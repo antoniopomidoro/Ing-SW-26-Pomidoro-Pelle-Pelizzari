@@ -3,6 +3,16 @@
 This document contains the exact count and distribution of all the cards in the game, categorized by type, Era, and scalability based on the number of players.
 
 ---
+## 🗺️ Board Tiles (Offer Track)
+
+The Offer Track is built using tiles **A through G**, which scale depending on the player count:
+* **Tile A:** 5 players only
+* **Tile D:** 3+ players
+* **Tile G:** 4+ players
+* *(All other tiles are always used)*
+
+---
+
 
 ## 📊 Character Deck Scalability
 
@@ -19,11 +29,16 @@ The main deck (Characters) scales based on the number of participants (excluding
 
 ## 🏛️ Building Cards (Total: 21)
 
-Building cards are divided into three separate decks during the initial setup:
-* **Era 1:** 6 cards
-* **Era 2:** 7 cards
-* **Era 3:** 8 cards
+Building cards are divided into three separate decks. During the initial setup, a specific number of cards is drawn per Era based on the player count:
 
+| Number of Players | Era 1 | Era 2 | Era 3 |
+| :--- | :--- | :--- | :--- |
+| **2 Players** | 1 | 2 | 3 |
+| **3 Players** | 2 | 2 | 4 |
+| **4 Players** | 2 | 3 | 4 |
+| **5 Players** | 2 | 3 | 5 |
+
+*(Total available pool: 6 cards in Era 1, 7 cards in Era 2, 8 cards in Era 3)*
 ---
 
 ## 🎴 Character Cards: Details per Era (Total: 84)
