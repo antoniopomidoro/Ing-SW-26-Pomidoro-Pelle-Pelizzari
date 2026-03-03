@@ -1,29 +1,29 @@
-# 🎲 Mesos - Progetto Ingegneria del Software
+# 🎲 Mesos - Software Engineering Project
 
 ![Java](https://img.shields.io/badge/Java-25-orange.svg)
 ![Maven](https://img.shields.io/badge/Maven-3.8-blue.svg)
 ![JavaFX](https://img.shields.io/badge/JavaFX-UI-green.svg)
 
-Progetto finale per il corso di **Ingegneria del Software** (A.A. 2025/2026) presso il Politecnico di Milano. 
-Il progetto consiste nell'implementazione del gioco da tavolo **Mesos**, sviluppato in Java seguendo il pattern architetturale MVC (Model-View-Controller).
+Final project for the **Software Engineering** course (A.Y. 2025/2026) at Politecnico di Milano. 
+The project consists of the implementation of the board game **Mesos**, developed in Java following the MVC (Model-View-Controller) architectural pattern.
 
 ---
 
-## 👥 Componenti del Gruppo
+## 👥 Group Members
 
-| Nome Cognome | GitHub |
+| Name Surname | GitHub |
 | :--- | :--- |
 | Antonio Pomidoro | [@antoniopomidoro](https://github.com/antoniopomidoro) |
-| Alessandro Pelle | [@Username1](https://github.com/Username1) |
-| Davide Pelizzari | [@Username2](https://github.com/Username2) |
-| *Membro 4 (TBD)* | *In attesa* |
+| Alessandro Pelle | [@alepelle1608](https://github.com/alepelle1608) |
+| Davide Pelizzari | [@LastPelikz22](https://github.com/LastPelikz22) |
+| Guilin Wang | [@Guilin-Wang](https://github.com/Guilin-Wang) |
 
 ---
 
-## 🛠 Tecnologie Utilizzate
+## 🛠 Technologies
 
-* **Linguaggio:** Java
+* **Language:** Java
 * **Build Automation:** Maven
-* **Interfaccia Grafica:** JavaFX / Swing (da specificare)
+* **User Interface:** JavaFX / Swing (to be specified)
 * **Network:** Socket / RMI
 * **Testing:** JUnit
