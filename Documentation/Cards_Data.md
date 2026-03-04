@@ -78,6 +78,27 @@ Building cards are divided into three separate decks. During the initial setup, 
 
 ---
 
-## ⚠️ Development To-Do
-* [ ] Add documentation for the **10 Event Cards**.
-* [ ] Add documentation for the **2 Final Event Cards**.
+## 📜 Event Cards (Total: 10 + 2 Final Events)
+
+The 10 standard Event cards are shuffled into their respective Age decks. The 2 Final Event cards are always placed at the bottom of the Age 3 deck and are always shamanic ritual and sustainance.
+
+### Event Types & Effects
+
+* **Sustenance**
+    * **Cost:** The player must pay `1 Food` OR `- (Age) PP` for each character in their tribe.
+    * *Formula:* `(-1 Food OR -Age PP) * #Characters`
+
+* **Hunting**
+    * **Reward:** The player gains `1 Food`, plus extra Prestige Points (PP) based on the card's Age multiplied by the number of Hunters they own.
+    * *Formula:* `1 Food + (1 PP * Age * #Hunters)`
+
+* **Shamanic Ritual**
+    * **Reward/Penalty:** Players are ranked based on their total Shaman stars. The first place gains PP, the last place loses PP, depending on the card's Age:
+        * **Era 1:** First Place `+5 PP` / Last Place `-3 PP`
+        * **Era 2:** First Place `+10 PP` / Last Place `-5 PP`
+        * **Era 3:** First Place `+15 PP` / Last Place `-7 PP`
+
+* **Cave Paintings**
+    * **Reward/Penalty:** The effect depends on the number of Artists the player owns compared to the card's Age number:
+        * **From 1 to Age:** Penalty of `-2 PP`.
+        * **Greater than Age (`> Age`):** Reward of `(Age * #Artists) PP`.
