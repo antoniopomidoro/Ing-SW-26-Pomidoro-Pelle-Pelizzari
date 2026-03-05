@@ -1,0 +1,224 @@
+@startuml
+package "Model"{
+    enum GamePhase {
+         START_TURN,
+         IN_TURN,
+         END_TURN,
+         EVENT,
+         END_GAME
+    }
+    enum Age{
+        AGE_1
+        AGE_2
+        AGE_3
+    }
+    enum Tool {
+        BREAD
+        STONE
+        BOAT
+        RING
+        ROPE
+        BOWL
+        STICK
+        DOLL
+        HOOK
+        NECKLACE
+    }
+    abstract class Card{
+        -age : Age
+        -id : string
+        -minPlayers : int
+
+        +getEra() : Age
+        +getId() : string
+        +getMinPlayers() : int
+    }
+    class Artist extends Card{
+    }
+    class Gatherer extends Card{
+    }
+    class Event extends Card{
+    }
+    class Shaman extends Card{
+        -stars : int
+
+        +getStars() : int
+    }
+    class Builder extends Card{
+        -discount : int
+        -pp : int
+
+        +getDiscount() : int
+        +getPP() : int
+    }
+    class Inventor extends Card{
+        -tool : Tool
+        +getTool() : Tool
+    }
+    class Hunter extends Card{
+        -food : boolean
+        +hasFood() : boolean
+    }
+    class Building extends Card{
+        -foodCost : int
+        -pp : int
+
+        +getCost() : int
+        +getPP() : int
+    }
+    class TileSet {
+        -tiles : List<Tile>
+        +getTile(id : char) : Tile
+        +getTiles() : List<Tile>
+    }
+    class Tile {
+        -tileId : char
+        -isOccupied : boolean
+        -occupier : Player
+        '-effectId : string
+        -minPlayers : int
+
+        +getId() : char
+        +isOccupied() : boolean
+        +getOccupier() : Player
+        +occupy(p : Player) : boolean
+        +deOccupy() : boolean
+    }
+    class Player {
+        -id : int
+        -nickname : string
+        -cards : List<Card>
+        -buildings : List<Building>
+        -food : int
+        -pp : int
+        -isChoosing : boolean
+
+        +getIsChoosing() : boolean
+        +getId() : int
+        +getFood() : int
+        +getCards() : List<Card>
+        +getBuildings() : List<Building>
+        +getBuildingDiscount() : int
+        +getStars() : int
+        +getSustainmentDiscount() : int
+        +getPP() : int
+        +addCard(c : Card) : boolean
+        +addBuilding(b : Building) : boolean
+        +setPP(val : int) : boolean
+        +setFood(val : int) : boolean
+        +choose() : boolean
+    }
+
+    class GameState {
+        -age : Age
+        -turn : int
+        -phase : GamePhase
+        -players : List<Player>
+        -deck : Deck
+        -board : Board
+        -currentPlayerIndex : int
+        -turnOrder : List<Player>
+
+        +getAge() : Age
+        +getTurn() : int
+        +getPhase() : GamePhase
+        +getPlayer(index : int) : Player
+        +setAge(age : Age) : boolean
+        +setTurn(turn : int) : boolean
+        +setPhase(phase : GamePhase) : boolean
+        +getCurrentPlayer() : Player
+        +getTurnOrder() : List<Player>
+    }
+    class Board {
+        -tiles : TileSet
+        -topCards : List<Card>
+        -bottomCards : List<Card>
+        -topBuildings : List<Building>
+        -bottomBuildings : List<Building>
+
+        +pickTopCard(index : int) : Card
+        +pickBottomCard(index : int) : Card
+        +pickTopBuilding(index : int) : Building
+        +pickBottomBuilding(index : int) : Building
+        +addTopCard(c : Card) : boolean
+        +addBottomCard(c : Card) : boolean
+        +addTopBuilding(b : Building) : boolean
+        +discardBottomCards() : boolean
+        +discardBottomBuildings() : boolean
+        +topToBottomCards() : boolean
+        +topToBottomBuildings() : boolean
+        +refillTopCards() : boolean
+        +refillTopBuildings() : boolean
+    }
+    class Deck {
+        -age_1_Cards : List<Card>
+        -age_2_Cards : List<Card>
+        -age_3_Cards : List<Card>
+        -age_1_Buildings : List<Building>
+        -age_2_Buildings : List<Building>
+        -age_3_Buildings : List<Building>
+
+        +shuffle(age : Age) : boolean
+        +popCard(age : Age) : Card
+        +popBuilding(age : Age) : Building
+    }
+
+    GameState "1" *-- "1" Board
+    GameState "1" *-- "1" Deck
+    GameState "1" *-- "1..5" Player
+    Board "1" *-- "1" TileSet
+    TileSet "1" *-- "*" Tile
+    Player "1" o-- "*" Card
+    Player "1" o-- "*" Building
+    Tile "*" o-- "0..1" Player : occupier
+    Deck "1" *-- "*" Card
+    Deck "1" *-- "*" Building
+    Board "1" o-- "*" Card : top/bottom
+    Board "1" o-- "*" Building : top/bottom
+}
+package "Controller"{
+    interface Effect{
+        +executeEffect(Player, GameState)
+    }
+    class BuildingsRegistry {
+        -effects : HashMap<String, Effect>
+        +getEffect(id : string) : Effect
+    }
+    class EventRegistry {
+        -events : HashMap<String, Effect>
+        +activateEvent(id : string, GameState)
+    }
+    interface EventEffect {
+        +execute(List<Player>, state : GameState) : boolean
+    }
+
+    class TileRegistry {
+        -effects : Map<String, TileEffect>
+
+        +TileEffectRegistry()
+        +registerEffect(id : string, effect : TileEffect) : boolean
+        +getEffect(id : string) : TileEffect
+        +executeEffect(id : string, p : Player, state : GameState) : boolean
+    }
+    class GameController {
+        -state : GameState
+        -buildingsRegistry : BuuildingsRegistry
+        -eventRegistry : EventRegistry
+
+        +createGame()
+        +firstOrder()
+        +triggerPhase()
+        +nextPhase()
+        +nextTurn()
+        +nextAge()
+    }
+
+    GameController --> GameState : updates
+    BuildingsRegistry --> Effect : manages
+    EventRegistry --> EventEffect : manages
+    TileRegistry --> Effect : manages
+    GameController --> EventRegistry : uses
+    GameController --> BuildingsRegistry : uses
+    GameController -->TileRegistry : uses
+}
+@enduml
