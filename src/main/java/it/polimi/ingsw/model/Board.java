@@ -9,6 +9,10 @@ public class Board {
     private List<Building> topBuildings;
     private List<Building> bottomBuildings;
 
+    public Board() {
+        // Skeleton constructor
+    }
+
     public Card pickTopCard(int index) {
         return null;
     }
@@ -50,14 +54,6 @@ public class Board {
     }
 
     public boolean topToBottomBuildings() {
-        return false;
-    }
-
-    public boolean refillTopCards() {
-        return false;
-    }
-
-    public boolean refillTopBuildings() {
         return false;
     }
 }

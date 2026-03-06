@@ -10,6 +10,36 @@ The Offer Track is built using tiles **A through G**, which scale depending on t
 * **Tile D:** 3+ players
 * **Tile G:** 4+ players
 * *(All other tiles are always used)*
+## Turn Order Tiles (Tessere Ordine di Turno)
+
+Questa sezione definisce il setup dinamico del tracciato iniziale dell'ordine di turno. La configurazione degli slot e dei relativi effetti cambia in base al numero di giocatori al tavolo.
+
+**Regola Globale:** L'ultima tessera del tracciato (`LAST_TILE`) prevede sempre un malus: il giocatore che la occupa deve scegliere se pagare 1 Cibo o 2 Punti Prestigio (PP).
+
+### Setup per 2 Giocatori
+* **Slot 1** (`START_1`): +1 Cibo
+* **Slot 2** (`LAST_TILE`): Paga 1 Cibo o 2 PP
+
+### Setup per 3 Giocatori
+* **Slot 1** (`START_1`): +2 Cibo
+* **Slot 2** (`START_2`): Nessun effetto
+* **Slot 3** (`LAST_TILE`): Paga 1 Cibo o 2 PP
+
+### Setup per 4 Giocatori
+* **Slot 1** (`START_1`): +2 Cibo
+* **Slot 2** (`START_2`): +1 Cibo
+* **Slot 3** (`START_3`): Nessun effetto
+* **Slot 4** (`LAST_TILE`): Paga 1 Cibo o 2 PP
+
+### Setup per 5 Giocatori
+* **Slot 1** (`START_1`): +3 Cibo
+* **Slot 2** (`START_2`): +1 Cibo
+* **Slot 3** (`START_3`): Nessun effetto
+* **Slot 4** (`START_4`): Nessun effetto
+* **Slot 5** (`LAST_TILE`): Paga 1 Cibo o 2 PP
+
+
+**Note di implementazione per il JSON:** Assicurarsi che gli ID degli slot (`START_1`, `START_2`, ecc.) e della tessera finale (`LAST_TILE`) corrispondano esattamente ai valori dell'`enum TileId` definiti nel Model.
 
 ---
 

@@ -11,6 +11,10 @@ public class Player {
     private int pp;
     private boolean isChoosing;
 
+    public Player() {
+        // Skeleton constructor
+    }
+
     public boolean getIsChoosing() {
         return false;
     }
@@ -55,11 +59,19 @@ public class Player {
         return false;
     }
 
-    public boolean setPP(int val) {
+    public boolean addFood(int amount) {
         return false;
     }
 
-    public boolean setFood(int val) {
+    public boolean payFood(int amount) {
+        return false;
+    }
+
+    public boolean addPP(int amount) {
+        return false;
+    }
+
+    public boolean payPP(int amount) {
         return false;
     }
 

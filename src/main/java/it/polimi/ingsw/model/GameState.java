@@ -12,6 +12,10 @@ public class GameState {
     private int currentPlayerIndex;
     private List<Player> turnOrder;
 
+    public GameState() {
+        // Skeleton constructor
+    }
+
     public Age getAge() {
         return null;
     }

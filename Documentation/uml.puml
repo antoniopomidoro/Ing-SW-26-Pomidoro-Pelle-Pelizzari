@@ -24,14 +24,31 @@ package "Model"{
         HOOK
         NECKLACE
     }
+    enum TileId {
+        START_1
+        START_2
+        START_3
+        START_4
+        LAST_TILE
+        A
+        B
+        C
+        D
+        E
+        F
+        G
+    }
     abstract class Card{
         -age : Age
         -id : string
         -minPlayers : int
 
-        +getEra() : Age
+        +getAge() : Age
+        +setAge(age : Age) : boolean
         +getId() : string
+        +setId(id : string) : boolean
         +getMinPlayers() : int
+        +setMinPlayers(minPlayers : int) : boolean
     }
     class Artist extends Card{
     }
@@ -43,44 +60,57 @@ package "Model"{
         -stars : int
 
         +getStars() : int
+        +setStars(stars : int) : boolean
     }
     class Builder extends Card{
         -discount : int
         -pp : int
 
         +getDiscount() : int
+        +setDiscount(discount : int) : boolean
         +getPP() : int
+        +setPP(pp : int) : boolean
     }
     class Inventor extends Card{
         -tool : Tool
         +getTool() : Tool
+        +setTool(tool : Tool) : boolean
     }
     class Hunter extends Card{
         -food : boolean
         +hasFood() : boolean
+        +setFood(food : boolean) : boolean
     }
     class Building extends Card{
         -foodCost : int
         -pp : int
 
-        +getCost() : int
+        +getFoodCost() : int
+        +setFoodCost(cost : int) : boolean
         +getPP() : int
+        +setPP(pp : int) : boolean
     }
     class TileSet {
         -tiles : List<Tile>
-        +getTile(id : char) : Tile
+
+        +getTile(id : TileId) : Tile
         +getTiles() : List<Tile>
     }
     class Tile {
-        -tileId : char
+        -tileId : TileId
         -isOccupied : boolean
         -occupier : Player
-        '-effectId : string
+        -effectId : string
         -minPlayers : int
 
-        +getId() : char
+        +getId() : TileId
+        +setId(id : TileId) : boolean
         +isOccupied() : boolean
         +getOccupier() : Player
+        +getEffectId() : string
+        +setEffectId(effectId : string) : boolean
+        +getMinPlayers() : int
+        +setMinPlayers(minPlayers : int) : boolean
         +occupy(p : Player) : boolean
         +deOccupy() : boolean
     }
@@ -104,8 +134,10 @@ package "Model"{
         +getPP() : int
         +addCard(c : Card) : boolean
         +addBuilding(b : Building) : boolean
-        +setPP(val : int) : boolean
-        +setFood(val : int) : boolean
+        +addFood(amount : int) : boolean
+        +payFood(amount : int) : boolean
+        +addPP (amount : int) : boolean
+        +payPP(amount : int) : boolean
         +choose() : boolean
     }
 
@@ -147,8 +179,6 @@ package "Model"{
         +discardBottomBuildings() : boolean
         +topToBottomCards() : boolean
         +topToBottomBuildings() : boolean
-        +refillTopCards() : boolean
-        +refillTopBuildings() : boolean
     }
     class Deck {
         -age_1_Cards : List<Card>
