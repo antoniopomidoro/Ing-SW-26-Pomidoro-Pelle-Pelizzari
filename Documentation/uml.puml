@@ -207,29 +207,29 @@ package "Model"{
     Board "1" o-- "*" Building : top/bottom
 }
 package "Controller"{
-    interface Effect{
+    interface ContextualEffect{
         +executeEffect(Player, GameState)
-    }
-    class BuildingsRegistry {
-        -effects : HashMap<String, Effect>
-        +getEffect(id : string) : Effect
-    }
-    class EventRegistry {
-        -events : HashMap<String, Effect>
-        +activateEvent(id : string, GameState)
+        +getTriggerPhase() : GamePhase
     }
     interface EventEffect {
-        +execute(List<Player>, state : GameState) : boolean
+        +executeEffect(List<Player>, state : GameState) : boolean
     }
-
+    class BuildingsRegistry {
+        -effects : HashMap<String, ContextualEffect>
+        +BuildingsRegistry()
+        +getEffect(id : string) : ContextualEffect
+    }
+    class EventRegistry {
+        -events : HashMap<String, EventEffect>
+        +EventRegistry()
+        +getEffect(id : string) : EventEffect
+    }
     class TileRegistry {
-        -effects : Map<String, TileEffect>
-
-        +TileEffectRegistry()
-        +registerEffect(id : string, effect : TileEffect) : boolean
-        +getEffect(id : string) : TileEffect
-        +executeEffect(id : string, p : Player, state : GameState) : boolean
+        -effects : Map<String, ContextualEffect>
+        +TileRegistry()
+        +getEffect(id : string) : ContextualEffect
     }
+
     class GameController {
         -state : GameState
         -buildingsRegistry : BuuildingsRegistry
@@ -244,9 +244,9 @@ package "Controller"{
     }
 
     GameController --> GameState : updates
-    BuildingsRegistry --> Effect : manages
+    BuildingsRegistry --> ContextualEffect : manages
     EventRegistry --> EventEffect : manages
-    TileRegistry --> Effect : manages
+    TileRegistry --> ContextualEffect : manages
     GameController --> EventRegistry : uses
     GameController --> BuildingsRegistry : uses
     GameController -->TileRegistry : uses
