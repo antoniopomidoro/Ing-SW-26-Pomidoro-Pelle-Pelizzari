@@ -230,12 +230,24 @@ package "Controller"{
         +getEffect(id : string) : ContextualEffect
     }
 
+    class JsonLoader {
+        +loadCards() : List<Card>
+        +loadBuildings() : List<Building>
+    }
+
+    class BoardFactory {
+        +createTileSet(playerCount : int) : TileSet
+    }
+
     class GameController {
         -state : GameState
-        -buildingsRegistry : BuuildingsRegistry
+        -buildingsRegistry : BuildingsRegistry
         -eventRegistry : EventRegistry
+        -tileRegistry : TileRegistry
+        -boardFactory : BoardFactory
+        -jsonLoader : JsonLoader
 
-        +createGame()
+        +createGame(playerCount : int)
         +firstOrder()
         +triggerPhase()
         +nextPhase()
@@ -249,6 +261,9 @@ package "Controller"{
     TileRegistry --> ContextualEffect : manages
     GameController --> EventRegistry : uses
     GameController --> BuildingsRegistry : uses
-    GameController -->TileRegistry : uses
+    GameController --> TileRegistry : uses
+    GameController --> BoardFactory : uses
+    GameController --> JsonLoader : uses
+    BoardFactory ..> TileSet : creates
 }
 @enduml
