@@ -1,59 +1,70 @@
 package it.polimi.ingsw.model;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class Board {
     private TileSet tiles;
-    private List<Card> topCards;
-    private List<Card> bottomCards;
-    private List<Building> topBuildings;
-    private List<Building> bottomBuildings;
+    private ArrayList<Card> topCards;
+    private ArrayList<Card> bottomCards;
+    private ArrayList<Building> topBuildings;
+    private ArrayList<Building> bottomBuildings;
 
     public Board() {
         // Skeleton constructor
     }
 
     public Card pickTopCard(int index) {
-        return null;
+        return topCards.remove( index);
     }
 
     public Card pickBottomCard(int index) {
-        return null;
+        return bottomCards.remove( index);
     }
 
     public Building pickTopBuilding(int index) {
-        return null;
+        return topBuildings.remove( index);
     }
 
     public Building pickBottomBuilding(int index) {
-        return null;
+        return bottomBuildings.remove(index);
     }
 
     public boolean addTopCard(Card c) {
+        if(c != null) {
+            topCards.add(c);
+            return true;
+        }
         return false;
     }
 
     public boolean addBottomCard(Card c) {
+        if(c != null) {
+            bottomCards.add(c);
+            return true;
+        }
         return false;
     }
 
-    public boolean addTopBuilding(Building b) {
-        return false;
-    }
-
-    public boolean discardBottomCards() {
-        return false;
-    }
-
-    public boolean discardBottomBuildings() {
+    public boolean addTopBuilding(ArrayList<Building> b) {
+        if(b != null) {
+            topBuildings.addAll(b);
+            return true;
+        }
         return false;
     }
 
     public boolean topToBottomCards() {
-        return false;
+        bottomCards.clear();
+        bottomCards.addAll(topCards);
+        topCards.clear();
+        return true;
     }
 
     public boolean topToBottomBuildings() {
-        return false;
+        bottomBuildings.clear();
+        bottomBuildings.addAll(topBuildings);
+        topBuildings.clear();
+        return true;
     }
 }
