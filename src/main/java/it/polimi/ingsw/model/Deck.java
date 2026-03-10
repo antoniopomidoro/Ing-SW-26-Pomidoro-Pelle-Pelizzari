@@ -7,9 +7,9 @@ import java.util.Collections;
 
 
 public class Deck {
-    private ArrayList<Card> deckE1;
-    private ArrayList<Card> deckE2;
-    private ArrayList<Card> deckE3;
+    private ArrayList<Card> deckA1;
+    private ArrayList<Card> deckA2;
+    private ArrayList<Card> deckA3;
     private ArrayList<Building> deckB1;
     private ArrayList<Building> deckB2;
     private ArrayList<Building> deckB3;
@@ -18,9 +18,9 @@ public class Deck {
     }
 
     public void shuffle() {
-        Collections.shuffle(deckE1);
-        Collections.shuffle(deckE2);
-        Collections.shuffle(deckE3);
+        Collections.shuffle(deckA1);
+        Collections.shuffle(deckA2);
+        Collections.shuffle(deckA3);
         return;
     }
 
@@ -31,13 +31,13 @@ public class Deck {
         }
         switch(a){
             case AGE_1:
-                deckE1.add(c);
+                deckA1.add(c);
                 return true;
             case AGE_2:
-                deckE2.add(c);
+                deckA2.add(c);
                 return true;
             case AGE_3:
-                deckE3.add(c);
+                deckA3.add(c);
                 return true;
             default:
                 return false;
@@ -65,11 +65,11 @@ public class Deck {
     public Card popCard(Age a) {
         switch(a){
             case AGE_1:
-                return deckE1.removeFirst();
+                return deckA1.removeFirst();
             case AGE_2:
-                return deckE2.removeFirst();
+                return deckA2.removeFirst();
             case AGE_3:
-                return deckE3.removeFirst();
+                return deckA3.removeFirst();
             default:
                 return null;
         }
