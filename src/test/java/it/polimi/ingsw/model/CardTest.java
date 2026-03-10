@@ -62,4 +62,31 @@ class CardTest {
         assertTrue(result, "Setting the minimum number of players with valid value should return true");
         assertEquals(minPlayers, card.getMinPlayers(), "Minimum number of players should be set correctly");
     }
+
+    @Test
+    void testGetIdIsValid() {
+        assertNotNull(card.getId(), "A card id shouldn't be null.");
+        assertNotEquals("", card.getId(), "A card id shouldn't be empty.");
+    }
+
+    @Test
+    void testSetIdInvalidArgument() {
+        assertFalse(card.setId(""), "A card id shouldn't be empty.");
+        assertFalse(card.setId(null), "A card id shouldn't be null");
+    }
+
+    @Test
+    void testGetMinPlayersInvalidValue() {
+        assertFalse(card.getMinPlayers() < 2, "The number of players cannot be less than 2.");
+        assertFalse(card.getMinPlayers() > 5, "The number of players cannot be more than 5.");
+    }
+
+    @Test
+    void testSetMinPlayersInvalidValue() {
+        // It generates a random integer < 2, in range [-100, 1]
+        int randomLow = (int) (Math.random() * 101) - 100;
+        int randomHigh = (int) (Math.random() * 95) + 5;
+        assertFalse(card.setMinPlayers(randomLow), "The number of players cannot be less than 2.");
+        assertFalse(card.setMinPlayers(randomHigh), "The number of players cannot be more than 5.");
+    }
 }
