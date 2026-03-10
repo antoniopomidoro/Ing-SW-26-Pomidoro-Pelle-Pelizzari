@@ -1,5 +1,4 @@
 package it.polimi.ingsw.model;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -25,9 +24,9 @@ public class Deck {
     }
 
     //add a card to the characters deck in the specified Age
-    public boolean addCard(Card c, Age a) throws BuildingInDeckException {
+    public boolean addCard(Card c, Age a) throws buildingInDeckException {
         if(c.getClass() == Building.class){
-            throw new BuildingInDeckException();
+            throw new buildingInDeckException();
         }
         switch(a){
             case AGE_1:
@@ -76,12 +75,20 @@ public class Deck {
 
     }
 
-    public Building getBuildings(Age age) {
-             return null;
+    public ArrayList getBuildings(Age age) {
+            switch (age) {
+                case AGE_1:
+                    return deckB1;
+                case AGE_2:
+                    return deckB2;
+                case AGE_3:
+                    return deckB3;
+                default:
+                    return null;
+            }
     }
 
-    public static class BuildingInDeckException extends Exception {
 
+    public static class buildingInDeckException extends Exception {
     }
-
 }
