@@ -15,7 +15,7 @@ public class Deck {
         // Skeleton constructor
     }
 
-    public boolean shuffle(Age age) {
+    public boolean shuffle() {
         return false;
     }
 
