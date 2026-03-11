@@ -7,6 +7,7 @@ public class Player {
     private String nickname;
     private List<Card> cards;
     private List<Building> buildings;
+    private PlayerStats stats;
     private int food;
     private int pp;
     private boolean isChoosing;
@@ -35,20 +36,8 @@ public class Player {
         return null;
     }
 
-    public int getBuildingDiscount() {
-        return 0;
-    }
-
-    public int getStars() {
-        return 0;
-    }
-
-    public int getSustainmentDiscount() {
-        return 0;
-    }
-
-    public int getPP() {
-        return 0;
+    public PlayerStats getStats() {
+        return null;
     }
 
     public boolean addCard(Card c) {
@@ -71,11 +60,9 @@ public class Player {
         return false;
     }
 
-    public boolean payPP(int amount) {
-        return false;
-    }
-
-    public boolean choose() {
-        return false;
-    }
+    // getBuildingDiscount() is now in PlayerStats
+    // getStars() is now in PlayerStats
+    // getSustainmentDiscount() is now in PlayerStats
+    // payPP() is removed from UML
+    // choose() is removed from UML
 }

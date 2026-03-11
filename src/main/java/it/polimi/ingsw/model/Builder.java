@@ -4,7 +4,7 @@ package it.polimi.ingsw.model;
  * Represents a Builder card, a specific type of card that provides discounts and prestige points.
  * Instances of this class are intended to be created from JSON data.
  */
-public class Builder extends Card {
+public class Builder extends Character {
     private int discount;
     private int pp;
 

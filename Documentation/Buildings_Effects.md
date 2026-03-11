@@ -2,14 +2,14 @@
 
 ## Age 1
 
-| Cost | PP | Effect |
-|---|---|---|
-| 3 | 4 | **2_Equal_Hands** : 3 food |
-| 3 | 3 | **Totem_Placement_Food_Bonus** |
-| 4 | 3 | **6_Cards_Set** : 5 food |
+| Cost | PP | Effect                                     |
+|---|---|--------------------------------------------|
+| 3 | 4 | **2_Inventor_Pair** : 3 food               |
+| 3 | 3 | **Totem_Placement_Food_Bonus**             |
+| 4 | 3 | **6_Cards_Set** : 5 food                   |
 | 4 | 4 | **Sustainment_Boost** : -1 food x Gatherer |
-| 5 | 2 | **Shamanic_ritual_loss_protection** |
-| 5 | 3 | **Sustainment_Boost** : -1 food x Artists |
+| 5 | 2 | **Shamanic_ritual_loss_protection**        |
+| 5 | 3 | **Sustainment_Boost** : -1 food x Artists  |
 
 ## Age 2
 

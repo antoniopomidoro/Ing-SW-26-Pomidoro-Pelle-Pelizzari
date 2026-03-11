@@ -7,8 +7,6 @@ package it.polimi.ingsw.model;
  */
 public abstract class Card {
     private Age age;
-    private String id;
-    private int minPlayers;
 
     /**
      * Default constructor for Card.
@@ -37,50 +35,6 @@ public abstract class Card {
         }
 
         this.age = age;
-        return true;
-    }
-
-    /**
-     * Gets the unique identifier of the card.
-     * @return The ID of the card.
-     */
-    public String getId() {
-        return this.id;
-    }
-
-    /**
-     * Sets the unique identifier of the card. This method is intended to be used by the JSON deserializer.
-     * @param id The ID to set for the card.
-     * @return True if the ID was set successfully, false otherwise.
-     */
-    public boolean setId(String id) {
-        if (id == null || id.trim().isEmpty()){
-            return false;
-        }
-
-        this.id = id;
-        return true;
-    }
-
-    /**
-     * Gets the minimum number of players required to use this card.
-     * @return The minimum number of players.
-     */
-    public int getMinPlayers() {
-        return this.minPlayers;
-    }
-
-    /**
-     * Sets the minimum number of players required to use this card. This method is intended to be used by the JSON deserializer.
-     * @param minPlayers The minimum number of players.
-     * @return True if the minimum number of players was set successfully, false otherwise.
-     */
-    public boolean setMinPlayers(int minPlayers) {
-        if (minPlayers <=1 || minPlayers>5){
-            return false;
-        }
-
-        this.minPlayers = minPlayers;
         return true;
     }
 }

@@ -4,6 +4,9 @@ public enum GamePhase {
     START_TURN,
     IN_TURN,
     END_TURN,
-    EVENT,
+    PAINTING_EVENT,
+    HUNTER_EVENT,
+    SHAMAN_EVENT,
+    SUSTAINMENT_EVENT,
     END_GAME
 }

@@ -3,9 +3,9 @@ package it.polimi.ingsw.model;
 /**
  * Represents a Gatherer card.
  * This class serves as a marker to identify cards of the Gatherer type.
- * It has no additional properties or methods beyond the base Card class.
+ * It has no additional properties or methods beyond the base Character class.
  */
-public class Gatherer extends Card {
+public class Gatherer extends Character {
 
     /**
      * Default constructor for Gatherer.

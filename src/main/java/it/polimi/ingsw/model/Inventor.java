@@ -4,7 +4,7 @@ package it.polimi.ingsw.model;
  * Represents an Inventor card, which is associated with a specific tool.
  * Instances of this class are intended to be created from JSON data.
  */
-public class Inventor extends Card {
+public class Inventor extends Character {
     private Tool tool;
 
     /**

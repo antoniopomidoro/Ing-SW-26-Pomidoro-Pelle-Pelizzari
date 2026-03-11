@@ -5,8 +5,10 @@ package it.polimi.ingsw.model;
  * Instances of this class are intended to be created from JSON data.
  */
 public class Building extends Card {
+    private String id;
     private int foodCost;
     private int pp;
+    private ContextualEffect effect;
 
     /**
      * Default constructor for Building.
@@ -14,6 +16,34 @@ public class Building extends Card {
      */
     public Building() {
         super();
+    }
+
+    /**
+     * Gets the ID of the building.
+     * @return The building ID.
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the ID of the building.
+     * @param id The building ID.
+     * @return True if successful.
+     */
+    public boolean setId(String id) {
+        if (id == null) return false;
+        this.id = id;
+        return true;
+    }
+
+    /**
+     * Triggers the effect of the building.
+     * @param p The player triggering the effect.
+     * @param state The game state.
+     */
+    public void triggerBuildingEffect(Player p, GameState state) {
+        // Skeleton method
     }
 
     /**
@@ -58,5 +88,13 @@ public class Building extends Card {
 
         this.pp=pp;
         return true;
+    }
+
+    /**
+     * Method triggered when the building is added to a player.
+     * @param p The player adding the building.
+     */
+    public void onAddedToPlayer(Player p) {
+        // Skeleton method
     }
 }

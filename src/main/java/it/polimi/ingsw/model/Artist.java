@@ -3,9 +3,9 @@ package it.polimi.ingsw.model;
 /**
  * Represents an Artist card.
  * This class serves as a marker to identify cards of the Artist type.
- * It has no additional properties or methods beyond the base Card class.
+ * It has no additional properties or methods beyond the base Character class.
  */
-public class Artist extends Card {
+public class Artist extends Character {
 
     /**
      * Default constructor for Artist.

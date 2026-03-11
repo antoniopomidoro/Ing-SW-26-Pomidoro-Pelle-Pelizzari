@@ -8,7 +8,8 @@ public class Tile {
     private TileId tileId;
     private boolean isOccupied;
     private Player occupier;
-    private String effectId;
+    private int topCards;
+    private int bottomCards;
     private int minPlayers;
 
     /**
@@ -54,27 +55,6 @@ public class Tile {
      */
     public Player getOccupier() {
         return this.occupier;
-    }
-
-    /**
-     * Gets the ID of the effect associated with this tile.
-     * @return The effect ID.
-     */
-    public String getEffectId() {
-        return effectId;
-    }
-
-    /**
-     * Sets the ID of the effect for this tile. This method is intended to be used by the JSON deserializer.
-     * @param effectId The effect ID to set.
-     * @return True if the effect ID was set successfully, false otherwise.
-     */
-    public boolean setEffectId(String effectId) {
-        if(effectId == null || effectId.trim().isEmpty()){
-            return false;
-        }
-        this.effectId = effectId;
-        return true;
     }
 
     /**

@@ -4,7 +4,7 @@ package it.polimi.ingsw.model;
  * Represents a Shaman card, which has a certain number of stars.
  * Instances of this class are intended to be created from JSON data.
  */
-public class Shaman extends Card {
+public class Shaman extends Character {
     private int stars;
 
     /**
