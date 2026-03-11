@@ -6,7 +6,7 @@ package it.polimi.ingsw.model;
  * Instances of this class are intended to be created from JSON data.
  */
 public abstract class Character extends Card {
-    private Character_Enum id;
+    private CharacterEnum id;
     private int minPlayers;
 
     /**
@@ -20,7 +20,7 @@ public abstract class Character extends Card {
      * Gets the type (ID) of the character.
      * @return The character type.
      */
-    public Character_Enum getId() {
+    public CharacterEnum getId() {
         return id;
     }
 
@@ -29,7 +29,7 @@ public abstract class Character extends Card {
      * @param id The character type to set.
      * @return True if the ID was set successfully, false otherwise.
      */
-    public boolean setId(Character_Enum id) {
+    public boolean setId(CharacterEnum id) {
         if (id == null) {
             return false;
         }

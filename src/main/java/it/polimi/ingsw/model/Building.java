@@ -9,6 +9,7 @@ public class Building extends Card {
     private int foodCost;
     private int pp;
     private ContextualEffect effect;
+    private GamePhase triggerPhase;
 
     /**
      * Default constructor for Building.
@@ -87,6 +88,25 @@ public class Building extends Card {
         }
 
         this.pp=pp;
+        return true;
+    }
+
+    /**
+     * Gets the phase in which this building's effect is triggered.
+     * @return The trigger phase.
+     */
+    public GamePhase getTriggerPhase() {
+        return triggerPhase;
+    }
+
+    /**
+     * Sets the phase in which this building's effect is triggered.
+     * @param triggerPhase The trigger phase.
+     * @return True if successful.
+     */
+    public boolean setTriggerPhase(GamePhase triggerPhase) {
+        if (triggerPhase == null) return false;
+        this.triggerPhase = triggerPhase;
         return true;
     }
 

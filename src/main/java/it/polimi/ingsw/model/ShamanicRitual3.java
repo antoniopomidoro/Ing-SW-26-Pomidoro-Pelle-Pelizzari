@@ -2,7 +2,7 @@ package it.polimi.ingsw.model;
 
 import java.util.List;
 
-public class Cave_Paintings implements EventEffect {
+public class ShamanicRitual3 implements EventEffect {
 
     @Override
     public boolean executeEffect(List<Player> players, GameState state) {

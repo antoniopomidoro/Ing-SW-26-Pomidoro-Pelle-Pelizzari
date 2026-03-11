@@ -24,8 +24,16 @@ public class Player {
         return 0;
     }
 
+    public String getNickname() {
+        return nickname;
+    }
+
     public int getFood() {
         return 0;
+    }
+
+    public int getPP() {
+        return pp;
     }
 
     public List<Card> getCards() {

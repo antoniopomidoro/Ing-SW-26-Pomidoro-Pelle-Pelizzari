@@ -3,7 +3,7 @@ package it.polimi.ingsw.model;
 import java.util.Map;
 
 public class PlayerStats {
-    private Map<Character_Enum, Integer> characterCounts;
+    private Map<CharacterEnum, Integer> characterCounts;
     private int buildingDiscount;
     private int ritualLossMultiplier;
     private int sustainmentDiscount;
@@ -12,11 +12,11 @@ public class PlayerStats {
     private int ritualWinBoost;
     private int differentToolNumber;
 
-    public void incrementCharacter(Character_Enum type) {
+    public void incrementCharacter(CharacterEnum type) {
         // Skeleton method
     }
 
-    public int getCharacterCount(Character_Enum type) {
+    public int getCharacterCount(CharacterEnum type) {
         return 0;
     }
 
@@ -40,19 +40,39 @@ public class PlayerStats {
         // Skeleton method
     }
 
+    public int getSustainmentDiscount() {
+        return sustainmentDiscount;
+    }
+
     public void addStars(int amount) {
         // Skeleton method
+    }
+
+    public int getStars() {
+        return stars;
     }
 
     public void setBuilderPp(int amount) {
         // Skeleton method
     }
 
+    public int getBuilderPp() {
+        return builderPp;
+    }
+
     public void setRitualWinBoost(int amount) {
         // Skeleton method
     }
 
+    public int getRitualWinBoost() {
+        return ritualWinBoost;
+    }
+
     public void updateDifferentToolNumber(int amount) {
         // Skeleton method
+    }
+
+    public int getDifferentToolNumber() {
+        return differentToolNumber;
     }
 }

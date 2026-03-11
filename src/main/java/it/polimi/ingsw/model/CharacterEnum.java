@@ -1,6 +1,6 @@
 package it.polimi.ingsw.model;
 
-public enum Character_Enum {
+public enum CharacterEnum {
     GATHERER,
     HUNTER,
     SHAMAN,

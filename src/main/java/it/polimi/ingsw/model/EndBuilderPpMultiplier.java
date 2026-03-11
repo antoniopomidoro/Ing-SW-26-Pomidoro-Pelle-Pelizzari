@@ -1,15 +1,10 @@
 package it.polimi.ingsw.model;
 
-public class End_Builder_PP_Multiplier implements ContextualEffect {
+public class EndBuilderPpMultiplier implements ContextualEffect {
     private int mult;
 
     @Override
     public void executeEffect(Player p, GameState state) {
         // Skeleton method
-    }
-
-    @Override
-    public GamePhase getTriggerPhase() {
-        return null;
     }
 }

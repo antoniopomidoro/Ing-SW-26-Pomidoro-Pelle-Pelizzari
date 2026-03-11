@@ -1,6 +1,6 @@
 package it.polimi.ingsw.model;
 
-public class Flat_Reward_Building implements ContextualEffect {
+public class FlatRewardBuilding implements ContextualEffect {
     private int stars;
     private int protect;
     private int bonus;
@@ -8,10 +8,5 @@ public class Flat_Reward_Building implements ContextualEffect {
     @Override
     public void executeEffect(Player p, GameState state) {
         // Skeleton method
-    }
-
-    @Override
-    public GamePhase getTriggerPhase() {
-        return null;
     }
 }

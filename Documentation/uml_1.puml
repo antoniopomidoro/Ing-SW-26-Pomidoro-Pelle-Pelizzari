@@ -1,6 +1,6 @@
 @startuml
 package "Model"{
-    enum Character_Enum{
+    enum CharacterEnum{
         GATHERER
         HUNTER
         SHAMAN
@@ -51,9 +51,7 @@ package "Model"{
 
     ' --- STRATEGY INTERFACES ---
     interface ContextualEffect{
-        -triggerPhase : GamePhase
         +executeEffect(p : Player, state : GameState)
-        +getTriggerPhase() : GamePhase
     }
 
     interface EventEffect {
@@ -61,43 +59,43 @@ package "Model"{
     }
 
     ' --- STRATEGY IMPLEMENTATIONS (Examples) ---
-    class Gain_By_Character implements ContextualEffect {
-        -type : Character_Enum
-        -pp_Gain : int
-        -food_Gain : int
+    class GainByCharacter implements ContextualEffect {
+        -type : CharacterEnum
+        -ppGain : int
+        -foodGain : int
     }
-    class Sustainment_Boost implements ContextualEffect {
-        -type : Character_Enum
+    class SustainmentBoost implements ContextualEffect {
+        -type : CharacterEnum
         -gain : int
     }
-    class End_Of_Turn_Extra_Pick implements ContextualEffect {
-        -upper_pick : int
+    class EndOfTurnExtraPick implements ContextualEffect {
+        -upperPick : int
     }
-    class Flat_Reward_Building implements ContextualEffect {
+    class FlatRewardBuilding implements ContextualEffect {
         -stars : int
         -protect : int
         -bonus : int
     }
-    class Inventor_Pair implements ContextualEffect{
+    class InventorPair implements ContextualEffect{
 
     }
-    class Card_Set implements ContextualEffect{
+    class CardSet implements ContextualEffect{
         -food : int
     }
-    class End_Card_Set implements ContextualEffect{
+    class EndCardSet implements ContextualEffect{
         -pp : int
     }
-    class End_Builder_PP_Multiplier implements ContextualEffect{
+    class EndBuilderPpMultiplier implements ContextualEffect{
         -mult : int
     }
 
 
     class Sustenance implements EventEffect{}
     class Hunting implements EventEffect{}
-    class Shamanic_Ritual_1 implements EventEffect{}
-    class Shamanic_Ritual_2 implements EventEffect{}
-    class Shamanic_Ritual_3 implements EventEffect{}
-    class Cave_Paintings implements EventEffect{}
+    class ShamanicRitual1 implements EventEffect{}
+    class ShamanicRitual2 implements EventEffect{}
+    class ShamanicRitual3 implements EventEffect{}
+    class CavePaintings implements EventEffect{}
 
     ' --- CORE MODEL ---
     abstract class Card {
@@ -107,10 +105,10 @@ package "Model"{
     }
 
     abstract class Character extends Card {
-        -id : Character_Enum
+        -id : CharacterEnum
         -minPlayers : int
-        +getId() : Character_Enum
-        +setId(id : Character_Enum) : boolean
+        +getId() : CharacterEnum
+        +setId(id : CharacterEnum) : boolean
         +getMinPlayers() : int
         +setMinPlayers(minPlayers : int) : boolean
         +onAddedToPlayer(p : Player) : void
@@ -136,8 +134,8 @@ package "Model"{
         +getTool() : Tool
         +setTool(tool : Tool) : boolean
     }
-    class Hunter_0 extends Character {}
-    class Hunter_1 extends Character {}
+    class Hunter0 extends Character {}
+    class Hunter1 extends Character {}
 
     class Event extends Card {
         -id : string
@@ -152,6 +150,7 @@ package "Model"{
         -foodCost : int
         -pp : int
         -effect : ContextualEffect
+        -triggerPhase : GamePhase
         +getId() : string
         +setId(id : string) : boolean
         +triggerBuildingEffect(p : Player, state : GameState)
@@ -159,6 +158,8 @@ package "Model"{
         +setFoodCost(cost : int) : boolean
         +getPP() : int
         +setPP(pp : int) : boolean
+        +getTriggerPhase() : GamePhase
+        +setTriggerPhase(phase : GamePhase) : boolean
         +onAddedToPlayer(p : Player) : void
     }
 
@@ -186,14 +187,14 @@ package "Model"{
     }
 
     class OrderTile extends Tile {
-        -food_1 : int
-        -food_2 : int
+        -food1 : int
+        -food2 : int
         +OrderTile(playerNumber : int)
     }
 
     ' --- OBSERVER / STATS TRACKER ---
     class PlayerStats {
-        -characterCounts : Map<Character_Enum, Integer>
+        -characterCounts : Map<CharacterEnum, Integer>
         -buildingDiscount : int
         -ritualLossMultiplier : int
         -sustainmentDiscount : int
@@ -201,8 +202,8 @@ package "Model"{
         -builderPp : int
         -ritualWinBoost : int
         -differentToolNumber : int
-        +incrementCharacter(type : Character_Enum)
-        +getCharacterCount(type : Character_Enum) : int
+        +incrementCharacter(type : CharacterEnum)
+        +getCharacterCount(type : CharacterEnum) : int
         +addBuildingDiscount(amount : int)
         +getBuildingDiscount() : int
         +setRitualLossMultiplier(mult : int)
@@ -310,7 +311,6 @@ package "Controller"{
 
     class GameController {
         -state : GameState
-        -boardFactory : BoardFactory
         -jsonLoader : JsonLoader
         +createGame(playerCount : int)
         +firstOrder()
