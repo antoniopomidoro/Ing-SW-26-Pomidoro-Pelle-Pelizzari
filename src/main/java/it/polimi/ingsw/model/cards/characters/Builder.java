@@ -2,6 +2,7 @@ package it.polimi.ingsw.model.cards.characters;
 
 import it.polimi.ingsw.model.board.*;
 import it.polimi.ingsw.model.cards.*;
+import it.polimi.ingsw.model.cards.Character;
 import it.polimi.ingsw.model.cards.characters.*;
 import it.polimi.ingsw.model.effects.*;
 import it.polimi.ingsw.model.effects.contextual.*;
@@ -14,7 +15,7 @@ import it.polimi.ingsw.model.player.*;
  * Represents a Builder card, a specific type of card that provides discounts and prestige points.
  * Instances of this class are intended to be created from JSON data.
  */
-public class Builder extends it.polimi.ingsw.model.cards.Character {
+public class Builder extends Character {
     private int discount;
     private int pp;
 
@@ -68,5 +69,10 @@ public class Builder extends it.polimi.ingsw.model.cards.Character {
 
         this.pp = pp;
         return true;
+    }
+
+    @Override
+    public void onAddedToPlayer(Player p) {
+        // Skeleton method
     }
 }

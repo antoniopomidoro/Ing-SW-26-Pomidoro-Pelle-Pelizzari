@@ -2,6 +2,7 @@ package it.polimi.ingsw.model.cards.characters;
 
 import it.polimi.ingsw.model.board.*;
 import it.polimi.ingsw.model.cards.*;
+import it.polimi.ingsw.model.cards.Character;
 import it.polimi.ingsw.model.cards.characters.*;
 import it.polimi.ingsw.model.effects.*;
 import it.polimi.ingsw.model.effects.contextual.*;
@@ -15,7 +16,7 @@ import it.polimi.ingsw.model.player.*;
  * This class serves as a marker to identify cards of the Artist type.
  * It has no additional properties or methods beyond the base Character class.
  */
-public class Artist extends it.polimi.ingsw.model.cards.Character {
+public class Artist extends Character {
 
     /**
      * Default constructor for Artist.
@@ -23,5 +24,10 @@ public class Artist extends it.polimi.ingsw.model.cards.Character {
      */
     public Artist() {
         super();
+    }
+
+    @Override
+    public void onAddedToPlayer(Player p) {
+        // Skeleton method
     }
 }

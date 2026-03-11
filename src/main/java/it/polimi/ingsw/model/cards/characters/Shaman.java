@@ -2,6 +2,7 @@ package it.polimi.ingsw.model.cards.characters;
 
 import it.polimi.ingsw.model.board.*;
 import it.polimi.ingsw.model.cards.*;
+import it.polimi.ingsw.model.cards.Character;
 import it.polimi.ingsw.model.cards.characters.*;
 import it.polimi.ingsw.model.effects.*;
 import it.polimi.ingsw.model.effects.contextual.*;
@@ -14,7 +15,7 @@ import it.polimi.ingsw.model.player.*;
  * Represents a Shaman card, which has a certain number of stars.
  * Instances of this class are intended to be created from JSON data.
  */
-public class Shaman extends it.polimi.ingsw.model.cards.Character {
+public class Shaman extends Character {
     private int stars;
 
     /**
@@ -44,5 +45,10 @@ public class Shaman extends it.polimi.ingsw.model.cards.Character {
         }
         this.stars = stars;
         return true;
+    }
+
+    @Override
+    public void onAddedToPlayer(Player p) {
+        // Skeleton method
     }
 }
