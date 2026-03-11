@@ -49,6 +49,7 @@ public class Inventor extends Character {
 
     @Override
     public void onAddedToPlayer(Player p) {
-        // Skeleton method
+        p.getStats().incrementCharacter(CharacterEnum.INVENTOR);
+        p.getStats().updateDifferentToolNumber(tool);
     }
 }

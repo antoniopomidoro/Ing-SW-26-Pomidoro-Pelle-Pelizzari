@@ -28,6 +28,6 @@ public class Artist extends Character {
 
     @Override
     public void onAddedToPlayer(Player p) {
-        // Skeleton method
+        p.getStats().incrementCharacter(CharacterEnum.ARTIST);
     }
 }

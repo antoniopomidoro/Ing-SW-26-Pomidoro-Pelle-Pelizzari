@@ -10,20 +10,28 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
 
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 public class Player {
     private int id;
     private String nickname;
     private List<Card> cards;
-    private List<Building> buildings;
+    // Dispatcher for buildings organized by their trigger phase
+    private Map<GamePhase, List<Building>> buildingDispatcher;
     private PlayerStats stats;
     private int food;
     private int pp;
     private boolean isChoosing;
 
     public Player() {
-        // Skeleton constructor
+        this.buildingDispatcher = new EnumMap<>(GamePhase.class);
+        for (GamePhase phase : GamePhase.values()) {
+            this.buildingDispatcher.put(phase, new ArrayList<>());
+        }
+        // Other initializations would go here in a real implementation
     }
 
     public boolean getIsChoosing() {
@@ -50,8 +58,26 @@ public class Player {
         return null;
     }
 
+    /**
+     * Returns all buildings owned by the player as a flat list.
+     * @return List of all buildings.
+     */
     public List<Building> getBuildings() {
-        return null;
+        List<Building> allBuildings = new ArrayList<>();
+        for (List<Building> phaseBuildings : buildingDispatcher.values()) {
+            allBuildings.addAll(phaseBuildings);
+        }
+        return allBuildings;
+    }
+
+    /**
+     * Returns the buildings that trigger in a specific phase.
+     * @param phase The game phase.
+     * @return List of buildings for that phase.
+     */
+    public List<Building> getBuildingsByPhase(GamePhase phase) {
+        if (phase == null) return new ArrayList<>();
+        return buildingDispatcher.getOrDefault(phase, new ArrayList<>());
     }
 
     public PlayerStats getStats() {
@@ -63,6 +89,20 @@ public class Player {
     }
 
     public boolean addBuilding(Building b) {
+        if (b == null) return false;
+        
+        GamePhase phase = b.getTriggerPhase();
+        if (phase == null) {
+            // Handle buildings without a specific trigger phase (one shot ones)
+            // Might be useful to add a NONE phase to the enum to store the ones without a phase
+            return false; 
+        }
+        
+        List<Building> list = buildingDispatcher.get(phase);
+        if (list != null) {
+            list.add(b);
+            return true;
+        }
         return false;
     }
 
@@ -77,10 +117,4 @@ public class Player {
     public boolean addPP(int amount) {
         return false;
     }
-
-    // getBuildingDiscount() is now in PlayerStats
-    // getStars() is now in PlayerStats
-    // getSustainmentDiscount() is now in PlayerStats
-    // payPP() is removed from UML
-    // choose() is removed from UML
 }

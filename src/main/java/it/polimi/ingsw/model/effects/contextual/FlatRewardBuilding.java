@@ -17,6 +17,8 @@ public class FlatRewardBuilding implements ContextualEffect {
 
     @Override
     public void executeEffect(Player p, GameState state) {
-        // Skeleton method
+        p.getStats().addStars(stars);
+        p.getStats().setRitualLossMultiplier(protect);
+        p.getStats().setRitualWinBoost(bonus);
     }
 }

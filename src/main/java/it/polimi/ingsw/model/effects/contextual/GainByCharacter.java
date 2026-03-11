@@ -15,8 +15,16 @@ public class GainByCharacter implements ContextualEffect {
     private int ppGain;
     private int foodGain;
 
+    public GainByCharacter(CharacterEnum type, int ppGain, int foodGain){
+        this.type = type;
+        this.ppGain = ppGain;
+        this.foodGain = foodGain;
+    }
+
     @Override
     public void executeEffect(Player p, GameState state) {
-        // Skeleton method
+        int charCount = p.getStats().getCharacterCount(type);
+        p.addPP(ppGain * charCount);
+        p.addFood(foodGain * charCount);
     }
 }

@@ -17,7 +17,7 @@ import it.polimi.ingsw.model.player.*;
  * It has no additional properties or methods beyond the base Character class.
  */
 public class Gatherer extends Character {
-
+    private int sustDisc;
     /**
      * Default constructor for Gatherer.
      * The constructor is empty as instances of this class will be populated using JSON deserialization.
@@ -28,6 +28,15 @@ public class Gatherer extends Character {
 
     @Override
     public void onAddedToPlayer(Player p) {
-        // Skeleton method
+        p.getStats().incrementCharacter(CharacterEnum.GATHERER);
+        p.getStats().addSustainmentDiscount(sustDisc);
+    }
+
+    public int getSustDisc() {
+        return sustDisc;
+    }
+
+    public void setSustDisc(int sustDisc) {
+        this.sustDisc = sustDisc;
     }
 }

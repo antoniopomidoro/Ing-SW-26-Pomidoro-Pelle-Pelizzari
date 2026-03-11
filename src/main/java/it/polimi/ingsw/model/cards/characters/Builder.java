@@ -73,6 +73,8 @@ public class Builder extends Character {
 
     @Override
     public void onAddedToPlayer(Player p) {
-        // Skeleton method
+        p.getStats().incrementCharacter(CharacterEnum.BUILDER);
+        p.getStats().addBuilderPp(pp);
+        p.getStats().addBuildingDiscount(discount);
     }
 }

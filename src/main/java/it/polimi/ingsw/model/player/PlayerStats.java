@@ -10,79 +10,93 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
 
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 
 public class PlayerStats {
-    private Map<CharacterEnum, Integer> characterCounts;
+    private Map<CharacterEnum, Integer> characterCounts = new EnumMap<>(CharacterEnum.class);
     private int buildingDiscount;
-    private int ritualLossMultiplier;
+    private int ritualLossMultiplier = 1;
     private int sustainmentDiscount;
     private int stars;
     private int builderPp;
-    private int ritualWinBoost;
-    private int differentToolNumber;
+    private int ritualWinBoost = 1;
+    private Set<Tool> uniqueTools = EnumSet.noneOf(Tool.class);
 
-    public void incrementCharacter(CharacterEnum type) {
-        // Skeleton method
+    public boolean incrementCharacter(CharacterEnum type) {
+        if(type == null) return false;
+        characterCounts.put(type, characterCounts.getOrDefault(type, 0) + 1);
+        return true;
     }
 
     public int getCharacterCount(CharacterEnum type) {
-        return 0;
+        if(type == null) return 0;
+        return characterCounts.getOrDefault(type, 0);
     }
 
-    public void addBuildingDiscount(int amount) {
-        // Skeleton method
+    public boolean addBuildingDiscount(int amount) {
+        this.buildingDiscount += amount;
+        return true;
     }
 
     public int getBuildingDiscount() {
         return buildingDiscount;
     }
 
-    public void setRitualLossMultiplier(int mult) {
-        // Skeleton method
+    public boolean setRitualLossMultiplier(int mult) {
+        if(mult < 0) return false;
+        this.ritualLossMultiplier = mult;
+        return true;
     }
 
     public int getRitualLossMultiplier() {
         return ritualLossMultiplier;
     }
 
-    public void addSustainmentDiscount(int amount) {
-        // Skeleton method
+    public boolean addSustainmentDiscount(int amount) {
+        this.sustainmentDiscount += amount;
+        return true;
     }
 
     public int getSustainmentDiscount() {
         return sustainmentDiscount;
     }
 
-    public void addStars(int amount) {
-        // Skeleton method
+    public boolean addStars(int amount) {
+        this.stars += amount;
+        return true;
     }
 
     public int getStars() {
         return stars;
     }
 
-    public void setBuilderPp(int amount) {
-        // Skeleton method
+    public boolean addBuilderPp(int amount) {
+        this.builderPp += amount;
+        return true;
     }
 
     public int getBuilderPp() {
         return builderPp;
     }
 
-    public void setRitualWinBoost(int amount) {
-        // Skeleton method
+    public boolean setRitualWinBoost(int amount) {
+        this.ritualWinBoost = amount;
+        return true;
     }
 
     public int getRitualWinBoost() {
         return ritualWinBoost;
     }
 
-    public void updateDifferentToolNumber(int amount) {
-        // Skeleton method
+    public boolean updateDifferentToolNumber(Tool tool) {
+        uniqueTools.add(tool);
+        return true;
     }
 
     public int getDifferentToolNumber() {
-        return differentToolNumber;
+        return uniqueTools.size();
     }
 }
