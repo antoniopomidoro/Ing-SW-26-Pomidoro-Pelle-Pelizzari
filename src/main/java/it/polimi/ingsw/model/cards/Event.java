@@ -19,6 +19,7 @@ import java.util.List;
 public class Event extends Card {
     private String id;
     private EventEffect effect;
+    private boolean isFinal;
 
     /**
      * Default constructor for Event.

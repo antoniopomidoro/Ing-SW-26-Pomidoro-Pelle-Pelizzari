@@ -9,13 +9,22 @@ import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
+import java.util.List;
+
 
 /**
  * Represents a specific tile used for turn order.
  */
 public class OrderTile extends Tile {
-    private int food1;
-    private int food2;
+    private List<Integer> orderBonus;
+
+    /**
+     * Default constructor for OrderTile.
+     * The constructor is empty as instances of this class will be populated using JSON deserialization.
+     */
+    public OrderTile() {
+        super();
+    }
 
     /**
      * Constructor for OrderTile.

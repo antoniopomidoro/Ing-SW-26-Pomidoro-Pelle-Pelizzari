@@ -1,0 +1,7 @@
+[
+  {"tileId":"ORDER_TILE","minPlayers":2,"orderBonus":[1,-1]},
+  {"tileId":"ORDER_TILE","minPlayers":3,"orderBonus":[2,0,-1]},
+  {"tileId":"ORDER_TILE","minPlayers":4,"orderBonus":[2,1,0,-1]},
+  {"tileId":"ORDER_TILE","minPlayers":5,"orderBonus":[3,1,0,0,-1]}
+]
+

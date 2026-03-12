@@ -1,0 +1,10 @@
+[
+  {"tileId":"A","topCards":0,"bottomCards":0,"minPlayers":5},
+  {"tileId":"B","topCards":0,"bottomCards":1,"minPlayers":2},
+  {"tileId":"C","topCards":1,"bottomCards":0,"minPlayers":2},
+  {"tileId":"D","topCards":0,"bottomCards":2,"minPlayers":3},
+  {"tileId":"E","topCards":1,"bottomCards":1,"minPlayers":2},
+  {"tileId":"F","topCards":2,"bottomCards":0,"minPlayers":2},
+  {"tileId":"G","topCards":2,"bottomCards":1,"minPlayers":4}
+]
+

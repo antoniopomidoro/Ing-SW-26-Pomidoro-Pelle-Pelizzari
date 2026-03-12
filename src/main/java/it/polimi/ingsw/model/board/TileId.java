@@ -11,11 +11,7 @@ import it.polimi.ingsw.model.player.*;
 
 
 public enum TileId {
-    START_1,
-    START_2,
-    START_3,
-    START_4,
-    LAST_TILE,
+    ORDER_TILE,
     A,
     B,
     C,

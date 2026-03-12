@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Board {
+    private OrderTile orderTile;
     private TileSet tiles;
     private ArrayList<Card> topCards;
     private ArrayList<Card> bottomCards;
