@@ -18,5 +18,6 @@ public enum GamePhase {
     HUNTER_EVENT,
     SHAMAN_EVENT,
     SUSTAINMENT_EVENT,
-    END_GAME
+    END_GAME,
+    NONE
 }

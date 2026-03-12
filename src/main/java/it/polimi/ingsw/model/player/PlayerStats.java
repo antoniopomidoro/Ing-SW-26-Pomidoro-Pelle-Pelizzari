@@ -23,6 +23,7 @@ public class PlayerStats {
     private int stars;
     private int builderPp;
     private int ritualWinBoost = 1;
+    private int extraUpperPick = 0;
     private Set<Tool> uniqueTools = EnumSet.noneOf(Tool.class);
 
     public boolean incrementCharacter(CharacterEnum type) {
@@ -98,5 +99,13 @@ public class PlayerStats {
 
     public int getDifferentToolNumber() {
         return uniqueTools.size();
+    }
+
+    public int getExtraUpperPick() {
+        return extraUpperPick;
+    }
+
+    public void setExtraUpperPick(int extraUpperPick) {
+        this.extraUpperPick = extraUpperPick;
     }
 }

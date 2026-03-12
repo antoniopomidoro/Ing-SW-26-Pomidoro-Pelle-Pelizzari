@@ -1,0 +1,18 @@
+[
+  {"age":"AGE_1","id":"SUSTENANCE_A1",      "effect":{"effectType":"SUSTENANCE"}},
+  {"age":"AGE_1","id":"HUNTING_A1",          "effect":{"effectType":"HUNTING"}},
+  {"age":"AGE_1","id":"CAVE_PAINTINGS_A1",   "effect":{"effectType":"CAVE_PAINTINGS"}},
+  {"age":"AGE_1","id":"SHAMANIC_RITUAL_A1",  "effect":{"effectType":"SHAMANIC_RITUAL_1"}},
+
+  {"age":"AGE_2","id":"SUSTENANCE_A2",      "effect":{"effectType":"SUSTENANCE"}},
+  {"age":"AGE_2","id":"HUNTING_A2",          "effect":{"effectType":"HUNTING"}},
+  {"age":"AGE_2","id":"CAVE_PAINTINGS_A2",   "effect":{"effectType":"CAVE_PAINTINGS"}},
+  {"age":"AGE_2","id":"SHAMANIC_RITUAL_A2",  "effect":{"effectType":"SHAMANIC_RITUAL_2"}},
+
+  {"age":"AGE_3","id":"HUNTING_A3",          "effect":{"effectType":"HUNTING"}},
+  {"age":"AGE_3","id":"CAVE_PAINTINGS_A3",   "effect":{"effectType":"CAVE_PAINTINGS"}},
+
+  {"age":"AGE_3","id":"FINAL_SHAMANIC_RITUAL","effect":{"effectType":"SHAMANIC_RITUAL_3"}},
+  {"age":"AGE_3","id":"FINAL_SUSTENANCE",     "effect":{"effectType":"SUSTENANCE"}}
+]
+

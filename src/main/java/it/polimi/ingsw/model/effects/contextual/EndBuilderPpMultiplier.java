@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model.effects.contextual;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.model.board.*;
 import it.polimi.ingsw.model.cards.*;
 import it.polimi.ingsw.model.cards.characters.*;
@@ -11,6 +12,7 @@ import it.polimi.ingsw.model.player.*;
 
 
 public class EndBuilderPpMultiplier implements ContextualEffect {
+    @JsonProperty("mult")
     private int mult;
 
     @Override
