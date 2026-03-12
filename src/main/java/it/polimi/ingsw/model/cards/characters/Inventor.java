@@ -34,19 +34,6 @@ public class Inventor extends Character {
         return tool;
     }
 
-    /**
-     * Sets the tool for this card. This method is intended to be used by the JSON deserializer.
-     * @param tool The tool to set.
-     * @return True if the tool was set successfully, false otherwise.
-     */
-    public boolean setTool(Tool tool) {
-        if(tool == null){
-            return false;
-        }
-        this.tool = tool;
-        return true;
-    }
-
     @Override
     public void onAddedToPlayer(Player p) {
         p.getStats().incrementCharacter(CharacterEnum.INVENTOR);

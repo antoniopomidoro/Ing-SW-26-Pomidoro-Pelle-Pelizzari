@@ -37,17 +37,6 @@ public class Event extends Card {
     }
 
     /**
-     * Sets the ID of the event.
-     * @param id The event ID.
-     * @return True if successful.
-     */
-    public boolean setId(String id) {
-        if (id == null) return false;
-        this.id = id;
-        return true;
-    }
-
-    /**
      * Triggers the event effect for all players.
      * @param players The list of players.
      * @param state The game state.

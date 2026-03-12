@@ -33,18 +33,4 @@ public abstract class Card {
     public Age getAge() {
         return this.age;
     }
-
-    /**
-     * Sets the age (era) of the card. This method is intended to be used by the JSON deserializer.
-     * @param age The age to set for the card.
-     * @return True if the age was set successfully, false otherwise.
-     */
-    public boolean setAge(Age age) {
-        if (age == null) {
-            return false;
-        }
-
-        this.age = age;
-        return true;
-    }
 }

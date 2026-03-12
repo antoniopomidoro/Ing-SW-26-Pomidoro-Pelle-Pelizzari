@@ -34,19 +34,6 @@ public class Shaman extends Character {
         return stars;
     }
 
-    /**
-     * Sets the number of stars for the card. This method is intended to be used by the JSON deserializer.
-     * @param stars The number of stars to set.
-     * @return True if the stars were set successfully, false otherwise.
-     */
-    public boolean setStars(int stars) {
-        if (stars <= 0){
-            return false;
-        }
-        this.stars = stars;
-        return true;
-    }
-
     @Override
     public void onAddedToPlayer(Player p) {
         p.getStats().incrementCharacter(CharacterEnum.SHAMAN);

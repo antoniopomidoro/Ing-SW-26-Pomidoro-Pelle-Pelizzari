@@ -38,17 +38,6 @@ public class Building extends Card {
     }
 
     /**
-     * Sets the ID of the building.
-     * @param id The building ID.
-     * @return True if successful.
-     */
-    public boolean setId(String id) {
-        if (id == null) return false;
-        this.id = id;
-        return true;
-    }
-
-    /**
      * Triggers the effect of the building.
      * @param p The player triggering the effect.
      * @param state The game state.
@@ -66,20 +55,6 @@ public class Building extends Card {
     }
 
     /**
-     * Sets the food cost for this building. This method is intended to be used by the JSON deserializer.
-     * @param foodCost The food cost to set.
-     * @return True if the food cost was set successfully, false otherwise.
-     */
-    public boolean setFoodCost(int foodCost) {
-        if (foodCost < 0) {
-            return false;
-        }
-
-        this.foodCost = foodCost;
-        return true;
-    }
-
-    /**
      * Gets the prestige points (PP) provided by this building.
      * @return The prestige points.
      */
@@ -88,36 +63,11 @@ public class Building extends Card {
     }
 
     /**
-     * Sets the prestige points (PP) for this building. This method is intended to be used by the JSON deserializer.
-     * @param pp The prestige points to set.
-     * @return True if the prestige points were set successfully, false otherwise.
-     */
-    public boolean setPP(int pp) {
-        if (pp < 0) {
-            return false;
-        }
-
-        this.pp=pp;
-        return true;
-    }
-
-    /**
      * Gets the phase in which this building's effect is triggered.
      * @return The trigger phase.
      */
     public GamePhase getTriggerPhase() {
         return triggerPhase;
-    }
-
-    /**
-     * Sets the phase in which this building's effect is triggered.
-     * @param triggerPhase The trigger phase.
-     * @return True if successful.
-     */
-    public boolean setTriggerPhase(GamePhase triggerPhase) {
-        if (triggerPhase == null) return false;
-        this.triggerPhase = triggerPhase;
-        return true;
     }
 
     /**

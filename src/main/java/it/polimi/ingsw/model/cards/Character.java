@@ -50,37 +50,11 @@ public abstract class Character extends Card {
     }
 
     /**
-     * Sets the type (ID) of the character.
-     * @param id The character type to set.
-     * @return True if the ID was set successfully, false otherwise.
-     */
-    public boolean setId(CharacterEnum id) {
-        if (id == null) {
-            return false;
-        }
-        this.id = id;
-        return true;
-    }
-
-    /**
      * Gets the minimum number of players required for this character card.
      * @return The minimum number of players.
      */
     public int getMinPlayers() {
         return minPlayers;
-    }
-
-    /**
-     * Sets the minimum number of players required for this character card.
-     * @param minPlayers The minimum number of players.
-     * @return True if the minimum number of players was set successfully, false otherwise.
-     */
-    public boolean setMinPlayers(int minPlayers) {
-        if (minPlayers < 1) { // Assuming minPlayers must be positive
-            return false;
-        }
-        this.minPlayers = minPlayers;
-        return true;
     }
 
     /**
