@@ -9,6 +9,8 @@ import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
+import java.util.List;
+
 
 /**
  * Represents an abstract game card with its basic properties.
@@ -32,5 +34,16 @@ public abstract class Card {
      */
     public Age getAge() {
         return this.age;
+    }
+
+    /**
+     * Handles the logic when a card is discarded.
+     * By default, it simply returns true. Subclasses can override this to implement specific behavior (e.g., Events).
+     * @param state The current game state.
+     * @param p The list of players involved.
+     * @return True if the discard action was processed successfully.
+     */
+    public boolean onDiscard(GameState state, List<Player> p){
+        return true;
     }
 }

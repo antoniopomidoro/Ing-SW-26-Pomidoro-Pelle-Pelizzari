@@ -12,14 +12,15 @@ import it.polimi.ingsw.model.player.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class Board {
     private OrderTile orderTile;
     private TileSet tiles;
-    private ArrayList<Card> topCards;
-    private ArrayList<Card> bottomCards;
-    private ArrayList<Building> topBuildings;
-    private ArrayList<Building> bottomBuildings;
+    private List<Card> topCards;
+    private List<Card> bottomCards;
+    private List<Building> topBuildings;
+    private List<Building> bottomBuildings;
 
     public Board() {
         // Skeleton constructor
@@ -76,6 +77,11 @@ public class Board {
         bottomBuildings.clear();
         bottomBuildings.addAll(topBuildings);
         topBuildings.clear();
+        return true;
+    }
+    public boolean discardBottomCards(List<Player> p, GameState state){
+        bottomCards.forEach(c -> c.onDiscard(state, p));
+        bottomCards.clear();
         return true;
     }
 }
