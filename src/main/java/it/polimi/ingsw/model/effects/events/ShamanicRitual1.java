@@ -15,7 +15,7 @@ import java.util.List;
 public class ShamanicRitual1 implements EventEffect {
 
     @Override
-    public boolean executeEffect(List<Player> players, GameState state) {
+    public boolean executeEffect(List<Player> players, GameState state, GamePhase phase, Age age) {
         // Skeleton method
         return false;
     }

@@ -43,7 +43,7 @@ public class Building extends Card {
      * @param state The game state.
      */
     public void triggerBuildingEffect(Player p, GameState state) {
-        // Skeleton method
+        effect.executeEffect(p, state);
     }
 
     /**

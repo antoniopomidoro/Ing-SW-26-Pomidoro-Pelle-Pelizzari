@@ -107,7 +107,8 @@ public class Player {
     }
 
     public boolean addFood(int amount) {
-        return false;
+        this.food += amount;
+        return true;
     }
 
     public boolean payFood(int amount) {
@@ -116,5 +117,19 @@ public class Player {
 
     public boolean addPP(int amount) {
         return false;
+    }
+
+    public boolean payPP(int amount) {
+        return true;
+    }
+    public boolean payFoodWithPenalty(int requiredFood, int penalty) {
+        int missingFood = Math.max(0, requiredFood - food);
+        int foodToPay = Math.min(requiredFood, food);
+        payFood(foodToPay);
+        if (missingFood > 0) {
+            int ppPenalty = missingFood * penalty;
+            payPP(ppPenalty);
+        }
+        return true;
     }
 }

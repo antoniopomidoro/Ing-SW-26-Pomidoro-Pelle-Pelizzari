@@ -127,7 +127,7 @@ The 10 standard Event cards are shuffled into their respective Age decks. The 2 
 
 * **Hunting**
     * **Reward:** The player gains `1 Food`, plus extra Prestige Points (PP) based on the card's Age multiplied by the number of Hunters they own.
-    * *Formula:* `1 Food + (1 PP * Age * #Hunters)`
+    * *Formula:* `(1 Food + (1 PP * Age)) * #Hunters`
 
 * **Shamanic Ritual**
     * **Reward/Penalty:** Players are ranked based on their total Shaman stars. The first place gains PP, the last place loses PP, depending on the card's Age:

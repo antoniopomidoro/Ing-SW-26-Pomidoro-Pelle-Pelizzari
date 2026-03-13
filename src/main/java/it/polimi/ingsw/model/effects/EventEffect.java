@@ -28,5 +28,5 @@ import java.util.List;
         @JsonSubTypes.Type(value = CavePaintings.class, name = "CAVE_PAINTINGS")
 })
 public interface EventEffect {
-    boolean executeEffect(List<Player> players, GameState state);
+    boolean executeEffect(List<Player> players, GameState state, GamePhase phase, Age age);
 }
