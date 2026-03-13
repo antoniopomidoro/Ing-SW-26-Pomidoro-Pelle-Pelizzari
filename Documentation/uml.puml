@@ -151,12 +151,8 @@ package "Model"{
         +refillTopBuildings() : boolean
     }
     class Deck {
-        -age_1_Cards : List<Card>
-        -age_2_Cards : List<Card>
-        -age_3_Cards : List<Card>
-        -age_1_Buildings : List<Building>
-        -age_2_Buildings : List<Building>
-        -age_3_Buildings : List<Building>
+        -cards : EnumMap<Age, List<Card>>
+        -buildings : EnumMap<Age, List<Building>>
 
         +shuffle(age : Age) : boolean
         +popCard(age : Age) : Card
