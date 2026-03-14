@@ -9,7 +9,9 @@ import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
+import java.util.ArrayList;
 import java.util.List;
+
 
 
 /**
@@ -30,6 +32,7 @@ public abstract class Card {
 
     /**
      * Gets the age (era) of the card.
+     *
      * @return The age of the card.
      */
     public Age getAge() {
@@ -40,6 +43,7 @@ public abstract class Card {
      * Returns the resolution priority of this card when discarded.
      * Cards with lower priority are resolved first. Default is 0.
      * Subclasses (e.g., Event) can override this to control discard ordering.
+     *
      * @return The resolution priority.
      */
     public int getResolutionPriority() {
@@ -49,11 +53,29 @@ public abstract class Card {
     /**
      * Handles the logic when a card is discarded.
      * By default, it simply returns true. Subclasses can override this to implement specific behavior (e.g., Events).
+     *
      * @param state The current game state.
-     * @param p The list of players involved.
+     * @param p     The list of players involved.
      * @return True if the discard action was processed successfully.
      */
-    public boolean onDiscard(GameState state, List<Player> p){
+    public boolean onDiscard(GameState state, List<Player> p) {
         return true;
+    }
+    //method that says if the selected card is a building
+    public boolean isBuilding(){
+        return false;
+    }
+//method that add the card to a list
+    public boolean addToDeck(ArrayList<ArrayList<Card>> deck) {
+
+
+        if(deck.get(age.ordinal()) == null){
+            for(int i = 0;i<=age.ordinal();i++){
+                deck.add(new ArrayList<>());
+                }
+        }
+        deck.get(age.ordinal()).add(this);
+        return true;
+
     }
 }
