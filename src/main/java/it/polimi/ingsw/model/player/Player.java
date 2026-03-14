@@ -93,14 +93,13 @@ public class Player {
         
         GamePhase phase = b.getTriggerPhase();
         if (phase == null) {
-            // Handle buildings without a specific trigger phase (one shot ones)
-            // Might be useful to add a NONE phase to the enum to store the ones without a phase
             return false; 
         }
         
         List<Building> list = buildingDispatcher.get(phase);
         if (list != null) {
             list.add(b);
+            b.onAddedToPlayer(this);
             return true;
         }
         return false;

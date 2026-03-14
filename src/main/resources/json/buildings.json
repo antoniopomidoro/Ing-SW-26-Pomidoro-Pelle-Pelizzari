@@ -21,8 +21,8 @@
   },
   {
     "age":"AGE_1","id":"SHAMANIC_LOSS_PROTECTION","foodCost":5,"pp":2,
-    "triggerPhase":"SHAMAN_EVENT",
-    "effect":{"effectType":"FLAT_REWARD_BUILDING","stars":0,"protect":1,"bonus":0}
+    "triggerPhase":"NONE",
+    "effect":{"effectType":"SHAMANIC_LOSS_PROTECTION","protect":0}
   },
   {
     "age":"AGE_1","id":"SUSTAINMENT_BOOST_ARTIST","foodCost":5,"pp":3,
@@ -48,7 +48,7 @@
   {
     "age":"AGE_2","id":"PLUS_3_STARS","foodCost":6,"pp":4,
     "triggerPhase":"NONE",
-    "effect":{"effectType":"FLAT_REWARD_BUILDING","stars":3,"protect":0,"bonus":0}
+    "effect":{"effectType":"ADD_STARS","stars":3}
   },
   {
     "age":"AGE_2","id":"SUSTAINMENT_BOOST_INVENTOR","foodCost":7,"pp":4,
@@ -57,8 +57,8 @@
   },
   {
     "age":"AGE_2","id":"SHAMANIC_WIN_BONUS","foodCost":7,"pp":0,
-    "triggerPhase":"SHAMAN_EVENT",
-    "effect":{"effectType":"FLAT_REWARD_BUILDING","stars":0,"protect":0,"bonus":2}
+    "triggerPhase":"NONE",
+    "effect":{"effectType":"SHAMANIC_WIN_BOOST","bonus":2}
   },
   {
     "age":"AGE_2","id":"HUNT_BONUS","foodCost":7,"pp":2,
@@ -98,7 +98,7 @@
   },
   {
     "age":"AGE_3","id":"EXTRA_UPPER_PICK","foodCost":9,"pp":3,
-    "triggerPhase":"END_TURN",
+    "triggerPhase":"NONE",
     "effect":{"effectType":"END_OF_TURN_EXTRA_PICK","upperPick":1}
   },
   {

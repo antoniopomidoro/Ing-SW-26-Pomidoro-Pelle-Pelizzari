@@ -21,7 +21,9 @@ import it.polimi.ingsw.model.player.*;
         @JsonSubTypes.Type(value = EndBuilderPpMultiplier.class, name = "END_BUILDER_PP_MULTIPLIER"),
         @JsonSubTypes.Type(value = EndCardSet.class, name = "END_CARD_SET"),
         @JsonSubTypes.Type(value = EndOfTurnExtraPick.class, name = "END_OF_TURN_EXTRA_PICK"),
-        @JsonSubTypes.Type(value = FlatRewardBuilding.class, name = "FLAT_REWARD_BUILDING"),
+        @JsonSubTypes.Type(value = AddStars.class, name = "ADD_STARS"),
+        @JsonSubTypes.Type(value = ShamanicLossProtection.class, name = "SHAMANIC_LOSS_PROTECTION"),
+        @JsonSubTypes.Type(value = ShamanicWinBoost.class, name = "SHAMANIC_WIN_BOOST"),
         @JsonSubTypes.Type(value = SustainmentBoost.class, name = "SUSTAINMENT_BOOST"),
         @JsonSubTypes.Type(value = InventorPair.class, name = "INVENTOR_PAIR"),
         @JsonSubTypes.Type(value = CardSet.class, name = "CARD_SET")

@@ -12,6 +12,7 @@ import it.polimi.ingsw.model.player.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class Board {
@@ -80,7 +81,9 @@ public class Board {
         return true;
     }
     public boolean discardBottomCards(List<Player> p, GameState state){
-        bottomCards.forEach(c -> c.onDiscard(state, p));
+        bottomCards.stream()
+                .sorted(Comparator.comparingInt(Card::getResolutionPriority))
+                .forEach(c -> c.onDiscard(state, p));
         bottomCards.clear();
         return true;
     }

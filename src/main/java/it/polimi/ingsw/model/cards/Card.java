@@ -37,6 +37,16 @@ public abstract class Card {
     }
 
     /**
+     * Returns the resolution priority of this card when discarded.
+     * Cards with lower priority are resolved first. Default is 0.
+     * Subclasses (e.g., Event) can override this to control discard ordering.
+     * @return The resolution priority.
+     */
+    public int getResolutionPriority() {
+        return 0;
+    }
+
+    /**
      * Handles the logic when a card is discarded.
      * By default, it simply returns true. Subclasses can override this to implement specific behavior (e.g., Events).
      * @param state The current game state.

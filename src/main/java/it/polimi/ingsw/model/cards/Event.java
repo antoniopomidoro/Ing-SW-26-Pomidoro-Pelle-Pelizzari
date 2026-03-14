@@ -16,6 +16,7 @@ public class Event extends Card {
     private EventEffect effect;
     private boolean isFinal;
     private GamePhase phase;
+    private int resolutionPriority;
 
     /**
      * Default constructor for Event.
@@ -23,6 +24,17 @@ public class Event extends Card {
      */
     public Event() {
         super();
+    }
+
+    /**
+     * Returns the resolution priority of this event.
+     * Events with lower priority are resolved first during discard.
+     * Sustenance events have higher priority so they are resolved last.
+     * @return The resolution priority.
+     */
+    @Override
+    public int getResolutionPriority() {
+        return resolutionPriority;
     }
 
     /**

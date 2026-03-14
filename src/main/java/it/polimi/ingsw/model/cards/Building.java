@@ -72,9 +72,12 @@ public class Building extends Card {
 
     /**
      * Method triggered when the building is added to a player.
+     * For one-shot buildings (triggerPhase == NONE), the effect is executed immediately.
      * @param p The player adding the building.
      */
     public void onAddedToPlayer(Player p) {
-        // Skeleton method
+        if (triggerPhase == GamePhase.NONE && effect != null) {
+            effect.executeEffect(p, null);
+        }
     }
 }
