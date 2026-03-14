@@ -11,33 +11,44 @@ import it.polimi.ingsw.model.cards.Character;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Loads game data (Characters, Events, Buildings, Tiles) from JSON resource files
- * using Jackson polymorphic deserialization.
+ * using Jackson polymorphic deserialization, and caches them for use by the game controller.
  * <p>
  * JSON files are expected at:
  * <ul>
- *   <li>{@code /json/characters.json} – array of {@link Character} (polymorphic via {@code characterType})</li>
- *   <li>{@code /json/events.json}     – array of {@link Event}     (effect polymorphic via {@code effectType})</li>
- *   <li>{@code /json/buildings.json}  – array of {@link Building}  (effect polymorphic via {@code effectType})</li>
- *   <li>{@code /json/tiles.json}      – array of {@link Tile}      (polymorphic via {@code tileType})</li>
+ * <li>{@code /json/characters.json} – array of {@link Character} (polymorphic
+ * via {@code characterType})</li>
+ * <li>{@code /json/events.json} – array of {@link Event} (effect polymorphic
+ * via {@code effectType})</li>
+ * <li>{@code /json/buildings.json} – array of {@link Building} (effect
+ * polymorphic via {@code effectType})</li>
+ * <li>{@code /json/tiles.json} – array of {@link Tile} (polymorphic via
+ * {@code tileType})</li>
  * </ul>
  */
-public class JsonLoader {
+public class JsonFactory {
 
     private static final String CHARACTERS_PATH = "/json/characters.json";
-    private static final String EVENTS_PATH     = "/json/events.json";
-    private static final String BUILDINGS_PATH  = "/json/buildings.json";
-    private static final String TILES_PATH      = "/json/tiles.json";
+    private static final String EVENTS_PATH = "/json/events.json";
+    private static final String BUILDINGS_PATH = "/json/buildings.json";
+    private static final String TILES_PATH = "/json/tiles.json";
     private static final String ORDER_TILES_PATH = "/json/order_tiles.json";
-    private static final String CONFIG_PATH      = "/json/config.json";
+    private static final String CONFIG_PATH = "/json/config.json";
 
     private final ObjectMapper mapper;
 
-    public JsonLoader() {
+    // Cached data lists (formerly in JsonFactory)
+    private List<Character> characters;
+    private List<Event> events;
+    private List<Building> buildings;
+    private List<Tile> tiles;
+    private List<OrderTile> orderTiles;
+    private GameConfig config;
+
+    public JsonFactory() {
         this.mapper = new ObjectMapper();
         // Use direct field access so Jackson reads/writes private fields by name,
         // avoiding issues with non-standard setter return types (boolean) and
@@ -46,7 +57,48 @@ public class JsonLoader {
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
     }
 
-    // ─── public API ────────────────────────────────────────────────────
+    /**
+     * Loads all game data from the JSON files and stores them in this instance.
+     * Call this method during game initialization.
+     *
+     * @throws IOException if any JSON file cannot be read or parsed.
+     */
+    public void loadAllData() throws IOException {
+        this.characters = loadCharacters();
+        this.events     = loadEvents();
+        this.buildings  = loadBuildings();
+        this.tiles      = loadTiles();
+        this.orderTiles = loadOrderTiles();
+        this.config     = loadConfig();
+    }
+
+    // ─── Getters for cached data ───────────────────────────────────────
+
+    public List<Character> getCharacters() {
+        return characters;
+    }
+
+    public List<Event> getEvents() {
+        return events;
+    }
+
+    public List<Building> getBuildings() {
+        return buildings;
+    }
+
+    public List<Tile> getTiles() {
+        return tiles;
+    }
+
+    public List<OrderTile> getOrderTiles() {
+        return orderTiles;
+    }
+
+    public GameConfig getConfig() {
+        return config;
+    }
+
+    // ─── Individual Loaders ────────────────────────────────────────────
 
     /**
      * Loads all Character cards from {@code characters.json}.
@@ -65,8 +117,10 @@ public class JsonLoader {
     /**
      * Loads all Event cards from {@code events.json}.
      * Each Event's {@code effect} field is polymorphically resolved via
-     * the {@code "effectType"} discriminator on {@link it.polimi.ingsw.model.effects.EventEffect}.
-     * Events with {@code isFinal == true} are the final events (placed at the bottom of Age 3 deck).
+     * the {@code "effectType"} discriminator on
+     * {@link it.polimi.ingsw.model.effects.EventEffect}.
+     * Events with {@code isFinal == true} are the final events (placed at the
+     * bottom of Age 3 deck).
      *
      * @return a list of Event cards.
      * @throws IOException if the JSON file cannot be read or parsed.
@@ -103,7 +157,8 @@ public class JsonLoader {
 
     /**
      * Loads all order tiles from {@code order_tiles.json}.
-     * Each entry represents the turn-order tile configuration for a specific player count.
+     * Each entry represents the turn-order tile configuration for a specific player
+     * count.
      *
      * @return a list of OrderTile objects (one per player-count setup: 2, 3, 4, 5).
      * @throws IOException if the JSON file cannot be read or parsed.
@@ -139,4 +194,3 @@ public class JsonLoader {
         return is;
     }
 }
-
