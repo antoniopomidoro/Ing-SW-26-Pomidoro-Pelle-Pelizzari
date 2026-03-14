@@ -80,4 +80,12 @@ public class Building extends Card {
             effect.executeEffect(p, null);
         }
     }
+
+    @Override
+    public boolean isBuilding() {
+        return true;
+    }
 }
+
+
+

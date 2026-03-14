@@ -24,7 +24,10 @@ public class Board {
     private List<Building> bottomBuildings;
 
     public Board() {
-        // Skeleton constructor
+        this.topCards = new ArrayList<>();
+        this.bottomCards = new ArrayList<>();
+        this.topBuildings = new ArrayList<>();
+        this.bottomBuildings = new ArrayList<>();
     }
 
     public Card pickTopCard(int index) {

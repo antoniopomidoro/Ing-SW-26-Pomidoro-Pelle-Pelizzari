@@ -17,7 +17,7 @@ public class GameState {
     private int turn;
     private GamePhase phase;
     private List<Player> players;
-    private Deck deck;
+    private Decks deck;
     private Board board;
     private int currentPlayerIndex;
     private List<Player> turnOrder;
