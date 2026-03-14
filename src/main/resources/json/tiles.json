@@ -1,10 +1,10 @@
 [
-  {"tileId":"A","topCards":0,"bottomCards":0,"minPlayers":5},
-  {"tileId":"B","topCards":0,"bottomCards":1,"minPlayers":2},
-  {"tileId":"C","topCards":1,"bottomCards":0,"minPlayers":2},
-  {"tileId":"D","topCards":0,"bottomCards":2,"minPlayers":3},
-  {"tileId":"E","topCards":1,"bottomCards":1,"minPlayers":2},
-  {"tileId":"F","topCards":2,"bottomCards":0,"minPlayers":2},
-  {"tileId":"G","topCards":2,"bottomCards":1,"minPlayers":4}
+  {"tileId":"A","upperPicks":0,"bottomPicks":0,"foodBonus":3,"minPlayers":5},
+  {"tileId":"B","upperPicks":0,"bottomPicks":1,"foodBonus":0,"minPlayers":2},
+  {"tileId":"C","upperPicks":1,"bottomPicks":0,"foodBonus":0,"minPlayers":2},
+  {"tileId":"D","upperPicks":0,"bottomPicks":2,"foodBonus":0,"minPlayers":3},
+  {"tileId":"E","upperPicks":1,"bottomPicks":1,"foodBonus":0,"minPlayers":2},
+  {"tileId":"F","upperPicks":2,"bottomPicks":0,"foodBonus":0,"minPlayers":2},
+  {"tileId":"G","upperPicks":2,"bottomPicks":1,"foodBonus":0,"minPlayers":4}
 ]
 

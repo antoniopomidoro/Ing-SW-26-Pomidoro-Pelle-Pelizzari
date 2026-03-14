@@ -13,10 +13,16 @@ import it.polimi.ingsw.model.player.*;
 import java.util.List;
 
 public class Sustenance implements EventEffect {
-
     @Override
     public boolean executeEffect(List<Player> players, GameState state, GamePhase phase, Age age) {
-        // Skeleton method
+        for(Player p : players){
+            int neededFood = 0;
+            for (CharacterEnum c : CharacterEnum.values()){
+                neededFood += p.getStats().getCharacterCount(c);
+            }
+            int foodToPay = neededFood - p.getStats().getSustainmentDiscount();
+            p.payFoodWithPenalty(foodToPay, age.getValue());
+        }
         return false;
     }
 }

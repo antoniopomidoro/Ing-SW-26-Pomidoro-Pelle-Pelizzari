@@ -18,8 +18,9 @@ public class Tile {
     private TileId tileId;
     private boolean isOccupied;
     private Player occupier;
-    private int topCards;
-    private int bottomCards;
+    private int upperPicks;
+    private int bottomPicks;
+    private int foodBonus;
     private int minPlayers;
 
     /**
@@ -113,5 +114,17 @@ public class Tile {
         this.occupier = null;
         this.isOccupied = false;
         return true;
+    }
+
+    public int getUpperPicks() {
+        return upperPicks;
+    }
+
+    public int getBottomPicks() {
+        return bottomPicks;
+    }
+
+    public int getFoodBonus() {
+        return foodBonus;
     }
 }

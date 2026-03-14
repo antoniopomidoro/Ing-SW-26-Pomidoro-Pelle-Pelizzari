@@ -6,8 +6,8 @@
   },
   {
     "age":"AGE_1","id":"TOTEM_PLACEMENT_FOOD_BONUS","foodCost":3,"pp":3,
-    "triggerPhase":"IN_TURN",
-    "effect":null
+    "triggerPhase":"START_TURN",
+    "effect":{"effectType":"TOTEM_PLACEMENT_BONUS"}
   },
   {
     "age":"AGE_1","id":"CARDS_SET_5_FOOD","foodCost":4,"pp":3,
@@ -16,7 +16,7 @@
   },
   {
     "age":"AGE_1","id":"SUSTAINMENT_BOOST_GATHERER","foodCost":4,"pp":4,
-    "triggerPhase":"SUSTAINMENT_EVENT",
+    "triggerPhase":"NONE",
     "effect":{"effectType":"SUSTAINMENT_BOOST","type":"GATHERER","gain":1}
   },
   {
@@ -26,7 +26,7 @@
   },
   {
     "age":"AGE_1","id":"SUSTAINMENT_BOOST_ARTIST","foodCost":5,"pp":3,
-    "triggerPhase":"SUSTAINMENT_EVENT",
+    "triggerPhase":"NONE",
     "effect":{"effectType":"SUSTAINMENT_BOOST","type":"ARTIST","gain":1}
   },
 
@@ -52,7 +52,7 @@
   },
   {
     "age":"AGE_2","id":"SUSTAINMENT_BOOST_INVENTOR","foodCost":7,"pp":4,
-    "triggerPhase":"SUSTAINMENT_EVENT",
+    "triggerPhase":"NONE",
     "effect":{"effectType":"SUSTAINMENT_BOOST","type":"INVENTOR","gain":1}
   },
   {
