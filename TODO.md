@@ -5,17 +5,17 @@ This document lists the classes and their respective methods that currently act 
 ## Package: `it.polimi.ingsw.model.player`
 
 ### `Player.java`
-* [ ] `Player()` (Constructor): Needs to initialize `cards`, `stats` (instantiate `PlayerStats`), `nickname`, and `id`.
-* [ ] `getIsChoosing()`: Currently returns `false`.
-* [ ] `getId()`: Currently returns `0`.
-* [ ] `getNickname()`: Currently returns `null` (if not set in constructor).
-* [ ] `getFood()`: Currently returns `0` instead of `this.food`.
-* [ ] `getCards()`: Currently returns `null`.
-* [ ] `getStats()`: Currently returns `null`.
-* [ ] `addCard(Card c)`: Currently returns `false` and does not add the card to the list.
-* [ ] `payFood(int amount)`: Currently returns `false` and does not subtract food.
-* [ ] `addPP(int amount)`: Currently returns `false` and does not add PP.
-* [ ] `payPP(int amount)`: Currently returns `true` but does not subtract PP.
+* [x] `Player()` (Constructor): Needs to initialize `cards`, `stats` (instantiate `PlayerStats`), `nickname`, and `id`.
+* [x] `getIsChoosing()`: Currently returns `false`.
+* [x] `getId()`: Currently returns `0`.
+* [x] `getNickname()`: Currently returns `null` (if not set in constructor).
+* [x] `getFood()`: Currently returns `0` instead of `this.food`.
+* [x] `getCards()`: Currently returns `null`.
+* [x] `getStats()`: Currently returns `null`.
+* [x] `addCard(Card c)`: Currently returns `false` and does not add the card to the list.
+* [x] `payFood(int amount)`: Currently returns `false` and does not subtract food.
+* [x] `addPP(int amount)`: Currently returns `false` and does not add PP.
+* [x] `payPP(int amount)`: Currently returns `true` but does not subtract PP.
 
 ## Package: `it.polimi.ingsw.model.game`
 
