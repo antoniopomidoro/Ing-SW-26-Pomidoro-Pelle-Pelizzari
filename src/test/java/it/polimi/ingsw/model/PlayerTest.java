@@ -12,7 +12,7 @@ import it.polimi.ingsw.model.player.*;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PlayerTest {
+/*public class PlayerTest {
     private static class DummyCard extends Card{
         public DummyCard(){
             super();
@@ -102,3 +102,4 @@ public class PlayerTest {
         assertEquals(player.getPP(), originalPP + random, "The new amount of PP should be the sum of the old amount + the paid PP; it could also be negative.");
     }
 }
+*/

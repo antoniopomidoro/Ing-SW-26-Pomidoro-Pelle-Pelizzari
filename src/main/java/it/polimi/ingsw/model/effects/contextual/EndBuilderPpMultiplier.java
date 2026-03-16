@@ -16,7 +16,7 @@ public class EndBuilderPpMultiplier implements ContextualEffect {
     private int mult;
 
     @Override
-    public void executeEffect(Player p, GameState state) {
-        // Skeleton method
+    public boolean executeEffect(Player p, GameState state) {
+        return false;
     }
 }

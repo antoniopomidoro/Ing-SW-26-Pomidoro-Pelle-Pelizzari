@@ -10,10 +10,7 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
 
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class PlayerStats {
     private Map<CharacterEnum, Integer> characterCounts = new EnumMap<>(CharacterEnum.class);
@@ -26,7 +23,6 @@ public class PlayerStats {
     private int ritualWinBoost = 1;
     private int extraUpperPick = 0;
     private Set<Tool> uniqueTools = EnumSet.noneOf(Tool.class);
-
     public boolean incrementCharacter(CharacterEnum type) {
         if(type == null) return false;
         characterCounts.put(type, characterCounts.getOrDefault(type, 0) + 1);
@@ -127,5 +123,12 @@ public class PlayerStats {
 
     public void setExtraUpperPick(int extraUpperPick) {
         this.extraUpperPick = extraUpperPick;
+    }
+
+    public int calculateSet() {
+        return Arrays.stream(CharacterEnum.values())
+                .mapToInt(this::getCharacterCount)
+                .min()
+                .orElse(0);
     }
 }

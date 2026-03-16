@@ -10,7 +10,9 @@ public class ShamanicWinBoost implements ContextualEffect {
     private int bonus;
 
     @Override
-    public void executeEffect(Player p, GameState state) {
+    public boolean onAddedToPlayer(Player p) {
+
         p.getStats().setRitualWinBoost(bonus);
+        return true;
     }
 }

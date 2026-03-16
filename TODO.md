@@ -43,9 +43,9 @@ This document lists the classes and their respective methods that currently act 
 ## Package: `it.polimi.ingsw.model.effects.contextual`
 
 Several contextual effects currently have skeleton `executeEffect` methods that need their logic implemented according to the game rules:
-* [ ] `CardSet.java` -> `executeEffect(Player p, GameState state)`
+* [x] `CardSet.java` -> `executeEffect(Player p, GameState state)`
 * [ ] `EndBuilderPpMultiplier.java` -> `executeEffect(Player p, GameState state)`
-* [ ] `EndCardSet.java` -> `executeEffect(Player p, GameState state)`
+* [x] `EndCardSet.java` -> `executeEffect(Player p, GameState state)`
 * [ ] `InventorPair.java` -> `executeEffect(Player p, GameState state)`
 * [ ] `SustainmentBoost.java` -> `executeEffect(Player p, GameState state)`
 * [ ] `EndOfTurnExtraPick.java` -> `executeEffect(Player p, GameState state)`

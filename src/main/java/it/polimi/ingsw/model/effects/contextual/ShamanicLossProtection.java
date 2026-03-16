@@ -10,7 +10,9 @@ public class ShamanicLossProtection implements ContextualEffect {
     private int protect;
 
     @Override
-    public void executeEffect(Player p, GameState state) {
+    public boolean onAddedToPlayer(Player p) {
+
         p.getStats().setRitualLossMultiplier(protect);
+        return true;
     }
 }

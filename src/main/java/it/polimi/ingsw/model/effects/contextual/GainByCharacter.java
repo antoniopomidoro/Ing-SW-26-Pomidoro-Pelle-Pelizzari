@@ -20,25 +20,11 @@ public class GainByCharacter implements ContextualEffect {
     @JsonProperty("foodGain")
     private int foodGain;
 
-    /**
-     * Default constructor for JSON deserialization.
-     */
-    public GainByCharacter() {}
-
-    @JsonCreator
-    public GainByCharacter(
-            @JsonProperty("type") CharacterEnum type,
-            @JsonProperty("ppGain") int ppGain,
-            @JsonProperty("foodGain") int foodGain) {
-        this.type = type;
-        this.ppGain = ppGain;
-        this.foodGain = foodGain;
-    }
-
     @Override
-    public void executeEffect(Player p, GameState state) {
+    public boolean executeEffect(Player p, GameState state) {
         int charCount = p.getStats().getCharacterCount(type);
         p.addPP(ppGain * charCount);
         p.addFood(foodGain * charCount);
+        return true;
     }
 }
