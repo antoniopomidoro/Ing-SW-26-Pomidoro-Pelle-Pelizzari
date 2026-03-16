@@ -61,4 +61,7 @@ public class Event extends Card {
     public boolean isFinal(){
         return isFinal;
     }
+
+
+    public boolean isEvent(){return true;}
 }

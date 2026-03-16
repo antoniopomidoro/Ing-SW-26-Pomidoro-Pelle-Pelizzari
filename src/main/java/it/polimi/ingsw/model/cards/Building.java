@@ -11,7 +11,7 @@ import it.polimi.ingsw.model.player.*;
 
 
 /**
- * Represents a Building card, which has a food cost and provides prestige points.
+ * Represents a Building card, which has food cost and provides prestige points.
  * Instances of this class are intended to be created from JSON data.
  */
 public class Building extends Card {

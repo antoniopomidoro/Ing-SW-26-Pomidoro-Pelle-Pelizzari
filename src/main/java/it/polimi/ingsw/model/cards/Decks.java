@@ -2,13 +2,12 @@ package it.polimi.ingsw.model.cards;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import it.polimi.ingsw.model.game.Age;
 
 
 public class Decks {
-    private ArrayList<ArrayList<Card>> cards;
-    private ArrayList<ArrayList<Card>> buildings;
+    private final ArrayList<ArrayList<Card>> cards;
+    private final ArrayList<ArrayList<Card>> buildings;
     //the constructor initialize 2 list that contains 3 lists divided by era of cards and buildings
     //then for each card and buildin in the lists passed in input creates the ages decks using the function addToDeck of card
     //using visitors pattern
@@ -25,28 +24,37 @@ public class Decks {
         }
         
     }
-
+    //the shuffle methond remove the final methods then shuffle all non-empty decks then add final events
     public void shuffle() {
-        Event LastEvent1 = (Event)cards.get(2).removeLast();
-        Event LastEvent2 = (Event)cards.get(2).removeLast();
+        ArrayList<Card> LastEvents = new ArrayList<>();
+        Event e;
+        int counter =0;
+        for(Card c : cards.getLast()){
+            if(c.isEvent()){
+                e = (Event)c;
+                if(e.isFinal()){
+                    LastEvents.add(cards.getLast().remove(counter));
+                }
+        }counter++;}
         for(ArrayList<Card> a:cards){
-            Collections.shuffle(a);
+            if(!a.isEmpty()){
+                Collections.shuffle(a);
+            }
+           }
+
+        if(!LastEvents.isEmpty()){
+            Collections.shuffle(LastEvents);
         }
-        Random rn = new Random();
-        int num = rn.nextInt(2);
-        if(num==1){
-            cards.get(2).addLast(LastEvent1);
-        }else{
-            cards.get(2).addLast(LastEvent2);
+        for(Card c : LastEvents){
+            cards.getLast().addLast(c);
         }
-        return;
     }
 
 
     //return the first card on the age deck if the deck is empty throws an exception if the last deck is empty throws endgame exception
     public Card popCard(Age a) throws endEraEx,endGameEx{
         if(cards.get(a.ordinal()).isEmpty()){
-            if(a.ordinal()==2){
+            if(a.ordinal()>=cards.size()-1){
                 throw new endGameEx();
             }else{
                 throw new endEraEx();
@@ -57,7 +65,9 @@ public class Decks {
     }
 
     public ArrayList<Card> getBuildings(Age age) {
-        return buildings.get(age.ordinal());
+        ArrayList<Card> buildingCopy = new ArrayList<>();
+        buildingCopy.addAll(this.buildings.get(age.ordinal()));
+        return buildingCopy;
     }
 
     public static class endGameEx extends Exception{
