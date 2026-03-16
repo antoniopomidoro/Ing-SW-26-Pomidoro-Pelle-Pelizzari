@@ -65,6 +65,8 @@ public abstract class Card {
     public boolean isBuilding(){
         return false;
     }
+
+    public boolean isEvent(){return false;}
 //method that add the card to a list
     public boolean addToDeck(ArrayList<ArrayList<Card>> deck) {
 
@@ -72,7 +74,7 @@ public abstract class Card {
             deck.get(age.ordinal()).add(this);
             return true;
         }catch(IndexOutOfBoundsException e){
-            for(int i = 0;i<=age.ordinal();i++){
+            for(int i = deck.size();i<=age.ordinal();i++){
                 deck.add(new ArrayList<>());
                 }
             deck.get(age.ordinal()).add(this);
