@@ -58,4 +58,7 @@ public class Event extends Card {
         }
         return false;
     }
+    public boolean isFinal(){
+        return isFinal;
+    }
 }
