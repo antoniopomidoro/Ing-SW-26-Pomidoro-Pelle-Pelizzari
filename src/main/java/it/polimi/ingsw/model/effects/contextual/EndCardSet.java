@@ -10,6 +10,8 @@ import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
+import java.util.Arrays;
+
 
 public class EndCardSet implements ContextualEffect {
     @JsonProperty("pp")
@@ -17,6 +19,10 @@ public class EndCardSet implements ContextualEffect {
 
     @Override
     public void executeEffect(Player p, GameState state) {
-        // Skeleton method
+        int set = Arrays.stream(CharacterEnum.values())
+                .mapToInt(c -> p.getStats().getCharacterCount(c))
+                .min()
+                .orElse(0);
+        p.addPP(set * pp);
     }
 }
