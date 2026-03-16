@@ -19,7 +19,8 @@ public class PlayerStats {
     private Map<CharacterEnum, Integer> characterCounts = new EnumMap<>(CharacterEnum.class);
     private int buildingDiscount;
     private int ritualLossMultiplier = 1;
-    private int sustainmentDiscount;
+    private int baseSustainmentDiscount;
+    private Map<CharacterEnum, Integer> sustainmentBoosts = new EnumMap<>(CharacterEnum.class);
     private int stars;
     private int builderPp;
     private int ritualWinBoost = 1;
@@ -57,12 +58,31 @@ public class PlayerStats {
     }
 
     public boolean addSustainmentDiscount(int amount) {
-        this.sustainmentDiscount += amount;
+        this.baseSustainmentDiscount += amount;
         return true;
     }
 
+    /**
+     * Registers a building-provided sustainment boost for a character type.
+     * During Sustenance events, each character of that type will provide
+     * an additional discount equal to gainPerCharacter.
+     * @param type The character type that provides the boost.
+     * @param gainPerCharacter The discount per character of that type.
+     */
+    public void addSustainmentBoost(CharacterEnum type, int gainPerCharacter) {
+        sustainmentBoosts.merge(type, gainPerCharacter, Integer::sum);
+    }
+
+    /**
+     * Returns the total sustainment discount: base (from Gatherer cards)
+     * plus dynamic boosts (from buildings, calculated per current character count).
+     * @return The total sustainment discount.
+     */
     public int getSustainmentDiscount() {
-        return sustainmentDiscount;
+        int boost = sustainmentBoosts.entrySet().stream()
+                .mapToInt(e -> getCharacterCount(e.getKey()) * e.getValue())
+                .sum();
+        return baseSustainmentDiscount + boost;
     }
 
     public boolean addStars(int amount) {

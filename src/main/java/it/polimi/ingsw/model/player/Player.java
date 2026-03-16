@@ -26,20 +26,28 @@ public class Player {
     private int pp;
     private boolean isChoosing;
 
-    public Player() {
+    public Player(int id, String nickname) {
         this.buildingDispatcher = new EnumMap<>(GamePhase.class);
         for (GamePhase phase : GamePhase.values()) {
             this.buildingDispatcher.put(phase, new ArrayList<>());
         }
-        // Other initializations would go here in a real implementation
+        // Other initializations
+        this.id = id;
+        this.nickname = nickname;
+        cards = new ArrayList<>();
+        stats = new PlayerStats();
+        // The food gets added later
+        food = 0;
+        pp = 0;
+        isChoosing = false;
     }
 
     public boolean getIsChoosing() {
-        return false;
+        return isChoosing;
     }
 
     public int getId() {
-        return 0;
+        return id;
     }
 
     public String getNickname() {
@@ -47,7 +55,7 @@ public class Player {
     }
 
     public int getFood() {
-        return 0;
+        return food;
     }
 
     public int getPP() {
@@ -55,7 +63,7 @@ public class Player {
     }
 
     public List<Card> getCards() {
-        return null;
+        return cards;
     }
 
     /**
@@ -81,11 +89,12 @@ public class Player {
     }
 
     public PlayerStats getStats() {
-        return null;
+        return stats;
     }
 
     public boolean addCard(Card c) {
-        return false;
+        cards.add(c);
+        return true;
     }
 
     public boolean addBuilding(Building b) {
@@ -111,14 +120,17 @@ public class Player {
     }
 
     public boolean payFood(int amount) {
-        return false;
+        this.food -= amount;
+        return true;
     }
 
     public boolean addPP(int amount) {
-        return false;
+        this.pp += amount;
+        return true;
     }
 
     public boolean payPP(int amount) {
+        this.pp -= amount;
         return true;
     }
     public boolean payFoodWithPenalty(int requiredFood, int penalty) {

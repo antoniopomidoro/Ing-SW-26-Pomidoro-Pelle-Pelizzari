@@ -26,7 +26,8 @@ import it.polimi.ingsw.model.player.*;
         @JsonSubTypes.Type(value = ShamanicWinBoost.class, name = "SHAMANIC_WIN_BOOST"),
         @JsonSubTypes.Type(value = SustainmentBoost.class, name = "SUSTAINMENT_BOOST"),
         @JsonSubTypes.Type(value = InventorPair.class, name = "INVENTOR_PAIR"),
-        @JsonSubTypes.Type(value = CardSet.class, name = "CARD_SET")
+        @JsonSubTypes.Type(value = CardSet.class, name = "CARD_SET"),
+        @JsonSubTypes.Type(value = TotemPlacementBonus.class, name = "TOTEM_PLACEMENT_BONUS")
 })
 public interface ContextualEffect {
     void executeEffect(Player p, GameState state);
