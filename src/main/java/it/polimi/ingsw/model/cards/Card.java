@@ -68,14 +68,19 @@ public abstract class Card {
 //method that add the card to a list
     public boolean addToDeck(ArrayList<ArrayList<Card>> deck) {
 
-
-        if(deck.get(age.ordinal()) == null){
+        try{
+            deck.get(age.ordinal()).add(this);
+            return true;
+        }catch(IndexOutOfBoundsException e){
             for(int i = 0;i<=age.ordinal();i++){
                 deck.add(new ArrayList<>());
                 }
+            deck.get(age.ordinal()).add(this);
+            return true;
+        }catch(Exception other){
+            other.printStackTrace();
+            return false;
         }
-        deck.get(age.ordinal()).add(this);
-        return true;
 
     }
 }
