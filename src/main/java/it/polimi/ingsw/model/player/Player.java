@@ -143,4 +143,15 @@ public class Player {
         }
         return true;
     }
+    public boolean canBuy(Building b){
+        return food >= calculateRealPrice(b);
+    }
+    public boolean payBuilding(Building b){
+        if(!canBuy(b))return false;
+        return payFood(calculateRealPrice(b));
+    }
+    private int calculateRealPrice(Building b) {
+        int realPrice = b.getFoodCost() - stats.getBuildingDiscount();
+        return Math.max(0, realPrice);
+    }
 }
