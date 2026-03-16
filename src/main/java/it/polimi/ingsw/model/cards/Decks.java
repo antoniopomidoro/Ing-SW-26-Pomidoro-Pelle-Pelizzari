@@ -6,8 +6,8 @@ import it.polimi.ingsw.model.game.Age;
 
 
 public class Decks {
-    private ArrayList<ArrayList<Card>> cards;
-    private ArrayList<ArrayList<Card>> buildings;
+    private final ArrayList<ArrayList<Card>> cards;
+    private final ArrayList<ArrayList<Card>> buildings;
     //the constructor initialize 2 list that contains 3 lists divided by era of cards and buildings
     //then for each card and buildin in the lists passed in input creates the ages decks using the function addToDeck of card
     //using visitors pattern
@@ -24,7 +24,7 @@ public class Decks {
         }
         
     }
-
+    //the shuffle methond remove the final methods then shuffle all non-empty decks then add final events
     public void shuffle() {
         ArrayList<Card> LastEvents = new ArrayList<>();
         Event e;
@@ -46,10 +46,8 @@ public class Decks {
             Collections.shuffle(LastEvents);
         }
         for(Card c : LastEvents){
-            cards.get(Age.values().length-1).addLast(c);
+            cards.getLast().addLast(c);
         }
-
-        return;
     }
 
 
