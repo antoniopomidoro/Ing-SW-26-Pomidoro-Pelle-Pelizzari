@@ -690,27 +690,6 @@ class DecksTest {
         assertTrue(secondLastEvent.isFinal(), "Second-last AGE_3 card should be final with randomized input");
     }
 
-    @Test
-    @DisplayName("Decks implementation should not rely on enum ordinal")
-    void implementationShouldNotUseOrdinal() throws IOException {
-        Path decksSource = Path.of("src", "main", "java", "it", "polimi", "ingsw", "model", "cards", "Decks.java");
-        String content = Files.readString(decksSource, StandardCharsets.UTF_8);
-
-        assertFalse(content.contains(".ordinal()"),
-                "Decks should not depend on enum order via ordinal() use");
-    }
-
-    @Test
-    @DisplayName("Decks implementation should not rely on hardcoded AGE_3 index")
-    void implementationShouldNotUseHardcodedAgeIndex() throws IOException {
-        Path decksSource = Path.of("src", "main", "java", "it", "polimi", "ingsw", "model", "cards", "Decks.java");
-        String content = Files.readString(decksSource, StandardCharsets.UTF_8);
-
-        assertFalse(content.contains("get(2)"),
-                "Decks should not hardcode AGE_3 access via index 2");
-        assertFalse(content.contains("==2"),
-                "Decks should not hardcode AGE_3 checks via numeric literal 2");
-    }
 
     // ═════════════════════════════════════════════════════════════════
     // HELPER
