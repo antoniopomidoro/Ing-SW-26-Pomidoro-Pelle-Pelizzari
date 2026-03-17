@@ -1,4 +1,9 @@
-package it.polimi.ingsw.model;
+package it.polimi.ingsw.model.game;
+import it.polimi.ingsw.model.board.Board;
+import it.polimi.ingsw.model.game.Age;
+import it.polimi.ingsw.model.game.GamePhase;
+import it.polimi.ingsw.model.player.Player;
+
 import java.util.*;
 import java.util.List;
 /**
@@ -11,8 +16,7 @@ public class GameState {
     private int turn;
     private GamePhase phase;
     private List<Player> players;       // 1..5 Players as per UML
-    private Board board;               // 1 Board per game
-    private Deck deck;                 // 1 Deck per game
+    private Board board;               // 1 Board per gam// 1 Deck per game
     private int currentPlayerIndex;    // Tracks whose turn it is
     private List<Player> turnOrder;    // List to manage player sequence
 
@@ -29,7 +33,6 @@ public class GameState {
 
         // Instantiating internal components (Composition)
         this.board = new Board();
-        this.deck = new Deck();
         this.players = new ArrayList<>();
 
         // Converting nicknames (formal parameter) into Player objects
@@ -112,51 +115,8 @@ public class GameState {
     }
 
     // --- Essential Getters for Controller interaction ---
-    public Deck getDeck() { return this.deck; }
     public Board getBoard() { return this.board; }
 
-    /**
-     * Advances the game state by progressing through phases, turns.
-     * This version aligns with Mesos rules where END_TURN signifies the
-     * completion of all player actions, leading directly to the global Event phase.*/
 
-    public void advanceState() {
-        switch (this.phase) {
-            case START_TURN:
-                // Transition from preparation to the active playing phase
-                this.phase = GamePhase.IN_TURN;
-                break;
-
-            case IN_TURN:
-                // Transition once all card-taking actions are finished
-                this.phase = GamePhase.END_TURN;
-                break;
-
-            case END_TURN:
-                /**
-                 * All players have completed their actions for the current round.
-                 * Reset the index and move directly to the global cleanup/event phase.
-                 */
-                this.currentPlayerIndex = 0;
-                this.phase = GamePhase.EVENT;
-                break;
-
-            case EVENT:
-                //Increment the round counter
-                this.turn++;
-
-                //Termination Check: Validate if the session has concluded
-                if (this.turn > 10) {
-                    this.phase = GamePhase.END_GAME;
-                } else {
-                    // Loop back to start a new round
-                    this.phase = GamePhase.START_TURN;
-                }
-                break;
-
-            case END_GAME:
-                // Terminal state: No further progression allowed
-                break;
         }
-    }
-}
+
