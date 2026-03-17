@@ -16,7 +16,8 @@ public class EndOfTurnExtraPick implements ContextualEffect {
     private int upperPick;
 
     @Override
-    public void executeEffect(Player p, GameState state) {
+    public boolean onAddedToPlayer(Player p) {
         p.getStats().setExtraUpperPick(upperPick);
+        return true;
     }
 }

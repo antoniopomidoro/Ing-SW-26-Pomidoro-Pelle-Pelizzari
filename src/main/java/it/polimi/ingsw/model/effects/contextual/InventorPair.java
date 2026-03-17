@@ -13,7 +13,8 @@ import it.polimi.ingsw.model.player.*;
 public class InventorPair implements ContextualEffect {
 
     @Override
-    public void executeEffect(Player p, GameState state) {
-        // Skeleton method
+    public boolean executeEffect(Player p, GameState state) {
+        p.addFood(3);
+        return true;
     }
 }

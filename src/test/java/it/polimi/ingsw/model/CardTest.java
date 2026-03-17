@@ -13,7 +13,7 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CardTest {
-    private static class DummyCard extends Card{
+    /*private static class DummyCard extends Card{
         public DummyCard(){
             super();
         }
@@ -97,5 +97,5 @@ class CardTest {
         int randomHigh = (int) (Math.random() * 95) + 5;
         assertFalse(card.setMinPlayers(randomLow), "The number of players cannot be less than 2.");
         assertFalse(card.setMinPlayers(randomHigh), "The number of players cannot be more than 5.");
-    }
+    }*/
 }

@@ -10,7 +10,8 @@ public class AddStars implements ContextualEffect {
     private int stars;
 
     @Override
-    public void executeEffect(Player p, GameState state) {
+    public boolean onAddedToPlayer(Player p) {
         p.getStats().addStars(stars);
+        return true;
     }
 }

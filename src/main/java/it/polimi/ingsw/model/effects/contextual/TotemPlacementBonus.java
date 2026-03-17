@@ -9,7 +9,8 @@ import java.util.List;
 public class TotemPlacementBonus implements ContextualEffect {
 
     @Override
-    public void executeEffect(Player p, GameState state) {
-        //TODO: ADD IMPLEMENTATION
+    public boolean executeEffect(Player p, GameState state) {
+        p.addFood(1);
+        return true;
     }
 }

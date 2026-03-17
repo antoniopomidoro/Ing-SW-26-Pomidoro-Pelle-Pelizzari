@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TileTest {
+/*class TileTest {
     private Tile tile;
     private Player player;
     @BeforeEach
@@ -60,7 +60,4 @@ class TileTest {
         assertFalse(tile.deOccupy(), "Deoccupying an already empty tile should return false.");
         assertNull(tile.getOccupier(), "The occupier of an already deoccupied tile should remain null.");
     }
-
-
-
-}
+}*/

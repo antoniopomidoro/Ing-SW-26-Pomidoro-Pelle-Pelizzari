@@ -14,9 +14,22 @@ import it.polimi.ingsw.model.player.*;
 public class CardSet implements ContextualEffect {
     @JsonProperty("food")
     private int food;
+    private int baseSet;
 
     @Override
-    public void executeEffect(Player p, GameState state) {
-        // Skeleton method
+    public boolean onAddedToPlayer(Player p) {
+        baseSet = p.getStats().calculateSet();
+        return true;
+    }
+
+    @Override
+    public boolean executeEffect(Player p, GameState state) {
+        int newSet = p.getStats().calculateSet();
+        if (newSet > baseSet) {
+            p.addFood((newSet - baseSet) * food);
+            baseSet = newSet; // Update baseSet to the new set value
+            return true;
+        }
+        return true;
     }
 }

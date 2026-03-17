@@ -18,11 +18,8 @@ public class EndCardSet implements ContextualEffect {
     private int pp;
 
     @Override
-    public void executeEffect(Player p, GameState state) {
-        int set = Arrays.stream(CharacterEnum.values())
-                .mapToInt(c -> p.getStats().getCharacterCount(c))
-                .min()
-                .orElse(0);
-        p.addPP(set * pp);
+    public boolean executeEffect(Player p, GameState state) {
+        p.addPP(p.getStats().calculateSet() * pp);
+        return true;
     }
 }

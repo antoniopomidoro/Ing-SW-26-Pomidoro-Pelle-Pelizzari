@@ -76,9 +76,7 @@ public class Building extends Card {
      * @param p The player adding the building.
      */
     public void onAddedToPlayer(Player p) {
-        if (triggerPhase == GamePhase.NONE && effect != null) {
-            effect.executeEffect(p, null);
-        }
+        effect.onAddedToPlayer(p);
     }
 
     @Override
@@ -86,6 +84,4 @@ public class Building extends Card {
         return true;
     }
 }
-
-
 

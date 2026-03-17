@@ -30,5 +30,10 @@ import it.polimi.ingsw.model.player.*;
         @JsonSubTypes.Type(value = TotemPlacementBonus.class, name = "TOTEM_PLACEMENT_BONUS")
 })
 public interface ContextualEffect {
-    void executeEffect(Player p, GameState state);
+    default boolean executeEffect(Player p, GameState state){
+        return true;
+    }
+    default boolean onAddedToPlayer(Player p){
+        return true;
+    }
 }
