@@ -10,6 +10,13 @@ The Offer Track is built using tiles **A through G**, which scale depending on t
 * **Tile D:** 3+ players
 * **Tile G:** 4+ players
 * *(All other tiles are always used)*
+* **Tile A:** +3food
+* **Tile B:** 1 bottomPick
+* **Tile C:** 1 topPick
+* **Tile D:** 2 bottomPicks
+* **Tile E:** 1 bottomPick + 1 topPick
+* **Tile F:** 2 topPicks
+* **Tile G:** 2 topPicks + 1 bottomPick
 ## Turn Order Tiles (Tessere Ordine di Turno)
 
 Questa sezione definisce il setup dinamico del tracciato iniziale dell'ordine di turno. La configurazione degli slot e dei relativi effetti cambia in base al numero di giocatori al tavolo.
@@ -17,29 +24,29 @@ Questa sezione definisce il setup dinamico del tracciato iniziale dell'ordine di
 **Regola Globale:** L'ultima tessera del tracciato (`LAST_TILE`) prevede sempre un malus: il giocatore che la occupa deve scegliere se pagare 1 Cibo o 2 Punti Prestigio (PP).
 
 ### Setup per 2 Giocatori
-* **Slot 1** (`START_1`): +1 Cibo
-* **Slot 2** (`LAST_TILE`): Paga 1 Cibo o 2 PP
+* **Slot 1** (`orderBonus1`): +1 Cibo
+* **Slot 2** (`orderBonus2`): Paga 1 Cibo o 2 PP
 
 ### Setup per 3 Giocatori
-* **Slot 1** (`START_1`): +2 Cibo
-* **Slot 2** (`START_2`): Nessun effetto
-* **Slot 3** (`LAST_TILE`): Paga 1 Cibo o 2 PP
+* **Slot 1** (`orderBonus1`): +2 Cibo
+* **Slot 2** (`orderBonus2`): Nessun effetto
+* **Slot 3** (`orderBonus3`): Paga 1 Cibo o 2 PP
 
 ### Setup per 4 Giocatori
-* **Slot 1** (`START_1`): +2 Cibo
-* **Slot 2** (`START_2`): +1 Cibo
-* **Slot 3** (`START_3`): Nessun effetto
-* **Slot 4** (`LAST_TILE`): Paga 1 Cibo o 2 PP
+* **Slot 1** (`orderBonus1`): +2 Cibo
+* **Slot 2** (`orderBonus2`): +1 Cibo
+* **Slot 3** (`orderBonus3`): Nessun effetto
+* **Slot 4** (`orderBonus4`): Paga 1 Cibo o 2 PP
 
 ### Setup per 5 Giocatori
-* **Slot 1** (`START_1`): +3 Cibo
-* **Slot 2** (`START_2`): +1 Cibo
-* **Slot 3** (`START_3`): Nessun effetto
-* **Slot 4** (`START_4`): Nessun effetto
-* **Slot 5** (`LAST_TILE`): Paga 1 Cibo o 2 PP
+* **Slot 1** (`orderBonus1`): +3 Cibo
+* **Slot 2** (`orderBonus2`): +1 Cibo
+* **Slot 3** (`orderBonus3`): Nessun effetto
+* **Slot 4** (`orderBonus4`): Nessun effetto
+* **Slot 5** (`orderBonus5`): Paga 1 Cibo o 2 PP
 
 
-**Note di implementazione per il JSON:** Assicurarsi che gli ID degli slot (`START_1`, `START_2`, ecc.) e della tessera finale (`LAST_TILE`) corrispondano esattamente ai valori dell'`enum TileId` definiti nel Model.
+**Note di implementazione per il JSON:** Ogni order tile deve avere come id ORDER_TILE
 
 ---
 
@@ -120,7 +127,7 @@ The 10 standard Event cards are shuffled into their respective Age decks. The 2 
 
 * **Hunting**
     * **Reward:** The player gains `1 Food`, plus extra Prestige Points (PP) based on the card's Age multiplied by the number of Hunters they own.
-    * *Formula:* `1 Food + (1 PP * Age * #Hunters)`
+    * *Formula:* `(1 Food + (1 PP * Age)) * #Hunters`
 
 * **Shamanic Ritual**
     * **Reward/Penalty:** Players are ranked based on their total Shaman stars. The first place gains PP, the last place loses PP, depending on the card's Age:

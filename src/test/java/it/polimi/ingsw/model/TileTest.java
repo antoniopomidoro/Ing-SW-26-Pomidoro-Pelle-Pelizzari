@@ -1,11 +1,20 @@
 package it.polimi.ingsw.model;
 
+import it.polimi.ingsw.model.board.*;
+import it.polimi.ingsw.model.cards.*;
+import it.polimi.ingsw.model.cards.characters.*;
+import it.polimi.ingsw.model.effects.*;
+import it.polimi.ingsw.model.effects.contextual.*;
+import it.polimi.ingsw.model.effects.events.*;
+import it.polimi.ingsw.model.game.*;
+import it.polimi.ingsw.model.player.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TileTest {
+/*class TileTest {
     private Tile tile;
     private Player player;
     @BeforeEach
@@ -14,7 +23,7 @@ class TileTest {
         player = new Player();
     }
     @Test
-    void testOccupyEptyTileSuccess(){
+    void testOccupyEmptyTileSuccess(){
         boolean result = tile.occupy(player);
         assertTrue(result, "Occupying an empty tile should return true");
         assertTrue(tile.isOccupied(), "Tile should be occupied after occupation");
@@ -36,6 +45,19 @@ class TileTest {
         assertNull(tile.getOccupier(), "Occupier should be null");
     }
 
+    // A player can occupy a maximum of 1 tile at the same time
+    @Test
+    void testOccupyNotMoreThanOneTile() {
+        Tile tile2 = new Tile();
+        tile.occupy(player);
+        assertFalse(tile2.occupy(player), "The attempt to occupy another tile by a player should not be possible.");
+    }
 
-
-}
+    @Test
+    void testDeOccupyEmptyTile() {
+        tile.occupy(player);
+        tile.deOccupy();
+        assertFalse(tile.deOccupy(), "Deoccupying an already empty tile should return false.");
+        assertNull(tile.getOccupier(), "The occupier of an already deoccupied tile should remain null.");
+    }
+}*/

@@ -1,0 +1,10 @@
+[
+  {"tileId":"A","upperPicks":0,"bottomPicks":0,"foodBonus":3,"minPlayers":5},
+  {"tileId":"B","upperPicks":0,"bottomPicks":1,"foodBonus":0,"minPlayers":2},
+  {"tileId":"C","upperPicks":1,"bottomPicks":0,"foodBonus":0,"minPlayers":2},
+  {"tileId":"D","upperPicks":0,"bottomPicks":2,"foodBonus":0,"minPlayers":3},
+  {"tileId":"E","upperPicks":1,"bottomPicks":1,"foodBonus":0,"minPlayers":2},
+  {"tileId":"F","upperPicks":2,"bottomPicks":0,"foodBonus":0,"minPlayers":2},
+  {"tileId":"G","upperPicks":2,"bottomPicks":1,"foodBonus":0,"minPlayers":4}
+]
+

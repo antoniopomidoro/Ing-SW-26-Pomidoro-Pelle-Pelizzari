@@ -1,0 +1,327 @@
+@startuml
+package "Model"{
+    enum CharacterEnum{
+        GATHERER
+        HUNTER
+        SHAMAN
+        INVENTOR
+        ARTIST
+        BUILDER
+    }
+
+    enum GamePhase {
+         START_TURN
+         IN_TURN
+         END_TURN
+         PAINTING_EVENT
+         HUNTER_EVENT
+         SHAMAN_EVENT
+         SUSTAINMENT_EVENT
+         END_GAME
+    }
+
+    enum Age{
+        AGE_1
+        AGE_2
+        AGE_3
+    }
+
+    enum Tool {
+        BREAD
+        STONE
+        BOAT
+        RING
+        ROPE
+        BOWL
+        STICK
+        DOLL
+        HOOK
+        NECKLACE
+    }
+
+    enum TileId {
+        A
+        B
+        C
+        D
+        E
+        F
+        G
+    }
+
+    ' --- STRATEGY INTERFACES ---
+    interface ContextualEffect{
+        +executeEffect(p : Player, state : GameState)
+    }
+
+    interface EventEffect {
+        +executeEffect(players : List<Player>, state : GameState) : boolean
+    }
+
+    ' --- STRATEGY IMPLEMENTATIONS (Examples) ---
+    class GainByCharacter implements ContextualEffect {
+        -type : CharacterEnum
+        -ppGain : int
+        -foodGain : int
+    }
+    class SustainmentBoost implements ContextualEffect {
+        -type : CharacterEnum
+        -gain : int
+    }
+    class EndOfTurnExtraPick implements ContextualEffect {
+        -upperPick : int
+    }
+    class FlatRewardBuilding implements ContextualEffect {
+        -stars : int
+        -protect : int
+        -bonus : int
+    }
+    class InventorPair implements ContextualEffect{
+
+    }
+    class CardSet implements ContextualEffect{
+        -food : int
+    }
+    class EndCardSet implements ContextualEffect{
+        -pp : int
+    }
+    class EndBuilderPpMultiplier implements ContextualEffect{
+        -mult : int
+    }
+
+
+    class Sustenance implements EventEffect{}
+    class Hunting implements EventEffect{}
+    class ShamanicRitual1 implements EventEffect{}
+    class ShamanicRitual2 implements EventEffect{}
+    class ShamanicRitual3 implements EventEffect{}
+    class CavePaintings implements EventEffect{}
+
+    ' --- CORE MODEL ---
+    abstract class Card {
+        -age : Age
+        +getAge() : Age
+        +setAge(age : Age) : boolean
+    }
+
+    abstract class Character extends Card {
+        -id : CharacterEnum
+        -minPlayers : int
+        +getId() : CharacterEnum
+        +setId(id : CharacterEnum) : boolean
+        +getMinPlayers() : int
+        +setMinPlayers(minPlayers : int) : boolean
+        +onAddedToPlayer(p : Player) : void
+    }
+
+    class Artist extends Character {}
+    class Gatherer extends Character {}
+    class Shaman extends Character {
+        -stars : int
+        +getStars() : int
+        +setStars(stars : int) : boolean
+    }
+    class Builder extends Character {
+        -discount : int
+        -pp : int
+        +getDiscount() : int
+        +setDiscount(discount : int) : boolean
+        +getPP() : int
+        +setPP(pp : int) : boolean
+    }
+    class Inventor extends Character {
+        -tool : Tool
+        +getTool() : Tool
+        +setTool(tool : Tool) : boolean
+    }
+    class Hunter0 extends Character {}
+    class Hunter1 extends Character {}
+
+    class Event extends Card {
+        -id : string
+        -effect : EventEffect
+        +getId() : string
+        +setId(id : string) : boolean
+        +triggerEvent(players : List<Player>, state : GameState) : boolean
+    }
+
+    class Building extends Card {
+        -id : string
+        -foodCost : int
+        -pp : int
+        -effect : ContextualEffect
+        -triggerPhase : GamePhase
+        +getId() : string
+        +setId(id : string) : boolean
+        +triggerBuildingEffect(p : Player, state : GameState)
+        +getFoodCost() : int
+        +setFoodCost(cost : int) : boolean
+        +getPP() : int
+        +setPP(pp : int) : boolean
+        +getTriggerPhase() : GamePhase
+        +setTriggerPhase(phase : GamePhase) : boolean
+        +onAddedToPlayer(p : Player) : void
+    }
+
+    class TileSet {
+        -tiles : List<Tile>
+        +getTile(id : TileId) : Tile
+        +getTiles() : List<Tile>
+    }
+
+    class Tile {
+        -tileId : TileId
+        -isOccupied : boolean
+        -occupier : Player
+        -topCards : int
+        -bottomCards : int
+        -minPlayers : int
+        +getId() : TileId
+        +setId(id : TileId) : boolean
+        +isOccupied() : boolean
+        +getOccupier() : Player
+        +getMinPlayers() : int
+        +setMinPlayers(minPlayers : int) : boolean
+        +occupy(p : Player) : boolean
+        +deOccupy() : boolean
+    }
+
+    class OrderTile extends Tile {
+        -food1 : int
+        -food2 : int
+        +OrderTile(playerNumber : int)
+    }
+
+    ' --- OBSERVER / STATS TRACKER ---
+    class PlayerStats {
+        -characterCounts : Map<CharacterEnum, Integer>
+        -buildingDiscount : int
+        -ritualLossMultiplier : int
+        -sustainmentDiscount : int
+        -stars : int
+        -builderPp : int
+        -ritualWinBoost : int
+        -differentToolNumber : int
+        +incrementCharacter(type : CharacterEnum)
+        +getCharacterCount(type : CharacterEnum) : int
+        +addBuildingDiscount(amount : int)
+        +getBuildingDiscount() : int
+        +setRitualLossMultiplier(mult : int)
+        +getRitualLossMultiplier() : int
+        +addSustainmentDiscount(amount : int)
+        +addStars(amount : int)
+        +setBuilderPp(amount : int)
+        +setRitualWinBoost(amount : int)
+        +updateDifferentToolNumber(amount : int)
+    }
+
+    class Player {
+        -id : int
+        -nickname : string
+        -cards : List<Card>
+        -buildings : List<Building>
+        -stats : PlayerStats
+        -food : int
+        -pp : int
+        -isChoosing : boolean
+        +getIsChoosing() : boolean
+        +getId() : int
+        +getFood() : int
+        +getCards() : List<Card>
+        +getBuildings() : List<Building>
+        +getStats() : PlayerStats
+        +addCard(c : Card) : boolean
+        +addBuilding(b : Building) : boolean
+        +addFood(amount : int) : boolean
+        +payFood(amount : int) : boolean
+        +addPP(amount : int) : boolean
+    }
+
+    class GameState {
+        -age : Age
+        -turn : int
+        -phase : GamePhase
+        -players : List<Player>
+        -deck : Deck
+        -board : Board
+        -currentPlayerIndex : int
+        -turnOrder : List<Player>
+        +getAge() : Age
+        +getTurn() : int
+        +getPhase() : GamePhase
+        +getPlayer(index : int) : Player
+        +setAge(age : Age) : boolean
+        +setTurn(turn : int) : boolean
+        +setPhase(phase : GamePhase) : boolean
+        +getCurrentPlayer() : Player
+        +getTurnOrder() : List<Player>
+    }
+
+    class Board {
+        -tiles : TileSet
+        -topCards : List<Card>
+        -bottomCards : List<Card>
+        -topBuildings : List<Building>
+        -bottomBuildings : List<Building>
+        +pickTopCard(index : int) : Card
+        +pickBottomCard(index : int) : Card
+        +pickTopBuilding(index : int) : Building
+        +pickBottomBuilding(index : int) : Building
+        +addTopCard(c : Card) : boolean
+        +addBottomCard(c : Card) : boolean
+        +addTopBuildings(b : List<Building>) : boolean
+    }
+
+    class Deck {
+        -age_1_Cards : List<Card>
+        -age_2_Cards : List<Card>
+        -age_3_Cards : List<Card>
+        -age_1_Buildings : List<Building>
+        -age_2_Buildings : List<Building>
+        -age_3_Buildings : List<Building>
+        +shuffle(age : Age) : boolean
+        +popCard(age : Age) : Card
+        +popBuilding(age : Age) : Building
+    }
+
+    ' --- RELATIONS IN MODEL ---
+    GameState "1" *-- "1" Board
+    GameState "1" *-- "1" Deck
+    GameState "1" *-- "1..5" Player
+    Board "1" *-- "1" TileSet
+    TileSet "1" *-- "*" Tile
+    Player "1" *-- "1" PlayerStats : tracks
+    Player "1" o-- "*" Card
+    Player "1" o-- "*" Building
+    Tile "*" o-- "0..1" Player : occupier
+    Deck "1" *-- "*" Card
+    Deck "1" *-- "*" Building
+    Board "1" o-- "*" Card : top/bottom
+    Board "1" o-- "*" Building : top/bottom
+
+    Building "1" *-- "1" ContextualEffect : strategy
+    Event "1" *-- "1" EventEffect : strategy
+}
+
+package "Controller"{
+    class JsonLoader {
+        +loadCards() : List<Card>
+        +loadBuildings() : List<Building>
+    }
+
+    class GameController {
+        -state : GameState
+        -jsonLoader : JsonLoader
+        +createGame(playerCount : int)
+        +firstOrder()
+        +triggerPhase()
+        +nextPhase()
+        +nextTurn()
+        +nextAge()
+    }
+
+    ' --- RELATIONS IN CONTROLLER ---
+    GameController --> GameState : updates
+    GameController --> JsonLoader : uses
+}
+@enduml
