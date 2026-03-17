@@ -17,6 +17,7 @@ public class EndBuilderPpMultiplier implements ContextualEffect {
 
     @Override
     public boolean executeEffect(Player p, GameState state) {
-        return false;
+        p.getStats().addBuilderPp(mult * p.getStats().getBuilderPp());
+        return true;
     }
 }

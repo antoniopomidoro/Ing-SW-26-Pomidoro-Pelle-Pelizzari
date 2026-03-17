@@ -44,12 +44,12 @@ This document lists the classes and their respective methods that currently act 
 
 Several contextual effects currently have skeleton `executeEffect` methods that need their logic implemented according to the game rules:
 * [x] `CardSet.java` -> `executeEffect(Player p, GameState state)`
-* [ ] `EndBuilderPpMultiplier.java` -> `executeEffect(Player p, GameState state)`
+* [x] `EndBuilderPpMultiplier.java` -> `executeEffect(Player p, GameState state)`
 * [x] `EndCardSet.java` -> `executeEffect(Player p, GameState state)`
-* [ ] `InventorPair.java` -> `executeEffect(Player p, GameState state)`
-* [ ] `SustainmentBoost.java` -> `executeEffect(Player p, GameState state)`
-* [ ] `EndOfTurnExtraPick.java` -> `executeEffect(Player p, GameState state)`
-* [ ] *(Check any other newly created effects in this package, such as `AddStars`, `ShamanicWinBoost`, `TotemPlacementBonus`, `ShamanicLossProtection` as they are likely skeletons too).*
+* [x] `InventorPair.java` -> `executeEffect(Player p, GameState state)`
+* [x] `SustainmentBoost.java` -> `executeEffect(Player p, GameState state)`
+* [x] `EndOfTurnExtraPick.java` -> `executeEffect(Player p, GameState state)`
+* [x] *(Check any other newly created effects in this package, such as `AddStars`, `ShamanicWinBoost`, `TotemPlacementBonus`, `ShamanicLossProtection` as they are likely skeletons too).*
 
 ## Package: `it.polimi.ingsw.controller`
 

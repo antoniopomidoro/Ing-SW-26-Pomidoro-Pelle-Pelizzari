@@ -14,7 +14,7 @@ public class InventorPair implements ContextualEffect {
 
     @Override
     public boolean executeEffect(Player p, GameState state) {
-        // Skeleton method
-        return false;
+        p.addFood(3);
+        return true;
     }
 }

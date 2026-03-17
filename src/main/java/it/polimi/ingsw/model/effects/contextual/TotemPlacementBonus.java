@@ -10,7 +10,7 @@ public class TotemPlacementBonus implements ContextualEffect {
 
     @Override
     public boolean executeEffect(Player p, GameState state) {
-        //TODO: ADD IMPLEMENTATION
-        return false;
+        p.addFood(1);
+        return true;
     }
 }
