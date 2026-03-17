@@ -24,18 +24,20 @@ public class Decks {
         }
         
     }
-    //the shuffle methond remove the final methods then shuffle all non-empty decks then add final events
+    //the shuffle method remove the final methods then shuffle all non-empty decks then add final events
     public void shuffle() {
         ArrayList<Card> LastEvents = new ArrayList<>();
         Event e;
-        int counter =0;
-        for(Card c : cards.getLast()){
+        Card c;
+        for(int counter =0; counter<cards.getLast().size() ;counter++){
+            c = cards.getLast().get(counter);
             if(c.isEvent()){
                 e = (Event)c;
                 if(e.isFinal()){
                     LastEvents.add(cards.getLast().remove(counter));
+                    counter--;
                 }
-        }counter++;}
+        }}
         for(ArrayList<Card> a:cards){
             if(!a.isEmpty()){
                 Collections.shuffle(a);
@@ -45,8 +47,8 @@ public class Decks {
         if(!LastEvents.isEmpty()){
             Collections.shuffle(LastEvents);
         }
-        for(Card c : LastEvents){
-            cards.getLast().addLast(c);
+        for(Card card : LastEvents){
+            cards.getLast().addLast(card);
         }
     }
 
