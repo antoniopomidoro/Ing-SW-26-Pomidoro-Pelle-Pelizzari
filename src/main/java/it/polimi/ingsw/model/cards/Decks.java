@@ -1,26 +1,28 @@
 package it.polimi.ingsw.model.cards;
 import java.util.*;
+import it.polimi.ingsw.model.cards.Card;
+import it.polimi.ingsw.model.cards.Building;
 import it.polimi.ingsw.model.game.Age;
 
-import javax.smartcardio.Card;
 
 public class Decks {
-    private final Map<Age,List<Card>> buildings;
-    private final Map<Age,List<Card>> cards;
+    private  Map<Age,List<Card>> buildings;
+    private  Map<Age,List<Card>> cards;
     private Optional<Card> card;
-    //the constructor initialize 2 list that contains 3 lists divided by era of cards and buildings
+    //the constructor initialize 2 enum map that contains lists divided by era of cards and buildings
     //then for each card and buildin in the lists passed in input creates the ages decks using the function addToDeck of card
     //using visitors pattern
-    public Decks(List<Card> cards, List<Building> buildings) throws buildingInDeckEx {
+    public Decks(List<Card> cards, List<Building> buildings){
         this.cards = new EnumMap<>(Age.class);
         this.buildings= new EnumMap<>(Age.class);
         for(Age a:Age.values()){
             this.cards.put(a,new ArrayList<>());
             this.buildings.put(a,new ArrayList<>());
         }
-        for(Card c:cards){
+        for(Card c :cards){
             c.addToDeck(this.cards);}
-        for(Building b:buildings){
+
+        for(Building b : buildings){
             b.addToDeck(this.buildings);
         }
         
@@ -33,13 +35,13 @@ public class Decks {
     }
 
 
-    //return the first card on the age deck if the deck is empty throws an exception if the last deck is empty throws endgame exception
+    //return the first card on the age deck if the deck is empty send an empty optional
     public Optional<Card> popCard(Age a){
-        if(cards.get(a).isEmpty() && a.getValue() != card.get().getAge().getValue()){
+        if(cards.get(a).isEmpty() && a.getValue() != Age.values()[a.ordinal()+1].getValue()){
             return Optional.empty();
-    }else if(cards.get(a).isEmpty() && a.getValue() == card.get().getAge().getValue()){
+    }else if(cards.get(a).isEmpty() && a.getValue() == Age.values()[a.ordinal()+1].getValue()){
             //this else if statement hide the Age_3_final enum to external classes
-            if(){
+            if(cards.get(Age.values()[a.ordinal()+1]).isEmpty()){
                 return Optional.empty();
             }else{
                 card = Optional.of(cards.get(a.ordinal()+1).removeLast());
@@ -58,6 +60,4 @@ public class Decks {
     }
 
 
-    public static class buildingInDeckEx extends Exception {
     }
-}
