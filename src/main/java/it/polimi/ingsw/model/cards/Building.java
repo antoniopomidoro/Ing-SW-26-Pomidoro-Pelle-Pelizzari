@@ -79,9 +79,5 @@ public class Building extends Card {
         effect.onAddedToPlayer(p);
     }
 
-    @Override
-    public boolean isBuilding() {
-        return true;
-    }
 }
 

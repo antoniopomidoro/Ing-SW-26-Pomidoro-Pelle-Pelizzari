@@ -1,5 +1,7 @@
 package it.polimi.ingsw.model.cards;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.model.board.*;
 import it.polimi.ingsw.model.cards.*;
 import it.polimi.ingsw.model.cards.characters.*;
@@ -10,8 +12,9 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
-
+import java.util.Map;
 
 
 /**
@@ -19,6 +22,16 @@ import java.util.List;
  * This class serves as a base for all specific card types in the game.
  * Concrete subclasses of this class are intended to be created from JSON data.
  */
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "cardType"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Character.class, name = "CHARACTER"),
+        @JsonSubTypes.Type(value = Event.class, name = "EVENT"),
+        @JsonSubTypes.Type(value = Building.class, name = "BUILDING")
+})
 public abstract class Card {
     private Age age;
 
@@ -62,27 +75,20 @@ public abstract class Card {
         return true;
     }
     //method that says if the selected card is a building
-    public boolean isBuilding(){
-        return false;
-    }
-
-    public boolean isEvent(){return false;}
-//method that add the card to a list
-    public boolean addToDeck(ArrayList<ArrayList<Card>> deck) {
-
-        try{
-            deck.get(age.ordinal()).add(this);
-            return true;
-        }catch(IndexOutOfBoundsException e){
-            for(int i = deck.size();i<=age.ordinal();i++){
-                deck.add(new ArrayList<>());
-                }
-            deck.get(age.ordinal()).add(this);
-            return true;
-        }catch(Exception other){
-            other.printStackTrace();
+    //method that add the card to a list
+    public boolean addToDeck(EnumMap<Age,List<Card>> deck){
+        if(this.age== null) {
             return false;
         }
+        else{deck.get(this.age).add(this);
+            return true;}
 
+        }
+    public boolean isBuyable() {
+        return true;
+    }
+    public boolean addToDeck(Map<Age,List<Card>> deck) {
+        return false;
     }
 }
+

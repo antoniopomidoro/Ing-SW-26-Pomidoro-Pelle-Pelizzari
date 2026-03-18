@@ -1,0 +1,121 @@
+[
+  {"cardType":"CHARACTER","characterType":"ARTIST","age":"AGE_1","id":"ARTIST","minPlayers":2},
+  {"cardType":"CHARACTER","characterType":"ARTIST","age":"AGE_1","id":"ARTIST","minPlayers":2},
+  {"cardType":"CHARACTER","characterType":"ARTIST","age":"AGE_1","id":"ARTIST","minPlayers":2},
+  {"cardType":"CHARACTER","characterType":"ARTIST","age":"AGE_1","id":"ARTIST","minPlayers":3},
+  {"cardType":"CHARACTER","characterType":"ARTIST","age":"AGE_1","id":"ARTIST","minPlayers":4},
+
+  {"cardType":"CHARACTER","characterType":"SHAMAN","age":"AGE_1","id":"SHAMAN","minPlayers":2,"stars":2},
+  {"cardType":"CHARACTER","characterType":"SHAMAN","age":"AGE_1","id":"SHAMAN","minPlayers":5,"stars":2},
+  {"cardType":"CHARACTER","characterType":"SHAMAN","age":"AGE_1","id":"SHAMAN","minPlayers":2,"stars":1},
+  {"cardType":"CHARACTER","characterType":"SHAMAN","age":"AGE_1","id":"SHAMAN","minPlayers":4,"stars":1},
+
+  {"cardType":"CHARACTER","characterType":"BUILDER","age":"AGE_1","id":"BUILDER","minPlayers":2,"discount":1,"pp":2},
+  {"cardType":"CHARACTER","characterType":"BUILDER","age":"AGE_1","id":"BUILDER","minPlayers":2,"discount":1,"pp":3},
+  {"cardType":"CHARACTER","characterType":"BUILDER","age":"AGE_1","id":"BUILDER","minPlayers":5,"discount":2,"pp":1},
+  {"cardType":"CHARACTER","characterType":"BUILDER","age":"AGE_1","id":"BUILDER","minPlayers":2,"discount":2,"pp":0},
+
+  {"cardType":"CHARACTER","characterType":"GATHERER","age":"AGE_1","id":"GATHERER","minPlayers":2,"sustDisc":1},
+  {"cardType":"CHARACTER","characterType":"GATHERER","age":"AGE_1","id":"GATHERER","minPlayers":2,"sustDisc":1},
+  {"cardType":"CHARACTER","characterType":"GATHERER","age":"AGE_1","id":"GATHERER","minPlayers":3,"sustDisc":1},
+  {"cardType":"CHARACTER","characterType":"GATHERER","age":"AGE_1","id":"GATHERER","minPlayers":5,"sustDisc":1},
+
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_1","id":"INVENTOR","minPlayers":2,"tool":"BREAD"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_1","id":"INVENTOR","minPlayers":2,"tool":"STONE"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_1","id":"INVENTOR","minPlayers":2,"tool":"BOAT"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_1","id":"INVENTOR","minPlayers":2,"tool":"RING"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_1","id":"INVENTOR","minPlayers":4,"tool":"ROPE"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_1","id":"INVENTOR","minPlayers":4,"tool":"BOWL"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_1","id":"INVENTOR","minPlayers":4,"tool":"STICK"},
+
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_1","id":"HUNTER","minPlayers":2,"hasFood":true},
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_1","id":"HUNTER","minPlayers":2,"hasFood":true},
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_1","id":"HUNTER","minPlayers":2,"hasFood":false},
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_1","id":"HUNTER","minPlayers":3,"hasFood":false},
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_1","id":"HUNTER","minPlayers":3,"hasFood":false},
+
+  {"cardType":"CHARACTER","characterType":"ARTIST","age":"AGE_2","id":"ARTIST","minPlayers":2},
+  {"cardType":"CHARACTER","characterType":"ARTIST","age":"AGE_2","id":"ARTIST","minPlayers":2},
+  {"cardType":"CHARACTER","characterType":"ARTIST","age":"AGE_2","id":"ARTIST","minPlayers":2},
+  {"cardType":"CHARACTER","characterType":"ARTIST","age":"AGE_2","id":"ARTIST","minPlayers":3},
+
+  {"cardType":"CHARACTER","characterType":"SHAMAN","age":"AGE_2","id":"SHAMAN","minPlayers":2,"stars":2},
+  {"cardType":"CHARACTER","characterType":"SHAMAN","age":"AGE_2","id":"SHAMAN","minPlayers":2,"stars":2},
+  {"cardType":"CHARACTER","characterType":"SHAMAN","age":"AGE_2","id":"SHAMAN","minPlayers":5,"stars":2},
+  {"cardType":"CHARACTER","characterType":"SHAMAN","age":"AGE_2","id":"SHAMAN","minPlayers":5,"stars":1},
+
+  {"cardType":"CHARACTER","characterType":"BUILDER","age":"AGE_2","id":"BUILDER","minPlayers":3,"discount":1,"pp":2},
+  {"cardType":"CHARACTER","characterType":"BUILDER","age":"AGE_2","id":"BUILDER","minPlayers":2,"discount":1,"pp":4},
+  {"cardType":"CHARACTER","characterType":"BUILDER","age":"AGE_2","id":"BUILDER","minPlayers":2,"discount":2,"pp":3},
+  {"cardType":"CHARACTER","characterType":"BUILDER","age":"AGE_2","id":"BUILDER","minPlayers":2,"discount":2,"pp":1},
+
+  {"cardType":"CHARACTER","characterType":"GATHERER","age":"AGE_2","id":"GATHERER","minPlayers":2,"sustDisc":1},
+  {"cardType":"CHARACTER","characterType":"GATHERER","age":"AGE_2","id":"GATHERER","minPlayers":3,"sustDisc":1},
+  {"cardType":"CHARACTER","characterType":"GATHERER","age":"AGE_2","id":"GATHERER","minPlayers":4,"sustDisc":1},
+  {"cardType":"CHARACTER","characterType":"GATHERER","age":"AGE_2","id":"GATHERER","minPlayers":5,"sustDisc":1},
+
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_2","id":"INVENTOR","minPlayers":2,"tool":"BOWL"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_2","id":"INVENTOR","minPlayers":2,"tool":"DOLL"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_2","id":"INVENTOR","minPlayers":2,"tool":"RING"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_2","id":"INVENTOR","minPlayers":2,"tool":"STICK"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_2","id":"INVENTOR","minPlayers":2,"tool":"ROPE"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_2","id":"INVENTOR","minPlayers":4,"tool":"HOOK"},
+
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_2","id":"HUNTER","minPlayers":2,"hasFood":true},
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_2","id":"HUNTER","minPlayers":3,"hasFood":true},
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_2","id":"HUNTER","minPlayers":4,"hasFood":true},
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_2","id":"HUNTER","minPlayers":2,"hasFood":false},
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_2","id":"HUNTER","minPlayers":2,"hasFood":false},
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_2","id":"HUNTER","minPlayers":5,"hasFood":false},
+
+  {"cardType":"CHARACTER","characterType":"ARTIST","age":"AGE_3","id":"ARTIST","minPlayers":2},
+  {"cardType":"CHARACTER","characterType":"ARTIST","age":"AGE_3","id":"ARTIST","minPlayers":2},
+  {"cardType":"CHARACTER","characterType":"ARTIST","age":"AGE_3","id":"ARTIST","minPlayers":2},
+  {"cardType":"CHARACTER","characterType":"ARTIST","age":"AGE_3","id":"ARTIST","minPlayers":5},
+
+  {"cardType":"CHARACTER","characterType":"SHAMAN","age":"AGE_3","id":"SHAMAN","minPlayers":2,"stars":3},
+  {"cardType":"CHARACTER","characterType":"SHAMAN","age":"AGE_3","id":"SHAMAN","minPlayers":2,"stars":3},
+  {"cardType":"CHARACTER","characterType":"SHAMAN","age":"AGE_3","id":"SHAMAN","minPlayers":2,"stars":2},
+  {"cardType":"CHARACTER","characterType":"SHAMAN","age":"AGE_3","id":"SHAMAN","minPlayers":3,"stars":2},
+  {"cardType":"CHARACTER","characterType":"SHAMAN","age":"AGE_3","id":"SHAMAN","minPlayers":4,"stars":2},
+
+  {"cardType":"CHARACTER","characterType":"BUILDER","age":"AGE_3","id":"BUILDER","minPlayers":5,"discount":1,"pp":4},
+  {"cardType":"CHARACTER","characterType":"BUILDER","age":"AGE_3","id":"BUILDER","minPlayers":2,"discount":1,"pp":5},
+  {"cardType":"CHARACTER","characterType":"BUILDER","age":"AGE_3","id":"BUILDER","minPlayers":2,"discount":2,"pp":3},
+  {"cardType":"CHARACTER","characterType":"BUILDER","age":"AGE_3","id":"BUILDER","minPlayers":2,"discount":2,"pp":2},
+
+  {"cardType":"CHARACTER","characterType":"GATHERER","age":"AGE_3","id":"GATHERER","minPlayers":2,"sustDisc":1},
+  {"cardType":"CHARACTER","characterType":"GATHERER","age":"AGE_3","id":"GATHERER","minPlayers":4,"sustDisc":1},
+  {"cardType":"CHARACTER","characterType":"GATHERER","age":"AGE_3","id":"GATHERER","minPlayers":5,"sustDisc":1},
+
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_3","id":"INVENTOR","minPlayers":2,"tool":"BREAD"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_3","id":"INVENTOR","minPlayers":2,"tool":"HOOK"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_3","id":"INVENTOR","minPlayers":2,"tool":"DOLL"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_3","id":"INVENTOR","minPlayers":2,"tool":"NECKLACE"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_3","id":"INVENTOR","minPlayers":3,"tool":"BOAT"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_3","id":"INVENTOR","minPlayers":3,"tool":"STONE"},
+  {"cardType":"CHARACTER","characterType":"INVENTOR","age":"AGE_3","id":"INVENTOR","minPlayers":4,"tool":"NECKLACE"},
+
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_3","id":"HUNTER","minPlayers":2,"hasFood":true},
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_3","id":"HUNTER","minPlayers":5,"hasFood":true},
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_3","id":"HUNTER","minPlayers":2,"hasFood":false},
+  {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_3","id":"HUNTER","minPlayers":2,"hasFood":false},
+
+  {"cardType":"EVENT","age":"AGE_1","id":"SUSTENANCE_A1",      "phase":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"}},
+  {"cardType":"EVENT","age":"AGE_1","id":"HUNTING_A1",          "phase":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"}},
+  {"cardType":"EVENT","age":"AGE_1","id":"CAVE_PAINTINGS_A1",   "phase":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"}},
+  {"cardType":"EVENT","age":"AGE_1","id":"SHAMANIC_RITUAL_A1",  "phase":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":5,"ppLoss":3}},
+
+  {"cardType":"EVENT","age":"AGE_2","id":"SUSTENANCE_A2",      "phase":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"}},
+  {"cardType":"EVENT","age":"AGE_2","id":"HUNTING_A2",          "phase":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"}},
+  {"cardType":"EVENT","age":"AGE_2","id":"CAVE_PAINTINGS_A2",   "phase":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"}},
+  {"cardType":"EVENT","age":"AGE_2","id":"SHAMANIC_RITUAL_A2",  "phase":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":10,"ppLoss":5}},
+
+  {"cardType":"EVENT","age":"AGE_3","id":"HUNTING_A3",          "phase":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"}},
+  {"cardType":"EVENT","age":"AGE_3","id":"CAVE_PAINTINGS_A3",   "phase":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"}},
+
+  {"cardType":"EVENT","age":"AGE_3_FINAL","id":"FINAL_SHAMANIC_RITUAL","phase":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":15,"ppLoss":7}},
+  {"cardType":"EVENT","age":"AGE_3_FINAL","id":"FINAL_SUSTENANCE",     "phase":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"}}
+]
+
+

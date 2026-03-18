@@ -13,7 +13,8 @@ import it.polimi.ingsw.model.player.*;
 public enum Age {
     AGE_1(1),
     AGE_2(2),
-    AGE_3(3);
+    AGE_3(3),
+    AGE_3_FINAL(3);
 
     // Il campo immutabile che contiene il vero valore numerico
     private final int numericValue;

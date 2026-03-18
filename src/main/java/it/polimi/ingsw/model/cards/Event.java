@@ -14,7 +14,6 @@ import java.util.List;
 public class Event extends Card {
     private String id;
     private EventEffect effect;
-    private boolean isFinal;
     private GamePhase phase;
     private int resolutionPriority;
 
@@ -58,10 +57,10 @@ public class Event extends Card {
         }
         return false;
     }
-    public boolean isFinal(){
-        return isFinal;
+    @Override
+    public boolean isBuyable{
+        return false;
     }
 
 
-    public boolean isEvent(){return true;}
 }

@@ -7,8 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.model.board.OrderTile;
 import it.polimi.ingsw.model.board.Tile;
 import it.polimi.ingsw.model.cards.*;
-import it.polimi.ingsw.model.cards.Character;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -19,20 +17,16 @@ import java.util.List;
  * <p>
  * JSON files are expected at:
  * <ul>
- * <li>{@code /json/characters.json} – array of {@link Character} (polymorphic
- * via {@code characterType})</li>
- * <li>{@code /json/events.json} – array of {@link Event} (effect polymorphic
- * via {@code effectType})</li>
- * <li>{@code /json/buildings.json} – array of {@link Building} (effect
- * polymorphic via {@code effectType})</li>
+ * <li>{@code /json/cards.json} – array of {@link Card} (polymorphic
+ * via {@code cardType}; Character uses {@code characterType})</li>
+ * <li>{@code /json/buildings.json} – array of {@link Building}</li>
  * <li>{@code /json/tiles.json} – array of {@link Tile} (polymorphic via
  * {@code tileType})</li>
  * </ul>
  */
 public class JsonFactory {
 
-    private static final String CHARACTERS_PATH = "/json/characters.json";
-    private static final String EVENTS_PATH = "/json/events.json";
+    private static final String CARDS_PATH = "/json/cards.json";
     private static final String BUILDINGS_PATH = "/json/buildings.json";
     private static final String TILES_PATH = "/json/tiles.json";
     private static final String ORDER_TILES_PATH = "/json/order_tiles.json";
@@ -41,8 +35,7 @@ public class JsonFactory {
     private final ObjectMapper mapper;
 
     // Cached data lists (formerly in JsonFactory)
-    private List<Character> characters;
-    private List<Event> events;
+    private List<Card> cards;
     private List<Building> buildings;
     private List<Tile> tiles;
     private List<OrderTile> orderTiles;
@@ -64,22 +57,17 @@ public class JsonFactory {
      * @throws IOException if any JSON file cannot be read or parsed.
      */
     public void loadAllData() throws IOException {
-        this.characters = loadCharacters();
-        this.events     = loadEvents();
-        this.buildings  = loadBuildings();
-        this.tiles      = loadTiles();
+        this.cards     = loadCards();
+        this.buildings = loadBuildings();
+        this.tiles     = loadTiles();
         this.orderTiles = loadOrderTiles();
         this.config     = loadConfig();
     }
 
     // ─── Getters for cached data ───────────────────────────────────────
 
-    public List<Character> getCharacters() {
-        return characters;
-    }
-
-    public List<Event> getEvents() {
-        return events;
+    public List<Card> getCards() {
+        return cards;
     }
 
     public List<Building> getBuildings() {
@@ -101,40 +89,24 @@ public class JsonFactory {
     // ─── Individual Loaders ────────────────────────────────────────────
 
     /**
-     * Loads all Character cards from {@code characters.json}.
-     * Each Character is polymorphically resolved via the {@code "characterType"}
-     * discriminator (Artist, Builder, Gatherer, Hunter, Inventor, Shaman).
+     * Loads all cards from {@code cards.json}.
+     * Each Card is polymorphically resolved via the {@code "cardType"}
+     * discriminator (Character, Event). Characters then use
+     * {@code "characterType"} for their own subtype.
      *
-     * @return a list of Character cards.
+     * @return a list of Card instances.
      * @throws IOException if the JSON file cannot be read or parsed.
      */
-    public List<Character> loadCharacters() throws IOException {
-        try (InputStream is = getResource(CHARACTERS_PATH)) {
-            return mapper.readValue(is, new TypeReference<List<Character>>() {});
+    public List<Card> loadCards() throws IOException {
+        try (InputStream is = getResource(CARDS_PATH)) {
+            return mapper.readValue(is, new TypeReference<List<Card>>() {});
         }
     }
 
     /**
-     * Loads all Event cards from {@code events.json}.
-     * Each Event's {@code effect} field is polymorphically resolved via
-     * the {@code "effectType"} discriminator on
-     * {@link it.polimi.ingsw.model.effects.EventEffect}.
-     * Events with {@code isFinal == true} are the final events (placed at the
-     * bottom of Age 3 deck).
+     * Loads all buildings from {@code buildings.json}.
      *
-     * @return a list of Event cards.
-     * @throws IOException if the JSON file cannot be read or parsed.
-     */
-    public List<Event> loadEvents() throws IOException {
-        try (InputStream is = getResource(EVENTS_PATH)) {
-            return mapper.readValue(is, new TypeReference<List<Event>>() {});
-        }
-    }
-
-    /**
-     * Loads all Building cards from {@code buildings.json}.
-     *
-     * @return a list of Building cards.
+     * @return a list of Building instances.
      * @throws IOException if the JSON file cannot be read or parsed.
      */
     public List<Building> loadBuildings() throws IOException {

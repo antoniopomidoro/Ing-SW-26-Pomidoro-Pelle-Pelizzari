@@ -18,7 +18,7 @@ public class SustainmentBoost implements ContextualEffect {
     private int gain;
 
     @Override
-    public boolean executeEffect(Player p, GameState state) {
+    public boolean onAddedToPlayer(Player p) {
 
         p.getStats().addSustainmentBoost(type, gain);
         return true;

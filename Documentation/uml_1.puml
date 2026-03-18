@@ -1,327 +1,523 @@
 @startuml
-package "Model"{
-    enum CharacterEnum{
-        GATHERER
-        HUNTER
-        SHAMAN
-        INVENTOR
-        ARTIST
-        BUILDER
-    }
 
-    enum GamePhase {
-         START_TURN
-         IN_TURN
-         END_TURN
-         PAINTING_EVENT
-         HUNTER_EVENT
-         SHAMAN_EVENT
-         SUSTAINMENT_EVENT
-         END_GAME
-    }
+package "controller" {
+  class GameConfig {
+    -gameMaxPlayers : int
+    -gameMinPlayers : int
+    -buildingPerPlayer : int[][]
+    -startingFood : List<Integer>
+    +GameConfig()
+    +getBuildingsCount(playerCount : int, age : int) : int
+    +getBuildingPerPlayer() : int[][]
+    +getStartingFood() : List<Integer>
+    +getGameMaxPlayers() : int
+    +getGameMinPlayers() : int
+  }
 
-    enum Age{
-        AGE_1
-        AGE_2
-        AGE_3
-    }
-
-    enum Tool {
-        BREAD
-        STONE
-        BOAT
-        RING
-        ROPE
-        BOWL
-        STICK
-        DOLL
-        HOOK
-        NECKLACE
-    }
-
-    enum TileId {
-        A
-        B
-        C
-        D
-        E
-        F
-        G
-    }
-
-    ' --- STRATEGY INTERFACES ---
-    interface ContextualEffect{
-        +executeEffect(p : Player, state : GameState)
-    }
-
-    interface EventEffect {
-        +executeEffect(players : List<Player>, state : GameState) : boolean
-    }
-
-    ' --- STRATEGY IMPLEMENTATIONS (Examples) ---
-    class GainByCharacter implements ContextualEffect {
-        -type : CharacterEnum
-        -ppGain : int
-        -foodGain : int
-    }
-    class SustainmentBoost implements ContextualEffect {
-        -type : CharacterEnum
-        -gain : int
-    }
-    class EndOfTurnExtraPick implements ContextualEffect {
-        -upperPick : int
-    }
-    class FlatRewardBuilding implements ContextualEffect {
-        -stars : int
-        -protect : int
-        -bonus : int
-    }
-    class InventorPair implements ContextualEffect{
-
-    }
-    class CardSet implements ContextualEffect{
-        -food : int
-    }
-    class EndCardSet implements ContextualEffect{
-        -pp : int
-    }
-    class EndBuilderPpMultiplier implements ContextualEffect{
-        -mult : int
-    }
-
-
-    class Sustenance implements EventEffect{}
-    class Hunting implements EventEffect{}
-    class ShamanicRitual1 implements EventEffect{}
-    class ShamanicRitual2 implements EventEffect{}
-    class ShamanicRitual3 implements EventEffect{}
-    class CavePaintings implements EventEffect{}
-
-    ' --- CORE MODEL ---
-    abstract class Card {
-        -age : Age
-        +getAge() : Age
-        +setAge(age : Age) : boolean
-    }
-
-    abstract class Character extends Card {
-        -id : CharacterEnum
-        -minPlayers : int
-        +getId() : CharacterEnum
-        +setId(id : CharacterEnum) : boolean
-        +getMinPlayers() : int
-        +setMinPlayers(minPlayers : int) : boolean
-        +onAddedToPlayer(p : Player) : void
-    }
-
-    class Artist extends Character {}
-    class Gatherer extends Character {}
-    class Shaman extends Character {
-        -stars : int
-        +getStars() : int
-        +setStars(stars : int) : boolean
-    }
-    class Builder extends Character {
-        -discount : int
-        -pp : int
-        +getDiscount() : int
-        +setDiscount(discount : int) : boolean
-        +getPP() : int
-        +setPP(pp : int) : boolean
-    }
-    class Inventor extends Character {
-        -tool : Tool
-        +getTool() : Tool
-        +setTool(tool : Tool) : boolean
-    }
-    class Hunter0 extends Character {}
-    class Hunter1 extends Character {}
-
-    class Event extends Card {
-        -id : string
-        -effect : EventEffect
-        +getId() : string
-        +setId(id : string) : boolean
-        +triggerEvent(players : List<Player>, state : GameState) : boolean
-    }
-
-    class Building extends Card {
-        -id : string
-        -foodCost : int
-        -pp : int
-        -effect : ContextualEffect
-        -triggerPhase : GamePhase
-        +getId() : string
-        +setId(id : string) : boolean
-        +triggerBuildingEffect(p : Player, state : GameState)
-        +getFoodCost() : int
-        +setFoodCost(cost : int) : boolean
-        +getPP() : int
-        +setPP(pp : int) : boolean
-        +getTriggerPhase() : GamePhase
-        +setTriggerPhase(phase : GamePhase) : boolean
-        +onAddedToPlayer(p : Player) : void
-    }
-
-    class TileSet {
-        -tiles : List<Tile>
-        +getTile(id : TileId) : Tile
-        +getTiles() : List<Tile>
-    }
-
-    class Tile {
-        -tileId : TileId
-        -isOccupied : boolean
-        -occupier : Player
-        -topCards : int
-        -bottomCards : int
-        -minPlayers : int
-        +getId() : TileId
-        +setId(id : TileId) : boolean
-        +isOccupied() : boolean
-        +getOccupier() : Player
-        +getMinPlayers() : int
-        +setMinPlayers(minPlayers : int) : boolean
-        +occupy(p : Player) : boolean
-        +deOccupy() : boolean
-    }
-
-    class OrderTile extends Tile {
-        -food1 : int
-        -food2 : int
-        +OrderTile(playerNumber : int)
-    }
-
-    ' --- OBSERVER / STATS TRACKER ---
-    class PlayerStats {
-        -characterCounts : Map<CharacterEnum, Integer>
-        -buildingDiscount : int
-        -ritualLossMultiplier : int
-        -sustainmentDiscount : int
-        -stars : int
-        -builderPp : int
-        -ritualWinBoost : int
-        -differentToolNumber : int
-        +incrementCharacter(type : CharacterEnum)
-        +getCharacterCount(type : CharacterEnum) : int
-        +addBuildingDiscount(amount : int)
-        +getBuildingDiscount() : int
-        +setRitualLossMultiplier(mult : int)
-        +getRitualLossMultiplier() : int
-        +addSustainmentDiscount(amount : int)
-        +addStars(amount : int)
-        +setBuilderPp(amount : int)
-        +setRitualWinBoost(amount : int)
-        +updateDifferentToolNumber(amount : int)
-    }
-
-    class Player {
-        -id : int
-        -nickname : string
-        -cards : List<Card>
-        -buildings : List<Building>
-        -stats : PlayerStats
-        -food : int
-        -pp : int
-        -isChoosing : boolean
-        +getIsChoosing() : boolean
-        +getId() : int
-        +getFood() : int
-        +getCards() : List<Card>
-        +getBuildings() : List<Building>
-        +getStats() : PlayerStats
-        +addCard(c : Card) : boolean
-        +addBuilding(b : Building) : boolean
-        +addFood(amount : int) : boolean
-        +payFood(amount : int) : boolean
-        +addPP(amount : int) : boolean
-    }
-
-    class GameState {
-        -age : Age
-        -turn : int
-        -phase : GamePhase
-        -players : List<Player>
-        -deck : Deck
-        -board : Board
-        -currentPlayerIndex : int
-        -turnOrder : List<Player>
-        +getAge() : Age
-        +getTurn() : int
-        +getPhase() : GamePhase
-        +getPlayer(index : int) : Player
-        +setAge(age : Age) : boolean
-        +setTurn(turn : int) : boolean
-        +setPhase(phase : GamePhase) : boolean
-        +getCurrentPlayer() : Player
-        +getTurnOrder() : List<Player>
-    }
-
-    class Board {
-        -tiles : TileSet
-        -topCards : List<Card>
-        -bottomCards : List<Card>
-        -topBuildings : List<Building>
-        -bottomBuildings : List<Building>
-        +pickTopCard(index : int) : Card
-        +pickBottomCard(index : int) : Card
-        +pickTopBuilding(index : int) : Building
-        +pickBottomBuilding(index : int) : Building
-        +addTopCard(c : Card) : boolean
-        +addBottomCard(c : Card) : boolean
-        +addTopBuildings(b : List<Building>) : boolean
-    }
-
-    class Deck {
-        -age_1_Cards : List<Card>
-        -age_2_Cards : List<Card>
-        -age_3_Cards : List<Card>
-        -age_1_Buildings : List<Building>
-        -age_2_Buildings : List<Building>
-        -age_3_Buildings : List<Building>
-        +shuffle(age : Age) : boolean
-        +popCard(age : Age) : Card
-        +popBuilding(age : Age) : Building
-    }
-
-    ' --- RELATIONS IN MODEL ---
-    GameState "1" *-- "1" Board
-    GameState "1" *-- "1" Deck
-    GameState "1" *-- "1..5" Player
-    Board "1" *-- "1" TileSet
-    TileSet "1" *-- "*" Tile
-    Player "1" *-- "1" PlayerStats : tracks
-    Player "1" o-- "*" Card
-    Player "1" o-- "*" Building
-    Tile "*" o-- "0..1" Player : occupier
-    Deck "1" *-- "*" Card
-    Deck "1" *-- "*" Building
-    Board "1" o-- "*" Card : top/bottom
-    Board "1" o-- "*" Building : top/bottom
-
-    Building "1" *-- "1" ContextualEffect : strategy
-    Event "1" *-- "1" EventEffect : strategy
+  class JsonFactory {
+    -CARDS_PATH : String
+    -BUILDINGS_PATH : String
+    -TILES_PATH : String
+    -ORDER_TILES_PATH : String
+    -CONFIG_PATH : String
+    -mapper : ObjectMapper
+    -cards : List<Card>
+    -buildings : List<Building>
+    -tiles : List<Tile>
+    -orderTiles : List<OrderTile>
+    -config : GameConfig
+    +JsonFactory()
+    +loadAllData() : void
+    +getCards() : List<Card>
+    +getBuildings() : List<Building>
+    +getTiles() : List<Tile>
+    +getOrderTiles() : List<OrderTile>
+    +getConfig() : GameConfig
+    +loadCards() : List<Card>
+    +loadBuildings() : List<Building>
+    +loadTiles() : List<Tile>
+    +loadOrderTiles() : List<OrderTile>
+    +loadConfig() : GameConfig
+  }
+  class GameController {
+    -state : GameState
+    -jsonLoader : JsonLoader
+    +createGame(playerCount : int)
+    +firstOrder()
+    +triggerPhase()
+    +nextPhase()
+    +nextTurn()
+    +nextAge()
+  }
 }
 
-package "Controller"{
-    class JsonLoader {
-        +loadCards() : List<Card>
-        +loadBuildings() : List<Building>
-    }
+package "model" {
+  enum Age {
+    AGE_1
+    AGE_2
+    AGE_3
+    AGE_3_FINAL
+  }
 
-    class GameController {
-        -state : GameState
-        -jsonLoader : JsonLoader
-        +createGame(playerCount : int)
-        +firstOrder()
-        +triggerPhase()
-        +nextPhase()
-        +nextTurn()
-        +nextAge()
-    }
+  enum GamePhase {
+    START_TURN
+    IN_TURN
+    END_TURN
+    PAINTING_EVENT
+    HUNTER_EVENT
+    SHAMAN_EVENT
+    SUSTAINMENT_EVENT
+    END_GAME
+    NONE
+  }
 
-    ' --- RELATIONS IN CONTROLLER ---
-    GameController --> GameState : updates
-    GameController --> JsonLoader : uses
+  class GameState {
+    -age : Age
+    -turn : int
+    -phase : GamePhase
+    -players : List<Player>
+    -deck : Decks
+    -board : Board
+    -currentPlayerIndex : int
+    -turnOrder : List<Player>
+    +GameState()
+    +getAge() : Age
+    +getTurn() : int
+    +getPhase() : GamePhase
+    +getPlayer(index : int) : Player
+    +setAge(age : Age) : boolean
+    +setTurn(turn : int) : boolean
+    +setPhase(phase : GamePhase) : boolean
+    +getCurrentPlayer() : Player
+    +getTurnOrder() : List<Player>
+  }
 }
+
+package "model" {
+  enum CharacterEnum {
+    GATHERER
+    HUNTER
+    SHAMAN
+    INVENTOR
+    ARTIST
+    BUILDER
+  }
+
+  enum Tool {
+    BREAD
+    STONE
+    BOAT
+    RING
+    ROPE
+    BOWL
+    STICK
+    DOLL
+    HOOK
+    NECKLACE
+  }
+
+  class Artist {
+    +Artist()
+    +onAddedToPlayer(p : Player) : void
+  }
+
+  class Builder {
+    -discount : int
+    -pp : int
+    +Builder()
+    +getDiscount() : int
+    +getPP() : int
+    +onAddedToPlayer(p : Player) : void
+  }
+
+  class Gatherer {
+    -sustDisc : int
+    +Gatherer()
+    +onAddedToPlayer(p : Player) : void
+    +getSustDisc() : int
+    +setSustDisc(sustDisc : int) : void
+  }
+
+  class Hunter {
+    -hasFood : boolean
+    +Hunter()
+    +onAddedToPlayer(p : Player) : void
+    +isHasFood() : boolean
+    +setHasFood(hasFood : boolean) : void
+  }
+
+  class Inventor {
+    -tool : Tool
+    +Inventor()
+    +getTool() : Tool
+    +onAddedToPlayer(p : Player) : void
+  }
+
+  class Shaman {
+    -stars : int
+    +Shaman()
+    +getStars() : int
+    +onAddedToPlayer(p : Player) : void
+  }
+}
+
+package "model" {
+  interface ContextualEffect {
+    +executeEffect(p : Player, state : GameState) : boolean
+    +onAddedToPlayer(p : Player) : boolean
+  }
+
+  interface EventEffect {
+    +executeEffect(players : List<Player>, state : GameState, phase : GamePhase, age : Age) : boolean
+  }
+}
+
+package "model" {
+  class AddStars {
+    -stars : int
+    +onAddedToPlayer(p : Player) : boolean
+  }
+
+  class CardSet {
+    -food : int
+    -baseSet : int
+    +onAddedToPlayer(p : Player) : boolean
+    +executeEffect(p : Player, state : GameState) : boolean
+  }
+
+  class EndBuilderPpMultiplier {
+    -mult : int
+    +executeEffect(p : Player, state : GameState) : boolean
+  }
+
+  class EndCardSet {
+    -pp : int
+    +executeEffect(p : Player, state : GameState) : boolean
+  }
+
+  class EndOfTurnExtraPick {
+    -upperPick : int
+    +onAddedToPlayer(p : Player) : boolean
+  }
+
+  class GainByCharacter {
+    -type : CharacterEnum
+    -ppGain : int
+    -foodGain : int
+    +executeEffect(p : Player, state : GameState) : boolean
+  }
+
+  class InventorPair {
+    +executeEffect(p : Player, state : GameState) : boolean
+  }
+
+  class ShamanicLossProtection {
+    -protect : int
+    +onAddedToPlayer(p : Player) : boolean
+  }
+
+  class ShamanicWinBoost {
+    -bonus : int
+    +onAddedToPlayer(p : Player) : boolean
+  }
+
+  class SustainmentBoost {
+    -type : CharacterEnum
+    -gain : int
+    +onAddedToPlayer(p : Player) : boolean
+  }
+
+  class TotemPlacementBonus {
+    +executeEffect(p : Player, state : GameState) : boolean
+  }
+}
+
+package "model" {
+  class CavePaintings {
+    -type : CharacterEnum
+    +executeEffect(players : List<Player>, state : GameState, phase : GamePhase, age : Age) : boolean
+  }
+
+  class Hunting {
+    -type : CharacterEnum
+    +executeEffect(players : List<Player>, state : GameState, phase : GamePhase, age : Age) : boolean
+  }
+
+  class ShamanicRitual {
+    -ppLoss : int
+    -ppGain : int
+    +executeEffect(players : List<Player>, state : GameState, phase : GamePhase, age : Age) : boolean
+  }
+
+  class Sustenance {
+    +executeEffect(players : List<Player>, state : GameState, phase : GamePhase, age : Age) : boolean
+  }
+}
+
+package "model" {
+  abstract class Card {
+    -age : Age
+    +Card()
+    +getAge() : Age
+    +getResolutionPriority() : int
+    +onDiscard(state : GameState, p : List<Player>) : boolean
+    +addToDeck(deck : EnumMap<Age, List<Card>>) : boolean
+    +isBuyable() : boolean
+  }
+
+  abstract class Character {
+    -id : CharacterEnum
+    -minPlayers : int
+    +Character()
+    +getId() : CharacterEnum
+    +getMinPlayers() : int
+    +onAddedToPlayer(p : Player) : void
+  }
+
+  class Event {
+    -id : String
+    -effect : EventEffect
+    -phase : GamePhase
+    -resolutionPriority : int
+    +Event()
+    +getResolutionPriority() : int
+    +getId() : String
+    +onDiscard(state : GameState, players : List<Player>) : boolean
+    +isBuyable() : boolean
+  }
+
+  class Building {
+    -id : String
+    -foodCost : int
+    -pp : int
+    -effect : ContextualEffect
+    -triggerPhase : GamePhase
+    +Building()
+    +getId() : String
+    +triggerBuildingEffect(p : Player, state : GameState) : void
+    +getFoodCost() : int
+    +getPP() : int
+    +getTriggerPhase() : GamePhase
+    +onAddedToPlayer(p : Player) : void
+  }
+
+  class Decks {
+    -buildings : Map<Age, List<Card>>
+    -cards : Map<Age, List<Card>>
+    -card : Optional<Card>
+    +Decks(cards : List<Card>, buildings : List<Building>)
+    +shuffle() : void
+    +popCard(a : Age) : Optional<Card>
+    +getBuildings(age : Age) : List<Card>
+  }
+}
+
+package "model" {
+  enum TileId {
+    ORDER_TILE
+    A
+    B
+    C
+    D
+    E
+    F
+    G
+  }
+
+  class Tile {
+    -tileId : TileId
+    -isOccupied : boolean
+    -occupier : Player
+    -upperPicks : int
+    -bottomPicks : int
+    -foodBonus : int
+    -minPlayers : int
+    +Tile()
+    +getId() : TileId
+    +setId(id : TileId) : boolean
+    +isOccupied() : boolean
+    +getOccupier() : Player
+    +getMinPlayers() : int
+    +setMinPlayers(minPlayers : int) : boolean
+    +occupy(p : Player) : boolean
+    +deOccupy() : boolean
+    +getUpperPicks() : int
+    +getBottomPicks() : int
+    +getFoodBonus() : int
+  }
+
+  class OrderTile {
+    -orderBonus : List<Integer>
+    +OrderTile()
+    +OrderTile(playerNumber : int)
+  }
+
+  class TileSet {
+    -tiles : List<Tile>
+    +TileSet(tiles : List<Tile>)
+    +getTile(id : TileId) : Tile
+    +getTiles() : List<Tile>
+  }
+
+  class Board {
+    -orderTile : OrderTile
+    -tiles : TileSet
+    -topCards : List<Card>
+    -bottomCards : List<Card>
+    -topBuildings : List<Building>
+    -bottomBuildings : List<Building>
+    +Board()
+    +pickTopCard(index : int) : Card
+    +pickBottomCard(index : int) : Card
+    +pickTopBuilding(index : int) : Building
+    +pickBottomBuilding(index : int) : Building
+    +addTopCard(c : Card) : boolean
+    +addBottomCard(c : Card) : boolean
+    +addTopBuilding(b : ArrayList<Building>) : boolean
+    +topToBottomCards() : boolean
+    +topToBottomBuildings() : boolean
+    +discardBottomCards(p : List<Player>, state : GameState) : boolean
+  }
+}
+
+package "model" {
+  class PlayerStats {
+    -characterCounts : Map<CharacterEnum, Integer>
+    -buildingDiscount : int
+    -ritualLossMultiplier : int
+    -baseSustainmentDiscount : int
+    -sustainmentBoosts : Map<CharacterEnum, Integer>
+    -stars : int
+    -builderPp : int
+    -ritualWinBoost : int
+    -extraUpperPick : int
+    -uniqueTools : Set<Tool>
+    +incrementCharacter(type : CharacterEnum) : boolean
+    +getCharacterCount(type : CharacterEnum) : int
+    +addBuildingDiscount(amount : int) : boolean
+    +getBuildingDiscount() : int
+    +setRitualLossMultiplier(mult : int) : boolean
+    +getRitualLossMultiplier() : int
+    +addSustainmentDiscount(amount : int) : boolean
+    +addSustainmentBoost(type : CharacterEnum, gainPerCharacter : int) : void
+    +getSustainmentDiscount() : int
+    +addStars(amount : int) : boolean
+    +getStars() : int
+    +addBuilderPp(amount : int) : boolean
+    +getBuilderPp() : int
+    +setRitualWinBoost(amount : int) : boolean
+    +getRitualWinBoost() : int
+    +updateDifferentToolNumber(tool : Tool) : boolean
+    +getDifferentToolNumber() : int
+    +getExtraUpperPick() : int
+    +setExtraUpperPick(extraUpperPick : int) : void
+    +calculateSet() : int
+  }
+
+  class Player {
+    -id : int
+    -nickname : String
+    -cards : List<Card>
+    -buildingDispatcher : Map<GamePhase, List<Building>>
+    -stats : PlayerStats
+    -food : int
+    -pp : int
+    -isChoosing : boolean
+    +Player(id : int, nickname : String)
+    +getIsChoosing() : boolean
+    +getId() : int
+    +getNickname() : String
+    +getFood() : int
+    +getPP() : int
+    +getCards() : List<Card>
+    +getBuildings() : List<Building>
+    +getBuildingsByPhase(phase : GamePhase) : List<Building>
+    +getStats() : PlayerStats
+    +addCard(c : Card) : boolean
+    +addBuilding(b : Building) : boolean
+    +addFood(amount : int) : boolean
+    +payFood(amount : int) : boolean
+    +addPP(amount : int) : boolean
+    +payPP(amount : int) : boolean
+    +payFoodWithPenalty(requiredFood : int, penalty : int) : boolean
+    +canBuy(b : Building) : boolean
+    +payBuilding(b : Building) : boolean
+  }
+}
+
+' Relazioni di ereditarieta e implementazione
+Character --|> Card
+Building --|> Card
+Event --|> Card
+Artist --|> Character
+Builder --|> Character
+Gatherer --|> Character
+Hunter --|> Character
+Inventor --|> Character
+Shaman --|> Character
+OrderTile --|> Tile
+
+AddStars ..|> ContextualEffect
+CardSet ..|> ContextualEffect
+EndBuilderPpMultiplier ..|> ContextualEffect
+EndCardSet ..|> ContextualEffect
+EndOfTurnExtraPick ..|> ContextualEffect
+GainByCharacter ..|> ContextualEffect
+InventorPair ..|> ContextualEffect
+ShamanicLossProtection ..|> ContextualEffect
+ShamanicWinBoost ..|> ContextualEffect
+SustainmentBoost ..|> ContextualEffect
+TotemPlacementBonus ..|> ContextualEffect
+
+CavePaintings ..|> EventEffect
+Hunting ..|> EventEffect
+ShamanicRitual ..|> EventEffect
+Sustenance ..|> EventEffect
+
+' Relazioni strutturali principali
+GameState *-- Board
+GameState *-- Decks
+GameState *-- "1..*" Player
+
+Board o-- TileSet
+Board o-- OrderTile
+Board o-- "*" Card
+Board o-- "*" Building
+
+TileSet *-- "*" Tile
+Tile o-- "0..1" Player : occupier
+
+Player *-- PlayerStats
+Player o-- "*" Card
+Player o-- "*" Building
+
+Building --> ContextualEffect : effect
+Event --> EventEffect : effect
+
+Player --> GamePhase
+Player --> Card
+Player --> Building
+
+PlayerStats --> CharacterEnum
+PlayerStats --> Tool
+
+Card --> Age
+Card --> GameState
+Card --> Player
+
+Character --> CharacterEnum
+Building --> GamePhase
+Building --> Player
+Building --> GameState
+Event --> GamePhase
+
+GameConfig --> "int[][]"
+
+JsonFactory --> Card
+JsonFactory --> Building
+JsonFactory --> Tile
+JsonFactory --> OrderTile
+JsonFactory --> GameConfig
+
+GameController --> GameState : updates
 @enduml
