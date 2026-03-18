@@ -44,12 +44,12 @@ public class Decks {
             if(cards.get(Age.values()[a.ordinal()+1]).isEmpty()){
                 return Optional.empty();
             }else{
-                card = Optional.of(cards.get(a.ordinal()+1).removeLast());
+                card = Optional.of(cards.get(Age.values()[a.ordinal()+1]).removeLast());
                 return card;
             }
         }
         else{
-            card = Optional.of(cards.get(a.ordinal()).removeLast());
+            card = Optional.of(cards.get(Age.values()[a.ordinal()]).removeLast());
             return card;
         }
     }
