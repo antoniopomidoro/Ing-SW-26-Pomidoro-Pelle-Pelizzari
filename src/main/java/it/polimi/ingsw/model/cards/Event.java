@@ -58,7 +58,7 @@ public class Event extends Card {
         return false;
     }
     @Override
-    public boolean isBuyable{
+    public boolean isBuyable(){
         return false;
     }
 
