@@ -31,19 +31,29 @@ public class Board {
     }
 
     public Card pickTopCard(int index) {
-        return topCards.remove( index);
+        return topCards.remove(index);
     }
 
     public Card pickBottomCard(int index) {
-        return bottomCards.remove( index);
+        return bottomCards.remove(index);
     }
 
     public Building pickTopBuilding(int index) {
-        return topBuildings.remove( index);
+        return topBuildings.remove(index);
     }
 
     public Building pickBottomBuilding(int index) {
         return bottomBuildings.remove(index);
+    }
+
+
+
+    public boolean cardBottomToTop(int index){
+        if(index >=0 && index < bottomCards.size()){
+            Card c = bottomCards.remove(index);
+            topCards.add(c);
+            return true;
+        }return false;
     }
 
     public boolean addTopCard(Card c) {
@@ -90,4 +100,33 @@ public class Board {
         bottomCards.clear();
         return true;
     }
+    //getter for top and bottom cards and buildings, returns a copy of the list to avoid external modification
+    public List<Card> getTopCards(){
+        List<Card> sup = new ArrayList<>();
+        sup.addAll(topCards);
+        return sup;
+
+    }
+
+    public List<Card> getBottomCards(){
+        List<Card> sup = new ArrayList<>();
+        sup.addAll(bottomCards);
+        return sup;
+    }
+
+    public List<Card> getBottomBuildings(){
+        List<Card> sup = new ArrayList<>();
+        sup.addAll(bottomBuildings);
+        return sup;
+    }
+
+    public List<Card> getTopBuildings(){
+        List<Card> sup = new ArrayList<>();
+        sup.addAll(topBuildings);
+        return sup;
+    }
+
+
+
+
 }
