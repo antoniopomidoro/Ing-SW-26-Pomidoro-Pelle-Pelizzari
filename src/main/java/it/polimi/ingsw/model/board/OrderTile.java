@@ -17,6 +17,7 @@ import java.util.List;
  */
 public class OrderTile extends Tile {
     private List<Integer> orderBonus;
+    private List<Integer> ppPenalty;
 
     /**
      * Default constructor for OrderTile.
@@ -26,11 +27,10 @@ public class OrderTile extends Tile {
         super();
     }
 
-    /**
-     * Constructor for OrderTile.
-     * @param playerNumber The number of the player (order).
-     */
-    public OrderTile(int playerNumber) {
-        // Skeleton constructor
+    public int getOrderBonus(int index){
+        return orderBonus.get(index);
+    }
+    public int getPenalty(int index){
+        return ppPenalty.get(index);
     }
 }

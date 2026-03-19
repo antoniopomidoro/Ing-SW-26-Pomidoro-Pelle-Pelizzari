@@ -25,6 +25,7 @@ public class Player {
     private int food;
     private int pp;
     private boolean isChoosing;
+    private int totemPlacementBonus = 0;
 
     public Player(int id, String nickname) {
         this.buildingDispatcher = new EnumMap<>(GamePhase.class);
@@ -153,5 +154,13 @@ public class Player {
     private int calculateRealPrice(Building b) {
         int realPrice = b.getFoodCost() - stats.getBuildingDiscount();
         return Math.max(0, realPrice);
+    }
+
+    public int getTotemPlacementBonus() {
+        return totemPlacementBonus;
+    }
+
+    public void setTotemPlacementBonus(int totemPlacementBonus) {
+        this.totemPlacementBonus = totemPlacementBonus;
     }
 }

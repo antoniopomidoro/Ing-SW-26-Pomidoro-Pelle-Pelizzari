@@ -93,6 +93,22 @@ public class Board {
         topBuildings.clear();
         return true;
     }
+    /**
+     * Returns the set of game tiles.
+     * @return The TileSet.
+     */
+    public TileSet getTiles() {
+        return this.tiles;
+    }
+
+    /**
+     * Returns the order tile.
+     * @return The OrderTile.
+     */
+    public OrderTile getOrderTile() {
+        return this.orderTile;
+    }
+
     public boolean discardBottomCards(List<Player> p, GameState state){
         bottomCards.stream()
                 .sorted(Comparator.comparingInt(Card::getResolutionPriority))

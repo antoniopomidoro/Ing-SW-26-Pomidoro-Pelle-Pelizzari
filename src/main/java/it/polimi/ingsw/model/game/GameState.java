@@ -1,57 +1,78 @@
 package it.polimi.ingsw.model.game;
 import it.polimi.ingsw.model.board.Board;
-import it.polimi.ingsw.model.game.Age;
-import it.polimi.ingsw.model.game.GamePhase;
+import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.player.Player;
 
 import java.util.*;
 import java.util.List;
+
 /**
- * GameState: The root aggregate of the game model.
- * It manages the lifecycle of Players, Board, and Deck.
+ * GameState: The root aggregate of the game model and the Context of the State Pattern.
+ * It manages the lifecycle of Players, Board, and Deck, and delegates
+ * phase-specific logic to {@link GamePhaseBehavior} implementations
+ * associated with each {@link GamePhase}.
  */
 public class GameState {
-    // --- Fields (Components inside the box) ---
+    // --- Core game fields ---
     private Age age;
     private int turn;
     private GamePhase phase;
-    private List<Player> players;       // 1..5 Players as per UML
-    private Board board;               // 1 Board per gam// 1 Deck per game
-    private int currentPlayerIndex;    // Tracks whose turn it is
-    private List<Player> turnOrder;    // List to manage player sequence
+    private GamePhaseBehavior gamePhase;
+    private List<Player> players;
+    private Board board;
+    private Decks deck;
+    private List<Player> turnOrder;
+    private List<Player> orderTileOrder;
+
+    // --- State Pattern support fields ---
+    private int currentTileIndex;
+    private boolean ageChangeNeeded;
+    private int currentPlayerIndex = 0;
+    private int currentPlayerOrderIndex = 0;
 
     /**
      * Constructor: Initializes the game environment.
-     * @param nicknames The list of names provided from the UI (Argument "names").
+     * @param nicknames The list of names provided from the UI.
      */
     public GameState(List<String> nicknames) {
-        // Initializing basic game attributes
         this.age = Age.AGE_1;
         this.turn = 1;
-        this.phase = GamePhase.START_TURN;
-        this.currentPlayerIndex = 0;
+        this.currentTileIndex = 0;
+        this.ageChangeNeeded = false;
 
-        // Instantiating internal components (Composition)
         this.board = new Board();
         this.players = new ArrayList<>();
 
-        // Converting nicknames (formal parameter) into Player objects
         for (int i = 0; i < nicknames.size(); i++) {
             String name = nicknames.get(i);
-            Player p = new Player(i,name);
-
-            // Numerical Verification: Initial food allocation based on rulebook
-
-
-            // Adding the reference to our internal players list
+            Player p = new Player(i, name);
             this.players.add(p);
         }
 
-        // Initialize turn order based on initial player list
         this.turnOrder = new ArrayList<>(this.players);
+        this.orderTileOrder = new ArrayList<>(this.players);
     }
 
-    // Getters & Setters
+    // ==========================================
+    //  State Pattern: Phase control & execution
+    // ==========================================
+
+    /**
+     * Executes the current phase's behavior.
+     * Delegates to the {@link GamePhaseBehavior} associated with the current
+     * {@link GamePhase}. Does nothing if the phase has no behavior (e.g., event phases).
+     */
+    public void executePhase() {
+        gamePhase = phase.getBehavior();
+        if (gamePhase != null) {
+            gamePhase.execute(this);
+        }
+    }
+
+    // ==========================================
+    //  Getters & Setters
+    // ==========================================
+
     /** @return The current Age of the game (Age I, II, or III). */
     public Age getAge() {
         return this.age;
@@ -62,9 +83,54 @@ public class GameState {
         return this.turn;
     }
 
-    /** @return The current phase within the turn (e.g., START_TURN, EVENT, ACTION). */
+    /** @return The current phase within the turn. */
     public GamePhase getPhase() {
         return this.phase;
+    }
+
+    /** @return The list of all players. */
+    public List<Player> getPlayers() {
+        return this.players;
+    }
+
+    /** @return The game board. */
+    public Board getBoard() {
+        return this.board;
+    }
+
+    /** @return The game decks. */
+    public Decks getDeck() {
+        return this.deck;
+    }
+
+    /** @return The list of players sorted by their current turn order. */
+    public List<Player> getTurnOrder() {
+        return this.turnOrder;
+    }
+
+    /** @return The list of players sorted by their current order-tile order. */
+    public List<Player> getOrderTileOrder() {
+        return this.orderTileOrder;
+    }
+
+    /** @return The current player in turn order, or null if unavailable. */
+    public Player getCurrentTurnOrderPlayer() {
+        return this.turnOrder.get(currentPlayerIndex);
+    }
+
+    /** @return The current player in order-tile order, or null if unavailable. */
+    public Player getCurrentOrderTileOrderPlayer() {
+        return this.orderTileOrder.get(currentPlayerOrderIndex);
+    }
+
+    /** @return The current tile index during tile scanning in TurnPhase. */
+    public int getCurrentTileIndex() {
+        return this.currentTileIndex;
+    }
+
+    /** @return Whether an age change is pending. */
+    public boolean isAgeChangeNeeded() {
+        return this.ageChangeNeeded;
     }
 
     /**
@@ -90,33 +156,47 @@ public class GameState {
     }
 
     /**
-     * Switches the game to a new phase.
-     * @param phase The next GamePhase.
+     * Switches the game to a new phase and updates the associated behavior.
+     * @param newPhase The next GamePhase.
      * @return true if the phase was updated.
      */
-    public boolean setPhase(GamePhase phase) {
-        if (phase == null) return false;
-        this.phase = phase;
-        return true;
+    public void setPhase(GamePhaseBehavior newPhase) {
+        this.gamePhase = newPhase;
+        // Autostart della fase non appena viene settata!
+        this.gamePhase.execute(this);
     }
 
     /**
-     * Helper method to retrieve the player who is currently taking their turn.
-     * @return The active Player object.
+     * Sets the current tile index for tile scanning in TurnPhase.
+     * @param index The tile index.
      */
-    public Player getCurrentPlayer() {
-        if (players == null || players.isEmpty()) return null;
-        return players.get(currentPlayerIndex);
+    public void setCurrentTileIndex(int index) {
+        this.currentTileIndex = index;
     }
 
-    /** @return The list of players sorted by their current turn order. */
-    public List<Player> getTurnOrder() {
-        return this.turnOrder;
+    /**
+     * Sets whether an age change is needed at the end of the current turn.
+     * @param needed true if age change is pending.
+     */
+    public void setAgeChangeNeeded(boolean needed) {
+        this.ageChangeNeeded = needed;
     }
 
-    // --- Essential Getters for Controller interaction ---
-    public Board getBoard() { return this.board; }
-
-
+    public boolean nextPlayerInTurnOrderTile(){
+        currentPlayerOrderIndex++;
+        if(currentPlayerOrderIndex >= orderTileOrder.size()){
+            currentPlayerOrderIndex = 0;
+            return false;
         }
+        return true;
+    }
+    public boolean nextPlayerInTurnOrder(){
+        currentPlayerIndex++;
+        if(currentPlayerIndex >= turnOrder.size()){
+            currentPlayerIndex = 0;
+            return false;
+        }
+        return true;
+    }
 
+}

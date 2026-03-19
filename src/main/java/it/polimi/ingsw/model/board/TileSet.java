@@ -37,13 +37,11 @@ public class TileSet {
      * @param id The ID of the tile to retrieve.
      * @return The tile with the specified ID, or null if not found.
      */
-    public Tile getTile(TileId id) {
-        for (Tile t : this.tiles) {
-            if (t.getId() == id) {
-                return t;
-            }
+    public Tile getTile(int index) {
+        if (index < 0 || index >= tiles.size()) {
+            throw new IndexOutOfBoundsException("Index out of bounds: " + index);
         }
-        return null;
+        return tiles.get(index);
     }
 
     /**
