@@ -38,5 +38,6 @@ public class Inventor extends Character {
     public void onAddedToPlayer(Player p) {
         p.getStats().incrementCharacter(CharacterEnum.INVENTOR);
         p.getStats().updateDifferentToolNumber(tool);
+        p.getStats().incrementTool(tool);
     }
 }

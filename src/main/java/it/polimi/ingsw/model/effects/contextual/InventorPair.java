@@ -9,12 +9,26 @@ import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 
 public class InventorPair implements ContextualEffect {
+    int oldPairs = 0;
 
     @Override
     public boolean executeEffect(Player p, GameState state) {
-        p.addFood(3);
+        int newPairs = 0;
+        for(Tool t : Tool.values()) {
+            int count = p.getStats().getToolCount(t);
+            if(count >= 2) {
+                newPairs += count / 2;
+            }
+        }
+        if(newPairs > oldPairs) {
+            p.addFood(3 * (newPairs - oldPairs));
+            oldPairs = newPairs;
+        }
         return true;
     }
 }

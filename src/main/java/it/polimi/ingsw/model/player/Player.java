@@ -2,6 +2,7 @@ package it.polimi.ingsw.model.player;
 
 import it.polimi.ingsw.model.board.*;
 import it.polimi.ingsw.model.cards.*;
+import it.polimi.ingsw.model.cards.Character;
 import it.polimi.ingsw.model.cards.characters.*;
 import it.polimi.ingsw.model.effects.*;
 import it.polimi.ingsw.model.effects.contextual.*;
@@ -10,10 +11,8 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 
 public class Player {
     private int id;
@@ -134,6 +133,7 @@ public class Player {
         this.pp -= amount;
         return true;
     }
+
     public boolean payFoodWithPenalty(int requiredFood, int penalty) {
         int missingFood = Math.max(0, requiredFood - food);
         int foodToPay = Math.min(requiredFood, food);

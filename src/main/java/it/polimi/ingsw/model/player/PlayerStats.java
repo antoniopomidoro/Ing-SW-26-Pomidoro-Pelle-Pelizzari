@@ -22,16 +22,34 @@ public class PlayerStats {
     private int builderPp;
     private int ritualWinBoost = 1;
     private int extraUpperPick = 0;
+    private int totemPlacementBonusFood = 0;
     private Set<Tool> uniqueTools = EnumSet.noneOf(Tool.class);
+    private Map<Tool, Integer> toolCounts = new EnumMap<>(Tool.class);
+
     public boolean incrementCharacter(CharacterEnum type) {
         if(type == null) return false;
         characterCounts.put(type, characterCounts.getOrDefault(type, 0) + 1);
         return true;
     }
 
+    public boolean incrementTool(Tool tool) {
+        if(tool == null) {
+            return false;
+        }
+        toolCounts.put(tool, toolCounts.getOrDefault(tool,0) + 1);
+        return true;
+    }
+
     public int getCharacterCount(CharacterEnum type) {
         if(type == null) return 0;
         return characterCounts.getOrDefault(type, 0);
+    }
+
+    public int getToolCount(Tool tool) {
+        if(tool == null) {
+            return 0;
+        }
+        return toolCounts.getOrDefault(tool, 0);
     }
 
     public boolean addBuildingDiscount(int amount) {
@@ -131,4 +149,13 @@ public class PlayerStats {
                 .min()
                 .orElse(0);
     }
+
+    public void setTotemPlacementBonusFood(int bonus) {
+        totemPlacementBonusFood = bonus;
+    }
+
+    public void setBuilderPp(int pp) {
+        builderPp = pp;
+    }
+
 }

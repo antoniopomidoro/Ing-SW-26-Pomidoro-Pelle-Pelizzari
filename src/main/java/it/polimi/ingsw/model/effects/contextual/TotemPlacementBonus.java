@@ -10,7 +10,7 @@ public class TotemPlacementBonus implements ContextualEffect {
 
     @Override
     public boolean executeEffect(Player p, GameState state) {
-        p.addFood(1);
+        p.getStats().setTotemPlacementBonusFood(1);
         return true;
     }
 }
