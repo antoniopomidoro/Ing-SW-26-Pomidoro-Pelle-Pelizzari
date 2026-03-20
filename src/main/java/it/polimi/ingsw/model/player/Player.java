@@ -18,8 +18,7 @@ public class Player {
     private int id;
     private String nickname;
     private List<Card> cards;
-    // Dispatcher for buildings organized by their trigger phase
-    private Map<GamePhase, List<Building>> buildingDispatcher;
+    private List<Building> buidlings;
     private PlayerStats stats;
     private int food;
     private int pp;
@@ -27,13 +26,11 @@ public class Player {
     private int totemPlacementBonus = 0;
 
     public Player(int id, String nickname) {
-        this.buildingDispatcher = new EnumMap<>(GamePhase.class);
-        for (GamePhase phase : GamePhase.values()) {
-            this.buildingDispatcher.put(phase, new ArrayList<>());
-        }
+
         // Other initializations
         this.id = id;
         this.nickname = nickname;
+        buidlings = new ArrayList<>();
         cards = new ArrayList<>();
         stats = new PlayerStats();
         // The food gets added later
@@ -66,27 +63,10 @@ public class Player {
         return cards;
     }
 
-    /**
-     * Returns all buildings owned by the player as a flat list.
-     * @return List of all buildings.
-     */
-    public List<Building> getBuildings() {
-        List<Building> allBuildings = new ArrayList<>();
-        for (List<Building> phaseBuildings : buildingDispatcher.values()) {
-            allBuildings.addAll(phaseBuildings);
-        }
-        return allBuildings;
-    }
 
-    /**
-     * Returns the buildings that trigger in a specific phase.
-     * @param phase The game phase.
-     * @return List of buildings for that phase.
-     */
-    public List<Building> getBuildingsByPhase(GamePhase phase) {
-        if (phase == null) return new ArrayList<>();
-        return buildingDispatcher.getOrDefault(phase, new ArrayList<>());
-    }
+
+
+
 
     public PlayerStats getStats() {
         return stats;
@@ -95,23 +75,6 @@ public class Player {
     public boolean addCard(Card c) {
         cards.add(c);
         return true;
-    }
-
-    public boolean addBuilding(Building b) {
-        if (b == null) return false;
-        
-        GamePhase phase = b.getTriggerPhase();
-        if (phase == null) {
-            return false; 
-        }
-        
-        List<Building> list = buildingDispatcher.get(phase);
-        if (list != null) {
-            list.add(b);
-            b.onAddedToPlayer(this);
-            return true;
-        }
-        return false;
     }
 
     public boolean addFood(int amount) {
@@ -163,4 +126,19 @@ public class Player {
     public void setTotemPlacementBonus(int totemPlacementBonus) {
         this.totemPlacementBonus = totemPlacementBonus;
     }
+
+    public boolean addBuilding( Building b){
+        buidlings.add(b);
+        return true;
+    }
+
+    public List<Building> getBuidlings(){
+        List<Building> sup = new ArrayList<>();
+        sup.addAll(buidlings);
+        return sup;
+    }
+
+
+
+
 }
