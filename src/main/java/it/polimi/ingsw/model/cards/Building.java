@@ -31,6 +31,7 @@ public class Building extends Card {
 
     /**
      * Gets the ID of the building.
+     *
      * @return The building ID.
      */
     public String getId() {
@@ -39,7 +40,8 @@ public class Building extends Card {
 
     /**
      * Triggers the effect of the building.
-     * @param p The player triggering the effect.
+     *
+     * @param p     The player triggering the effect.
      * @param state The game state.
      */
     public void triggerBuildingEffect(Player p, GameState state) {
@@ -48,6 +50,7 @@ public class Building extends Card {
 
     /**
      * Gets the food cost required to build this building.
+     *
      * @return The food cost.
      */
     public int getFoodCost() {
@@ -56,6 +59,7 @@ public class Building extends Card {
 
     /**
      * Gets the prestige points (PP) provided by this building.
+     *
      * @return The prestige points.
      */
     public int getPP() {
@@ -64,6 +68,7 @@ public class Building extends Card {
 
     /**
      * Gets the phase in which this building's effect is triggered.
+     *
      * @return The trigger phase.
      */
     public GamePhase getTriggerPhase() {
@@ -73,6 +78,7 @@ public class Building extends Card {
     /**
      * Method triggered when the building is added to a player.
      * For one-shot buildings (triggerPhase == NONE), the effect is executed immediately.
+     *
      * @param p The player adding the building.
      */
     public void onAddedToPlayer(Player p) {
@@ -80,4 +86,3 @@ public class Building extends Card {
     }
 
 }
-

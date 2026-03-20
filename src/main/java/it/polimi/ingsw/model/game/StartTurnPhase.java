@@ -24,7 +24,7 @@ public class StartTurnPhase implements GamePhaseBehavior {
     @Override
     public void execute(GameState context) {
         if (context.getTurn() == 1){
-            return true;
+            return;
         }
 
         Board board = context.getBoard();
