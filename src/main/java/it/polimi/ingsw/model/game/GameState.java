@@ -29,6 +29,7 @@ public class GameState {
     private boolean ageChangeNeeded;
     private int currentPlayerIndex = 0;
     private int currentPlayerOrderIndex = 0;
+    private int totemIndex = 0;
 
     /**
      * Constructor: Initializes the game environment.
@@ -199,4 +200,11 @@ public class GameState {
         return true;
     }
 
+    public int getTotemIndex() {
+        return totemIndex;
+    }
+
+    public void setTotemIndex(int totemIndex) {
+        this.totemIndex = totemIndex;
+    }
 }

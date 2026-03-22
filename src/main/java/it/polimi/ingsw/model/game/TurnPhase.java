@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model.game;
 
 import it.polimi.ingsw.model.board.Tile;
+import it.polimi.ingsw.model.player.Player;
 
 import java.util.List;
 
@@ -31,7 +32,17 @@ public class TurnPhase implements GamePhaseBehavior {
             }
             index++;
         }
-
+        List<Player> players = context.getTurnOrder();
+        int totemIndex = context.getTotemIndex();
+        while (totemIndex < players.size()) {
+            Player player = players.get(totemIndex);
+            int bonus = player.getTotemPlacementBonus();
+            context.setTotemIndex(totemIndex + 1);
+            if (bonus > 0) {
+                context.setPhase(new PlayerTurnPhase(player, new Tile(player, bonus, 0)));
+                return;
+            }
+        }
         // All tiles have been scanned — move to END_TURN
         context.setPhase(new EndTurnPhase());
     }
