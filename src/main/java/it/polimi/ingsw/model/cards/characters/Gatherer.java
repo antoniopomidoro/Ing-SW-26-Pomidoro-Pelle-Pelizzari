@@ -26,6 +26,12 @@ public class Gatherer extends Character {
         super();
     }
 
+    public Gatherer(Age age, int sustDisc){
+        this.sustDisc = sustDisc;
+        this.age = age;
+    }
+
+
     @Override
     public void onAddedToPlayer(Player p) {
         p.getStats().incrementCharacter(CharacterEnum.GATHERER);
@@ -36,7 +42,8 @@ public class Gatherer extends Character {
         return sustDisc;
     }
 
-    public void setSustDisc(int sustDisc) {
-        this.sustDisc = sustDisc;
+    @Override
+    public Card copy() {
+        return new Gatherer(this.age, this.sustDisc);
     }
 }

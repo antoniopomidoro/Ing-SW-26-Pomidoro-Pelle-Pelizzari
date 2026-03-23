@@ -32,8 +32,8 @@ import java.util.Map;
         @JsonSubTypes.Type(value = Event.class, name = "EVENT"),
         @JsonSubTypes.Type(value = Building.class, name = "BUILDING")
 })
-public abstract class Card {
-    private Age age;
+public abstract class Card{
+    protected Age age;
 
     /**
      * Default constructor for Card.
@@ -43,6 +43,7 @@ public abstract class Card {
 
     }
 
+
     /**
      * Gets the age (era) of the card.
      *
@@ -51,6 +52,7 @@ public abstract class Card {
     public Age getAge() {
         return this.age;
     }
+
 
     /**
      * Returns the resolution priority of this card when discarded.
@@ -90,5 +92,11 @@ public abstract class Card {
     public boolean addToDeck(Map<Age,List<Card>> deck) {
         return false;
     }
+
+    public Card copy() {
+    return null;}
+
+
+
 }
 

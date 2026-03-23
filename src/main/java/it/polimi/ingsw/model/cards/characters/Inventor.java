@@ -25,6 +25,10 @@ public class Inventor extends Character {
     public Inventor() {
         super();
     }
+    public Inventor(Age age, Tool tool){
+        this.age = age;
+        this.tool = tool;
+    }
 
     /**
      * Gets the tool associated with this card.
@@ -39,5 +43,10 @@ public class Inventor extends Character {
         p.getStats().incrementCharacter(CharacterEnum.INVENTOR);
         p.getStats().updateDifferentToolNumber(tool);
         p.getStats().incrementTool(tool);
+    }
+
+    @Override
+    public Card copy() {
+        return new Inventor(this.age, this.tool);
     }
 }

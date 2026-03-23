@@ -29,6 +29,16 @@ public class Building extends Card {
         super();
     }
 
+    public Building(Age age, String id, int foodCost,int pp, ContextualEffect effect, GamePhase triggerPhase){
+        this.age = age;
+        this.id = id;
+        this.foodCost = foodCost;
+        this.pp = pp;
+        this.effect = effect;
+        this.triggerPhase = triggerPhase;
+
+    }
+
     /**
      * Gets the ID of the building.
      *
@@ -85,4 +95,8 @@ public class Building extends Card {
         effect.onAddedToPlayer(p);
     }
 
+    @Override
+    public Building copy() {
+        return new Building(this.age,this.id,this.foodCost,this.pp,this.effect,this.triggerPhase);
+    }
 }

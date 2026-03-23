@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model.cards.characters;
 
+import it.polimi.ingsw.controller.JsonFactory;
 import it.polimi.ingsw.model.board.*;
 import it.polimi.ingsw.model.cards.*;
 import it.polimi.ingsw.model.cards.Character;
@@ -26,8 +27,21 @@ public class Artist extends Character {
         super();
     }
 
+    public Artist(Age age){
+        this.age = age;
+    }
+
+
     @Override
     public void onAddedToPlayer(Player p) {
         p.getStats().incrementCharacter(CharacterEnum.ARTIST);
+    }
+
+
+    @Override
+    public Card copy() {
+        Artist sup = new Artist(this.age);
+        return sup;
+
     }
 }
