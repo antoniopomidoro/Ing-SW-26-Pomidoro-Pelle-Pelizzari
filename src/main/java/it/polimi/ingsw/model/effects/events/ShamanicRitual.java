@@ -11,37 +11,45 @@ public class ShamanicRitual implements EventEffect {
     private int ppGain;
 
     @Override
-    public boolean applyEffect(List<Player> players, GameState state, Age age) {
-        if (players == null || players.isEmpty() || state == null || age == null) {
+    public boolean applyEffect(GameState state, Age age) {
+        if (state == null || age == null || state.getOrderTileOrder() == null) {
+            return false;
+        }
+        List<Player> players = state.getOrderTileOrder();
+        if (players.isEmpty()) {
             return false;
         }
 
         int maxStars = players.stream()
+                .filter(p -> p != null)
                 .mapToInt(p -> p.getStats().getStars())
                 .max()
                 .orElse(0);
 
         int minStars = players.stream()
+                .filter(p -> p != null)
                 .mapToInt(p -> p.getStats().getStars())
                 .min()
                 .orElse(0);
 
         if (maxStars == minStars) {
             for (Player p : players) {
+                if (p == null) continue;
                 p.addPP(ppGain * p.getStats().getRitualWinBoost());
             }
             for (Player p : players) {
+                if (p == null) continue;
                 p.payPP(ppLoss * p.getStats().getRitualLossMultiplier());
             }
             return true;
         }
 
         List<Player> minPlayers = players.stream()
-                .filter(p -> p.getStats().getStars() == minStars)
+                .filter(p -> p != null && p.getStats().getStars() == minStars)
                 .toList();
 
         List<Player> maxPlayers = players.stream()
-                .filter(p -> p.getStats().getStars() == maxStars)
+                .filter(p -> p != null && p.getStats().getStars() == maxStars)
                 .toList();
 
         for (Player p : maxPlayers) {

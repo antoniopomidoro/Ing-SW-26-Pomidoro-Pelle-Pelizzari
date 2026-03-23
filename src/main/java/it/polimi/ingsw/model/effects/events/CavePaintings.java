@@ -11,11 +11,13 @@ public class CavePaintings implements EventEffect {
     private CharacterEnum type = CharacterEnum.ARTIST;
 
     @Override
-    public boolean applyEffect(List<Player> players, GameState state, Age age) {
-        if (players == null || state == null || age == null) {
+    public boolean applyEffect(GameState state, Age age) {
+        if (state == null || age == null || state.getOrderTileOrder() == null) {
             return false;
         }
+        List<Player> players = state.getOrderTileOrder();
         for (Player p : players) {
+            if (p == null) continue;
             int artist = p.getStats().getCharacterCount(type);
             if (artist < age.getValue()) {
                 p.payPP(2);

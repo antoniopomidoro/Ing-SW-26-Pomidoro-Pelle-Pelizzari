@@ -6,9 +6,6 @@ import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
-
-import java.util.List;
-
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
@@ -24,20 +21,21 @@ public interface EventEffect {
 
     /**
      * Core event logic — each concrete effect implements only this.
+     * Players are retrieved from state.getOrderTileOrder().
      * Must NOT trigger buildings; that's handled by the template method.
      */
-    boolean applyEffect(List<Player> players, GameState state, Age age);
+    boolean applyEffect(GameState state, Age age);
 
     /**
      * Template method: executes the event effect, then publishes the
      * corresponding trigger so that matching buildings are activated.
      * Concrete classes should NOT override this.
      */
-    default boolean executeEffect(List<Player> players, GameState state, TriggerKey triggerKey, Age age) {
-        if (players == null || state == null || triggerKey == null || age == null) {
+    default boolean executeEffect(GameState state, TriggerKey triggerKey, Age age) {
+        if (state == null || triggerKey == null || age == null) {
             return false;
         }
-        if (!applyEffect(players, state, age)) {
+        if (!applyEffect(state, age)) {
             return false;
         }
         return state.publishTrigger(triggerKey);

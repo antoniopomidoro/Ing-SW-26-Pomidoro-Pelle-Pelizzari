@@ -9,11 +9,13 @@ import java.util.List;
 
 public class Sustenance implements EventEffect {
     @Override
-    public boolean applyEffect(List<Player> players, GameState state, Age age) {
-        if (players == null || state == null || age == null) {
+    public boolean applyEffect(GameState state, Age age) {
+        if (state == null || age == null || state.getOrderTileOrder() == null) {
             return false;
         }
+        List<Player> players = state.getOrderTileOrder();
         for (Player p : players) {
+            if (p == null) continue;
             int neededFood = 0;
             for (CharacterEnum c : CharacterEnum.values()) {
                 neededFood += p.getStats().getCharacterCount(c);

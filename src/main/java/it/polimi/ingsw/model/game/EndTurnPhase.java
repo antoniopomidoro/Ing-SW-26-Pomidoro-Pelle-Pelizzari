@@ -30,7 +30,7 @@ public class EndTurnPhase implements GamePhaseBehavior {
             context.setPhase(new EndGamePhase());
             return true;
         }
-        board.discardBottomCards(players, context);
+        board.discardBottomCards(context);
         board.topToBottomCards();
 
         // Trigger END_TURN buildings (e.g. InventorPair, CardSet)

@@ -70,10 +70,9 @@ public abstract class Card{
      * By default, it simply returns true. Subclasses can override this to implement specific behavior (e.g., Events).
      *
      * @param state The current game state.
-     * @param p     The list of players involved.
      * @return True if the discard action was processed successfully.
      */
-    public boolean onDiscard(GameState state, List<Player> p) {
+    public boolean onDiscard(GameState state) {
         return true;
     }
     //method that says if the selected card is a building

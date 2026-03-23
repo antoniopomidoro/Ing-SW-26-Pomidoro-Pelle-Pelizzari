@@ -57,13 +57,12 @@ public class Event extends Card {
     /**
      * Handles the logic when the event card is discarded (triggered).
      * @param state The current game state.
-     * @param players The list of players involved.
      * @return True if the event was executed successfully.
      */
     @Override
-    public boolean onDiscard(GameState state, List<Player> players){
+    public boolean onDiscard(GameState state){
         if (effect != null) {
-            return effect.executeEffect(players, state, triggerKey, this.getAge());
+            return effect.executeEffect(state, triggerKey, this.getAge());
         }
         return false;
     }

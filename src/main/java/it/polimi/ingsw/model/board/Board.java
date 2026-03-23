@@ -109,10 +109,11 @@ public class Board {
         return this.orderTile;
     }
 
-    public boolean discardBottomCards(List<Player> p, GameState state){
+    public boolean discardBottomCards(GameState state){
+        if (state == null) return false;
         bottomCards.stream()
                 .sorted(Comparator.comparingInt(Card::getResolutionPriority))
-                .forEach(c -> c.onDiscard(state, p));
+                .forEach(c -> c.onDiscard(state));
         bottomCards.clear();
         return true;
     }
