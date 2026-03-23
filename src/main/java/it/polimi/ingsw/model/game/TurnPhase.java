@@ -33,11 +33,11 @@ public class TurnPhase implements GamePhaseBehavior {
             index++;
         }
         List<Player> players = context.getTurnOrder();
-        int totemIndex = context.getTotemIndex();
-        while (totemIndex < players.size()) {
-            Player player = players.get(totemIndex);
-            int bonus = player.getTotemPlacementBonus();
-            context.setTotemIndex(totemIndex + 1);
+        int extraIndex = context.getExtraIndex();
+        while (extraIndex < players.size()) {
+            Player player = players.get(extraIndex);
+            int bonus = player.getStats().getExtraUpperPick();
+            context.setExtraIndex(extraIndex + 1);
             if (bonus > 0) {
                 context.setPhase(new PlayerTurnPhase(player, new Tile(player, bonus, 0)));
                 return;

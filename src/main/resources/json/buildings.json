@@ -2,12 +2,12 @@
   {
     "age":"AGE_1","id":"INVENTOR_PAIR","foodCost":3,"pp":4,
     "triggerPhase":"END_TURN",
-    "effect":{"effectType":"INVENTOR_PAIR"}
+    "effect":{"effectType":"INVENTOR_PAIR","bonus":3}
   },
   {
     "age":"AGE_1","id":"TOTEM_PLACEMENT_FOOD_BONUS","foodCost":3,"pp":3,
     "triggerPhase":"START_TURN",
-    "effect":{"effectType":"TOTEM_PLACEMENT_BONUS"}
+    "effect":{"effectType":"TOTEM_PLACEMENT_BONUS","bonus":1}
   },
   {
     "age":"AGE_1","id":"CARDS_SET_5_FOOD","foodCost":4,"pp":3,

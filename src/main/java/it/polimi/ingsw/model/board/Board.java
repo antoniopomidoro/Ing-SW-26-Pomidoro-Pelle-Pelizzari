@@ -130,14 +130,14 @@ public class Board {
         return sup;
     }
 
-    public List<Card> getBottomBuildings(){
-        List<Card> sup = new ArrayList<>();
+    public List<Building> getBottomBuildings(){
+        List<Building> sup = new ArrayList<>();
         sup.addAll(bottomBuildings);
         return sup;
     }
 
-    public List<Card> getTopBuildings(){
-        List<Card> sup = new ArrayList<>();
+    public List<Building> getTopBuildings(){
+        List<Building> sup = new ArrayList<>();
         sup.addAll(topBuildings);
         return sup;
     }
