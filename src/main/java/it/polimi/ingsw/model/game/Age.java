@@ -16,16 +16,24 @@ public enum Age {
     AGE_3(3),
     AGE_3_FINAL(3);
 
-    // Il campo immutabile che contiene il vero valore numerico
     private final int numericValue;
 
-    // Il costruttore dell'Enum
     Age(int numericValue) {
         this.numericValue = numericValue;
     }
 
-    // Il metodo pubblico e sicuro da chiamare in giro per il codice
     public int getValue() {
         return this.numericValue;
+    }
+
+    public boolean hasNext() {
+        return this.ordinal() < Age.values().length - 1;
+    }
+
+    public Age getNext() {
+        if (!hasNext()) {
+            throw new IllegalStateException("No next age");
+        }
+        return Age.values()[this.ordinal() + 1];
     }
 }

@@ -1,4 +1,5 @@
 package it.polimi.ingsw.model.game;
+import it.polimi.ingsw.controller.GameConfig;
 import it.polimi.ingsw.model.board.Board;
 import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.player.Player;
@@ -14,6 +15,7 @@ import java.util.List;
  */
 public class GameState {
     // --- Core game fields ---
+    private GameConfig config;
     private Age age;
     private int turn;
     private GamePhase phase;
@@ -26,7 +28,6 @@ public class GameState {
 
     // --- State Pattern support fields ---
     private int currentTileIndex;
-    private boolean ageChangeNeeded;
     private int currentPlayerIndex = 0;
     private int currentPlayerOrderIndex = 0;
     private int extraIndex = 0;
@@ -35,11 +36,11 @@ public class GameState {
      * Constructor: Initializes the game environment.
      * @param nicknames The list of names provided from the UI.
      */
-    public GameState(List<String> nicknames) {
+    public GameState(List<String> nicknames, GameConfig config) {
         this.age = Age.AGE_1;
         this.turn = 1;
         this.currentTileIndex = 0;
-        this.ageChangeNeeded = false;
+        this.config = config;
 
         this.board = new Board();
         this.players = new ArrayList<>();
@@ -129,11 +130,6 @@ public class GameState {
         return this.currentTileIndex;
     }
 
-    /** @return Whether an age change is pending. */
-    public boolean isAgeChangeNeeded() {
-        return this.ageChangeNeeded;
-    }
-
     /**
      * Updates the game Age.
      * @param age The new Age to set.
@@ -175,13 +171,6 @@ public class GameState {
         this.currentTileIndex = index;
     }
 
-    /**
-     * Sets whether an age change is needed at the end of the current turn.
-     * @param needed true if age change is pending.
-     */
-    public void setAgeChangeNeeded(boolean needed) {
-        this.ageChangeNeeded = needed;
-    }
 
     public boolean nextPlayerInTurnOrderTile(){
         currentPlayerOrderIndex++;
@@ -206,5 +195,24 @@ public class GameState {
 
     public void setExtraIndex(int extraIndex) {
         this.extraIndex = extraIndex;
+    }
+
+    public GameConfig getConfig() {
+        return config;
+    }
+    public boolean updateTurnOrder(Player p){
+        if (p == null || turnOrder.contains(p)) return false;
+        this.turnOrder.add(p);
+        return true;
+    }
+    public boolean setOrderTileOrder(List<Player> orderTileOrder) {
+        if (orderTileOrder == null || orderTileOrder.isEmpty())return false;
+        this.orderTileOrder.clear();
+        this.orderTileOrder.addAll(orderTileOrder);
+        return true;
+    }
+    public boolean clearTurnOrder() {
+        this.turnOrder.clear();
+        return true;
     }
 }

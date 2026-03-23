@@ -23,17 +23,26 @@ public class StartTurnPhase implements GamePhaseBehavior {
 
     @Override
     public void execute(GameState context) {
-        if (context.getTurn() == 1){
-            return;
-        }
-
         Board board = context.getBoard();
         Decks deck = context.getDeck();
         List<Player> turnOrder = context.getTurnOrder();
         OrderTile orderTile = board.getOrderTile();
+        int topCardsNumber = context.getConfig().getTopCardsQuantity(context.getPlayers());
 
-        // 1. Shift existing top cards/buildings to bottom
-        board.topToBottomCards();
+        while (board.getTopCards().size() < topCardsNumber) {
+            Optional<Card> drawnCard = deck.popCard(context.getAge());
+            if (drawnCard.isPresent()) {
+                board.addTopCard(drawnCard.get());
+            } else {
+                if (context.getAge().hasNext()) {
+                    context.setPhase(new ChangeAgePhase());
+                    return;
+                } else {
+                    break;
+                }
+            }
+        }
+
 
         for (int i = 0; i < turnOrder.size(); i++){
             Player p = turnOrder.get(i);
@@ -56,6 +65,7 @@ public class StartTurnPhase implements GamePhaseBehavior {
             throw new IllegalStateException("Only the current player can occupy an offer trail tile during START_TURN phase.");
         }
         board.getTiles().getTile(index).occupy(player);
+        context.updateTurnOrder(currentPlayer);
         boolean isPhaseFinished = context.nextPlayerInTurnOrderTile();
         if(isPhaseFinished){
             this.nextPhase(context);

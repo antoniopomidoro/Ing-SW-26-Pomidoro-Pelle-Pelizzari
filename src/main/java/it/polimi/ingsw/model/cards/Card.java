@@ -78,19 +78,13 @@ public abstract class Card{
     }
     //method that says if the selected card is a building
     //method that add the card to a list
-    public boolean addToDeck(EnumMap<Age,List<Card>> deck){
-        if(this.age== null) {
-            return false;
-        }
-        else{deck.get(this.age).add(this);
-            return true;}
-
-        }
-    public boolean isBuyable() {
+    public boolean addToDeck(Decks manager) {
+        if (this.age == null) return false;
+        manager.addCard(this);
         return true;
     }
-    public boolean addToDeck(Map<Age,List<Card>> deck) {
-        return false;
+    public boolean isBuyable() {
+        return true;
     }
 
     public Card copy() {

@@ -6,9 +6,8 @@ import it.polimi.ingsw.model.game.Age;
 
 
 public class Decks {
-    private  Map<Age,List<Card>> buildings;
+    private  Map<Age,List<Building>> buildings;
     private  Map<Age,List<Card>> cards;
-    private Optional<Card> card;
     //the constructor initialize 2 enum map that contains lists divided by era of cards and buildings
     //then for each card and buildin in the lists passed in input creates the ages decks using the function addToDeck of card
     //using visitors pattern
@@ -20,10 +19,10 @@ public class Decks {
             this.buildings.put(a,new ArrayList<>());
         }
         for(Card c :cards){
-            c.addToDeck(this.cards);}
+            c.addToDeck(this);}
 
         for(Building b : buildings){
-            b.addToDeck(this.buildings);
+            b.addToDeck(this);
         }
         
     }
@@ -44,20 +43,25 @@ public class Decks {
             if(cards.get(Age.values()[a.ordinal()+1]).isEmpty()){
                 return Optional.empty();
             }else{
-                card = Optional.of(cards.get(Age.values()[a.ordinal()+1]).removeLast());
-                return card;
+                return Optional.of(cards.get(Age.values()[a.ordinal()+1]).removeLast());
+
             }
         }
         else{
-            card = Optional.of(cards.get(Age.values()[a.ordinal()]).removeLast());
-            return card;
+            return Optional.of(cards.get(Age.values()[a.ordinal()]).removeLast());
         }
     }
 
-    public List<Card> getBuildings(Age age) {
-        List<Card> sup = buildings.get(age);
+    public List<Building> getBuildings(Age age) {
+        List<Building> sup = buildings.get(age);
         return sup;
     }
+    public void addCard(Card c) {
+        this.cards.get(c.getAge()).add(c);
+    }
 
+    public void addBuilding(Building b) {
+        this.buildings.get(b.getAge()).add(b);
+    }
 
     }

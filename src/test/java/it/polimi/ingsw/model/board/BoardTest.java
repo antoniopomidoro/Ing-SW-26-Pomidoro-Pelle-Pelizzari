@@ -51,7 +51,7 @@ public class BoardTest {
         for(int i = 0; i < size ; i++) {
             b.add(new Building());
         }
-        board.addTopBuilding(b);
+        board.addTopBuildings(b);
     }
 
     private void generateBottomBuildings(int size) {
@@ -386,7 +386,7 @@ public class BoardTest {
         for(int i = 0; i < size ; i++) {
             b.add(new Building());
         }
-        boolean ret = board.addTopBuilding(b);
+        boolean ret = board.addTopBuildings(b);
 
         assertTrue(ret);
         assertEquals(size, board.getTopBuildings().size());

@@ -9,6 +9,9 @@ import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * Represents a Building card, which has food cost and provides prestige points.
@@ -98,5 +101,11 @@ public class Building extends Card {
     @Override
     public Building copy() {
         return new Building(this.age,this.id,this.foodCost,this.pp,this.effect,this.triggerPhase);
+    }
+    @Override
+    public boolean addToDeck(Decks manager) {
+        if (this.age == null) return false;
+        manager.addBuilding(this);
+        return true;
     }
 }

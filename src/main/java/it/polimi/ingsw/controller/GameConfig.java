@@ -1,5 +1,7 @@
 package it.polimi.ingsw.controller;
 
+import it.polimi.ingsw.model.player.Player;
+
 import java.util.List;
 
 /**
@@ -17,6 +19,11 @@ public class GameConfig {
     private int gameMinPlayers;
     private int[][] buildingPerPlayer;
     private List<Integer> startingFood;
+    private int bottomExtraCards;
+    private int topExtraCards;
+    private int maxTurns;
+
+
 
     /**
      * Default constructor for Jackson deserialization.
@@ -60,5 +67,17 @@ public class GameConfig {
 
     public int getGameMinPlayers() {
         return gameMinPlayers;
+    }
+
+    public int getBottomCardsQuantity(List<Player> p) {
+        return bottomExtraCards + p.size();
+    }
+
+    public int getTopCardsQuantity(List<Player> p) {
+        return topExtraCards + p.size();
+    }
+
+    public int getMaxTurns() {
+        return maxTurns;
     }
 }

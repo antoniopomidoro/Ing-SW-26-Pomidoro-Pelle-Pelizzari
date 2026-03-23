@@ -72,7 +72,7 @@ public class Board {
         return false;
     }
 
-    public boolean addTopBuilding(ArrayList<Building> b) {
+    public boolean addTopBuildings(List<Building> b) {
         if(b != null) {
             topBuildings.addAll(b);
             return true;
@@ -170,6 +170,10 @@ public class Board {
         }
         return null;
 
+    }
+    public boolean discardBottomBuildings(){
+        bottomBuildings.clear();
+        return true;
     }
 
 
