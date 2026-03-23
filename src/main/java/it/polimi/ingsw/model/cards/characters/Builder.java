@@ -26,6 +26,11 @@ public class Builder extends Character {
     public Builder() {
 
     }
+    public Builder(Age age, int pp , int discount){
+        this.age = age;
+        this.discount =discount;
+        this.pp=pp;
+    }
 
     /**
      * Gets the discount value provided by the card.
@@ -48,5 +53,11 @@ public class Builder extends Character {
         p.getStats().incrementCharacter(CharacterEnum.BUILDER);
         p.getStats().addBuilderPp(pp);
         p.getStats().addBuildingDiscount(discount);
+    }
+
+
+    @Override
+    public Card copy() {
+        return new Builder(this.age,this.pp,this.discount);
     }
 }

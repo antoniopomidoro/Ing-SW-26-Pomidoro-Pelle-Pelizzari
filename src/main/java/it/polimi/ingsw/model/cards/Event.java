@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model.cards;
 
+import it.polimi.ingsw.model.cards.characters.Builder;
 import it.polimi.ingsw.model.effects.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
@@ -24,6 +25,15 @@ public class Event extends Card {
     public Event() {
         super();
     }
+
+    public Event(Age age, String id, EventEffect effect, GamePhase phase,int resolutionPriority){
+        this.age = age;
+        this.id = id;
+        this.effect = effect;
+        this.phase = phase;
+        this.resolutionPriority = resolutionPriority;
+    }
+
 
     /**
      * Returns the resolution priority of this event.
@@ -62,5 +72,8 @@ public class Event extends Card {
         return false;
     }
 
-
+    @Override
+    public Card copy() {
+        return new Event(this.age, this.id, this.effect, this.phase, this.resolutionPriority);
+    }
 }

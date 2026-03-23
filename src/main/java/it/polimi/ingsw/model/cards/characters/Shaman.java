@@ -26,6 +26,11 @@ public class Shaman extends Character {
         super();
     }
 
+    public Shaman(Age age, int stars){
+        this.age = age;
+        this.stars= stars;
+    }
+
     /**
      * Gets the number of stars on the card.
      * @return The number of stars.
@@ -38,5 +43,10 @@ public class Shaman extends Character {
     public void onAddedToPlayer(Player p) {
         p.getStats().incrementCharacter(CharacterEnum.SHAMAN);
         p.getStats().addStars(stars);
+    }
+
+    @Override
+    public Card copy() {
+        return new Shaman(this.age, this.stars);
     }
 }

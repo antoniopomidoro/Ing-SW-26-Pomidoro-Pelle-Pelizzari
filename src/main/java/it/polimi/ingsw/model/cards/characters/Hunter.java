@@ -1,6 +1,8 @@
 package it.polimi.ingsw.model.cards.characters;
 
+import it.polimi.ingsw.model.cards.Card;
 import it.polimi.ingsw.model.cards.Character;
+import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.player.*;
 
 
@@ -18,6 +20,11 @@ public class Hunter extends Character {
         super();
     }
 
+    public Hunter(Age age, boolean hasFood){
+        this.age = age;
+        this.hasFood = hasFood;
+    }
+
     @Override
     public void onAddedToPlayer(Player p) {
         p.getStats().incrementCharacter(CharacterEnum.HUNTER);
@@ -31,5 +38,10 @@ public class Hunter extends Character {
 
     public void setHasFood(boolean hasFood) {
         this.hasFood = hasFood;
+    }
+
+    @Override
+    public Card copy() {
+        return new Hunter(this.age, this.hasFood);
     }
 }

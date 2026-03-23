@@ -141,6 +141,36 @@ public class Board {
         sup.addAll(topBuildings);
         return sup;
     }
+    public Card seeTopCard(int index){
+        if(index >=0 && index < topCards.size()){
+            return topCards.get(index).copy();
+        }
+        return null;
+
+    }
+
+    public Card seeBottomCard(int index){
+        if(index >=0 && index < bottomCards.size()){
+            return bottomCards.get(index).copy();
+        }
+        return null;
+    }
+
+
+    public Building seeTopBuilding(int index){
+        if(index >=0 && index < topBuildings.size()){
+            return topBuildings.get(index).copy();
+        }
+        return null;
+    }
+
+    public Building seeBottomBuilding(int index){
+        if(index >=0 && index < bottomBuildings.size()){
+            return bottomBuildings.get(index).copy();
+        }
+        return null;
+
+    }
 
 
 
