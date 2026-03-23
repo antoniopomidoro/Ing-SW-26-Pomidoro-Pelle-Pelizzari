@@ -33,9 +33,12 @@ public class Gatherer extends Character {
 
 
     @Override
-    public void onAddedToPlayer(Player p) {
-        p.getStats().incrementCharacter(CharacterEnum.GATHERER);
-        p.getStats().addSustainmentDiscount(sustDisc);
+    public boolean onAddedToPlayer(Player p) {
+        if (p == null) {
+            return false;
+        }
+        return p.getStats().incrementCharacter(CharacterEnum.GATHERER)
+                && p.getStats().addSustainmentDiscount(sustDisc);
     }
 
     public int getSustDisc() {

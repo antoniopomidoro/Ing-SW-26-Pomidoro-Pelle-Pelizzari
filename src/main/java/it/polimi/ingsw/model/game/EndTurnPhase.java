@@ -19,16 +19,23 @@ import java.util.List;
  */
 public class EndTurnPhase implements GamePhaseBehavior {
     @Override
-    public void execute(GameState context) {
+    public boolean execute(GameState context) {
+        if (context == null || context.getBoard() == null || context.getConfig() == null) {
+            return false;
+        }
         Board board = context.getBoard();
         List<Player> players = context.getPlayers();
         int maxTurns = context.getConfig().getMaxTurns();
         if (context.getTurn() >= maxTurns) {
             context.setPhase(new EndGamePhase());
-            return;
+            return true;
         }
         board.discardBottomCards(players, context);
         board.topToBottomCards();
+
+        // Trigger END_TURN buildings (e.g. InventorPair, CardSet)
+        context.publishTrigger(TriggerKey.END_TURN);
+
         // Free all occupied tiles to prepare for next turn
         List<Tile> tiles = board.getTiles().getTiles();
         for (Tile tile : tiles) {
@@ -47,5 +54,6 @@ public class EndTurnPhase implements GamePhaseBehavior {
         context.setTurn(context.getTurn() + 1);
 
         context.setPhase(new StartTurnPhase());
+        return true;
     }
 }

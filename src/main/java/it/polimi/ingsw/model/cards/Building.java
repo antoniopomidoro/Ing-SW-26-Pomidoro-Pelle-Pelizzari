@@ -22,7 +22,7 @@ public class Building extends Card {
     private int foodCost;
     private int pp;
     private ContextualEffect effect;
-    private GamePhase triggerPhase;
+    private TriggerKey triggerKey;
 
     /**
      * Default constructor for Building.
@@ -32,13 +32,13 @@ public class Building extends Card {
         super();
     }
 
-    public Building(Age age, String id, int foodCost,int pp, ContextualEffect effect, GamePhase triggerPhase){
+    public Building(Age age, String id, int foodCost, int pp, ContextualEffect effect, TriggerKey triggerKey){
         this.age = age;
         this.id = id;
         this.foodCost = foodCost;
         this.pp = pp;
         this.effect = effect;
-        this.triggerPhase = triggerPhase;
+        this.triggerKey = triggerKey;
 
     }
 
@@ -57,8 +57,11 @@ public class Building extends Card {
      * @param p     The player triggering the effect.
      * @param state The game state.
      */
-    public void triggerBuildingEffect(Player p, GameState state) {
-        effect.executeEffect(p, state);
+    public boolean triggerBuildingEffect(Player p, GameState state) {
+        if (effect == null || p == null || state == null) {
+            return false;
+        }
+        return effect.executeEffect(p, state);
     }
 
     /**
@@ -80,27 +83,30 @@ public class Building extends Card {
     }
 
     /**
-     * Gets the phase in which this building's effect is triggered.
+     * Gets the trigger key that determines when this building's effect fires.
      *
-     * @return The trigger phase.
+     * @return The trigger key.
      */
-    public GamePhase getTriggerPhase() {
-        return triggerPhase;
+    public TriggerKey getTriggerKey() {
+        return triggerKey;
     }
 
     /**
      * Method triggered when the building is added to a player.
-     * For one-shot buildings (triggerPhase == NONE), the effect is executed immediately.
+     * For one-shot buildings (triggerKey == ON_ACQUIRE), the effect is executed immediately.
      *
      * @param p The player adding the building.
      */
-    public void onAddedToPlayer(Player p) {
-        effect.onAddedToPlayer(p);
+    public boolean onAddedToPlayer(Player p) {
+        if (effect == null || p == null) {
+            return false;
+        }
+        return effect.onAddedToPlayer(p);
     }
 
     @Override
     public Building copy() {
-        return new Building(this.age,this.id,this.foodCost,this.pp,this.effect,this.triggerPhase);
+        return new Building(this.age, this.id, this.foodCost, this.pp, this.effect, this.triggerKey);
     }
     @Override
     public boolean addToDeck(Decks manager) {

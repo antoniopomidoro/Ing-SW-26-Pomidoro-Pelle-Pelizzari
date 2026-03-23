@@ -26,18 +26,24 @@ public class Hunter extends Character {
     }
 
     @Override
-    public void onAddedToPlayer(Player p) {
-        p.getStats().incrementCharacter(CharacterEnum.HUNTER);
+    public boolean onAddedToPlayer(Player p) {
+        if (p == null) {
+            return false;
+        }
+        if (!p.getStats().incrementCharacter(CharacterEnum.HUNTER)) {
+            return false;
+        }
         int food = p.getStats().getCharacterCount(CharacterEnum.HUNTER)*(hasFood ? 1 : 0);
-        p.addFood(food);
+        return p.addFood(food);
     }
 
     public boolean isHasFood() {
         return hasFood;
     }
 
-    public void setHasFood(boolean hasFood) {
+    public boolean setHasFood(boolean hasFood) {
         this.hasFood = hasFood;
+        return true;
     }
 
     @Override

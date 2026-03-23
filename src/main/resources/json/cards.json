@@ -101,21 +101,21 @@
   {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_3","id":"HUNTER","minPlayers":2,"hasFood":false},
   {"cardType":"CHARACTER","characterType":"HUNTER","age":"AGE_3","id":"HUNTER","minPlayers":2,"hasFood":false},
 
-  {"cardType":"EVENT","age":"AGE_1","id":"SUSTENANCE_A1",      "phase":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"}},
-  {"cardType":"EVENT","age":"AGE_1","id":"HUNTING_A1",          "phase":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"}},
-  {"cardType":"EVENT","age":"AGE_1","id":"CAVE_PAINTINGS_A1",   "phase":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"}},
-  {"cardType":"EVENT","age":"AGE_1","id":"SHAMANIC_RITUAL_A1",  "phase":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":5,"ppLoss":3}},
+  {"cardType":"EVENT","age":"AGE_1","id":"SUSTENANCE_A1",      "triggerKey":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"}},
+  {"cardType":"EVENT","age":"AGE_1","id":"HUNTING_A1",          "triggerKey":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"}},
+  {"cardType":"EVENT","age":"AGE_1","id":"CAVE_PAINTINGS_A1",   "triggerKey":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"}},
+  {"cardType":"EVENT","age":"AGE_1","id":"SHAMANIC_RITUAL_A1",  "triggerKey":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":5,"ppLoss":3}},
 
-  {"cardType":"EVENT","age":"AGE_2","id":"SUSTENANCE_A2",      "phase":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"}},
-  {"cardType":"EVENT","age":"AGE_2","id":"HUNTING_A2",          "phase":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"}},
-  {"cardType":"EVENT","age":"AGE_2","id":"CAVE_PAINTINGS_A2",   "phase":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"}},
-  {"cardType":"EVENT","age":"AGE_2","id":"SHAMANIC_RITUAL_A2",  "phase":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":10,"ppLoss":5}},
+  {"cardType":"EVENT","age":"AGE_2","id":"SUSTENANCE_A2",      "triggerKey":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"}},
+  {"cardType":"EVENT","age":"AGE_2","id":"HUNTING_A2",          "triggerKey":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"}},
+  {"cardType":"EVENT","age":"AGE_2","id":"CAVE_PAINTINGS_A2",   "triggerKey":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"}},
+  {"cardType":"EVENT","age":"AGE_2","id":"SHAMANIC_RITUAL_A2",  "triggerKey":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":10,"ppLoss":5}},
 
-  {"cardType":"EVENT","age":"AGE_3","id":"HUNTING_A3",          "phase":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"}},
-  {"cardType":"EVENT","age":"AGE_3","id":"CAVE_PAINTINGS_A3",   "phase":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"}},
+  {"cardType":"EVENT","age":"AGE_3","id":"HUNTING_A3",          "triggerKey":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"}},
+  {"cardType":"EVENT","age":"AGE_3","id":"CAVE_PAINTINGS_A3",   "triggerKey":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"}},
 
-  {"cardType":"EVENT","age":"AGE_3_FINAL","id":"FINAL_SHAMANIC_RITUAL","phase":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":15,"ppLoss":7}},
-  {"cardType":"EVENT","age":"AGE_3_FINAL","id":"FINAL_SUSTENANCE",     "phase":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"}}
+  {"cardType":"EVENT","age":"AGE_3_FINAL","id":"FINAL_SHAMANIC_RITUAL","triggerKey":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":15,"ppLoss":7}},
+  {"cardType":"EVENT","age":"AGE_3_FINAL","id":"FINAL_SUSTENANCE",     "triggerKey":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"}}
 ]
 
 

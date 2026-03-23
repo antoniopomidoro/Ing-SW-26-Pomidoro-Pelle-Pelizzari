@@ -18,7 +18,7 @@ public class Player {
     private int id;
     private String nickname;
     private List<Card> cards;
-    private List<Building> buidlings;
+    private List<Building> buildings;
     private PlayerStats stats;
     private int food;
     private int pp;
@@ -30,7 +30,7 @@ public class Player {
         // Other initializations
         this.id = id;
         this.nickname = nickname;
-        buidlings = new ArrayList<>();
+        buildings = new ArrayList<>();
         cards = new ArrayList<>();
         stats = new PlayerStats();
         // The food gets added later
@@ -123,19 +123,38 @@ public class Player {
         return totemPlacementBonus;
     }
 
-    public void setTotemPlacementBonus(int totemPlacementBonus) {
+    public boolean setTotemPlacementBonus(int totemPlacementBonus) {
+        if (totemPlacementBonus < 0) {
+            return false;
+        }
         this.totemPlacementBonus = totemPlacementBonus;
-    }
-
-    public boolean addBuilding( Building b){
-        buidlings.add(b);
         return true;
     }
 
-    public List<Building> getBuidlings(){
+    public boolean addBuilding(Building b){
+        buildings.add(b);
+        return true;
+    }
+
+    public List<Building> getBuildings(){
         List<Building> sup = new ArrayList<>();
-        sup.addAll(buidlings);
+        sup.addAll(buildings);
         return sup;
+    }
+
+    /**
+     * Returns all buildings owned by this player that match the given trigger key.
+     * @param key The trigger key to filter by.
+     * @return A list of buildings with the matching trigger key.
+     */
+    public List<Building> getBuildingsByTrigger(TriggerKey key) {
+        List<Building> result = new ArrayList<>();
+        for (Building b : buildings) {
+            if (b.getTriggerKey() == key) {
+                result.add(b);
+            }
+        }
+        return result;
     }
 
 }

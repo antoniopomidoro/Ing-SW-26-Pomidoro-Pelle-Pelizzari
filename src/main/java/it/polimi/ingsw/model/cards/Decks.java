@@ -27,10 +27,17 @@ public class Decks {
         
     }
     //the shuffle method remove the final methods then shuffle all non-empty decks then add final events
-    public void shuffle() {
-        for(Age a:Age.values()){
-           Collections.shuffle(cards.get(a));
+    public boolean shuffle() {
+        if (cards == null) {
+            return false;
         }
+        for(Age a:Age.values()){
+            List<Card> ageDeck = cards.get(a);
+            if (ageDeck != null) {
+                Collections.shuffle(ageDeck);
+            }
+        }
+        return true;
     }
 
 
@@ -56,12 +63,20 @@ public class Decks {
         List<Building> sup = buildings.get(age);
         return sup;
     }
-    public void addCard(Card c) {
+    public boolean addCard(Card c) {
+        if (c == null || c.getAge() == null || this.cards.get(c.getAge()) == null) {
+            return false;
+        }
         this.cards.get(c.getAge()).add(c);
+        return true;
     }
 
-    public void addBuilding(Building b) {
+    public boolean addBuilding(Building b) {
+        if (b == null || b.getAge() == null || this.buildings.get(b.getAge()) == null) {
+            return false;
+        }
         this.buildings.get(b.getAge()).add(b);
+        return true;
     }
 
     }

@@ -14,7 +14,7 @@ public interface GamePhaseBehavior {
      * Executes the logic for this game phase.
      * @param context The GameState acting as the State Pattern context.
      */
-    default public void execute(GameState context){
+    default public boolean execute(GameState context){
         throw new UnsupportedOperationException("method not available in this phase");
     }
     default boolean nextPhase(GameState context){

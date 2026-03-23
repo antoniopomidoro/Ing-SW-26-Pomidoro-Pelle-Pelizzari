@@ -56,12 +56,13 @@ public class JsonFactory {
      *
      * @throws IOException if any JSON file cannot be read or parsed.
      */
-    public void loadAllData() throws IOException {
+    public boolean loadAllData() throws IOException {
         this.cards     = loadCards();
         this.buildings = loadBuildings();
         this.tiles     = loadTiles();
         this.orderTiles = loadOrderTiles();
         this.config     = loadConfig();
+        return cards != null && buildings != null && tiles != null && orderTiles != null && config != null;
     }
 
     // ─── Getters for cached data ───────────────────────────────────────

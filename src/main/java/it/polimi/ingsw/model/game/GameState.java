@@ -6,20 +6,19 @@ import it.polimi.ingsw.model.player.Player;
 
 import java.util.*;
 import java.util.List;
+import it.polimi.ingsw.model.cards.Building;
 
 /**
  * GameState: The root aggregate of the game model and the Context of the State Pattern.
  * It manages the lifecycle of Players, Board, and Deck, and delegates
- * phase-specific logic to {@link GamePhaseBehavior} implementations
- * associated with each {@link GamePhase}.
+ * phase-specific logic to {@link GamePhaseBehavior} implementations.
  */
 public class GameState {
     // --- Core game fields ---
     private GameConfig config;
     private Age age;
     private int turn;
-    private GamePhase phase;
-    private GamePhaseBehavior gamePhase;
+    private GamePhaseBehavior currentPhase;
     private List<Player> players;
     private Board board;
     private Decks deck;
@@ -56,24 +55,13 @@ public class GameState {
     }
 
     // ==========================================
-    //  State Pattern: Phase control & execution
-    // ==========================================
-
-    /**
-     * Executes the current phase's behavior.
-     * Delegates to the {@link GamePhaseBehavior} associated with the current
-     * {@link GamePhase}. Does nothing if the phase has no behavior (e.g., event phases).
-     */
-    public void executePhase() {
-        gamePhase = phase.getBehavior();
-        if (gamePhase != null) {
-            gamePhase.execute(this);
-        }
-    }
-
-    // ==========================================
     //  Getters & Setters
     // ==========================================
+
+    /** @return The current phase behavior (State Pattern). */
+    public GamePhaseBehavior getCurrentPhase() {
+        return this.currentPhase;
+    }
 
     /** @return The current Age of the game (Age I, II, or III). */
     public Age getAge() {
@@ -83,11 +71,6 @@ public class GameState {
     /** @return The current round number. */
     public int getTurn() {
         return this.turn;
-    }
-
-    /** @return The current phase within the turn. */
-    public GamePhase getPhase() {
-        return this.phase;
     }
 
     /** @return The list of all players. */
@@ -153,22 +136,28 @@ public class GameState {
     }
 
     /**
-     * Switches the game to a new phase and updates the associated behavior.
-     * @param newPhase The next GamePhase.
-     * @return true if the phase was updated.
+     * Switches the game to a new phase and auto-starts it.
+     * @param newPhase The new phase behavior.
      */
-    public void setPhase(GamePhaseBehavior newPhase) {
-        this.gamePhase = newPhase;
+    public boolean setPhase(GamePhaseBehavior newPhase) {
+        if (newPhase == null) {
+            return false;
+        }
+        this.currentPhase = newPhase;
         // Autostart della fase non appena viene settata!
-        this.gamePhase.execute(this);
+        return this.currentPhase.execute(this);
     }
 
     /**
      * Sets the current tile index for tile scanning in TurnPhase.
      * @param index The tile index.
      */
-    public void setCurrentTileIndex(int index) {
+    public boolean setCurrentTileIndex(int index) {
+        if (index < 0) {
+            return false;
+        }
         this.currentTileIndex = index;
+        return true;
     }
 
 
@@ -193,8 +182,12 @@ public class GameState {
         return extraIndex;
     }
 
-    public void setExtraIndex(int extraIndex) {
+    public boolean setExtraIndex(int extraIndex) {
+        if (extraIndex < 0) {
+            return false;
+        }
         this.extraIndex = extraIndex;
+        return true;
     }
 
     public GameConfig getConfig() {
@@ -213,6 +206,32 @@ public class GameState {
     }
     public boolean clearTurnOrder() {
         this.turnOrder.clear();
+        return true;
+    }
+
+    // ==========================================
+    //  Trigger System
+    // ==========================================
+
+    /**
+     * Publishes a trigger: for each active player (orderTileOrder),
+     * activates all buildings that match the given trigger key.
+     *
+     * @param key The trigger key (e.g. END_TURN, HUNTER_EVENT, etc.)
+     */
+    public boolean publishTrigger(TriggerKey key) {
+        if (key == null || orderTileOrder == null) {
+            return false;
+        }
+        for (Player p : orderTileOrder) {
+            if (p == null) {
+                continue;
+            }
+            List<Building> triggered = p.getBuildingsByTrigger(key);
+            for (Building b : triggered) {
+                b.triggerBuildingEffect(p, this);
+            }
+        }
         return true;
     }
 }

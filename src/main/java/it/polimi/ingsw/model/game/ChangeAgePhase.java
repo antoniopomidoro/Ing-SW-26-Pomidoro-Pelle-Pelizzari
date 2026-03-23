@@ -15,7 +15,13 @@ import it.polimi.ingsw.model.board.Board;
 public class ChangeAgePhase implements GamePhaseBehavior {
 
     @Override
-    public void execute(GameState context) {
+    public boolean execute(GameState context) {
+        if (context == null || context.getBoard() == null || context.getAge() == null) {
+            return false;
+        }
+        if (!context.getAge().hasNext()) {
+            return false;
+        }
         Board board = context.getBoard();
         // Advance to the next Age
         context.setAge(context.getAge().getNext());
@@ -26,5 +32,6 @@ public class ChangeAgePhase implements GamePhaseBehavior {
         board.addTopBuildings(context.getDeck().getBuildings(context.getAge()));
         // Transition to START_TURN
         context.setPhase(new StartTurnPhase());
+        return true;
     }
 }

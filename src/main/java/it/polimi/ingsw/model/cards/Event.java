@@ -15,7 +15,7 @@ import java.util.List;
 public class Event extends Card {
     private String id;
     private EventEffect effect;
-    private GamePhase phase;
+    private TriggerKey triggerKey;
     private int resolutionPriority;
 
     /**
@@ -26,11 +26,11 @@ public class Event extends Card {
         super();
     }
 
-    public Event(Age age, String id, EventEffect effect, GamePhase phase,int resolutionPriority){
+    public Event(Age age, String id, EventEffect effect, TriggerKey triggerKey, int resolutionPriority){
         this.age = age;
         this.id = id;
         this.effect = effect;
-        this.phase = phase;
+        this.triggerKey = triggerKey;
         this.resolutionPriority = resolutionPriority;
     }
 
@@ -63,7 +63,7 @@ public class Event extends Card {
     @Override
     public boolean onDiscard(GameState state, List<Player> players){
         if (effect != null) {
-            return effect.executeEffect(players, state, phase, this.getAge());
+            return effect.executeEffect(players, state, triggerKey, this.getAge());
         }
         return false;
     }
@@ -74,6 +74,6 @@ public class Event extends Card {
 
     @Override
     public Card copy() {
-        return new Event(this.age, this.id, this.effect, this.phase, this.resolutionPriority);
+        return new Event(this.age, this.id, this.effect, this.triggerKey, this.resolutionPriority);
     }
 }

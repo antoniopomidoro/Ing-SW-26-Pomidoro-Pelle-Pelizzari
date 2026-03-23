@@ -83,8 +83,12 @@ public class PlayerStats {
      * @param type The character type that provides the boost.
      * @param gainPerCharacter The discount per character of that type.
      */
-    public void addSustainmentBoost(CharacterEnum type, int gainPerCharacter) {
+    public boolean addSustainmentBoost(CharacterEnum type, int gainPerCharacter) {
+        if (type == null || gainPerCharacter < 0) {
+            return false;
+        }
         sustainmentBoosts.merge(type, gainPerCharacter, Integer::sum);
+        return true;
     }
 
     /**
@@ -139,8 +143,12 @@ public class PlayerStats {
         return extraUpperPick;
     }
 
-    public void setExtraUpperPick(int extraUpperPick) {
+    public boolean setExtraUpperPick(int extraUpperPick) {
+        if (extraUpperPick < 0) {
+            return false;
+        }
         this.extraUpperPick = extraUpperPick;
+        return true;
     }
 
     public int calculateSet() {
@@ -150,12 +158,20 @@ public class PlayerStats {
                 .orElse(0);
     }
 
-    public void setTotemPlacementBonusFood(int bonus) {
+    public boolean setTotemPlacementBonusFood(int bonus) {
+        if (bonus < 0) {
+            return false;
+        }
         totemPlacementBonusFood = bonus;
+        return true;
     }
 
-    public void setBuilderPp(int pp) {
+    public boolean setBuilderPp(int pp) {
+        if (pp < 0) {
+            return false;
+        }
         builderPp = pp;
+        return true;
     }
 
 }

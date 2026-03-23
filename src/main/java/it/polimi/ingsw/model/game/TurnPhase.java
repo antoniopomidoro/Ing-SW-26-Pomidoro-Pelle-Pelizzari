@@ -17,7 +17,10 @@ import java.util.List;
 public class TurnPhase implements GamePhaseBehavior {
 
     @Override
-    public void execute(GameState context) {
+    public boolean execute(GameState context) {
+        if (context == null || context.getBoard() == null || context.getBoard().getTiles() == null) {
+            return false;
+        }
         List<Tile> tiles = context.getBoard().getTiles().getTiles();
         int index = context.getCurrentTileIndex();
 
@@ -28,7 +31,7 @@ public class TurnPhase implements GamePhaseBehavior {
                 // Save the current index so PlayerTurnPhase knows which tile to process
                 context.setCurrentTileIndex(index + 1);
                 context.setPhase(new PlayerTurnPhase(tile.getOccupier(), tile));
-                return;
+                return true;
             }
             index++;
         }
@@ -40,10 +43,12 @@ public class TurnPhase implements GamePhaseBehavior {
             context.setExtraIndex(extraIndex + 1);
             if (bonus > 0) {
                 context.setPhase(new PlayerTurnPhase(player, new Tile(player, bonus, 0)));
-                return;
+                return true;
             }
+            extraIndex++;
         }
         // All tiles have been scanned — move to END_TURN
         context.setPhase(new EndTurnPhase());
+        return true;
     }
 }

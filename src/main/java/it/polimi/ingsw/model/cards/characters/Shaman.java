@@ -40,9 +40,12 @@ public class Shaman extends Character {
     }
 
     @Override
-    public void onAddedToPlayer(Player p) {
-        p.getStats().incrementCharacter(CharacterEnum.SHAMAN);
-        p.getStats().addStars(stars);
+    public boolean onAddedToPlayer(Player p) {
+        if (p == null) {
+            return false;
+        }
+        return p.getStats().incrementCharacter(CharacterEnum.SHAMAN)
+                && p.getStats().addStars(stars);
     }
 
     @Override

@@ -49,10 +49,13 @@ public class Builder extends Character {
     }
 
     @Override
-    public void onAddedToPlayer(Player p) {
-        p.getStats().incrementCharacter(CharacterEnum.BUILDER);
-        p.getStats().addBuilderPp(pp);
-        p.getStats().addBuildingDiscount(discount);
+    public boolean onAddedToPlayer(Player p) {
+        if (p == null) {
+            return false;
+        }
+        return p.getStats().incrementCharacter(CharacterEnum.BUILDER)
+                && p.getStats().addBuilderPp(pp)
+                && p.getStats().addBuildingDiscount(discount);
     }
 
 

@@ -22,7 +22,10 @@ import java.util.Optional;
 public class StartTurnPhase implements GamePhaseBehavior {
 
     @Override
-    public void execute(GameState context) {
+    public boolean execute(GameState context) {
+        if (context == null || context.getBoard() == null || context.getDeck() == null || context.getConfig() == null) {
+            return false;
+        }
         Board board = context.getBoard();
         Decks deck = context.getDeck();
         List<Player> turnOrder = context.getTurnOrder();
@@ -36,7 +39,7 @@ public class StartTurnPhase implements GamePhaseBehavior {
             } else {
                 if (context.getAge().hasNext()) {
                     context.setPhase(new ChangeAgePhase());
-                    return;
+                    return true;
                 } else {
                     break;
                 }
@@ -55,6 +58,10 @@ public class StartTurnPhase implements GamePhaseBehavior {
                 p.payFoodWithPenalty(-food, penalty);
             }
         }
+
+        // Trigger START_TURN buildings (e.g. TotemPlacementBonus)
+        context.publishTrigger(TriggerKey.START_TURN);
+        return true;
 
     }
     @Override

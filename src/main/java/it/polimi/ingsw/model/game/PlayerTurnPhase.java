@@ -13,7 +13,7 @@ import java.util.List;
  * Handles the full turn logic for the player occupying the current tile:
  * <ol>
  *   <li>Identifies the player on the current tile</li>
- *   <li>Triggers all buildings with triggerPhase == PLAYER_TURN</li>
+ *   <li>Triggers all buildings with triggerKey == PLAYER_TURN</li>
  *   <li>The player performs picks (upper/bottom) as defined by the tile</li>
  *   <li>Advances the tile index and transitions back to TURN</li>
  * </ol>
@@ -32,13 +32,16 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         this.bottomPicks = activeTile.getBottomPicks();
     }
     @Override
-    public void execute(GameState context) {
+    public boolean execute(GameState context) {
+        if (context == null || activePlayer == null || activeTile == null) {
+            return false;
+        }
         int food = activeTile.getFoodBonus();
         if (food > 0){
             activePlayer.addFood(food);
         }
         nextPhase(context);
-        return;
+        return true;
     }
     @Override
     public boolean pickTopCard(GameState context, int index, Player player){
@@ -50,6 +53,8 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         c = context.getBoard().pickTopCard(index);
         activePlayer.addCard(c);
         upperPicks--;
+        // Trigger ON_CARD_PICK buildings (e.g. CardSet, InventorPair)
+        triggerOnCardPick(activePlayer, context);
         nextPhase(context);
         return true;
     }
@@ -63,6 +68,8 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         c = context.getBoard().pickBottomCard(index);
         activePlayer.addCard(c);
         bottomPicks--;
+        // Trigger ON_CARD_PICK buildings (e.g. CardSet, InventorPair)
+        triggerOnCardPick(activePlayer, context);
         nextPhase(context);
         return true;
     }
@@ -78,6 +85,8 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         activePlayer.payBuilding(b);
         activePlayer.addBuilding(b);
         upperPicks--;
+        // Trigger ON_CARD_PICK buildings (e.g. CardSet, InventorPair)
+        triggerOnCardPick(activePlayer, context);
         nextPhase(context);
         return true;
     }
@@ -93,8 +102,23 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         activePlayer.payBuilding(b);
         activePlayer.addBuilding(b);
         bottomPicks--;
+        // Trigger ON_CARD_PICK buildings (e.g. CardSet, InventorPair)
+        triggerOnCardPick(activePlayer, context);
         nextPhase(context);
         return true;
+    }
+
+    /**
+     * Triggers ON_CARD_PICK buildings for the active player only.
+     * This fires per-pick, not globally, so we avoid publishTrigger
+     * which would iterate all active players.
+     */
+    private void triggerOnCardPick(Player player, GameState context) {
+        if (player == null || context == null) return;
+        List<Building> triggered = player.getBuildingsByTrigger(TriggerKey.ON_CARD_PICK);
+        for (Building b : triggered) {
+            b.triggerBuildingEffect(player, context);
+        }
     }
     @Override
      public boolean nextPhase(GameState context){

@@ -39,10 +39,13 @@ public class Inventor extends Character {
     }
 
     @Override
-    public void onAddedToPlayer(Player p) {
-        p.getStats().incrementCharacter(CharacterEnum.INVENTOR);
-        p.getStats().updateDifferentToolNumber(tool);
-        p.getStats().incrementTool(tool);
+    public boolean onAddedToPlayer(Player p) {
+        if (p == null) {
+            return false;
+        }
+        return p.getStats().incrementCharacter(CharacterEnum.INVENTOR)
+                && p.getStats().updateDifferentToolNumber(tool)
+                && p.getStats().incrementTool(tool);
     }
 
     @Override

@@ -61,7 +61,7 @@ public abstract class Character extends Card {
      * Method triggered when the character is added to a player.
      * @param p The player adding the character.
      */
-    public void onAddedToPlayer(Player p) {
-        // Skeleton method
+    public boolean onAddedToPlayer(Player p) {
+        return p != null;
     }
 }

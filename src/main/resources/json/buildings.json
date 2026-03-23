@@ -1,110 +1,109 @@
 [
   {
     "age":"AGE_1","id":"INVENTOR_PAIR","foodCost":3,"pp":4,
-    "triggerPhase":"END_TURN",
+    "triggerKey":"ON_CARD_PICK",
     "effect":{"effectType":"INVENTOR_PAIR","bonus":3}
   },
   {
     "age":"AGE_1","id":"TOTEM_PLACEMENT_FOOD_BONUS","foodCost":3,"pp":3,
-    "triggerPhase":"START_TURN",
+    "triggerKey":"START_TURN",
     "effect":{"effectType":"TOTEM_PLACEMENT_BONUS","bonus":1}
   },
   {
     "age":"AGE_1","id":"CARDS_SET_5_FOOD","foodCost":4,"pp":3,
-    "triggerPhase":"END_TURN",
+    "triggerKey":"ON_CARD_PICK",
     "effect":{"effectType":"CARD_SET","food":5}
   },
   {
     "age":"AGE_1","id":"SUSTAINMENT_BOOST_GATHERER","foodCost":4,"pp":4,
-    "triggerPhase":"NONE",
+    "triggerKey":"ON_ACQUIRE",
     "effect":{"effectType":"SUSTAINMENT_BOOST","type":"GATHERER","gain":1}
   },
   {
     "age":"AGE_1","id":"SHAMANIC_LOSS_PROTECTION","foodCost":5,"pp":2,
-    "triggerPhase":"NONE",
+    "triggerKey":"ON_ACQUIRE",
     "effect":{"effectType":"SHAMANIC_LOSS_PROTECTION","protect":0}
   },
   {
     "age":"AGE_1","id":"SUSTAINMENT_BOOST_ARTIST","foodCost":5,"pp":3,
-    "triggerPhase":"NONE",
+    "triggerKey":"ON_ACQUIRE",
     "effect":{"effectType":"SUSTAINMENT_BOOST","type":"ARTIST","gain":1}
   },
 
   {
     "age":"AGE_2","id":"END_SET_BONUS_6PP","foodCost":5,"pp":6,
-    "triggerPhase":"END_GAME",
+    "triggerKey":"END_GAME",
     "effect":{"effectType":"END_CARD_SET","pp":6}
   },
   {
     "age":"AGE_2","id":"CAVE_PAINTING_BOOST","foodCost":5,"pp":6,
-    "triggerPhase":"PAINTING_EVENT",
+    "triggerKey":"PAINTING_EVENT",
     "effect":{"effectType":"GAIN_BY_CHARACTER","type":"ARTIST","ppGain":0,"foodGain":1}
   },
   {
     "age":"AGE_2","id":"DOUBLE_BUILDERS_PP","foodCost":6,"pp":4,
-    "triggerPhase":"END_GAME",
+    "triggerKey":"END_GAME",
     "effect":{"effectType":"END_BUILDER_PP_MULTIPLIER","mult":2}
   },
   {
     "age":"AGE_2","id":"PLUS_3_STARS","foodCost":6,"pp":4,
-    "triggerPhase":"NONE",
+    "triggerKey":"ON_ACQUIRE",
     "effect":{"effectType":"ADD_STARS","stars":3}
   },
   {
     "age":"AGE_2","id":"SUSTAINMENT_BOOST_INVENTOR","foodCost":7,"pp":4,
-    "triggerPhase":"NONE",
+    "triggerKey":"ON_ACQUIRE",
     "effect":{"effectType":"SUSTAINMENT_BOOST","type":"INVENTOR","gain":1}
   },
   {
     "age":"AGE_2","id":"SHAMANIC_WIN_BONUS","foodCost":7,"pp":0,
-    "triggerPhase":"NONE",
+    "triggerKey":"ON_ACQUIRE",
     "effect":{"effectType":"SHAMANIC_WIN_BOOST","bonus":2}
   },
   {
     "age":"AGE_2","id":"HUNT_BONUS","foodCost":7,"pp":2,
-    "triggerPhase":"HUNTER_EVENT",
+    "triggerKey":"HUNTER_EVENT",
     "effect":{"effectType":"GAIN_BY_CHARACTER","type":"HUNTER","ppGain":1,"foodGain":1}
   },
 
   {
     "age":"AGE_3","id":"END_PP_INVENTORS","foodCost":6,"pp":6,
-    "triggerPhase":"END_GAME",
+    "triggerKey":"END_GAME",
     "effect":{"effectType":"GAIN_BY_CHARACTER","type":"INVENTOR","ppGain":2,"foodGain":0}
   },
   {
     "age":"AGE_3","id":"END_PP_BUILDERS","foodCost":6,"pp":3,
-    "triggerPhase":"END_GAME",
+    "triggerKey":"END_GAME",
     "effect":{"effectType":"GAIN_BY_CHARACTER","type":"BUILDER","ppGain":4,"foodGain":0}
   },
   {
     "age":"AGE_3","id":"END_PP_GATHERERS","foodCost":7,"pp":6,
-    "triggerPhase":"END_GAME",
+    "triggerKey":"END_GAME",
     "effect":{"effectType":"GAIN_BY_CHARACTER","type":"GATHERER","ppGain":4,"foodGain":0}
   },
   {
     "age":"AGE_3","id":"END_PP_SHAMANS","foodCost":7,"pp":4,
-    "triggerPhase":"END_GAME",
+    "triggerKey":"END_GAME",
     "effect":{"effectType":"GAIN_BY_CHARACTER","type":"SHAMAN","ppGain":4,"foodGain":0}
   },
   {
     "age":"AGE_3","id":"END_PP_ARTISTS","foodCost":7,"pp":4,
-    "triggerPhase":"END_GAME",
+    "triggerKey":"END_GAME",
     "effect":{"effectType":"GAIN_BY_CHARACTER","type":"ARTIST","ppGain":4,"foodGain":0}
   },
   {
     "age":"AGE_3","id":"END_PP_HUNTERS","foodCost":8,"pp":8,
-    "triggerPhase":"END_GAME",
+    "triggerKey":"END_GAME",
     "effect":{"effectType":"GAIN_BY_CHARACTER","type":"HUNTER","ppGain":3,"foodGain":0}
   },
   {
     "age":"AGE_3","id":"EXTRA_UPPER_PICK","foodCost":9,"pp":3,
-    "triggerPhase":"NONE",
+    "triggerKey":"ON_ACQUIRE",
     "effect":{"effectType":"END_OF_TURN_EXTRA_PICK","upperPick":1}
   },
   {
     "age":"AGE_3","id":"END_FLAT_25PP","foodCost":10,"pp":0,
-    "triggerPhase":"END_GAME",
+    "triggerKey":"END_GAME",
     "effect":{"effectType":"END_CARD_SET","pp":25}
   }
 ]
-
