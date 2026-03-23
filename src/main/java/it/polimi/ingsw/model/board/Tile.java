@@ -31,6 +31,14 @@ public class Tile {
 
     }
 
+    public Tile(Player p, int upperPicks, int bottomPicks){
+        this.occupier = p;
+        this.upperPicks = upperPicks;
+        this.bottomPicks = bottomPicks;
+        this.isOccupied = true;
+
+    }
+
     /**
      * Gets the ID of the tile.
      * @return The tile ID.
