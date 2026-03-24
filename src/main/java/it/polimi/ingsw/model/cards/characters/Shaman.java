@@ -31,6 +31,11 @@ public class Shaman extends Character {
         this.stars= stars;
     }
 
+    /* protected constructor for test purposes */
+    protected Shaman(int stars) {
+        this.stars = stars;
+    }
+
     /**
      * Gets the number of stars on the card.
      * @return The number of stars.
