@@ -32,7 +32,6 @@ import it.polimi.ingsw.model.player.*;
 })
 public abstract class Character extends Card {
     private CharacterEnum id;
-    private int minPlayers;
 
     /**
      * Default constructor for Character.
@@ -54,7 +53,7 @@ public abstract class Character extends Card {
      * @return The minimum number of players.
      */
     public int getMinPlayers() {
-        return minPlayers;
+        return super.getMinPlayers();
     }
 
     /**

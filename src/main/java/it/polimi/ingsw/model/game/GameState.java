@@ -33,25 +33,19 @@ public class GameState {
 
     /**
      * Constructor: Initializes the game environment.
-     * @param nicknames The list of names provided from the UI.
+     * @param players The list of players provided from the login handler.
      */
-    public GameState(List<String> nicknames, GameConfig config) {
+    public GameState(List<Player> players, GameConfig config, Board board, Decks deck) {
         this.age = Age.AGE_1;
         this.turn = 1;
         this.currentTileIndex = 0;
         this.config = config;
-
-        this.board = new Board();
-        this.players = new ArrayList<>();
-
-        for (int i = 0; i < nicknames.size(); i++) {
-            String name = nicknames.get(i);
-            Player p = new Player(i, name);
-            this.players.add(p);
-        }
-
-        this.turnOrder = new ArrayList<>(this.players);
+        this.board = board;
+        this.deck = deck;
+        this.players = new ArrayList<>(players);
+        this.turnOrder = new ArrayList<>();
         this.orderTileOrder = new ArrayList<>(this.players);
+        setPhase(new SetupPhase());
     }
 
     // ==========================================
@@ -207,6 +201,39 @@ public class GameState {
     public boolean clearTurnOrder() {
         this.turnOrder.clear();
         return true;
+    }
+
+    // ==========================================
+    //  Phase Delegation API
+    // ==========================================
+
+    private boolean hasCurrentPhase() {
+        return currentPhase != null;
+    }
+
+    public boolean pickTopCard(int index, Player player) {
+        if (!hasCurrentPhase()) return false;
+        return currentPhase.pickTopCard(this, index, player);
+    }
+
+    public boolean pickBottomCard(int index, Player player) {
+        if (!hasCurrentPhase()) return false;
+        return currentPhase.pickBottomCard(this, index, player);
+    }
+
+    public boolean pickTopBuilding(int index, Player player) {
+        if (!hasCurrentPhase()) return false;
+        return currentPhase.pickTopBuilding(this, index, player);
+    }
+
+    public boolean pickBottomBuilding(int index, Player player) {
+        if (!hasCurrentPhase()) return false;
+        return currentPhase.pickBottomBuilding(this, index, player);
+    }
+
+    public boolean occupyOfferTrailTile(int index, Player player) {
+        if (!hasCurrentPhase()) return false;
+        return currentPhase.occupyOfferTrailTile(this, index, player);
     }
 
     // ==========================================

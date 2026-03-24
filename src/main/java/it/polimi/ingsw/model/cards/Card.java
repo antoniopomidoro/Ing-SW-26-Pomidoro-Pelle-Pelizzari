@@ -34,6 +34,7 @@ import java.util.Map;
 })
 public abstract class Card{
     protected Age age;
+    protected int minPlayers = 0;
 
     /**
      * Default constructor for Card.
@@ -51,6 +52,29 @@ public abstract class Card{
      */
     public Age getAge() {
         return this.age;
+    }
+
+    /**
+     * Gets the minimum number of players required for this card to be available.
+     * Cards without a specific requirement can leave this value to 0.
+     *
+     * @return minimum required players
+     */
+    public int getMinPlayers() {
+        return minPlayers;
+    }
+
+    /**
+     * OOP helper used by setup logic to decide if this card can be included.
+     *
+     * @param playerCount current game player count
+     * @return true if the card is valid for this player count
+     */
+    public boolean isAvailableForPlayers(int playerCount) {
+        if (playerCount <= 0) {
+            return false;
+        }
+        return playerCount >= minPlayers;
     }
 
 

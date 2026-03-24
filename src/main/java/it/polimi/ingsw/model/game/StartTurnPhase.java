@@ -46,20 +46,20 @@ public class StartTurnPhase implements GamePhaseBehavior {
             }
         }
 
-
-        for (int i = 0; i < turnOrder.size(); i++){
-            Player p = turnOrder.get(i);
-            int food = orderTile.getOrderBonus(i);
-            if (food > 0){
-                food += p.getTotemPlacementBonus();
-                p.addFood(food);
-            } else if (food < 0) {
-                int penalty = orderTile.getPenalty(i);
-                p.payFoodWithPenalty(-food, penalty);
+        if (context.getTurn() != 1) {
+            for (int i = 0; i < turnOrder.size(); i++){
+                Player p = turnOrder.get(i);
+                int food = orderTile.getOrderBonus(i);
+                if (food > 0){
+                    food += p.getTotemPlacementBonus();
+                    p.addFood(food);
+                } else if (food < 0) {
+                    int penalty = orderTile.getPenalty(i);
+                    p.payFoodWithPenalty(-food, penalty);
+                }
             }
         }
-
-        // Trigger START_TURN buildings (e.g. TotemPlacementBonus)
+        // Trigger START_TURN buildings
         context.publishTrigger(TriggerKey.START_TURN);
         return true;
 
