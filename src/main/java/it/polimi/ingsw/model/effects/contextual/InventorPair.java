@@ -14,14 +14,15 @@ public class InventorPair implements ContextualEffect {
     private int bonus;
     private int oldPairs = 0;
 
-    /* The method is activated when the player buys the building */
-    public void countOldPairs(Player p) {
+    @Override
+    public boolean onAddedToPlayer(Player p) {
         for(Tool t : Tool.values()) {
             int count = p.getStats().getToolCount(t);
             if(count >= 2) {
                 this.oldPairs += count / 2;
             }
         }
+        return true;
     }
 
     @Override
