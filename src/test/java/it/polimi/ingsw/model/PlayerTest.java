@@ -11,8 +11,8 @@ import it.polimi.ingsw.model.player.*;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
-
-/*public class PlayerTest {
+/*
+public class PlayerTest {
     private static class DummyCard extends Card{
         public DummyCard(){
             super();
