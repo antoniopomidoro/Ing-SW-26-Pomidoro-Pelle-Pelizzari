@@ -15,7 +15,7 @@ import java.util.*;
 
 
 public class Player {
-    private int id;
+    private Totem id;
     private String nickname;
     private List<Card> cards;
     private List<Building> buildings;
@@ -25,7 +25,7 @@ public class Player {
     private boolean isChoosing;
     private int totemPlacementBonus = 0;
 
-    public Player(int id, String nickname) {
+    public Player(Totem id, String nickname) {
 
         // Other initializations
         this.id = id;
@@ -43,7 +43,7 @@ public class Player {
         return isChoosing;
     }
 
-    public int getId() {
+    public Totem getId() {
         return id;
     }
 

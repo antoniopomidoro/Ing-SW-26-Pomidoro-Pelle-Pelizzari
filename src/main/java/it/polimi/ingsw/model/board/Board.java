@@ -23,11 +23,13 @@ public class Board {
     private List<Building> topBuildings;
     private List<Building> bottomBuildings;
 
-    public Board() {
+    public Board(OrderTile orderTile, TileSet tiles) {
         this.topCards = new ArrayList<>();
         this.bottomCards = new ArrayList<>();
         this.topBuildings = new ArrayList<>();
         this.bottomBuildings = new ArrayList<>();
+        this.orderTile = orderTile;
+        this.tiles = tiles;
     }
 
     public Card pickTopCard(int index) {
