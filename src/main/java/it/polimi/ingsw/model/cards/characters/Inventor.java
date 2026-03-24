@@ -50,9 +50,4 @@ public class Inventor extends Character {
                 && p.getStats().updateDifferentToolNumber(tool)
                 && p.getStats().incrementTool(tool);
     }
-
-    @Override
-    public Card copy() {
-        return new Inventor(this.age, this.tool);
-    }
 }

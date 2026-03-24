@@ -105,10 +105,6 @@ public class Building extends Card {
     }
 
     @Override
-    public Building copy() {
-        return new Building(this.age, this.id, this.foodCost, this.pp, this.effect, this.triggerKey);
-    }
-    @Override
     public boolean addToDeck(Decks manager) {
         if (this.age == null) return false;
         manager.addBuilding(this);

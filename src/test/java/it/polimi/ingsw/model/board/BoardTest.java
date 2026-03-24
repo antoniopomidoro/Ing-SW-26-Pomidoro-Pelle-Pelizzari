@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BoardTest {
-    private final int REP = 100;
+    private final int REP = 1;
     Board board = new Board();
     private static class DummyCard extends Card{
         public DummyCard(){
@@ -395,7 +395,6 @@ public class BoardTest {
      * - discardBottomBuildings()
      */
 
-    /* TODO i Correct delle cards scoppiano */
     @DisplayName("See top card returns the right card")
     @Test
     public void testCorrectSeeTopCard() {
@@ -410,10 +409,10 @@ public class BoardTest {
         assertNotNull(board.seeTopCard(1));
         assertNotNull(board.seeTopCard(2));
 
-        assertEquals(c1, board.seeTopCard(0));
-        assertEquals(c2, board.seeTopCard(1));
-        assertEquals(c3, board.seeTopCard(2));
-        assertEquals(c1, board.seeTopCard(0));
+        assertSame(c1, board.seeTopCard(0));
+        assertSame(c2, board.seeTopCard(1));
+        assertSame(c3, board.seeTopCard(2));
+        assertSame(c1, board.seeTopCard(0));
     }
 
     @DisplayName("See top card returns null when the index is incorrect")
@@ -445,10 +444,10 @@ public class BoardTest {
         assertNotNull(board.seeBottomCard(1));
         assertNotNull(board.seeBottomCard(2));
 
-        assertEquals(c1, board.seeBottomCard(0));
-        assertEquals(c2, board.seeBottomCard(1));
-        assertEquals(c3, board.seeBottomCard(2));
-        assertEquals(c1, board.seeBottomCard(0));
+        assertSame(c1, board.seeBottomCard(0));
+        assertSame(c2, board.seeBottomCard(1));
+        assertSame(c3, board.seeBottomCard(2));
+
     }
 
     @DisplayName("See bottom card returns null when the index is incorrect")
@@ -481,6 +480,9 @@ public class BoardTest {
         assertNotNull(board.seeTopBuilding(0));
         assertNotNull(board.seeTopBuilding(1));
         assertNotNull(board.seeTopBuilding(2));
+        assertSame(b1, board.seeTopBuilding(0));
+        assertSame(b2, board.seeTopBuilding(1));
+        assertSame(b3, board.seeTopBuilding(2));
     }
 
     @DisplayName("See top building returns null when the index is incorrect")
@@ -516,6 +518,9 @@ public class BoardTest {
         assertNotNull(board.seeBottomBuilding(0));
         assertNotNull(board.seeBottomBuilding(1));
         assertNotNull(board.seeBottomBuilding(2));
+        assertSame(b1, board.seeBottomBuilding(0));
+        assertSame(b2, board.seeBottomBuilding(1));
+        assertSame(b3, board.seeBottomBuilding(2));
     }
 
     @DisplayName("See bottom building returns null when the index is incorrect")

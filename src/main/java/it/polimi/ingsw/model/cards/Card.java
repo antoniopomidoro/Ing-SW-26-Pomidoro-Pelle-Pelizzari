@@ -86,10 +86,6 @@ public abstract class Card{
         return true;
     }
 
-    public Card copy() {
-    return null;}
-
-
 
 }
 

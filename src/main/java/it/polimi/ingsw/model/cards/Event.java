@@ -71,8 +71,4 @@ public class Event extends Card {
         return false;
     }
 
-    @Override
-    public Card copy() {
-        return new Event(this.age, this.id, this.effect, this.triggerKey, this.resolutionPriority);
-    }
 }

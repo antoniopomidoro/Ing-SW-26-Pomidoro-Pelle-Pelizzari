@@ -52,9 +52,4 @@ public class Shaman extends Character {
         return p.getStats().incrementCharacter(CharacterEnum.SHAMAN)
                 && p.getStats().addStars(stars);
     }
-
-    @Override
-    public Card copy() {
-        return new Shaman(this.age, this.stars);
-    }
 }

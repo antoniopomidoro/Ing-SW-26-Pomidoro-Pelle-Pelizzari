@@ -63,10 +63,4 @@ public class Builder extends Character {
                 && p.getStats().addBuilderPp(pp)
                 && p.getStats().addBuildingDiscount(discount);
     }
-
-
-    @Override
-    public Card copy() {
-        return new Builder(this.age,this.pp,this.discount);
-    }
 }

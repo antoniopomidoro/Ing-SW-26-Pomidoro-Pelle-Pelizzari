@@ -145,7 +145,7 @@ public class Board {
     }
     public Card seeTopCard(int index){
         if(index >=0 && index < topCards.size()){
-            return topCards.get(index).copy();
+            return topCards.get(index);
         }
         return null;
 
@@ -153,7 +153,7 @@ public class Board {
 
     public Card seeBottomCard(int index){
         if(index >=0 && index < bottomCards.size()){
-            return bottomCards.get(index).copy();
+            return bottomCards.get(index);
         }
         return null;
     }
@@ -161,14 +161,14 @@ public class Board {
 
     public Building seeTopBuilding(int index){
         if(index >=0 && index < topBuildings.size()){
-            return topBuildings.get(index).copy();
+            return topBuildings.get(index);
         }
         return null;
     }
 
     public Building seeBottomBuilding(int index){
         if(index >=0 && index < bottomBuildings.size()){
-            return bottomBuildings.get(index).copy();
+            return bottomBuildings.get(index);
         }
         return null;
 

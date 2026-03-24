@@ -39,12 +39,4 @@ public class Artist extends Character {
         }
         return p.getStats().incrementCharacter(CharacterEnum.ARTIST);
     }
-
-
-    @Override
-    public Card copy() {
-        Artist sup = new Artist(this.age);
-        return sup;
-
-    }
 }

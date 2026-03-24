@@ -41,18 +41,4 @@ public class Hunter extends Character {
         int food = p.getStats().getCharacterCount(CharacterEnum.HUNTER)*(hasFood ? 1 : 0);
         return p.addFood(food);
     }
-
-    public boolean isHasFood() {
-        return hasFood;
-    }
-
-    public boolean setHasFood(boolean hasFood) {
-        this.hasFood = hasFood;
-        return true;
-    }
-
-    @Override
-    public Card copy() {
-        return new Hunter(this.age, this.hasFood);
-    }
 }

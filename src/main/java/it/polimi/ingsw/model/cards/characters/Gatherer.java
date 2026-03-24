@@ -48,9 +48,4 @@ public class Gatherer extends Character {
     public int getSustDisc() {
         return sustDisc;
     }
-
-    @Override
-    public Card copy() {
-        return new Gatherer(this.age, this.sustDisc);
-    }
 }
