@@ -65,11 +65,12 @@ public class Board {
     }
 
     public boolean addBottomCard(Card c) {
-        if(c != null) {
-            bottomCards.add(c);
-            return true;
+        if(c == null) {
+            return false;
         }
-        return false;
+        if(!c.isBuyable()) addTopCard(c);
+        else bottomCards.add(c);
+        return true;
     }
 
     public boolean addTopBuildings(List<Building> b) {
