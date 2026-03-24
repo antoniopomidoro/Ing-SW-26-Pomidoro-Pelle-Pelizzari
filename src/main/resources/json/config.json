@@ -10,6 +10,7 @@
   "startingFood": [2, 3, 3, 4, 4],
   "bottomExtraCards": 1,
   "topExtraCards": 4,
-  "maxTurns": 10
+  "maxTurns": 10,
+  "artistGain": 10
 }
 

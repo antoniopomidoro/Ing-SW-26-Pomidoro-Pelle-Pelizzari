@@ -173,5 +173,7 @@ public class PlayerStats {
         builderPp = pp;
         return true;
     }
-
+    public int getCharacterPair(CharacterEnum type){
+        return this.getCharacterCount(type) / 2;
+    }
 }

@@ -156,5 +156,9 @@ public class Player {
         }
         return result;
     }
-
+    public int getBuildingsPP(){
+        return buildings.stream()
+                .mapToInt(Building::getPP)
+                .sum();
+    }
 }

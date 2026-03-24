@@ -22,6 +22,7 @@ public class GameConfig {
     private int bottomExtraCards;
     private int topExtraCards;
     private int maxTurns;
+    private int artistGain;
 
 
 
@@ -79,5 +80,9 @@ public class GameConfig {
 
     public int getMaxTurns() {
         return maxTurns;
+    }
+
+    public int getArtistGain() {
+        return artistGain;
     }
 }
