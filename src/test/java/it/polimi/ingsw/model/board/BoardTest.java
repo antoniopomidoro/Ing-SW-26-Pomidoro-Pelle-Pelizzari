@@ -2,7 +2,6 @@ package it.polimi.ingsw.model.board;
 
 import it.polimi.ingsw.model.cards.Building;
 import it.polimi.ingsw.model.cards.Card;
-import it.polimi.ingsw.model.cards.Event;
 import it.polimi.ingsw.model.cards.characters.*;
 
 import org.junit.jupiter.api.*;
@@ -10,38 +9,24 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BoardTest {
-    private final int rep = 100;
+    private final int REP = 100;
     Board board = new Board();
-
-    /* Generates one random instance of the 7 possible types of card with uniform probability distribution; buildings are differently */
-    private Card generateCard() {
-        int rand;
-        Card c;
-        rand = (int) (Math.random() * 7);
-        c = switch (rand) {
-            case 0 -> new Artist();
-            case 1 -> new Builder();
-            case 2 -> new Gatherer();
-            case 3 -> new Hunter();
-            case 4 -> new Inventor();
-            case 5 -> new Shaman();
-            default -> new Event();
-        };
-        return c;
+    private static class DummyCard extends Card{
+        public DummyCard(){
+            super();
+        }
     }
 
-    /* Generates random instances of the 7 possible types of card with uniform probability distribution; buildings are handled by a different method */
     private void generateTopCards(int size) {
         for(int i = 0; i < size ; i++) {
-            Card c = generateCard();
+            Card c = new DummyCard();
             board.addTopCard(c);
         }
     }
 
-    /* Generates random instances of 7 of the 8 possible types of card (buildings get chosen by a different method) with uniform probability distribution; buildings are handled by a different method */
     private void generateBottomCards(int size) {
         for(int i = 0; i < size ; i++) {
-            Card c = generateCard();
+            Card c = new DummyCard();
             board.addBottomCard(c);
         }
     }
@@ -72,7 +57,7 @@ public class BoardTest {
      */
 
     @DisplayName("Pick top card")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testPickTopCardCheckSize() {
         int size = (int) (Math.random() * 9) + 1;
         generateTopCards(size);
@@ -91,7 +76,7 @@ public class BoardTest {
     }
 
     @DisplayName("Pick top card with negative index")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testPickTopCardNegativeIdx() {
         board = new Board();            // We have to be sure that topCards is empty
         int idx = - (int) (Math.random() * 100) + 1;
@@ -99,7 +84,7 @@ public class BoardTest {
     }
 
     @DisplayName("Pick last top card and not the (non-existent) last + 1 card")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testPickLastTopCard() {
         int size = (int) (Math.random() * 9) + 1;
         generateTopCards(size);
@@ -111,7 +96,7 @@ public class BoardTest {
     }
 
     @DisplayName("Pick bottom card")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testPickBottomCardCheckSize() {
         int size = (int) (Math.random() * 9) + 1;
         generateBottomCards(size);
@@ -130,7 +115,7 @@ public class BoardTest {
     }
 
     @DisplayName("Pick bottom card with negative index")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testPickBottomCardNegativeIdx() {
         board = new Board();            // We have to be sure that bottomCards is empty
         int idx = - (int) (Math.random() * 100) + 1;
@@ -138,7 +123,7 @@ public class BoardTest {
     }
 
     @DisplayName("Pick last bottom card and not the (non-existent) last + 1 card")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testPickLastBottomCard() {
         int size = (int) (Math.random() * 9) + 1;
         generateBottomCards(size);
@@ -150,7 +135,7 @@ public class BoardTest {
     }
 
     @DisplayName("Pick top building")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testPickTopBuildingCheckSize() {
         int size = (int) (Math.random() * 9) + 1;
         generateTopBuildings(size);
@@ -169,7 +154,7 @@ public class BoardTest {
     }
 
     @DisplayName("Pick top building with negative index")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testPickTopBuildingNegativeIdx() {
         board = new Board();            // We have to be sure that topBuildings is empty
         int idx = - (int) (Math.random() * 100) + 1;
@@ -177,7 +162,7 @@ public class BoardTest {
     }
 
     @DisplayName("Pick last top building and not the (non-existent) last + 1 building")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testPickLastTopBuilding() {
         int size = (int) (Math.random() * 9) + 1;
         generateTopBuildings(size);
@@ -189,7 +174,7 @@ public class BoardTest {
     }
 
     @DisplayName("Pick bottom building")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testPickBottomBuildingCheckSize() {
         int size = (int) (Math.random() * 9) + 1;
         generateBottomBuildings(size);
@@ -208,7 +193,7 @@ public class BoardTest {
     }
 
     @DisplayName("Pick bottom building with negative index")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testPickBottomBuildingNegativeIdx() {
         board = new Board();            // We have to be sure that bottomBuildings is empty
         int idx = - (int) (Math.random() * 100) + 1;
@@ -216,7 +201,7 @@ public class BoardTest {
     }
 
     @DisplayName("Pick last bottom building and not the (non-existent) last + 1 building")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testPickLastBottomBuilding() {
         int size = (int) (Math.random() * 9) + 1;
         generateBottomBuildings(size);
@@ -234,7 +219,7 @@ public class BoardTest {
      */
 
     @DisplayName("Bottom to top changes the sizes correctly")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testBottomToTopCorrectSizes() {
         int topSize = (int) (Math.random() * 9) + 1;
         generateTopCards(topSize);
@@ -250,7 +235,7 @@ public class BoardTest {
     }
 
     @DisplayName("Bottom to top returns false when it receives a negative index")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testBottomToTopIndexNotNegative() {
         int topSize = (int) (Math.random() * 9) + 1;
         generateTopCards(topSize);
@@ -262,7 +247,7 @@ public class BoardTest {
     }
 
     @DisplayName("Bottom to top returns false when it receives an out of bound index")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testBottomToTopIndexInSize() {
         int topSize = (int) (Math.random() * 9) + 1;
         generateTopCards(topSize);
@@ -274,7 +259,7 @@ public class BoardTest {
     }
 
     @DisplayName("When the bottomCards is empty, the method returns false")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testBottomToTopEmptyBottomCards() {
         board = new Board();
         int topSize = (int) (Math.random() * 9) + 1;
@@ -285,7 +270,7 @@ public class BoardTest {
     }
 
     @DisplayName("Top to bottom cards changes the sizes correctly")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testTopToBottomCardsCorrectSizes() {
         int topSize = (int) (Math.random() * 9) + 1;
         generateTopCards(topSize);
@@ -299,7 +284,7 @@ public class BoardTest {
     }
 
     @DisplayName("Top to bottom cards with empty top cards")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testTopToBottomCardsEmptyTop() {
         board = new Board();
         int bottomSize = (int) (Math.random() * 9) + 1;
@@ -312,7 +297,7 @@ public class BoardTest {
     }
 
     @DisplayName("Top to bottom cards with empty bottom cards")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testTopToBottomCardsEmptyBottom() {
         board = new Board();
         int topSize = (int) (Math.random() * 9) + 1;
@@ -331,19 +316,19 @@ public class BoardTest {
      */
 
     @DisplayName("New top cards size is correct")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testAddTopCardCheckSize() {
         int topSize = (int) (Math.random() * 9) + 1;
         generateTopCards(topSize);
 
-        boolean ret = board.addTopCard(generateCard());
+        boolean ret = board.addTopCard(new DummyCard());
 
         assertTrue(ret);
         assertEquals(topSize + 1, board.getTopCards().size());
     }
 
     @DisplayName("A null card cannot be added")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testAddTopCardNull() {
         int topSize = (int) (Math.random() * 9) + 1;
         generateTopCards(topSize);
@@ -355,19 +340,19 @@ public class BoardTest {
     }
 
     @DisplayName("New bottom cards size is correct")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testAddBottomCardCheckSize() {
         int bottomSize = (int) (Math.random() * 9) + 1;
         generateBottomCards(bottomSize);
 
-        boolean ret = board.addBottomCard(generateCard());
+        boolean ret = board.addBottomCard(new DummyCard());
 
         assertTrue(ret);
         assertEquals(bottomSize + 1, board.getBottomCards().size());
     }
 
     @DisplayName("A null card cannot be added")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testAddBottomCardNull() {
         int bottomSize = (int) (Math.random() * 9) + 1;
         generateBottomCards(bottomSize);
@@ -379,7 +364,7 @@ public class BoardTest {
     }
 
     @DisplayName("New top building size is correct")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testAddTopBuildingCheckSize() {
         int size = (int) (Math.random() * 9) + 1;
         ArrayList<Building> b = new ArrayList<>();
@@ -393,7 +378,7 @@ public class BoardTest {
     }
 
     @DisplayName("A null list of buildings cannot be added")
-    @RepeatedTest(rep)
+    @RepeatedTest(REP)
     public void testAddTopBuildingNull() {
         int oldSize = board.getTopBuildings().size();
         boolean ret = board.addTopCard(null);
@@ -401,4 +386,156 @@ public class BoardTest {
         assertFalse(ret);
         assertEquals(oldSize, board.getTopCards().size());
     }
+
+    /** Tests for
+     * - seeTopCard()
+     * - seeBottomCard()
+     * - seeTopBuilding()
+     * - seeBottomBuilding()
+     * - discardBottomBuildings()
+     */
+
+    /* TODO i Correct delle cards scoppiano */
+    @DisplayName("See top card returns the right card")
+    @Test
+    public void testCorrectSeeTopCard() {
+        Card c1 = new DummyCard();
+        Card c2 = new DummyCard();
+        Card c3 = new DummyCard();
+        board.addTopCard(c1);
+        board.addTopCard(c2);
+        board.addTopCard(c3);
+
+        assertNotNull(board.seeTopCard(0));
+        assertNotNull(board.seeTopCard(1));
+        assertNotNull(board.seeTopCard(2));
+
+        assertEquals(c1, board.seeTopCard(0));
+        assertEquals(c2, board.seeTopCard(1));
+        assertEquals(c3, board.seeTopCard(2));
+        assertEquals(c1, board.seeTopCard(0));
+    }
+
+    @DisplayName("See top card returns null when the index is incorrect")
+    @Test
+    public void testSeeTopCardIndexOutOfBound() {
+        Card c1 = new DummyCard();
+        Card c2 = new DummyCard();
+        Card c3 = new DummyCard();
+        board.addTopCard(c1);
+        board.addTopCard(c2);
+        board.addTopCard(c3);
+
+        assertNull(board.seeTopCard(-1));
+        assertNull(board.seeTopCard(3));
+        assertNull(board.seeTopCard(22));
+    }
+
+    @DisplayName("See bottom card returns the right card")
+    @Test
+    public void testCorrectSeeBottomCard() {
+        Card c1 = new DummyCard();
+        Card c2 = new DummyCard();
+        Card c3 = new DummyCard();
+        board.addBottomCard(c1);
+        board.addBottomCard(c2);
+        board.addBottomCard(c3);
+
+        assertNotNull(board.seeBottomCard(0));
+        assertNotNull(board.seeBottomCard(1));
+        assertNotNull(board.seeBottomCard(2));
+
+        assertEquals(c1, board.seeBottomCard(0));
+        assertEquals(c2, board.seeBottomCard(1));
+        assertEquals(c3, board.seeBottomCard(2));
+        assertEquals(c1, board.seeBottomCard(0));
+    }
+
+    @DisplayName("See bottom card returns null when the index is incorrect")
+    @Test
+    public void testSeeBottomCardIndexOutOfBound() {
+        Card c1 = new DummyCard();
+        Card c2 = new DummyCard();
+        Card c3 = new DummyCard();
+        board.addBottomCard(c1);
+        board.addBottomCard(c2);
+        board.addBottomCard(c3);
+
+        assertNull(board.seeBottomCard(-1));
+        assertNull(board.seeBottomCard(3));
+        assertNull(board.seeBottomCard(22));
+    }
+
+    @DisplayName("See top building returns the right building")
+    @Test
+    public void testCorrectSeeTopBuilding() {
+        Building b1 = new Building();
+        Building b2 = new Building();
+        Building b3 = new Building();
+        ArrayList<Building> buildings = new ArrayList<>();
+        buildings.add(b1);
+        buildings.add(b2);
+        buildings.add(b3);
+        board.addTopBuildings(buildings);
+
+        assertNotNull(board.seeTopBuilding(0));
+        assertNotNull(board.seeTopBuilding(1));
+        assertNotNull(board.seeTopBuilding(2));
+    }
+
+    @DisplayName("See top building returns null when the index is incorrect")
+    @Test
+    public void testSeeTopBuildingIndexOutOfBound() {
+        Building b1 = new Building();
+        Building b2 = new Building();
+        Building b3 = new Building();
+        ArrayList<Building> buildings = new ArrayList<>();
+        buildings.add(b1);
+        buildings.add(b2);
+        buildings.add(b3);
+        board.addTopBuildings(buildings);
+
+        assertNull(board.seeTopBuilding(-1));
+        assertNull(board.seeTopBuilding(3));
+        assertNull(board.seeTopBuilding(22));
+    }
+
+    @DisplayName("See bottom building returns the right building")
+    @Test
+    public void testCorrectSeeBottomBuilding() {
+        Building b1 = new Building();
+        Building b2 = new Building();
+        Building b3 = new Building();
+        ArrayList<Building> buildings = new ArrayList<>();
+        buildings.add(b1);
+        buildings.add(b2);
+        buildings.add(b3);
+        board.addTopBuildings(buildings);
+        board.topToBottomBuildings();
+
+        assertNotNull(board.seeBottomBuilding(0));
+        assertNotNull(board.seeBottomBuilding(1));
+        assertNotNull(board.seeBottomBuilding(2));
+    }
+
+    @DisplayName("See bottom building returns null when the index is incorrect")
+    @Test
+    public void testSeeBottomBuildingIndexOutOfBound() {
+        Building b1 = new Building();
+        Building b2 = new Building();
+        Building b3 = new Building();
+        ArrayList<Building> buildings = new ArrayList<>();
+        buildings.add(b1);
+        buildings.add(b2);
+        buildings.add(b3);
+        board.addTopBuildings(buildings);
+        board.topToBottomBuildings();
+
+        assertNull(board.seeBottomBuilding(-1));
+        assertNull(board.seeBottomBuilding(3));
+        assertNull(board.seeBottomBuilding(22));
+    }
+
+    /* TODO tests for discard */
+
 }

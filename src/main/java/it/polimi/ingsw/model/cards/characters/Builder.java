@@ -32,6 +32,12 @@ public class Builder extends Character {
         this.pp=pp;
     }
 
+    /* Protected constructor for test purposes */
+    protected Builder(int discount, int pp) {
+        this.discount = discount;
+        this.pp = pp;
+    }
+
     /**
      * Gets the discount value provided by the card.
      * @return The discount value.
