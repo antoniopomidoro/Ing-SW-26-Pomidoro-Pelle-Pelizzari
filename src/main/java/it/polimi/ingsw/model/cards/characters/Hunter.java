@@ -25,6 +25,11 @@ public class Hunter extends Character {
         this.hasFood = hasFood;
     }
 
+    /* protected constructor for test purposes */
+    protected Hunter(boolean hasFood) {
+        this.hasFood = hasFood;
+    }
+
     @Override
     public boolean onAddedToPlayer(Player p) {
         if (p == null) {

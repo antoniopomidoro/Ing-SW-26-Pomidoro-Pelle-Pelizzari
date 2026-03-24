@@ -31,6 +31,10 @@ public class Gatherer extends Character {
         this.age = age;
     }
 
+    /* protected setter for testing purposes */
+    protected void setSustDisc(int sustDisc) {
+        this.sustDisc = sustDisc;
+    }
 
     @Override
     public boolean onAddedToPlayer(Player p) {

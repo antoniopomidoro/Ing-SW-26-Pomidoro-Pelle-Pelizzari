@@ -5,19 +5,24 @@ import it.polimi.ingsw.model.board.*;
 import it.polimi.ingsw.model.cards.*;
 import it.polimi.ingsw.model.cards.characters.*;
 import it.polimi.ingsw.model.effects.*;
-import it.polimi.ingsw.model.effects.contextual.*;
 import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
-
-import java.util.EnumMap;
-import java.util.Map;
-
 
 public class InventorPair implements ContextualEffect {
     @JsonProperty("bonus")
     private int bonus;
     private int oldPairs = 0;
+
+    /* The method is activated when the player buys the building */
+    public void countOldPairs(Player p) {
+        for(Tool t : Tool.values()) {
+            int count = p.getStats().getToolCount(t);
+            if(count >= 2) {
+                this.oldPairs += count / 2;
+            }
+        }
+    }
 
     @Override
     public boolean executeEffect(Player p, GameState state) {
@@ -28,9 +33,9 @@ public class InventorPair implements ContextualEffect {
                 newPairs += count / 2;
             }
         }
-        if(newPairs > oldPairs) {
-            p.addFood(3 * (newPairs - oldPairs));
-            oldPairs = newPairs;
+        if(newPairs > this.oldPairs) {
+            p.addFood(bonus * (newPairs - oldPairs));
+            this.oldPairs = newPairs;
         }
         return true;
     }
