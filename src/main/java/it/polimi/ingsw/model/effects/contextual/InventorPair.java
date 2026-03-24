@@ -12,31 +12,21 @@ import it.polimi.ingsw.model.player.*;
 public class InventorPair implements ContextualEffect {
     @JsonProperty("bonus")
     private int bonus;
-    private int oldPairs = 0;
+    private int oldPairs;
 
     @Override
     public boolean onAddedToPlayer(Player p) {
-        for(Tool t : Tool.values()) {
-            int count = p.getStats().getToolCount(t);
-            if(count >= 2) {
-                this.oldPairs += count / 2;
-            }
-        }
+        this.oldPairs = p.getStats().getEqualInventorPair();
         return true;
     }
 
     @Override
     public boolean executeEffect(Player p, GameState state) {
-        int newPairs = 0;
-        for(Tool t : Tool.values()) {
-            int count = p.getStats().getToolCount(t);
-            if(count >= 2) {
-                newPairs += count / 2;
-            }
-        }
-        if(newPairs > this.oldPairs) {
-            p.addFood(bonus * (newPairs - oldPairs));
-            this.oldPairs = newPairs;
+        int newPairs = p.getStats().getEqualInventorPair();
+        if(newPairs > oldPairs) {
+            int pairsGained = newPairs - oldPairs;
+            p.addFood(pairsGained * bonus);
+            oldPairs = newPairs;
         }
         return true;
     }
