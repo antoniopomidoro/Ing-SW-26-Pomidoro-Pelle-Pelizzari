@@ -21,6 +21,10 @@ import java.util.Optional;
  */
 public class StartTurnPhase implements GamePhaseBehavior {
 
+    /**
+     * Esegue la logica di start turno: refill carte, gestione cambio era,
+     * bonus/malus cibo e trigger START_TURN.
+     */
     @Override
     public boolean execute(GameState context) {
         if (context == null || context.getBoard() == null || context.getDeck() == null || context.getConfig() == null) {
@@ -64,12 +68,19 @@ public class StartTurnPhase implements GamePhaseBehavior {
         return true;
 
     }
+
+    /**
+     * Permette al giocatore corrente in ordine offerta di occupare una tile.
+     * In caso di turno errato notifica prima un {@link GameEvent} e poi lancia
+     * {@link IllegalMoveException}.
+     */
     @Override
     public boolean occupyOfferTrailTile(GameState context, int index, Player player){
         Board board = context.getBoard();
         Player currentPlayer = context.getCurrentOrderTileOrderPlayer();
         if (player != currentPlayer){
-            throw new IllegalStateException("Only the current player can occupy an offer trail tile during START_TURN phase.");
+            context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player, "It's not your turn to place a totem."));
+            throw new IllegalMoveException("It's not your turn to place a totem.");
         }
         board.getTiles().getTile(index).occupy(player);
         context.updateTurnOrder(currentPlayer);
@@ -79,6 +90,10 @@ public class StartTurnPhase implements GamePhaseBehavior {
         }
         return true;
     }
+
+    /**
+     * Transizione verso la fase TURN.
+     */
     @Override
     public boolean nextPhase(GameState context){
             context.setPhase(new TurnPhase());

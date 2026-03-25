@@ -24,6 +24,7 @@ public class GameState {
     private Decks deck;
     private List<Player> turnOrder;
     private List<Player> orderTileOrder;
+    private transient List<GameStateObserver> observers = new ArrayList<>();
 
     // --- State Pattern support fields ---
     private int currentTileIndex;
@@ -34,6 +35,9 @@ public class GameState {
     /**
      * Constructor: Initializes the game environment.
      * @param players The list of players provided from the login handler.
+     * @param config The game configuration object.
+     * @param board The initial board instance.
+     * @param deck The decks manager.
      */
     public GameState(List<Player> players, GameConfig config, Board board, Decks deck) {
         this.age = Age.AGE_1;
@@ -131,7 +135,9 @@ public class GameState {
 
     /**
      * Switches the game to a new phase and auto-starts it.
+     *
      * @param newPhase The new phase behavior.
+     * @return true if the phase is accepted and its execute(...) completes successfully.
      */
     public boolean setPhase(GamePhaseBehavior newPhase) {
         if (newPhase == null) {
@@ -145,6 +151,7 @@ public class GameState {
     /**
      * Sets the current tile index for tile scanning in TurnPhase.
      * @param index The tile index.
+     * @return true if the operation was successful.
      */
     public boolean setCurrentTileIndex(int index) {
         if (index < 0) {
@@ -154,7 +161,10 @@ public class GameState {
         return true;
     }
 
-
+    /**
+     * Advances to the next player in the order-tile sequence.
+     * @return true if there are more players in the sequence, false if it looped back to the beginning.
+     */
     public boolean nextPlayerInTurnOrderTile(){
         currentPlayerOrderIndex++;
         if(currentPlayerOrderIndex >= orderTileOrder.size()){
@@ -163,6 +173,11 @@ public class GameState {
         }
         return true;
     }
+
+    /**
+     * Advances to the next player in the standard turn order.
+     * @return true if there are more players in the turn order, false if it looped back to the beginning.
+     */
     public boolean nextPlayerInTurnOrder(){
         currentPlayerIndex++;
         if(currentPlayerIndex >= turnOrder.size()){
@@ -172,10 +187,18 @@ public class GameState {
         return true;
     }
 
+    /**
+     * @return The extra index value used for game-specific state tracking.
+     */
     public int getExtraIndex() {
         return extraIndex;
     }
 
+    /**
+     * Sets the extra index value.
+     * @param extraIndex the non-negative index to set.
+     * @return true if the update was successful, false if the value was negative.
+     */
     public boolean setExtraIndex(int extraIndex) {
         if (extraIndex < 0) {
             return false;
@@ -184,53 +207,126 @@ public class GameState {
         return true;
     }
 
+    /**
+     * @return The game configuration currently active.
+     */
     public GameConfig getConfig() {
         return config;
     }
+
+    /**
+     * Updates the turn order with a new player.
+     * @param p The player to add to the turn order.
+     * @return true if successful, false if the player is null or already present.
+     */
     public boolean updateTurnOrder(Player p){
         if (p == null || turnOrder.contains(p)) return false;
         this.turnOrder.add(p);
         return true;
     }
+
+    /**
+     * Sets a completely new sequence for the order-tile order.
+     * @param orderTileOrder A list representing the new order.
+     * @return true if successful, false if the list is null or empty.
+     */
     public boolean setOrderTileOrder(List<Player> orderTileOrder) {
         if (orderTileOrder == null || orderTileOrder.isEmpty())return false;
         this.orderTileOrder.clear();
         this.orderTileOrder.addAll(orderTileOrder);
         return true;
     }
+
+    /**
+     * Clears the current turn order list.
+     * @return true to indicate success.
+     */
     public boolean clearTurnOrder() {
         this.turnOrder.clear();
         return true;
+    }
+
+    /**
+     * Registra un osservatore per le notifiche {@link GameEvent}.
+     *
+     * @param observer callback osservatore; valori null vengono ignorati
+     */
+    public void addObserver(GameStateObserver observer) {
+        if (observer != null) observers.add(observer);
+    }
+
+    /**
+     * Pubblica un evento a tutti gli osservatori registrati.
+     *
+     * @param event evento da notificare; null viene ignorato
+     */
+    public void raiseEvent(GameEvent event) {
+        if (event == null) return;
+        observers.forEach(o -> o.onGameEvent(event));
     }
 
     // ==========================================
     //  Phase Delegation API
     // ==========================================
 
+    /**
+     * Checks if a phase behavior is currently active.
+     * @return true if a phase is assigned, false otherwise.
+     */
     private boolean hasCurrentPhase() {
         return currentPhase != null;
     }
 
+    /**
+     * Delegates the top card picking action to the current phase.
+     * @param index the position of the card.
+     * @param player the player making the action.
+     * @return true if successful, false otherwise.
+     */
     public boolean pickTopCard(int index, Player player) {
         if (!hasCurrentPhase()) return false;
         return currentPhase.pickTopCard(this, index, player);
     }
 
+    /**
+     * Delegates the bottom card picking action to the current phase.
+     * @param index the position of the card.
+     * @param player the player making the action.
+     * @return true if successful, false otherwise.
+     */
     public boolean pickBottomCard(int index, Player player) {
         if (!hasCurrentPhase()) return false;
         return currentPhase.pickBottomCard(this, index, player);
     }
 
+    /**
+     * Delegates the top building picking action to the current phase.
+     * @param index the position of the building.
+     * @param player the player making the action.
+     * @return true if successful, false otherwise.
+     */
     public boolean pickTopBuilding(int index, Player player) {
         if (!hasCurrentPhase()) return false;
         return currentPhase.pickTopBuilding(this, index, player);
     }
 
+    /**
+     * Delegates the bottom building picking action to the current phase.
+     * @param index the position of the building.
+     * @param player the player making the action.
+     * @return true if successful, false otherwise.
+     */
     public boolean pickBottomBuilding(int index, Player player) {
         if (!hasCurrentPhase()) return false;
         return currentPhase.pickBottomBuilding(this, index, player);
     }
 
+    /**
+     * Delegates the occupation of an offer trail tile to the current phase.
+     * @param index the index of the offer trail tile.
+     * @param player the player taking the action.
+     * @return true if successful, false otherwise.
+     */
     public boolean occupyOfferTrailTile(int index, Player player) {
         if (!hasCurrentPhase()) return false;
         return currentPhase.occupyOfferTrailTile(this, index, player);
@@ -243,8 +339,10 @@ public class GameState {
     /**
      * Publishes a trigger: for each active player (orderTileOrder),
      * activates all buildings that match the given trigger key.
+     * Questo meccanismo e distinto dal broadcast error/event via {@link #raiseEvent(GameEvent)}.
      *
      * @param key The trigger key (e.g. END_TURN, HUNTER_EVENT, etc.)
+     * @return true se il trigger viene iterato correttamente, false su input non valido
      */
     public boolean publishTrigger(TriggerKey key) {
         if (key == null || orderTileOrder == null) {

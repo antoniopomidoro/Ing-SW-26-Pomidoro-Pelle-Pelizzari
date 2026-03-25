@@ -6,7 +6,7 @@
   },
   {
     "age":"AGE_1","id":"TOTEM_PLACEMENT_FOOD_BONUS","foodCost":3,"pp":3,
-    "triggerKey":"START_TURN",
+    "triggerKey":"ON_ACQUIRE",
     "effect":{"effectType":"TOTEM_PLACEMENT_BONUS","bonus":1}
   },
   {

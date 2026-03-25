@@ -133,6 +133,7 @@ public class Player {
 
     public boolean addBuilding(Building b){
         buildings.add(b);
+        b.onAddedToPlayer(this);
         return true;
     }
 

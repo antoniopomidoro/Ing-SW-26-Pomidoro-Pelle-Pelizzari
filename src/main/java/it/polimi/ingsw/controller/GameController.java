@@ -9,6 +9,7 @@ import it.polimi.ingsw.model.cards.Card;
 import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.game.GameState;
+import it.polimi.ingsw.model.game.IllegalMoveException;
 import it.polimi.ingsw.model.player.Player;
 
 import java.io.IOException;
@@ -17,10 +18,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Controller applicativo del gioco.
+ * Le azioni pubbliche intercettano {@link IllegalMoveException} provenienti dal model
+ * e convertono l'esito in false, mentre il broadcast dell'evento e gia avvenuto nel model.
+ */
 public class GameController {
     private final JsonFactory jsonGod = new JsonFactory();
     private final GameState state;
 
+    /**
+     * Inizializza configurazione, deck e board a partire dai dati JSON.
+     *
+     * @param players giocatori della partita
+     * @throws IOException se il caricamento dati da JSON fallisce
+     */
     public GameController(List<Player> players) throws IOException {
         jsonGod.loadAllData();
         int playerCount = players.size();
@@ -70,24 +82,69 @@ public class GameController {
     }
 
 
+    /**
+     * Delega il pick top card al model.
+     *
+     * @return true su mossa valida, false su mossa illegale
+     */
     public boolean pickTopCard(int index, Player player) {
-        return state.pickTopCard(index, player);
+        try {
+            return state.pickTopCard(index, player);
+        } catch (IllegalMoveException e) {
+            return false;
+        }
     }
 
+    /**
+     * Delega il pick bottom card al model.
+     *
+     * @return true su mossa valida, false su mossa illegale
+     */
     public boolean pickBottomCard(int index, Player player) {
-        return state.pickBottomCard(index, player);
+        try {
+            return state.pickBottomCard(index, player);
+        } catch (IllegalMoveException e) {
+            return false;
+        }
     }
 
+    /**
+     * Delega il pick top building al model.
+     *
+     * @return true su mossa valida, false su mossa illegale
+     */
     public boolean pickTopBuilding(int index, Player player) {
-        return state.pickTopBuilding(index, player);
+        try {
+            return state.pickTopBuilding(index, player);
+        } catch (IllegalMoveException e) {
+            return false;
+        }
     }
 
+    /**
+     * Delega il pick bottom building al model.
+     *
+     * @return true su mossa valida, false su mossa illegale
+     */
     public boolean pickBottomBuilding(int index, Player player) {
-        return state.pickBottomBuilding(index, player);
+        try {
+            return state.pickBottomBuilding(index, player);
+        } catch (IllegalMoveException e) {
+            return false;
+        }
     }
 
+    /**
+     * Delega l'occupazione di una tile offerta al model.
+     *
+     * @return true su mossa valida, false su mossa illegale
+     */
     public boolean occupyOfferTrailTile(int index, Player player) {
-        return state.occupyOfferTrailTile(index, player);
+        try {
+            return state.occupyOfferTrailTile(index, player);
+        } catch (IllegalMoveException e) {
+            return false;
+        }
     }
 
 
