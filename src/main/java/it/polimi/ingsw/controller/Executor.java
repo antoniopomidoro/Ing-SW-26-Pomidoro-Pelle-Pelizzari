@@ -30,7 +30,7 @@ protected int index;
 protected int id;
 
 @JsonProperty
-protected int idPartita;
+protected int idGame;
 
 @JsonProperty
 protected int idPlayer;
@@ -45,7 +45,7 @@ protected int idPlayer;
 
 
     public int getIdPartita() {
-        return idPartita;
+        return idGame;
     }
     public  int getIdPlayer(){
         return idPlayer;
