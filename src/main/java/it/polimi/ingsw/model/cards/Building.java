@@ -110,4 +110,9 @@ public class Building extends Card {
         manager.addBuilding(this);
         return true;
     }
+
+    @Override
+    public CardCategory getCategory() {
+        return CardCategory.BUILDING;
+    }
 }

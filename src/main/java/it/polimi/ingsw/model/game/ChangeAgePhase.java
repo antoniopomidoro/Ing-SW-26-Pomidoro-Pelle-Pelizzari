@@ -30,6 +30,14 @@ public class ChangeAgePhase implements GamePhaseBehavior {
         board.discardBottomBuildings();
         board.topToBottomBuildings();
         board.addTopBuildings(context.getDeck().getBuildings(context.getAge()));
+
+        // Notifica fine cambio era prima della transizione
+        context.raiseEvent(new GameEvent(
+                GameEvent.Type.SUCCESSFUL_ACTION,
+                null,
+                "phaseCompleted:CHANGE_AGE"
+        ));
+
         // Transition to START_TURN
         context.setPhase(new StartTurnPhase());
         return true;

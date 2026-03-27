@@ -2,8 +2,6 @@ package it.polimi.ingsw.model.game;
 
 import it.polimi.ingsw.model.board.Board;
 import it.polimi.ingsw.model.board.Tile;
-import it.polimi.ingsw.model.cards.Building;
-import it.polimi.ingsw.model.player.Player;
 
 import java.util.List;
 
@@ -24,9 +22,13 @@ public class EndTurnPhase implements GamePhaseBehavior {
             return false;
         }
         Board board = context.getBoard();
-        List<Player> players = context.getPlayers();
         int maxTurns = context.getConfig().getMaxTurns();
         if (context.getTurn() >= maxTurns) {
+            context.raiseEvent(new GameEvent(
+                    GameEvent.Type.SUCCESSFUL_ACTION,
+                    null,
+                    "phaseCompleted:END_TURN"
+            ));
             context.setPhase(new EndGamePhase());
             return true;
         }
@@ -53,6 +55,11 @@ public class EndTurnPhase implements GamePhaseBehavior {
         // Increment turn counter
         context.setTurn(context.getTurn() + 1);
 
+        context.raiseEvent(new GameEvent(
+                GameEvent.Type.SUCCESSFUL_ACTION,
+                null,
+                "phaseCompleted:END_TURN"
+        ));
         context.setPhase(new StartTurnPhase());
         return true;
     }

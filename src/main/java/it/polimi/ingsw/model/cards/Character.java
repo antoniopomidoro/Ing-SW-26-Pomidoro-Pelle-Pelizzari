@@ -63,4 +63,9 @@ public abstract class Character extends Card {
     public boolean onAddedToPlayer(Player p) {
         return p != null;
     }
+
+    @Override
+    public CardCategory getCategory() {
+        return CardCategory.CHARACTER;
+    }
 }

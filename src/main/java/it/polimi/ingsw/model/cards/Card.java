@@ -36,6 +36,17 @@ public abstract class Card{
     protected Age age;
     protected int minPlayers = 0;
 
+    public enum CardCategory {
+        CHARACTER,
+        EVENT,
+        BUILDING
+    }
+
+    /**
+     * Categoria semantica della carta usata per serializzazione DTO e rendering client.
+     */
+    public abstract CardCategory getCategory();
+
     /**
      * Default constructor for Card.
      * The constructor is empty as instances of its subclasses will be populated using JSON deserialization.
@@ -112,4 +123,3 @@ public abstract class Card{
 
 
 }
-

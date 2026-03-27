@@ -265,6 +265,13 @@ public class GameState {
         observers.forEach(o -> o.onGameEvent(event));
     }
 
+    /**
+     * Emette un evento di azione riuscita per aggiornare le view osservatrici.
+     */
+    private void raiseSuccessfulAction(Player player, String actionName) {
+        raiseEvent(new GameEvent(GameEvent.Type.SUCCESSFUL_ACTION, player, actionName));
+    }
+
     // ==========================================
     //  Phase Delegation API
     // ==========================================
@@ -285,7 +292,11 @@ public class GameState {
      */
     public boolean pickTopCard(int index, Player player) {
         if (!hasCurrentPhase()) return false;
-        return currentPhase.pickTopCard(this, index, player);
+        boolean success = currentPhase.pickTopCard(this, index, player);
+        if (success) {
+            raiseSuccessfulAction(player, "pickTopCard(index=" + index + ")");
+        }
+        return success;
     }
 
     /**
@@ -296,7 +307,11 @@ public class GameState {
      */
     public boolean pickBottomCard(int index, Player player) {
         if (!hasCurrentPhase()) return false;
-        return currentPhase.pickBottomCard(this, index, player);
+        boolean success = currentPhase.pickBottomCard(this, index, player);
+        if (success) {
+            raiseSuccessfulAction(player, "pickBottomCard(index=" + index + ")");
+        }
+        return success;
     }
 
     /**
@@ -307,7 +322,11 @@ public class GameState {
      */
     public boolean pickTopBuilding(int index, Player player) {
         if (!hasCurrentPhase()) return false;
-        return currentPhase.pickTopBuilding(this, index, player);
+        boolean success = currentPhase.pickTopBuilding(this, index, player);
+        if (success) {
+            raiseSuccessfulAction(player, "pickTopBuilding(index=" + index + ")");
+        }
+        return success;
     }
 
     /**
@@ -318,7 +337,11 @@ public class GameState {
      */
     public boolean pickBottomBuilding(int index, Player player) {
         if (!hasCurrentPhase()) return false;
-        return currentPhase.pickBottomBuilding(this, index, player);
+        boolean success = currentPhase.pickBottomBuilding(this, index, player);
+        if (success) {
+            raiseSuccessfulAction(player, "pickBottomBuilding(index=" + index + ")");
+        }
+        return success;
     }
 
     /**
@@ -329,7 +352,11 @@ public class GameState {
      */
     public boolean occupyOfferTrailTile(int index, Player player) {
         if (!hasCurrentPhase()) return false;
-        return currentPhase.occupyOfferTrailTile(this, index, player);
+        boolean success = currentPhase.occupyOfferTrailTile(this, index, player);
+        if (success) {
+            raiseSuccessfulAction(player, "occupyOfferTrailTile(index=" + index + ")");
+        }
+        return success;
     }
 
     // ==========================================

@@ -47,6 +47,14 @@ public class TurnPhase implements GamePhaseBehavior {
             }
             extraIndex++;
         }
+
+        // Notifica fine turn phase prima della transizione
+        context.raiseEvent(new GameEvent(
+                GameEvent.Type.SUCCESSFUL_ACTION,
+                null,
+                "phaseCompleted:TURN"
+        ));
+
         // All tiles have been scanned — move to END_TURN
         context.setPhase(new EndTurnPhase());
         return true;

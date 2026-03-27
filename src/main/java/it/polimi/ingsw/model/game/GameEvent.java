@@ -32,7 +32,8 @@ public class GameEvent {
          * Indicates that an action was attempted in a game phase where it is not permitted.
          */
         INVALID_PHASE,
-        INSUFFICIENT_PICKS
+        INSUFFICIENT_PICKS,
+        SUCCESSFUL_ACTION
     }
 
     private final Type type;

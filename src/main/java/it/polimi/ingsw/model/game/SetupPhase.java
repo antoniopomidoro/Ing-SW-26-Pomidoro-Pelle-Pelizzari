@@ -34,13 +34,17 @@ public class SetupPhase implements GamePhaseBehavior{
         while (board.getTopCards().size() < topCardsNumber) {
             deck.popCard(context.getAge()).ifPresentOrElse(board::addTopCard, () -> { throw new IllegalStateException("the deck is empty");});
         }
-
         // 3. Transition to START_TURN phase
         return nextPhase(context);
     }
 
     @Override
     public boolean nextPhase(GameState context) {
+        context.raiseEvent(new GameEvent(
+                GameEvent.Type.SUCCESSFUL_ACTION,
+                null,
+                "phaseCompleted:SETUP"
+        ));
         context.setPhase(new StartTurnPhase());
         return true;
     }

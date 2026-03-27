@@ -35,6 +35,13 @@ public class EndGamePhase implements GamePhaseBehavior {
             player.addPP(stats.getCharacterPair(CharacterEnum.ARTIST) * artistGain);
             player.addPP(player.getBuildingsPP());
         }
+
+        context.raiseEvent(new GameEvent(
+                GameEvent.Type.SUCCESSFUL_ACTION,
+                null,
+                "phaseCompleted:END_GAME"
+        ));
+
         // Terminal state — no transition
         return true;
     }

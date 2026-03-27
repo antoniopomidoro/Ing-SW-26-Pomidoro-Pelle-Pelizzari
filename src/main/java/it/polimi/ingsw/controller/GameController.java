@@ -147,5 +147,9 @@ public class GameController {
         }
     }
 
+    public GameState getGameState() {
+        return state;
+    }
+
 
 }

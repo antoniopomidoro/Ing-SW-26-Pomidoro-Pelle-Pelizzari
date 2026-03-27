@@ -70,5 +70,9 @@ public class Event extends Card {
     public boolean isBuyable(){
         return false;
     }
+    @Override
+    public CardCategory getCategory() {
+        return CardCategory.EVENT;
+    }
 
 }
