@@ -6,8 +6,8 @@ import it.polimi.ingsw.model.player.Player;
 public class ExecTopCard extends Executor{
 
     @Override
-    public boolean execute(Player player, GameState gameState){
-        gameState.pickTopCard(super.index,player);
+    public boolean execute(Player player, GameController controller){
+        controller.pickTopCard(super.index,player);
         return true;
     }
 }

@@ -37,7 +37,7 @@ protected int idPlayer;
 
 
 
-    public boolean execute(Player player, GameState gameState){
+    public boolean execute(Player player, GameController controller){
         return false;
     }
 

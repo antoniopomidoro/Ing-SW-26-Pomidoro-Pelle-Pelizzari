@@ -6,8 +6,8 @@ import it.polimi.ingsw.model.player.Player;
 public class ExecTopBuilding extends Executor{
 
     @Override
-    public boolean execute(Player player, GameState gameState){
-        gameState.pickTopBuilding(super.index,player);
+    public boolean execute(Player player, GameController controller){
+        controller.pickTopBuilding(super.index,player);
         return true;
     }
 }
