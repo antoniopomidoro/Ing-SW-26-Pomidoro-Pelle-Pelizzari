@@ -1,9 +1,9 @@
-package it.polimi.ingsw.controller;
+package it.polimi.ingsw.controller.Actions;
 
-import it.polimi.ingsw.model.game.GameState;
+import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.player.Player;
 
-public class ExecTopCard extends Executor{
+public class ExecTopCard extends Executor {
 
     @Override
     public boolean execute(Player player, GameController controller){

@@ -1,11 +1,12 @@
-package it.polimi.ingsw.controller;
+package it.polimi.ingsw.controller.Actions;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import it.polimi.ingsw.controller.*;
 import it.polimi.ingsw.model.player.Player;
-import it.polimi.ingsw.model.game.GameState;
+
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
