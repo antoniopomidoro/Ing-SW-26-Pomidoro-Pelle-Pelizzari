@@ -32,7 +32,7 @@ public class StartTurnPhase implements GamePhaseBehavior {
         }
         Board board = context.getBoard();
         Decks deck = context.getDeck();
-        List<Player> turnOrder = context.getTurnOrder();
+        List<Player> turnOrder = context.getOrderTileOrder();
         OrderTile orderTile = board.getOrderTile();
         int topCardsNumber = context.getConfig().getTopCardsQuantity(context.getPlayers());
 
@@ -75,17 +75,22 @@ public class StartTurnPhase implements GamePhaseBehavior {
      * {@link IllegalMoveException}.
      */
     @Override
-    public boolean occupyOfferTrailTile(GameState context, int index, Player player){
+    public boolean occupyOfferTrailTile(GameState context, int index, Player player) {
         Board board = context.getBoard();
         Player currentPlayer = context.getCurrentOrderTileOrderPlayer();
-        if (player != currentPlayer){
-            context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player, "It's not your turn to place a totem."));
-            throw new IllegalMoveException("It's not your turn to place a totem.");
+        if (player != currentPlayer) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player, "Not your turn"));
+            throw new IllegalMoveException("Not your turn");
         }
-        board.getTiles().getTile(index).occupy(player);
+        var targetTile = board.getTiles().getTile(index);
+        if (targetTile.isOccupied()) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ACTION, player, "Tile already occupied"));
+            throw new IllegalMoveException("Tile already occupied");
+        }
+        targetTile.occupy(player);
         context.updateTurnOrder(currentPlayer);
-        boolean isPhaseFinished = context.nextPlayerInTurnOrderTile();
-        if(isPhaseFinished){
+        boolean hasNextPlayer = context.nextPlayerInTurnOrderTile();
+        if (!hasNextPlayer) {
             this.nextPhase(context);
         }
         return true;

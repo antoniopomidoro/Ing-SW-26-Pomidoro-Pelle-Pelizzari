@@ -27,7 +27,7 @@ public class TurnPhase implements GamePhaseBehavior {
         // Scan tiles from current index onward
         while (index < tiles.size()) {
             Tile tile = tiles.get(index);
-            if (tile.isOccupied()) {
+            if (tile.isOccupied()&&tile.getOccupier().isConnected()) {
                 // Save the current index so PlayerTurnPhase knows which tile to process
                 context.setCurrentTileIndex(index + 1);
                 context.setPhase(new PlayerTurnPhase(tile.getOccupier(), tile));
@@ -40,8 +40,8 @@ public class TurnPhase implements GamePhaseBehavior {
         while (extraIndex < players.size()) {
             Player player = players.get(extraIndex);
             int bonus = player.getStats().getExtraUpperPick();
-            context.setExtraIndex(extraIndex + 1);
-            if (bonus > 0) {
+            if (bonus > 0 && player.isConnected()) {
+                context.setExtraIndex(extraIndex + 1);
                 context.setPhase(new PlayerTurnPhase(player, new Tile(player, bonus, 0)));
                 return true;
             }

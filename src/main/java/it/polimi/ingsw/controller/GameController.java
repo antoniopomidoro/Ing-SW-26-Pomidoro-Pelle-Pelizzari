@@ -10,6 +10,7 @@ import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.game.GameState;
 import it.polimi.ingsw.model.game.IllegalMoveException;
+import it.polimi.ingsw.model.game.TurnPhase;
 import it.polimi.ingsw.model.player.Player;
 
 import java.io.IOException;
@@ -151,5 +152,9 @@ public class GameController {
         return state;
     }
 
+    public boolean disconnectPlayer(Player p){
+        if(p == state.getCurrentTurnOrderPlayer()) state.setPhase(new TurnPhase());
+        return state.disconnectPlayer(p);
+    }
 
 }

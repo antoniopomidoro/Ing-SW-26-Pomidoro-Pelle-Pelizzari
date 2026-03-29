@@ -48,5 +48,30 @@ public abstract class VirtualView implements GameStateObserver {
         sendToClient(dto);
     }
 
+    public boolean sendGameSnapshot(){
+        if (gameController == null) {
+            return false;
+        }
+        GameStateDTO snapshot = GameStateDTO.from(gameController.getGameState());
+        GameEventDTO syncDto = new GameEventDTO(
+                "SYNC",
+                null,
+                "Game state synchronization",
+                snapshot
+        );
+        sendToClient(syncDto);
+        return true;
+    }
+    public void sendLobbyUpdate(int currentPlayers, int requiredPlayers) {
+        GameEventDTO lobbyDto = new GameEventDTO(
+                "LOBBY_UPDATE",
+                this.totem,
+                "Waiting for players... (" + currentPlayers + "/" + requiredPlayers + ")",
+                null
+        );
+
+        sendToClient(lobbyDto);
+    }
     protected abstract void sendToClient(GameEventDTO dto);
+
 }

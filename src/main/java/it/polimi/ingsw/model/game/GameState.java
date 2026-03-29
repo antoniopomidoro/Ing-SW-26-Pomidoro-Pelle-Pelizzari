@@ -165,13 +165,20 @@ public class GameState {
      * Advances to the next player in the order-tile sequence.
      * @return true if there are more players in the sequence, false if it looped back to the beginning.
      */
-    public boolean nextPlayerInTurnOrderTile(){
-        currentPlayerOrderIndex++;
-        if(currentPlayerOrderIndex >= orderTileOrder.size()){
-            currentPlayerOrderIndex = 0;
-            return false;
+    public boolean nextPlayerInTurnOrderTile() {
+        while (true) {
+            currentPlayerOrderIndex++;
+
+            if (currentPlayerOrderIndex >= orderTileOrder.size()) {
+                currentPlayerOrderIndex = 0;
+                return false;
+            }
+
+            if (getCurrentOrderTileOrderPlayer().isConnected()) {
+                return true;
+            }
+
         }
-        return true;
     }
 
     /**
@@ -227,13 +234,22 @@ public class GameState {
 
     /**
      * Sets a completely new sequence for the order-tile order.
-     * @param orderTileOrder A list representing the new order.
+     * @param generatedOrder A list representing the new order.
      * @return true if successful, false if the list is null or empty.
      */
-    public boolean setOrderTileOrder(List<Player> orderTileOrder) {
-        if (orderTileOrder == null || orderTileOrder.isEmpty())return false;
+    public boolean setOrderTileOrder(List<Player> generatedOrder) {
+        if (generatedOrder == null || generatedOrder.isEmpty()) {
+            return false;
+        }
+
         this.orderTileOrder.clear();
-        this.orderTileOrder.addAll(orderTileOrder);
+        generatedOrder.stream()
+                .filter(Player::isConnected)
+                .forEach(this.orderTileOrder::add);
+        generatedOrder.stream()
+                .filter(p -> !p.isConnected())
+                .forEach(this.orderTileOrder::add);
+
         return true;
     }
 
@@ -386,4 +402,22 @@ public class GameState {
         }
         return true;
     }
+    public boolean disconnectPlayer(Player player) {
+        if (player == null) return false;
+        if (!orderTileOrder.contains(player)) {
+            throw new IllegalStateException("Player not in game");
+        }
+        player.setConnected(false);
+        return true;
+    }
+
+    public boolean reintegratePlayer(Player player) {
+        if (player == null) return false;
+        if (!orderTileOrder.contains(player)) {
+            throw new IllegalStateException("Player non riconosciuto");
+        }
+        player.setConnected(true);
+        return true;
+    }
+
 }

@@ -24,6 +24,7 @@ public class Player {
     private int pp;
     private boolean isChoosing;
     private int totemPlacementBonus = 0;
+    private boolean isConnected = true;
 
     public Player(Totem id, String nickname) {
 
@@ -161,5 +162,13 @@ public class Player {
         return buildings.stream()
                 .mapToInt(Building::getPP)
                 .sum();
+    }
+
+    public boolean isConnected() {
+        return isConnected;
+    }
+
+    public void setConnected(boolean b) {
+        isConnected = b;
     }
 }

@@ -33,7 +33,8 @@ public class GameEvent {
          */
         INVALID_PHASE,
         INSUFFICIENT_PICKS,
-        SUCCESSFUL_ACTION
+        SUCCESSFUL_ACTION,
+        INVALID_ACTION
     }
 
     private final Type type;
