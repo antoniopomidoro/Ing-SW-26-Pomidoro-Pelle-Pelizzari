@@ -1,6 +1,6 @@
 package it.polimi.ingsw.network.rmi;
 
-import it.polimi.ingsw.controller.Executor;
+import it.polimi.ingsw.controller.Actions.Executor;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.NUDEAnalyzer;
 import it.polimi.ingsw.model.player.Player;
@@ -59,7 +59,7 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
             throw new RemoteException("Player not found");
         }
         synchronized (controller) {
-            executor.execute(player, controller.getGameState());
+            executor.execute(player, controller);
         }
         return true;
     }
