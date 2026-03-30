@@ -171,4 +171,16 @@ public class Player {
     public void setConnected(boolean b) {
         isConnected = b;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || this.getClass() != obj.getClass()) {
+            return false;
+        }
+        Player otherPlayer = (Player) obj;
+        return Objects.equals(this.nickname, otherPlayer.nickname) && Objects.equals(this.id, otherPlayer.id);
+    }
 }

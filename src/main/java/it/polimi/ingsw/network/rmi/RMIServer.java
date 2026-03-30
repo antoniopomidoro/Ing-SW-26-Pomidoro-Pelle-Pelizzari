@@ -15,13 +15,25 @@ import java.rmi.registry.Registry;
 import java.rmi.server.ExportException;
 import java.rmi.server.UnicastRemoteObject;
 
+/**
+ * RMI server entry point for lobby management and command execution.
+ */
 public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface {
     private final ServerManager serverManager;
 
+    /**
+     * Creates an RMI server wrapper around the {@link ServerManager}.
+     *
+     * @param serverManager server manager instance
+     * @throws RemoteException if RMI initialization fails
+     */
     public RMIServer(ServerManager serverManager) throws RemoteException {
         this.serverManager = serverManager;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public LobbyState joinGame(String gameId, String playerName, int requiredPlayers, Totem requestedTotem, ClientRMIInterface clientCallback) throws RemoteException {
         try {
@@ -35,6 +47,9 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean sendNUDECommand(String gameId, String jsonCommand) throws RemoteException {
         if (gameId == null || gameId.isBlank() || jsonCommand == null || jsonCommand.isBlank()) {
@@ -64,6 +79,14 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
         return true;
     }
 
+    /**
+     * Starts and binds the RMI server.
+     *
+     * @param port registry port
+     * @param rmiBindName registry binding name
+     * @param serverManager server manager instance
+     * @throws RemoteException if RMI setup fails
+     */
     public static void start(int port, String rmiBindName, ServerManager serverManager) throws RemoteException {
         RMIServer server = new RMIServer(serverManager);
         Registry registry;

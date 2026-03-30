@@ -11,22 +11,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Coordinates lobby creation, player rejoin, and the lifecycle of active games.
+ */
 public class ServerManager {
     private final Map<String, PendingGame> pendingGames = new ConcurrentHashMap<>();
     private final Map<String, GameController> activeGames = new ConcurrentHashMap<>();
     private final Map<String, Map<Totem, VirtualView>> viewRegistry = new ConcurrentHashMap<>();
 
     /**
-     * Un giocatore chiede di creare o unirsi a una partita.
-     * Se la lobby si riempie, crea il GameController e registra le VirtualView come observer.
+     * A player requests to create or join a game.
+     * When the lobby fills up, this method creates the {@link GameController}
+     * and registers each {@link VirtualView} as an observer.
      *
-     * @param gameId          ID della stanza
-     * @param playerName      nickname del giocatore
-     * @param requiredPlayers quanti giocatori servono (usato solo alla creazione)
-     * @param requestedTotem  totem/colore richiesto dal giocatore
-     * @param view            la VirtualView del giocatore (Socket o RMI)
-     * @return il GameController se la partita e' partita, null se e' ancora in attesa
-     * @throws IllegalStateException se la partita e' gia' attiva o input non valido
+     * @param gameId ID of the room
+     * @param playerName player's nickname
+     * @param requiredPlayers number of players required (used only when creating a new lobby)
+     * @param requestedTotem totem/color requested by the player
+     * @param view the player's {@link VirtualView} (Socket or RMI)
+     * @return {@link LobbyState#STARTING_GAME} when the match starts, {@link LobbyState#WAITING}
+     *         while the lobby is filling, or {@link LobbyState#REJOIN} for a returning player
+     * @throws IllegalArgumentException if input is invalid
+     * @throws IllegalStateException if the game is already active or the player cannot rejoin
+     * @throws IOException if the game initialization fails
      */
     public synchronized LobbyState joinGame(String gameId, String playerName, int requiredPlayers,
                                                 Totem requestedTotem, VirtualView view) throws IOException {
@@ -69,7 +76,7 @@ public class ServerManager {
         view.setTotem(totem);
 
         if (pending.isFull()) {
-            List<Player> players = pending.createPlayers();
+            List<Player> players = pending.getJoinedPlayers();
             GameController controller = new GameController(players);
 
             Map<Totem, VirtualView> views = viewRegistry.get(gameId);

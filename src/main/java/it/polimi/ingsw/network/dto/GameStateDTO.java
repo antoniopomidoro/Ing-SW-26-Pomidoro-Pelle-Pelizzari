@@ -21,6 +21,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * Serializable snapshot of the public game state for network transport.
+ */
 public class GameStateDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -53,6 +56,12 @@ public class GameStateDTO implements Serializable {
         this.activePlayer = activePlayer;
     }
 
+    /**
+     * Builds a DTO snapshot from the current {@link GameState}.
+     *
+     * @param state the source game state
+     * @return a DTO snapshot, or an empty snapshot when {@code state} is null
+     */
     public static GameStateDTO from(GameState state) {
         if (state == null) {
             return new GameStateDTO(null, 0, null, List.of(), null, List.of(), List.of(), null);
@@ -118,6 +127,12 @@ public class GameStateDTO implements Serializable {
         return turnOrder;
     }
 
+    /**
+     * Returns the player order as dictated by the order tile. This is the only
+     * variable that always knows all players.
+     *
+     * @return list of totems following the order-tile ordering
+     */
     public List<Totem> getOrderTileOrder() {
         return orderTileOrder;
     }
@@ -126,6 +141,9 @@ public class GameStateDTO implements Serializable {
         return activePlayer;
     }
 
+    /**
+     * Player data included in the public snapshot.
+     */
     public static class PlayerDTO implements Serializable {
         private static final long serialVersionUID = 1L;
 
@@ -139,6 +157,11 @@ public class GameStateDTO implements Serializable {
         private final int stars;
         private final int buildingDiscount;
 
+        /**
+         * Builds a DTO from a player instance.
+         *
+         * @param player the source player
+         */
         public PlayerDTO(Player player) {
             if (player == null) {
                 this.totem = null;
@@ -235,6 +258,9 @@ public class GameStateDTO implements Serializable {
         }
     }
 
+    /**
+     * Board data included in the public snapshot.
+     */
     public static class BoardDTO implements Serializable {
         private static final long serialVersionUID = 1L;
 
@@ -244,6 +270,11 @@ public class GameStateDTO implements Serializable {
         private final List<BuildingDTO> bottomBuildings;
         private final List<TileDTO> tiles;
 
+        /**
+         * Builds a DTO from the board.
+         *
+         * @param board the source board
+         */
         public BoardDTO(Board board) {
             this.topCards = new ArrayList<>();
             this.bottomCards = new ArrayList<>();
@@ -285,12 +316,20 @@ public class GameStateDTO implements Serializable {
         }
     }
 
+    /**
+     * Card data included in the public snapshot.
+     */
     public static class CardDTO implements Serializable {
         private static final long serialVersionUID = 1L;
 
         private final String cardType;
         private final String ageName;
 
+        /**
+         * Builds a DTO from a card.
+         *
+         * @param card the source card
+         */
         public CardDTO(Card card) {
             if (card == null) {
                 this.cardType = null;
@@ -313,6 +352,9 @@ public class GameStateDTO implements Serializable {
         }
     }
 
+    /**
+     * Building data included in the public snapshot.
+     */
     public static class BuildingDTO implements Serializable {
         private static final long serialVersionUID = 1L;
 
@@ -322,6 +364,11 @@ public class GameStateDTO implements Serializable {
         private final String ageName;
         private final String triggerKeyName;
 
+        /**
+         * Builds a DTO from a building.
+         *
+         * @param building the source building
+         */
         public BuildingDTO(Building building) {
             if (building == null) {
                 this.id = null;
@@ -361,6 +408,9 @@ public class GameStateDTO implements Serializable {
         }
     }
 
+    /**
+     * Tile data included in the public snapshot.
+     */
     public static class TileDTO implements Serializable {
         private static final long serialVersionUID = 1L;
 
@@ -370,6 +420,12 @@ public class GameStateDTO implements Serializable {
         private final int upperPicks;
         private final int bottomPicks;
 
+        /**
+         * Builds a DTO from a tile.
+         *
+         * @param index tile index on the board
+         * @param tile the source tile
+         */
         public TileDTO(int index, Tile tile) {
             this.index = index;
             if (tile == null) {

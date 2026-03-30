@@ -9,12 +9,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Holds lobby state before a match starts, including join order and totem assignments.
+ */
 public class PendingGame {
     private final String gameId;
     private final int requiredPlayers;
-    private final List<String> joinOrder = new ArrayList<>();
-    private final Map<String, Totem> totemByPlayer = new LinkedHashMap<>();
-    private final EnumMap<Totem, String> playerByTotem = new EnumMap<>(Totem.class);
+    private final List<Player> joinedPlayers = new ArrayList<>();
 
     public PendingGame(String gameId, int requiredPlayers) {
         this.gameId = gameId;
@@ -22,53 +23,54 @@ public class PendingGame {
     }
 
     /**
-     * Aggiunge un giocatore alla lobby assegnandogli il Totem richiesto.
-     * @param playerName il nickname del giocatore
-     * @param requestedTotem il colore/totem richiesto dal giocatore
-     * @return il Totem assegnato
-     * @throws IllegalArgumentException se il nickname e' null/blank o gia' presente
-     *                                  oppure se il totem richiesto e' null/occupato
-     * @throws IllegalStateException se la lobby e' piena
+     * Adds a player to the lobby and assigns the requested totem.
+     *
+     * @param playerName the player's nickname
+     * @param requestedTotem the totem/color requested by the player
+     * @return the assigned totem
+     * @throws IllegalArgumentException if the nickname is null/blank or already used,
+     *                                  or if the requested totem is null/occupied
+     * @throws IllegalStateException if the lobby is full
      */
     public synchronized Totem addPlayer(String playerName, Totem requestedTotem) {
         if (playerName == null || playerName.isBlank()) {
-            throw new IllegalArgumentException("Nickname non valido: null o blank");
-        }
-        if (totemByPlayer.containsKey(playerName)) {
-            throw new IllegalArgumentException("Nickname gia' in uso: " + playerName);
+            throw new IllegalArgumentException("Invalid nickname: null o blank");
         }
         if (isFull()) {
-            throw new IllegalStateException("La stanza e' piena: " + gameId);
+            throw new IllegalStateException("Lobby is full: " + gameId);
         }
         if (requestedTotem == null) {
-            throw new IllegalArgumentException("Totem richiesto non valido: null");
-        }
-        if (playerByTotem.containsKey(requestedTotem)) {
-            throw new IllegalArgumentException("Totem gia' occupato: " + requestedTotem);
+            throw new IllegalArgumentException("Invalid totem: null");
         }
 
-        joinOrder.add(playerName);
-        totemByPlayer.put(playerName, requestedTotem);
-        playerByTotem.put(requestedTotem, playerName);
+        for (Player player : joinedPlayers) {
+            if (player.getNickname().equals(playerName)) {
+                throw new IllegalArgumentException("Nickname not available: " + playerName);
+            }
+            if (player.getId().equals(requestedTotem)) {
+                throw new IllegalArgumentException("Totem not available: " + requestedTotem);
+            }
+        }
+
+        joinedPlayers.add(new Player(requestedTotem, playerName));
         return requestedTotem;
     }
 
     public synchronized boolean isFull() {
-        return joinOrder.size() >= requiredPlayers;
+        return joinedPlayers.size() >= requiredPlayers;
     }
 
     /**
-     * Crea la lista di Player dall'ordine di join.
-     * @return lista di Player con Totem e nickname assegnati
-     * @throws IllegalStateException se la lobby non e' piena
+     * Creates the player list following the join order.
+     *
+     * @return list of {@link Player} with assigned totems and nicknames
+     * @throws IllegalStateException if the lobby is not full
      */
-    public synchronized List<Player> createPlayers() {
+    public synchronized List<Player> getJoinedPlayers() {
         if (!isFull()) {
-            throw new IllegalStateException("Lobby non piena: " + joinOrder.size() + "/" + requiredPlayers);
+            throw new IllegalStateException("Lobby non piena: " + joinedPlayers.size() + "/" + requiredPlayers);
         }
-        return joinOrder.stream()
-                .map(name -> new Player(totemByPlayer.get(name), name))
-                .toList();
+        return new ArrayList<>(joinedPlayers);
     }
 
     public String getGameId() {
@@ -80,14 +82,7 @@ public class PendingGame {
     }
 
     public synchronized int getCurrentPlayerCount() {
-        return joinOrder.size();
+        return joinedPlayers.size();
     }
 
-    public synchronized Map<String, Totem> getAssignedTotems() {
-        return new LinkedHashMap<>(totemByPlayer);
-    }
-
-    public synchronized Map<Totem, String> getPlayersByTotem() {
-        return new EnumMap<>(playerByTotem);
-    }
 }

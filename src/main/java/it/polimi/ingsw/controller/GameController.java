@@ -20,19 +20,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Controller applicativo del gioco.
- * Le azioni pubbliche intercettano {@link IllegalMoveException} provenienti dal model
- * e convertono l'esito in false, mentre il broadcast dell'evento e gia avvenuto nel model.
+ * Application controller for the game.
+ * Public actions catch {@link IllegalMoveException} thrown by the model and
+ * translate the outcome into {@code false}; the model already broadcasts the
+ * corresponding event.
+ * <p>
+ * Note: {@code orderTileOrder} is the only variable that always knows all players.
  */
 public class GameController {
     private final JsonFactory jsonGod = new JsonFactory();
     private final GameState state;
 
     /**
-     * Inizializza configurazione, deck e board a partire dai dati JSON.
+     * Initializes configuration, decks, and board from JSON data.
      *
-     * @param players giocatori della partita
-     * @throws IOException se il caricamento dati da JSON fallisce
+     * @param players the players in the match
+     * @throws IOException if loading data from JSON fails
      */
     public GameController(List<Player> players) throws IOException {
         jsonGod.loadAllData();
@@ -44,6 +47,16 @@ public class GameController {
         
     }
 
+    /**
+     * Builds and shuffles decks based on the player count and configuration.
+     *
+     * @param cards all available character cards
+     * @param buildings all available building cards
+     * @param playerCount number of players in the match
+     * @param config game configuration
+     * @return a shuffled {@link Decks} instance for the match
+     * @throws IllegalStateException if there are not enough buildings for any age
+     */
     private Decks setupDeck(List<Card> cards, List<Building> buildings, int playerCount, GameConfig config) {
         List<Card> filteredCards = cards.stream()
                 .filter(card -> card.isAvailableForPlayers(playerCount))
@@ -69,6 +82,15 @@ public class GameController {
         return decks;
     }
 
+    /**
+     * Builds the board using the order tile and the tile set compatible with the player count.
+     *
+     * @param orderTiles all available order tiles
+     * @param tiles all available terrain tiles
+     * @param playerCount number of players in the match
+     * @return a {@link Board} configured for the match
+     * @throws IllegalStateException if no order tile matches the player count
+     */
     private Board setupBoard(List<OrderTile> orderTiles, List<Tile> tiles, int playerCount) {
         OrderTile validOrderTile = orderTiles.stream()
                 .filter(orderTile -> orderTile.getMinPlayers() == playerCount)
@@ -84,9 +106,11 @@ public class GameController {
 
 
     /**
-     * Delega il pick top card al model.
+     * Delegates picking the top card from the offer trail to the model.
      *
-     * @return true su mossa valida, false su mossa illegale
+     * @param index position in the offer trail
+     * @param player the acting player
+     * @return {@code true} for a valid move, {@code false} for an illegal move
      */
     public boolean pickTopCard(int index, Player player) {
         try {
@@ -97,9 +121,11 @@ public class GameController {
     }
 
     /**
-     * Delega il pick bottom card al model.
+     * Delegates picking the bottom card from the offer trail to the model.
      *
-     * @return true su mossa valida, false su mossa illegale
+     * @param index position in the offer trail
+     * @param player the acting player
+     * @return {@code true} for a valid move, {@code false} for an illegal move
      */
     public boolean pickBottomCard(int index, Player player) {
         try {
@@ -110,9 +136,11 @@ public class GameController {
     }
 
     /**
-     * Delega il pick top building al model.
+     * Delegates picking the top building from the offer trail to the model.
      *
-     * @return true su mossa valida, false su mossa illegale
+     * @param index position in the offer trail
+     * @param player the acting player
+     * @return {@code true} for a valid move, {@code false} for an illegal move
      */
     public boolean pickTopBuilding(int index, Player player) {
         try {
@@ -123,9 +151,11 @@ public class GameController {
     }
 
     /**
-     * Delega il pick bottom building al model.
+     * Delegates picking the bottom building from the offer trail to the model.
      *
-     * @return true su mossa valida, false su mossa illegale
+     * @param index position in the offer trail
+     * @param player the acting player
+     * @return {@code true} for a valid move, {@code false} for an illegal move
      */
     public boolean pickBottomBuilding(int index, Player player) {
         try {
@@ -136,9 +166,11 @@ public class GameController {
     }
 
     /**
-     * Delega l'occupazione di una tile offerta al model.
+     * Delegates occupying an offered tile on the trail to the model.
      *
-     * @return true su mossa valida, false su mossa illegale
+     * @param index position in the offer trail
+     * @param player the acting player
+     * @return {@code true} for a valid move, {@code false} for an illegal move
      */
     public boolean occupyOfferTrailTile(int index, Player player) {
         try {
@@ -148,13 +180,27 @@ public class GameController {
         }
     }
 
+    /**
+     * Exposes the current game state handled by this controller.
+     *
+     * @return the current {@link GameState}
+     */
     public GameState getGameState() {
         return state;
     }
 
+    /**
+     * Disconnects a player and, if needed, resets the turn phase when the current player leaves.
+     *
+     * @param p the player to disconnect
+     * @return {@code true} if the player was disconnected, {@code false} otherwise
+     */
     public boolean disconnectPlayer(Player p){
-        if(p == state.getCurrentTurnOrderPlayer()) state.setPhase(new TurnPhase());
-        return state.disconnectPlayer(p);
+        boolean disconnect = state.disconnectPlayer(p);
+        if(p.equals(state.getCurrentTurnOrderPlayer())) {
+            state.setPhase(new TurnPhase());
+        }
+        return disconnect;
     }
 
 }
