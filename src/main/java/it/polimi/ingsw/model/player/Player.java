@@ -23,7 +23,6 @@ public class Player {
     private int food;
     private int pp;
     private boolean isChoosing;
-    private int totemPlacementBonus = 0;
     private boolean isConnected = true;
 
     public Player(Totem id, String nickname) {
@@ -120,17 +119,6 @@ public class Player {
         return Math.max(0, realPrice);
     }
 
-    public int getTotemPlacementBonus() {
-        return totemPlacementBonus;
-    }
-
-    public boolean setTotemPlacementBonus(int totemPlacementBonus) {
-        if (totemPlacementBonus < 0) {
-            return false;
-        }
-        this.totemPlacementBonus = totemPlacementBonus;
-        return true;
-    }
 
     public boolean addBuilding(Building b){
         buildings.add(b);

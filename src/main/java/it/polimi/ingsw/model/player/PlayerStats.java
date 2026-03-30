@@ -22,7 +22,7 @@ public class PlayerStats {
     private int builderPp;
     private int ritualWinBoost = 1;
     private int extraUpperPick = 0;
-    private int totemPlacementBonusFood = 0;
+    private int totemPlacementBonus = 0;
     private Set<Tool> uniqueTools = EnumSet.noneOf(Tool.class);
 
     public boolean incrementCharacter(CharacterEnum type) {
@@ -119,7 +119,7 @@ public class PlayerStats {
         return ritualWinBoost;
     }
 
-    public boolean updateDifferentToolNumber(Tool tool) {
+    public boolean incrementTool(Tool tool) {
         uniqueTools.add(tool);
         return true;
     }
@@ -151,7 +151,7 @@ public class PlayerStats {
         if (bonus < 0) {
             return false;
         }
-        totemPlacementBonusFood = bonus;
+        totemPlacementBonus = bonus;
         return true;
     }
 
@@ -164,5 +164,14 @@ public class PlayerStats {
     }
     public int getCharacterPair(CharacterEnum type){
         return this.getCharacterCount(type) / 2;
+    }
+
+    public int getTotemPlacementBonus() {
+        return totemPlacementBonus;
+    }
+
+    public boolean setTotemPlacementBonus(int totemPlacementBonus) {
+        this.totemPlacementBonus = totemPlacementBonus;
+        return true;
     }
 }

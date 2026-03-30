@@ -47,7 +47,6 @@ public class Inventor extends Character {
             return false;
         }
         return p.getStats().incrementCharacter(CharacterEnum.INVENTOR)
-                && p.getStats().updateDifferentToolNumber(tool)
                 && p.getStats().incrementTool(tool);
     }
 }

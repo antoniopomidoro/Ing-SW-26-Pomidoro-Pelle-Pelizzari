@@ -55,7 +55,7 @@ public class StartTurnPhase implements GamePhaseBehavior {
                 Player p = turnOrder.get(i);
                 int food = orderTile.getOrderBonus(i);
                 if (food > 0){
-                    food += p.getTotemPlacementBonus();
+                    food += p.getStats().getTotemPlacementBonus();
                     p.addFood(food);
                 } else if (food < 0) {
                     int penalty = orderTile.getPenalty(i);
