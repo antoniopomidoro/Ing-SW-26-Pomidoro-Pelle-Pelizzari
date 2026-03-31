@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model.cards;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.model.board.*;
 import it.polimi.ingsw.model.cards.*;
 import it.polimi.ingsw.model.cards.characters.*;
@@ -17,6 +18,7 @@ import java.util.Map;
  * Represents a Building card, which has food cost and provides prestige points.
  * Instances of this class are intended to be created from JSON data.
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
 public class Building extends Card {
     private String id;
     private int foodCost;

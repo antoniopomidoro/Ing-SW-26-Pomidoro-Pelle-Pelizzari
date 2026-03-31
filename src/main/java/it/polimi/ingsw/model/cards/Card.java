@@ -29,6 +29,12 @@ import java.util.Map;
 )
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Character.class, name = "CHARACTER"),
+        @JsonSubTypes.Type(value = Artist.class, name = "ARTIST"),
+        @JsonSubTypes.Type(value = Gatherer.class, name = "GATHERER"),
+        @JsonSubTypes.Type(value = Shaman.class, name = "SHAMAN"),
+        @JsonSubTypes.Type(value = Builder.class, name = "BUILDER"),
+        @JsonSubTypes.Type(value = Inventor.class, name = "INVENTOR"),
+        @JsonSubTypes.Type(value = Hunter.class, name = "HUNTER"),
         @JsonSubTypes.Type(value = Event.class, name = "EVENT"),
         @JsonSubTypes.Type(value = Building.class, name = "BUILDING")
 })

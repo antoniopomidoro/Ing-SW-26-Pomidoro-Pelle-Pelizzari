@@ -1,6 +1,6 @@
 {
-  "maxPlayers": 5,
-  "minPlayers": 2,
+  "gameMaxPlayers": 5,
+  "gameMinPlayers": 2,
   "buildingPerPlayer": [
     [1, 2, 3, 0],
     [2, 2, 4, 0],
