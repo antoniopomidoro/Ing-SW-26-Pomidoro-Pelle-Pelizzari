@@ -1,13 +1,22 @@
 package it.polimi.ingsw.model.effects.events;
 
 import it.polimi.ingsw.controller.GameConfig;
+import it.polimi.ingsw.model.board.Board;
+import it.polimi.ingsw.model.board.OrderTile;
+import it.polimi.ingsw.model.board.TileSet;
+import it.polimi.ingsw.model.cards.Building;
+import it.polimi.ingsw.model.cards.Card;
+import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.GameState;
 import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.cards.characters.CharacterEnum;
+import it.polimi.ingsw.model.player.Totem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 class CavePaintingsTest {
@@ -18,10 +27,21 @@ class CavePaintingsTest {
     @BeforeEach
     void setUp() {
         // Initialize the game environment and the test player
-        List<String>nicknames=List.of("TestPlayer");
+        Totem testTotem=Totem.RED_TOTEM;
+        player=new Player(testTotem,"Tester");
+        List<Player>players=List.of(player);
+
         GameConfig config = new GameConfig();
-        state = new GameState(nicknames,config);
-        player = new Player(0,"TestPlayer");
+
+        OrderTile orderTile=new OrderTile();
+        TileSet tiles=new TileSet(new ArrayList<>());
+        Board board = new Board(orderTile,tiles);
+        List<Card> cards=new ArrayList<>();
+        List<Building> buildings=new ArrayList<>();
+        Decks deck= new Decks(cards,buildings);
+
+        state = new GameState(players,config,board,deck);
+
 
         // Setup turn order to avoid null pointers in applyEffect logic
         state.setOrderTileOrder(List.of(player));

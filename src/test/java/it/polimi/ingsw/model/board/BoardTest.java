@@ -10,10 +10,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BoardTest {
     private final int REP = 1;
-    Board board = new Board();
+    Board board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));
     private static class DummyCard extends Card{
         public DummyCard(){
             super();
+        }
+        public CardCategory getCategory(){
+            return null;
         }
     }
 
@@ -70,7 +73,7 @@ public class BoardTest {
     @DisplayName("Pick top card with empty list")
     @Test
     public void testPickTopCardEmpty() {
-        board = new Board();            // We have to be sure that topCards is empty
+        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that topCards is empty
         int idx = 0;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickTopCard(idx));
     }
@@ -78,7 +81,7 @@ public class BoardTest {
     @DisplayName("Pick top card with negative index")
     @RepeatedTest(REP)
     public void testPickTopCardNegativeIdx() {
-        board = new Board();            // We have to be sure that topCards is empty
+        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that topCards is empty
         int idx = - (int) (Math.random() * 100) + 1;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickTopCard(idx));
     }
@@ -109,7 +112,7 @@ public class BoardTest {
     @DisplayName("Pick bottom card with empty list")
     @Test
     public void testPickBottomCardEmpty() {
-        board = new Board();            // We have to be sure that bottomCards is empty
+        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that bottomCards is empty
         int idx = 0;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickBottomCard(idx));
     }
@@ -117,7 +120,7 @@ public class BoardTest {
     @DisplayName("Pick bottom card with negative index")
     @RepeatedTest(REP)
     public void testPickBottomCardNegativeIdx() {
-        board = new Board();            // We have to be sure that bottomCards is empty
+        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that bottomCards is empty
         int idx = - (int) (Math.random() * 100) + 1;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickBottomCard(idx));
     }
@@ -148,7 +151,7 @@ public class BoardTest {
     @DisplayName("Pick top building with empty list")
     @Test
     public void testPickTopBuildingEmpty() {
-        board = new Board();            // We have to be sure that topBuildings is empty
+        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that topBuildings is empty
         int idx = 0;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickTopBuilding(idx));
     }
@@ -156,7 +159,7 @@ public class BoardTest {
     @DisplayName("Pick top building with negative index")
     @RepeatedTest(REP)
     public void testPickTopBuildingNegativeIdx() {
-        board = new Board();            // We have to be sure that topBuildings is empty
+        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that topBuildings is empty
         int idx = - (int) (Math.random() * 100) + 1;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickTopBuilding(idx));
     }
@@ -187,7 +190,7 @@ public class BoardTest {
     @DisplayName("Pick bottom building with empty list")
     @Test
     public void testPickBottomBuildingEmpty() {
-        board = new Board();            // We have to be sure that bottomBuildings is empty
+        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that bottomBuildings is empty
         int idx = 0;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickBottomBuilding(idx));
     }
@@ -195,7 +198,7 @@ public class BoardTest {
     @DisplayName("Pick bottom building with negative index")
     @RepeatedTest(REP)
     public void testPickBottomBuildingNegativeIdx() {
-        board = new Board();            // We have to be sure that bottomBuildings is empty
+        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that bottomBuildings is empty
         int idx = - (int) (Math.random() * 100) + 1;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickBottomBuilding(idx));
     }
@@ -261,7 +264,7 @@ public class BoardTest {
     @DisplayName("When the bottomCards is empty, the method returns false")
     @RepeatedTest(REP)
     public void testBottomToTopEmptyBottomCards() {
-        board = new Board();
+        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));
         int topSize = (int) (Math.random() * 9) + 1;
         generateTopCards(topSize);
         int idx = 0;
@@ -286,7 +289,7 @@ public class BoardTest {
     @DisplayName("Top to bottom cards with empty top cards")
     @RepeatedTest(REP)
     public void testTopToBottomCardsEmptyTop() {
-        board = new Board();
+        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));
         int bottomSize = (int) (Math.random() * 9) + 1;
         generateBottomCards(bottomSize);
         boolean ret = board.topToBottomCards();
@@ -299,7 +302,7 @@ public class BoardTest {
     @DisplayName("Top to bottom cards with empty bottom cards")
     @RepeatedTest(REP)
     public void testTopToBottomCardsEmptyBottom() {
-        board = new Board();
+        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));
         int topSize = (int) (Math.random() * 9) + 1;
         generateTopCards(topSize);
         boolean ret = board.topToBottomCards();

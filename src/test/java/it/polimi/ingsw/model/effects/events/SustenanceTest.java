@@ -1,11 +1,19 @@
 package it.polimi.ingsw.model.effects.events;
 
 import it.polimi.ingsw.controller.GameConfig;
+import it.polimi.ingsw.model.board.Board;
+import it.polimi.ingsw.model.board.OrderTile;
+import it.polimi.ingsw.model.board.TileSet;
+import it.polimi.ingsw.model.cards.Building;
+import it.polimi.ingsw.model.cards.Card;
+import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 import it.polimi.ingsw.model.cards.characters.CharacterEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,13 +28,18 @@ class SustenanceTest {
 
     @BeforeEach
     void setUp() {
-        // Initialize GameState with required constructor parameters: nicknames and config
-        List<String> nicknames = List.of("TestPlayer");
-        GameConfig config = new GameConfig();
-        state = new GameState(nicknames, config);
+        Totem testTotem=Totem.RED_TOTEM;
+        player=new Player(testTotem,"Tester");
+        List<Player>players=List.of(player);
 
-        // Initialize Player with correct (id, nickname) format
-        player = new Player(0, "TestPlayer");
+        GameConfig config = new GameConfig();
+
+        OrderTile orderTile=new OrderTile();
+        TileSet tiles=new TileSet(new ArrayList<>());
+        Board board = new Board(orderTile,tiles);
+        List<Card> cards=new ArrayList<>();
+        List<Building> buildings=new ArrayList<>();
+        Decks deck= new Decks(cards,buildings);
 
         // Register player in turn order list to satisfy applyEffect loop
         state.setOrderTileOrder(List.of(player));

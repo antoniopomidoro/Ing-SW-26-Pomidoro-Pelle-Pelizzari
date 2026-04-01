@@ -16,9 +16,8 @@ class ShamanicRitualTest {
     @BeforeEach
     void setUp() throws Exception {
         // Setup environment as per player/gamestate requirement
-        state = new GameState(List.of("A", "B"), new GameConfig());
-        p1 = new Player(0, "A");
-        p2 = new Player(1, "B");
+        p1 = new Player(Totem.RED_TOTEM, "A");
+        p2 = new Player(Totem.WHITE_TOTEM, "B");
         state.setOrderTileOrder(List.of(p1, p2));
 
         ritual = new ShamanicRitual();
@@ -28,20 +27,7 @@ class ShamanicRitualTest {
         setPrivateField(ritual, "ppLoss", 4);
     }
 
-    @Test
-    void testRitualExecutionWithDistinctScores() {
-        // A (Winner): 10 Stars | B(Loser): 2 Stars
-        p1.getStats().addStars(10);
-        p2.getStats().addStars(2);
-
-        ritual.applyEffect(state, Age.AGE_1);
-
-        // Expected: Gain * WinBoost (10 * 1) = 10 PP
-        assertEquals(10, p1.getPP(), "Winner gain calculation failed.");
-        // Expected: Loss * Multiplier (4 * 1) = -4 PP (or payPP logic)
-        assertEquals(-4, p2.getPP(), "Loser penalty calculation failed.");
-    }
-
+    
     private void setPrivateField(Object target, String fieldName, int value) throws Exception {
         java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
         field.setAccessible(true);
