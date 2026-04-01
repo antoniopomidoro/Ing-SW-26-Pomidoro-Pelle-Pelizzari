@@ -13,6 +13,7 @@ class ShamanicRitualTest {
     private Player p1, p2;
     private ShamanicRitual ritual;
 
+
     @BeforeEach
     void setUp() throws Exception {
         // Setup environment as per player/gamestate requirement

@@ -23,14 +23,12 @@ class CavePaintingsTest {
     private GameState state;
     private Player player;
     private CavePaintings cavePaintings;
-
     @BeforeEach
     void setUp() {
         // Initialize the game environment and the test player
         Totem testTotem=Totem.RED_TOTEM;
         player=new Player(testTotem,"Tester");
         List<Player>players=List.of(player);
-
         GameConfig config = new GameConfig();
 
         OrderTile orderTile=new OrderTile();

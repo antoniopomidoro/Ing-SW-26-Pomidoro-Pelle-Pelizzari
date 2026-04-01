@@ -26,6 +26,7 @@ class HuntingTest {
     private Player player;
     private Hunting hunting;
 
+
     @BeforeEach
     void setUp() {
         Totem testTotem=Totem.RED_TOTEM;
