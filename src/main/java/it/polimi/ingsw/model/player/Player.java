@@ -83,6 +83,9 @@ public class Player {
     }
 
     public boolean payFood(int amount) {
+        if(amount < 0) {
+            amount = 0;
+        }
         this.food -= amount;
         return true;
     }
