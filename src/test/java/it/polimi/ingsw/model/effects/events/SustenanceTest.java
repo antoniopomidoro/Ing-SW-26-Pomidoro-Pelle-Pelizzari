@@ -1,11 +1,20 @@
 package it.polimi.ingsw.model.effects.events;
 
 import it.polimi.ingsw.controller.GameConfig;
+import it.polimi.ingsw.model.board.Board;
+import it.polimi.ingsw.model.board.OrderTile;
+import it.polimi.ingsw.model.board.TileSet;
+import it.polimi.ingsw.model.cards.Building;
+import it.polimi.ingsw.model.cards.Card;
+import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 import it.polimi.ingsw.model.cards.characters.CharacterEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,30 +28,56 @@ class SustenanceTest {
     private Sustenance sustenance;
 
     @BeforeEach
-    void setUp() {
-        // Initialize GameState with required constructor parameters: nicknames and config
-        List<String> nicknames = List.of("TestPlayer");
-        GameConfig config = new GameConfig();
-        state = new GameState(nicknames, config);
+    void setUp() throws Exception {
+        sustenance=new Sustenance();
+    player = new Player(Totem.RED_TOTEM, "aldo");
+    List<Player> players = new ArrayList<>(List.of(player));
 
-        // Initialize Player with correct (id, nickname) format
-        player = new Player(0, "TestPlayer");
 
-        // Register player in turn order list to satisfy applyEffect loop
-        state.setOrderTileOrder(List.of(player));
+    GameConfig config = new GameConfig();
+    setPrivateField(config, "startingFood", new ArrayList<>(List.of(0, 0, 0, 0, 0)));
+    setPrivateField(config, "buildingPerPlayer", new int[5][3]);
 
-        sustenance = new Sustenance();
+
+    List<Card> cards = new ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+        Card c = new Card() {
+            @Override
+            public CardCategory getCategory() { return null; }
+        };
+
+        Field ageField = Card.class.getDeclaredField("age");
+        ageField.setAccessible(true);
+        ageField.set(c, Age.AGE_1);
+
+        cards.add(c);}
+
+    List<Building> buildings = new ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+        buildings.add(new Building());
     }
 
+    Decks decks = new Decks(cards, buildings);
+    Board board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
+
+
+    state = new GameState(players, config, board, decks);
+        state.setOrderTileOrder(players);}
+
+private void setPrivateField(Object object, String fieldName, Object value) throws Exception {
+    Field field = object.getClass().getDeclaredField(fieldName);
+    field.setAccessible(true);
+    field.set(object, value);
+}
     @Test
     void testPenaltyScalingWithAge() {
         /*
-         * Formula Check: ppPenalty = (requiredFood - currentFood) * age.getValue()
-         * Scenario:
-         * 1. Player has 2 characters (Needs 2 Food)
-         * 2. Player has 0 Food (Deficit of 2)
-         * 3. Start with 100 PP for easy calculation
-         */
+          *Formula Check: ppPenalty = (requiredFood - currentFood) * age.getValue()
+          *Scenario:
+          *1. Player has 2 characters (Needs 2 Food)
+          * 2. Player has 0 Food (Deficit of 2)
+          * 3. Start with 100 PP for easy calculation
+          */
         player.getStats().incrementCharacter(CharacterEnum.ARTIST);
         player.getStats().incrementCharacter(CharacterEnum.ARTIST);
         player.addFood(0);
@@ -59,9 +94,7 @@ class SustenanceTest {
         // Expected penalty: 2 missing food * Age 3 value (assume 3)
         int lossInAge3 = 100 - player.getPP();
 
-        // High-level Assertion: Penalty must increase as the Age advances
-        assertTrue(lossInAge3 > lossInAge1,
-                "The PP penalty should scale proportionally with the Age value.");
+        assertEquals(lossInAge1*3,lossInAge3);
     }
 
     @Test
@@ -74,16 +107,36 @@ class SustenanceTest {
         player.getStats().incrementCharacter(CharacterEnum.HUNTER);
         player.getStats().incrementCharacter(CharacterEnum.HUNTER);
 
-        player.addFood(1); // Partial storage
         player.addPP(10);  // Initial prestige
-
+        player.addFood(1);
         sustenance.applyEffect(state, Age.AGE_2);
 
-        // 1. Food check: All 1 food should be consumed
-        assertEquals(0, player.getFood(), "All available food should be consumed first.");
+        //  1 food should be consumed
+
+        assertEquals(0, player.getFood());
 
         // 2. Penalty check: 2 missing food * Age 2 (multiplier 2) = 4 PP deduction
         // Final PP: 10 - 4 = 6
         assertEquals(6, player.getPP(), "Penalty for partial food deficiency is incorrect.");
+    }
+
+    @Test
+    void testApplyEffect_MultipleSustainmentBoosts_Excessive() {
+
+        player.getStats().incrementCharacter(CharacterEnum.ARTIST);
+        player.getStats().incrementCharacter(CharacterEnum.ARTIST);
+        player.getStats().incrementCharacter(CharacterEnum.GATHERER);
+        player.getStats().incrementCharacter(CharacterEnum.GATHERER);
+
+        player.getStats().addSustainmentBoost(CharacterEnum.GATHERER, 3);
+
+        player.addFood(10 );
+        player.addPP(100 );
+
+        sustenance.applyEffect(state, Age.AGE_1);
+
+
+        assertEquals(10, player.getFood(), "no food cost,because food boost>food needed");
+        assertEquals(100, player.getPP(), "no pp penalty");
     }
 }

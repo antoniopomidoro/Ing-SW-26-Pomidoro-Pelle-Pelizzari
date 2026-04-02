@@ -5,6 +5,7 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 import it.polimi.ingsw.model.cards.characters.CharacterEnum;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
 import java.util.List;
@@ -83,4 +84,4 @@ class CardSetTest {
         field.setAccessible(true);
         field.set(obj, value);
     }
-}
+ }

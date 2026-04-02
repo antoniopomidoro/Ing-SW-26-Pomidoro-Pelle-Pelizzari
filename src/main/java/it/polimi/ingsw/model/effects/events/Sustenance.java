@@ -20,7 +20,7 @@ public class Sustenance implements EventEffect {
             for (CharacterEnum c : CharacterEnum.values()) {
                 neededFood += p.getStats().getCharacterCount(c);
             }
-            int foodToPay = neededFood - p.getStats().getSustainmentDiscount();
+            int foodToPay = Math.max(0,neededFood-p.getStats().getSustainmentDiscount());
             p.payFoodWithPenalty(foodToPay, age.getValue());
         }
         return true;
