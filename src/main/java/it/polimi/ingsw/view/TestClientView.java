@@ -18,4 +18,5 @@ public class TestClientView extends UnicastRemoteObject implements ClientRMIInte
     public void receiveEvent(GameEventDTO event) throws RemoteException {
         System.out.println("📢 EVENTO DAL SERVER: " + event.getMessage() +" "+ event.getSnapshot() +" "+ event.getEventType());
     }
+
 }
