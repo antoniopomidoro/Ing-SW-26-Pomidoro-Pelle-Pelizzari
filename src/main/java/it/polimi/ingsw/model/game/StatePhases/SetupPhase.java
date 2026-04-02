@@ -1,15 +1,15 @@
-package it.polimi.ingsw.model.game;
+package it.polimi.ingsw.model.game.StatePhases;
 
 import it.polimi.ingsw.controller.GameConfig;
 import it.polimi.ingsw.model.board.Board;
-import it.polimi.ingsw.model.cards.Card;
 import it.polimi.ingsw.model.cards.Decks;
+import it.polimi.ingsw.model.game.GameEvent;
+import it.polimi.ingsw.model.game.GameState;
 import it.polimi.ingsw.model.player.Player;
 
 import java.util.Collections;
-import java.util.Optional;
 
-public class SetupPhase implements GamePhaseBehavior{
+public class SetupPhase implements GamePhaseBehavior {
     @Override
     public boolean execute(GameState context) {
         if (context == null || context.getPlayers() == null || context.getConfig() == null) {

@@ -34,7 +34,14 @@ public class GameEvent {
         INVALID_PHASE,
         INSUFFICIENT_PICKS,
         SUCCESSFUL_ACTION,
-        INVALID_ACTION
+        INVALID_ACTION,
+        UPPER_CARD,
+        BOTTOM_CARD,
+        UPPER_BUILDING,
+        BOTTOM_BUILDING,
+        OCCUPIED_TILE,
+        BOARD_UPDATE,
+        AGE_CHANGED
     }
 
     private final Type type;

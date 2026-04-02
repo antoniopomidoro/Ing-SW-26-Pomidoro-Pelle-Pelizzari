@@ -1,6 +1,8 @@
-package it.polimi.ingsw.model.game;
+package it.polimi.ingsw.model.game.StatePhases;
 
 import it.polimi.ingsw.model.board.Board;
+import it.polimi.ingsw.model.game.GameEvent;
+import it.polimi.ingsw.model.game.GameState;
 
 /**
  * CHANGE_AGE phase behavior.

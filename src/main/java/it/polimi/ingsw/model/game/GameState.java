@@ -2,6 +2,8 @@ package it.polimi.ingsw.model.game;
 import it.polimi.ingsw.controller.GameConfig;
 import it.polimi.ingsw.model.board.Board;
 import it.polimi.ingsw.model.cards.Decks;
+import it.polimi.ingsw.model.game.StatePhases.GamePhaseBehavior;
+import it.polimi.ingsw.model.game.StatePhases.SetupPhase;
 import it.polimi.ingsw.model.player.Player;
 
 import java.util.*;

@@ -1,4 +1,6 @@
-package it.polimi.ingsw.model.game;
+package it.polimi.ingsw.model.game.StatePhases;
+
+import it.polimi.ingsw.model.game.GameEvent;
 
 /**
  * Eccezione runtime di dominio usata per segnalare mosse non consentite.
