@@ -114,4 +114,6 @@ public abstract class VirtualView implements GameStateObserver {
      */
     protected abstract void sendToClient(GameEventDTO dto);
 
+    protected abstract void ping();
+
 }

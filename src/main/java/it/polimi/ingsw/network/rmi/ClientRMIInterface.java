@@ -16,4 +16,5 @@ public interface ClientRMIInterface extends Remote {
      * @throws RemoteException if the remote call fails
      */
     void receiveEvent(GameEventDTO event) throws RemoteException;
+    void ping() throws RemoteException;
 }

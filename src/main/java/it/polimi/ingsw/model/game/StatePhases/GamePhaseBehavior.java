@@ -1,5 +1,6 @@
-package it.polimi.ingsw.model.game;
+package it.polimi.ingsw.model.game.StatePhases;
 
+import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.Player;
 
 /**

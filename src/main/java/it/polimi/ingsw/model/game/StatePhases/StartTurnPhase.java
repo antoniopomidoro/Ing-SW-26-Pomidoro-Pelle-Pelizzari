@@ -1,9 +1,10 @@
-package it.polimi.ingsw.model.game;
+package it.polimi.ingsw.model.game.StatePhases;
 
 import it.polimi.ingsw.model.board.Board;
 import it.polimi.ingsw.model.board.OrderTile;
 import it.polimi.ingsw.model.cards.Card;
 import it.polimi.ingsw.model.cards.Decks;
+import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.Player;
 
 import java.util.List;

@@ -39,7 +39,6 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
         try {
             RMIClientHandler handler = new RMIClientHandler(clientCallback);
             return serverManager.joinGame(gameId, playerName, requiredPlayers, requestedTotem, handler);
-
         } catch (Exception e) {
             // TODO: tradurre eccezioni dominio in codici errore RMI per il client.
             // TODO: distinguere "in attesa lobby" da "join fallita" senza eccezioni generiche.

@@ -33,4 +33,13 @@ public class RMIClientHandler extends VirtualView {
             System.err.println("[RMI] sending failed to player " + totem + ": " + e.getMessage());
         }
     }
+    @Override
+    protected void ping() {
+        try {
+            clientStub.ping();
+        } catch (RemoteException e) {
+            // TODO: rimuovere questa view dal registro della partita e liberare risorse.
+            System.err.println("[RMI] sending failed to player " + totem + ": " + e.getMessage());
+        }
+    }
 }

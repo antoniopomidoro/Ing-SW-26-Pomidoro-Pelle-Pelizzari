@@ -9,8 +9,8 @@ import it.polimi.ingsw.model.cards.Card;
 import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.game.GameState;
-import it.polimi.ingsw.model.game.IllegalMoveException;
-import it.polimi.ingsw.model.game.TurnPhase;
+import it.polimi.ingsw.model.game.StatePhases.IllegalMoveException;
+import it.polimi.ingsw.model.game.StatePhases.TurnPhase;
 import it.polimi.ingsw.model.player.Player;
 
 import java.io.IOException;

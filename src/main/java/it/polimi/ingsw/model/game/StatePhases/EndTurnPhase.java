@@ -1,7 +1,8 @@
-package it.polimi.ingsw.model.game;
+package it.polimi.ingsw.model.game.StatePhases;
 
 import it.polimi.ingsw.model.board.Board;
 import it.polimi.ingsw.model.board.Tile;
+import it.polimi.ingsw.model.game.*;
 
 import java.util.List;
 
