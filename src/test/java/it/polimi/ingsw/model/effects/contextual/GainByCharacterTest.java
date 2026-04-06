@@ -1,6 +1,12 @@
 package it.polimi.ingsw.model.effects.contextual;
 
 import it.polimi.ingsw.controller.GameConfig;
+import it.polimi.ingsw.model.board.Board;
+import it.polimi.ingsw.model.board.OrderTile;
+import it.polimi.ingsw.model.board.TileSet;
+import it.polimi.ingsw.model.cards.Building;
+import it.polimi.ingsw.model.cards.Card;
+import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 import it.polimi.ingsw.model.cards.characters.CharacterEnum;
@@ -8,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,8 +24,19 @@ class GainByCharacterTest {
 
     @BeforeEach
     void setUp() {
-        state = new GameState(List.of("ProPlayer"), new GameConfig());
-        player = new Player(0, "ProPlayer");
+        // Initialize the game environment and the test player
+        Totem testTotem=Totem.RED_TOTEM;
+        player=new Player(testTotem,"Tester");
+        List<Player>players=List.of(player);
+        GameConfig config = new GameConfig();
+
+        OrderTile orderTile=new OrderTile();
+        TileSet tiles=new TileSet(new ArrayList<>());
+        Board board = new Board(orderTile,tiles);
+        List<Card> cards=new ArrayList<>();
+        List<Building> buildings=new ArrayList<>();
+        Decks deck= new Decks(cards,buildings);
+        state = new GameState(players,config,board,deck);
     }
 
     @Test

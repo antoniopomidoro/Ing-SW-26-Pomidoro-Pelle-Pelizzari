@@ -1,55 +1,47 @@
 package it.polimi.ingsw.model.effects.contextual;
 
-import it.polimi.ingsw.controller.GameConfig;
-import it.polimi.ingsw.model.game.*;
-import it.polimi.ingsw.model.player.*;
+import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.model.player.Totem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
-import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit test for AddStars contextual effect.
- * Verifies that stars are correctly added to the player stats upon card acquisition.
- */
+
 class AddStarsTest {
-    private GameState state;
     private Player player;
-    private AddStars addStars;
+    private AddStars effect;
+    private final int STAR_BONUS = 3;
 
     @BeforeEach
     void setUp() throws Exception {
-        // [2026-03-08] Initialization following standard constructor requirements
-        state = new GameState(List.of("StarGatherer"), new GameConfig());
-        player = new Player(0, "StarGatherer");
+        player = new Player(Totem.RED_TOTEM, "Aldo");
+        effect = new AddStars();
 
-        addStars = new AddStars();
-
-        // Use reflection to set the private 'stars' field since it's injected via JSON
-        setPrivateField(addStars, "stars", 5);
+        // Step 1: Inject the 'stars' value via reflection.
+        Field field = effect.getClass().getDeclaredField("stars");
+        field.setAccessible(true);
+        field.set(effect, STAR_BONUS);
     }
 
     @Test
-    void testStarsAddedOnAcquisition() {
-        /*
-         * 1. Player initially has 0 stars.
-         * 2. AddStars effect (value=5) is added to player.
-         * 3. Expected: Player now has 5 stars.
-         */
+    void testOnAddedToPlayerIncrementsStars() {
+        // Precise Numerical Verification: Baseline check.
         int initialStars = player.getStats().getStars();
 
-        // Execution: Trigger the onAddedToPlayer hook
-        addStars.onAddedToPlayer(player);
+        // Execute effect
+        boolean result = effect.onAddedToPlayer(player);
 
-        // Numerical Verification
-        assertEquals(initialStars + 5, player.getStats().getStars(),
-                "The player's star count should increase by the specified amount.");
+        // Implementation Check: Verification of the increment logic.
+        assertTrue(result, "Effect should return true on successful execution.");
+        assertEquals(initialStars + STAR_BONUS, player.getStats().getStars(),
+                "The player's stars should increase by exactly the bonus amount.");
     }
 
-    private void setPrivateField(Object obj, String fieldName, int value) throws Exception {
-        Field field = obj.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(obj, value);
+    @Test
+    void testOnAddedToPlayerNullProtection() {
+        // Implementation Check: Defensive programming verification.
+        assertFalse(effect.onAddedToPlayer(null), "Should return false when player is null.");
     }
 }

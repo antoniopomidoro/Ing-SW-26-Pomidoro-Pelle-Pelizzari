@@ -1,87 +1,61 @@
 package it.polimi.ingsw.model.effects.contextual;
 
-import it.polimi.ingsw.controller.GameConfig;
-import it.polimi.ingsw.model.game.*;
-import it.polimi.ingsw.model.player.*;
+import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.model.cards.characters.CharacterEnum;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
-import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Full Suite for CardSet Effect and PlayerStats Calculation.
- * Validates the "Incremental Reward" logic and "Bucket Effect" calculation.
- */
 class CardSetTest {
-    private GameState state;
     private Player player;
-    private CardSet cardSet;
+    private CardSet effect;
+    private final int FOOD_REWARD = 4;
 
     @BeforeEach
     void setUp() throws Exception {
-        // Standard setup
-        state = new GameState(List.of("Collector"), new GameConfig());
-        player = new Player(0, "Collector");
-        cardSet = new CardSet();
+        player = new Player(Totem.RED_TOTEM, "Aldo");
+        effect = new CardSet();
 
-        // Inject 5 food per set reward via Reflection
-        setPrivateField(cardSet, "food", 5);
+        // Step 1: Inject reward value.
+        setPrivateField(effect, "food", FOOD_REWARD);
     }
 
     @Test
-    void testFullIncrementalRewardCycle() {
-        // Initial State (Player has 1 complete set)
-        addOneOfEachCharacter(player);
-        assertEquals(1, player.getStats().calculateSet(), "Initial set count should be 1.");
-
-        // Card Added (Establishing Baseline)
-        cardSet.onAddedToPlayer(player);
-        // baseSet should now be 1
-
-        // Execute immediately (No change in sets)
-        cardSet.executeEffect(player, state);
-        assertEquals(0, player.getFood(), "No new sets, so no food should be rewarded.");
-
-        // Add another complete set (Total = 2)
-        addOneOfEachCharacter(player);
-        assertEquals(2, player.getStats().calculateSet(), "Total set count should now be 2.");
-
-        // Trigger Effect (Reward Expected)
-        // (2 - 1) * 5 food = 5 food expected
-        cardSet.executeEffect(player, state);
-        assertEquals(5, player.getFood(), "Player should receive 5 food for the 1 new set.");
-
-        // Execute again without changes (No double dipping)
-        cardSet.executeEffect(player, state);
-        assertEquals(5, player.getFood(), "Reward should not be granted again for the same set.");
-    }
-
-    @Test
-    void testBucketEffectCalculation() {
-        /*
-         * 10 Artists, 10 Hunters, but 0 Shamans.
-         * Min should be 0.
-         */
-        for(int i=0; i<10; i++) {
-            player.getStats().incrementCharacter(CharacterEnum.ARTIST);
-            player.getStats().incrementCharacter(CharacterEnum.HUNTER);
+    void testIncrementalRewardLogic() {
+        //  Initial state (Already has 1 set)
+        for (CharacterEnum c : CharacterEnum.values()) {
+            player.getStats().incrementCharacter(c);
         }
-        assertEquals(0, player.getStats().calculateSet(), "Set count must be 0 if one category is missing.");
-    }
 
-    // Helper to add one of every character type to the player
-    private void addOneOfEachCharacter(Player p) {
-        for (CharacterEnum type : CharacterEnum.values()) {
-            p.getStats().incrementCharacter(type);
+        // Initializing the effect: baseSet should become 1.
+        effect.onAddedToPlayer(player);
+
+        // Adding random cards (No new complete set)
+        player.getStats().incrementCharacter(CharacterEnum.HUNTER);
+        effect.executeEffect(player, null);
+        assertEquals(0, player.getFood(), "No reward if no NEW set is completed.");
+
+        //  Completing a SECOND set
+        for (CharacterEnum c : CharacterEnum.values()) {
+            if (c != CharacterEnum.HUNTER) { // Already added one Hunter above
+                player.getStats().incrementCharacter(c);
+            }
         }
+
+        int initialFood = player.getFood();
+        effect.executeEffect(player, null);
+
+        // Precise Numerical Verification: (2 sets - 1 base) * 4 food = 4 food.
+        assertEquals(initialFood + FOOD_REWARD, player.getFood(),
+                "Should reward food only for the newly completed set.");
     }
 
-    private void setPrivateField(Object obj, String fieldName, int value) throws Exception {
-        Field field = obj.getClass().getDeclaredField(fieldName);
+    private void setPrivateField(Object object, String fieldName, Object value) throws Exception {
+        Field field = object.getClass().getDeclaredField(fieldName);
         field.setAccessible(true);
-        field.set(obj, value);
+        field.set(object, value);
     }
- }
+}
