@@ -2,6 +2,7 @@ package it.polimi.ingsw.network.socket;
 import java.io.BufferedReader;
 import java.io.IOException;
 import  java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 
 import it.polimi.ingsw.controller.Actions.Executor;
@@ -46,13 +47,14 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
 
     @Override
     protected void sendToClient(GameEventDTO dto) {
-        try {
-            client.getOutputStream().write(NUDEAnalyzer.asJson(dto).getBytes());
-        } catch (IOException e) {
-            System.err.println("Error sending to client: " + e.getMessage());
-        }catch (NullPointerException e){
-            System.out.println("Error converting GameEventDTO to JSON: json cannot be null " + e.getMessage());
+        try{String payload = NUDEAnalyzer.asJson(dto);
+        if (payload != null) {
+            client.getOutputStream().write((payload + "\n").getBytes(StandardCharsets.UTF_8));
+            client.getOutputStream().flush();
+        }} catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
     }
 
     @Override
