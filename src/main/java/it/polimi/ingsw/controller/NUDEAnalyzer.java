@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.controller.Actions.Executor;
 
+import java.util.function.Function;
+
 
 public class NUDEAnalyzer {
     static ObjectMapper mapper = new ObjectMapper();
@@ -21,6 +23,14 @@ public class NUDEAnalyzer {
        }       catch (JsonProcessingException e){
                return null;
        }
+
+   }
+   public static String asJson(Object object){
+        try{
+        return  mapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
 
    }
 
