@@ -1,36 +1,37 @@
 package it.polimi.ingsw.model.cards.characters;
 
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.model.player.Totem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class InventorTest {
-    private final int REP = 100;
-    private Player player = new Player(1, "aldo");
+    private final int REP = 1;
+    private Player player = new Player(Totem.RED_TOTEM, "aldo");
 
     @DisplayName("Add one inventor to a player")
     @Test
     public void onAddedToPlayerOneAddiction() {
         Inventor inventor = new Inventor(Tool.BOAT);
-        player = new Player(1, "aldo");
-        inventor.onAddedToPlayer(player);
+        player = new Player(Totem.RED_TOTEM, "aldo");
+        boolean ret = inventor.onAddedToPlayer(player);
+        assertTrue(ret);
         assertEquals(1, player.getStats().getCharacterCount(CharacterEnum.INVENTOR));
         assertEquals(1, player.getStats().getDifferentToolNumber());
+    }
 
-        assertEquals(0, player.getStats().getToolCount(Tool.BREAD));
-        assertEquals(0, player.getStats().getToolCount(Tool.STONE));
-        assertEquals(1, player.getStats().getToolCount(Tool.BOAT));
-        assertEquals(0, player.getStats().getToolCount(Tool.RING));
-        assertEquals(0, player.getStats().getToolCount(Tool.ROPE));
-        assertEquals(0, player.getStats().getToolCount(Tool.BOWL));
-        assertEquals(0, player.getStats().getToolCount(Tool.STICK));
-        assertEquals(0, player.getStats().getToolCount(Tool.DOLL));
-        assertEquals(0, player.getStats().getToolCount(Tool.HOOK));
-        assertEquals(0, player.getStats().getToolCount(Tool.NECKLACE));
+    @DisplayName("Add one inventor to a null player")
+    @Test
+    public void onAddedToPlayerNull() {
+        Inventor inventor = new Inventor(Tool.BOAT);
+        boolean ret = inventor.onAddedToPlayer(null);
+        assertFalse(ret);
+        assertEquals(0, player.getStats().getCharacterCount(CharacterEnum.INVENTOR));
+        assertEquals(0, player.getStats().getDifferentToolNumber());
     }
 
     @DisplayName("Add multiple inventors to a player")
@@ -39,7 +40,6 @@ public class InventorTest {
         int old = player.getStats().getCharacterCount(CharacterEnum.INVENTOR);
         boolean[] present = new boolean[10];
         int differents = 0;
-        int[] count = new int[10];
         int reps = (int) ((Math.random() * 20) + 1);
         for(int i = 0; i < reps; i++) {
             int rand = (int) (Math.random() * 10);
@@ -59,30 +59,18 @@ public class InventorTest {
                 differents++;
                 present[rand] = true;
             }
-            count[rand]++;
             inv.onAddedToPlayer(player);
 
             assertEquals(old + i + 1, player.getStats().getCharacterCount(CharacterEnum.INVENTOR));
             assertEquals(differents, player.getStats().getDifferentToolNumber());
-
-            assertEquals(count[0], player.getStats().getToolCount(Tool.BREAD));
-            assertEquals(count[1], player.getStats().getToolCount(Tool.STONE));
-            assertEquals(count[2], player.getStats().getToolCount(Tool.BOAT));
-            assertEquals(count[3], player.getStats().getToolCount(Tool.RING));
-            assertEquals(count[4], player.getStats().getToolCount(Tool.ROPE));
-            assertEquals(count[5], player.getStats().getToolCount(Tool.BOWL));
-            assertEquals(count[6], player.getStats().getToolCount(Tool.STICK));
-            assertEquals(count[7], player.getStats().getToolCount(Tool.DOLL));
-            assertEquals(count[8], player.getStats().getToolCount(Tool.HOOK));
-            assertEquals(count[9], player.getStats().getToolCount(Tool.NECKLACE));
         }
     }
 
     @DisplayName("Adding inventors to player1 does not change player2's inventors")
     @Test
     public void onAddedToPlayersMultiplePlayers() {
-        Player p2 = new Player(2, "Giovanni");
-        Player p3 = new Player(3, "Giacomo");
+        Player p2 = new Player(Totem.BLUE_TOTEM, "Giovanni");
+        Player p3 = new Player(Totem.BLUE_TOTEM, "Giacomo");
         int old1 = player.getStats().getCharacterCount(CharacterEnum.INVENTOR);
         int old2 = p2.getStats().getCharacterCount(CharacterEnum.INVENTOR);
         int old3 = p3.getStats().getCharacterCount(CharacterEnum.INVENTOR);

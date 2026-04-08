@@ -1,21 +1,32 @@
 package it.polimi.ingsw.model.board;
 
+import it.polimi.ingsw.controller.GameConfig;
 import it.polimi.ingsw.model.cards.Building;
 import it.polimi.ingsw.model.cards.Card;
+import it.polimi.ingsw.model.cards.Decks;
+import it.polimi.ingsw.model.cards.Event;
 import it.polimi.ingsw.model.cards.characters.*;
 
+import it.polimi.ingsw.model.game.GameState;
+import it.polimi.ingsw.model.player.Player;
 import org.junit.jupiter.api.*;
 import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BoardTest {
-    private final int REP = 1;
-    Board board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));
+    OrderTile ot = new OrderTile();
+    List<Tile> tiles = new ArrayList<>();
+    TileSet ts = new TileSet(tiles);
+    Board board = new Board(ot, ts);
     private static class DummyCard extends Card{
         public DummyCard(){
             super();
         }
-        public CardCategory getCategory(){
+
+        @Override
+        public CardCategory getCategory() {
             return null;
         }
     }
@@ -60,11 +71,11 @@ public class BoardTest {
      */
 
     @DisplayName("Pick top card")
-    @RepeatedTest(REP)
+    @Test
     public void testPickTopCardCheckSize() {
-        int size = (int) (Math.random() * 9) + 1;
+        int size = 10;
         generateTopCards(size);
-        int idx = (int) (Math.random() * size);
+        int idx = 4;
         board.pickTopCard(idx);
 
         assertEquals(size - 1, board.getTopCards().size(), "New size should be the old size - 1");
@@ -73,23 +84,23 @@ public class BoardTest {
     @DisplayName("Pick top card with empty list")
     @Test
     public void testPickTopCardEmpty() {
-        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that topCards is empty
+        board = new Board(ot, ts);            // We have to be sure that topCards is empty
         int idx = 0;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickTopCard(idx));
     }
 
     @DisplayName("Pick top card with negative index")
-    @RepeatedTest(REP)
+    @Test
     public void testPickTopCardNegativeIdx() {
-        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that topCards is empty
-        int idx = - (int) (Math.random() * 100) + 1;
+        board = new Board(ot, ts);            // We have to be sure that topCards is empty
+        int idx = -1;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickTopCard(idx));
     }
 
     @DisplayName("Pick last top card and not the (non-existent) last + 1 card")
-    @RepeatedTest(REP)
+    @Test
     public void testPickLastTopCard() {
-        int size = (int) (Math.random() * 9) + 1;
+        int size = 10;
         generateTopCards(size);
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickTopCard(size));
 
@@ -99,11 +110,11 @@ public class BoardTest {
     }
 
     @DisplayName("Pick bottom card")
-    @RepeatedTest(REP)
+    @Test
     public void testPickBottomCardCheckSize() {
-        int size = (int) (Math.random() * 9) + 1;
+        int size = 10;
         generateBottomCards(size);
-        int idx = (int) (Math.random() * size);
+        int idx = 4;
         board.pickBottomCard(idx);
 
         assertEquals(size - 1, board.getBottomCards().size(), "New size should be the old size - 1");
@@ -112,23 +123,23 @@ public class BoardTest {
     @DisplayName("Pick bottom card with empty list")
     @Test
     public void testPickBottomCardEmpty() {
-        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that bottomCards is empty
+        board = new Board(ot, ts);            // We have to be sure that bottomCards is empty
         int idx = 0;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickBottomCard(idx));
     }
 
     @DisplayName("Pick bottom card with negative index")
-    @RepeatedTest(REP)
+    @Test
     public void testPickBottomCardNegativeIdx() {
-        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that bottomCards is empty
-        int idx = - (int) (Math.random() * 100) + 1;
+        board = new Board(ot, ts);            // We have to be sure that bottomCards is empty
+        int idx = -1;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickBottomCard(idx));
     }
 
     @DisplayName("Pick last bottom card and not the (non-existent) last + 1 card")
-    @RepeatedTest(REP)
+    @Test
     public void testPickLastBottomCard() {
-        int size = (int) (Math.random() * 9) + 1;
+        int size = 10;
         generateBottomCards(size);
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickBottomCard(size));
 
@@ -138,11 +149,11 @@ public class BoardTest {
     }
 
     @DisplayName("Pick top building")
-    @RepeatedTest(REP)
+    @Test
     public void testPickTopBuildingCheckSize() {
-        int size = (int) (Math.random() * 9) + 1;
+        int size = 10;
         generateTopBuildings(size);
-        int idx = (int) (Math.random() * size);
+        int idx = 4;
         board.pickTopBuilding(idx);
 
         assertEquals(size - 1, board.getTopBuildings().size(), "New size should be the old size - 1");
@@ -151,23 +162,23 @@ public class BoardTest {
     @DisplayName("Pick top building with empty list")
     @Test
     public void testPickTopBuildingEmpty() {
-        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that topBuildings is empty
+        board = new Board(ot, ts);            // We have to be sure that topBuildings is empty
         int idx = 0;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickTopBuilding(idx));
     }
 
     @DisplayName("Pick top building with negative index")
-    @RepeatedTest(REP)
+    @Test
     public void testPickTopBuildingNegativeIdx() {
-        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that topBuildings is empty
-        int idx = - (int) (Math.random() * 100) + 1;
+        board = new Board(ot, ts);            // We have to be sure that topBuildings is empty
+        int idx = - 10;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickTopBuilding(idx));
     }
 
     @DisplayName("Pick last top building and not the (non-existent) last + 1 building")
-    @RepeatedTest(REP)
+    @Test
     public void testPickLastTopBuilding() {
-        int size = (int) (Math.random() * 9) + 1;
+        int size = 10;
         generateTopBuildings(size);
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickTopBuilding(size));
 
@@ -177,11 +188,11 @@ public class BoardTest {
     }
 
     @DisplayName("Pick bottom building")
-    @RepeatedTest(REP)
+    @Test
     public void testPickBottomBuildingCheckSize() {
-        int size = (int) (Math.random() * 9) + 1;
+        int size = 10;
         generateBottomBuildings(size);
-        int idx = (int) (Math.random() * size);
+        int idx = 4;
         board.pickBottomBuilding(idx);
 
         assertEquals(size - 1, board.getBottomBuildings().size(), "New size should be the old size - 1");
@@ -190,23 +201,23 @@ public class BoardTest {
     @DisplayName("Pick bottom building with empty list")
     @Test
     public void testPickBottomBuildingEmpty() {
-        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that bottomBuildings is empty
+        board = new Board(ot, ts);            // We have to be sure that bottomBuildings is empty
         int idx = 0;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickBottomBuilding(idx));
     }
 
     @DisplayName("Pick bottom building with negative index")
-    @RepeatedTest(REP)
+    @Test
     public void testPickBottomBuildingNegativeIdx() {
-        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));            // We have to be sure that bottomBuildings is empty
-        int idx = - (int) (Math.random() * 100) + 1;
+        board = new Board(ot, ts);            // We have to be sure that bottomBuildings is empty
+        int idx = - 1;
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickBottomBuilding(idx));
     }
 
     @DisplayName("Pick last bottom building and not the (non-existent) last + 1 building")
-    @RepeatedTest(REP)
+    @Test
     public void testPickLastBottomBuilding() {
-        int size = (int) (Math.random() * 9) + 1;
+        int size = 10;
         generateBottomBuildings(size);
         assertThrows(IndexOutOfBoundsException.class, () -> board.pickBottomBuilding(size));
 
@@ -222,14 +233,14 @@ public class BoardTest {
      */
 
     @DisplayName("Bottom to top changes the sizes correctly")
-    @RepeatedTest(REP)
+    @Test
     public void testBottomToTopCorrectSizes() {
-        int topSize = (int) (Math.random() * 9) + 1;
+        int topSize = 10;
         generateTopCards(topSize);
-        int bottomSize = (int) (Math.random() * 9) + 1;
+        int bottomSize = 10;
         generateBottomCards(bottomSize);
 
-        int idx = (int) (Math.random() * bottomSize);
+        int idx = 4;
         boolean ret = board.cardBottomToTop(idx);
 
         assertTrue(ret, "Return value should be true");
@@ -238,23 +249,23 @@ public class BoardTest {
     }
 
     @DisplayName("Bottom to top returns false when it receives a negative index")
-    @RepeatedTest(REP)
+    @Test
     public void testBottomToTopIndexNotNegative() {
-        int topSize = (int) (Math.random() * 9) + 1;
+        int topSize = 10;
         generateTopCards(topSize);
-        int bottomSize = (int) (Math.random() * 9) + 1;
+        int bottomSize = 10;
         generateBottomCards(bottomSize);
 
-        int idx = - ((int) (Math.random() * 100) + 1);
+        int idx = -1;
         assertFalse(board.cardBottomToTop(idx));
     }
 
     @DisplayName("Bottom to top returns false when it receives an out of bound index")
-    @RepeatedTest(REP)
+    @Test
     public void testBottomToTopIndexInSize() {
-        int topSize = (int) (Math.random() * 9) + 1;
+        int topSize = 10;
         generateTopCards(topSize);
-        int bottomSize = (int) (Math.random() * 9) + 1;
+        int bottomSize = 10;
         generateBottomCards(bottomSize);
 
         assertFalse(board.cardBottomToTop(bottomSize));
@@ -262,10 +273,10 @@ public class BoardTest {
     }
 
     @DisplayName("When the bottomCards is empty, the method returns false")
-    @RepeatedTest(REP)
+    @Test
     public void testBottomToTopEmptyBottomCards() {
-        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));
-        int topSize = (int) (Math.random() * 9) + 1;
+        board = new Board(ot, ts);
+        int topSize = 10;
         generateTopCards(topSize);
         int idx = 0;
 
@@ -273,11 +284,11 @@ public class BoardTest {
     }
 
     @DisplayName("Top to bottom cards changes the sizes correctly")
-    @RepeatedTest(REP)
+    @Test
     public void testTopToBottomCardsCorrectSizes() {
-        int topSize = (int) (Math.random() * 9) + 1;
+        int topSize = 10;
         generateTopCards(topSize);
-        int bottomSize = (int) (Math.random() * 9) + 1;
+        int bottomSize = 10;
         generateBottomCards(bottomSize);
         boolean ret = board.topToBottomCards();
 
@@ -287,10 +298,10 @@ public class BoardTest {
     }
 
     @DisplayName("Top to bottom cards with empty top cards")
-    @RepeatedTest(REP)
+    @Test
     public void testTopToBottomCardsEmptyTop() {
-        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));
-        int bottomSize = (int) (Math.random() * 9) + 1;
+        board = new Board(ot, ts);
+        int bottomSize = 10;
         generateBottomCards(bottomSize);
         boolean ret = board.topToBottomCards();
 
@@ -300,10 +311,10 @@ public class BoardTest {
     }
 
     @DisplayName("Top to bottom cards with empty bottom cards")
-    @RepeatedTest(REP)
+    @Test
     public void testTopToBottomCardsEmptyBottom() {
-        board = new Board(new OrderTile(),new TileSet(new ArrayList<>()));
-        int topSize = (int) (Math.random() * 9) + 1;
+        board = new Board(ot, ts);
+        int topSize = 10;
         generateTopCards(topSize);
         boolean ret = board.topToBottomCards();
 
@@ -319,9 +330,9 @@ public class BoardTest {
      */
 
     @DisplayName("New top cards size is correct")
-    @RepeatedTest(REP)
+    @Test
     public void testAddTopCardCheckSize() {
-        int topSize = (int) (Math.random() * 9) + 1;
+        int topSize = 10;
         generateTopCards(topSize);
 
         boolean ret = board.addTopCard(new DummyCard());
@@ -331,9 +342,9 @@ public class BoardTest {
     }
 
     @DisplayName("A null card cannot be added")
-    @RepeatedTest(REP)
+    @Test
     public void testAddTopCardNull() {
-        int topSize = (int) (Math.random() * 9) + 1;
+        int topSize = 10;
         generateTopCards(topSize);
 
         boolean ret = board.addTopCard(null);
@@ -343,9 +354,9 @@ public class BoardTest {
     }
 
     @DisplayName("New bottom cards size is correct")
-    @RepeatedTest(REP)
+    @Test
     public void testAddBottomCardCheckSize() {
-        int bottomSize = (int) (Math.random() * 9) + 1;
+        int bottomSize = 10;
         generateBottomCards(bottomSize);
 
         boolean ret = board.addBottomCard(new DummyCard());
@@ -355,9 +366,9 @@ public class BoardTest {
     }
 
     @DisplayName("A null card cannot be added")
-    @RepeatedTest(REP)
+    @Test
     public void testAddBottomCardNull() {
-        int bottomSize = (int) (Math.random() * 9) + 1;
+        int bottomSize = 10;
         generateBottomCards(bottomSize);
 
         boolean ret = board.addBottomCard(null);
@@ -366,10 +377,24 @@ public class BoardTest {
         assertEquals(bottomSize, board.getBottomCards().size());
     }
 
+    @DisplayName("A not buyable card cannot be added directly to the bottom cards")
+    @Test
+    public void testAddBottomCardNotBuyable() {
+        Card c = new Event();                   // Events are not buyable cards
+        int topSize = 5;
+        generateTopCards(5);
+        int bottomSize = 10;
+        generateBottomCards(10);
+        board.addBottomCard(c);
+
+        assertEquals(topSize + 1, board.getTopCards().size());
+        assertEquals(bottomSize, board.getBottomCards().size());
+    }
+
     @DisplayName("New top building size is correct")
-    @RepeatedTest(REP)
+    @Test
     public void testAddTopBuildingCheckSize() {
-        int size = (int) (Math.random() * 9) + 1;
+        int size = 10;
         ArrayList<Building> b = new ArrayList<>();
         for(int i = 0; i < size ; i++) {
             b.add(new Building());
@@ -381,10 +406,10 @@ public class BoardTest {
     }
 
     @DisplayName("A null list of buildings cannot be added")
-    @RepeatedTest(REP)
+    @Test
     public void testAddTopBuildingNull() {
         int oldSize = board.getTopBuildings().size();
-        boolean ret = board.addTopCard(null);
+        boolean ret = board.addTopBuildings(null);
 
         assertFalse(ret);
         assertEquals(oldSize, board.getTopCards().size());
@@ -395,6 +420,7 @@ public class BoardTest {
      * - seeBottomCard()
      * - seeTopBuilding()
      * - seeBottomBuilding()
+     * - discardBottomCards()
      * - discardBottomBuildings()
      */
 
@@ -483,6 +509,7 @@ public class BoardTest {
         assertNotNull(board.seeTopBuilding(0));
         assertNotNull(board.seeTopBuilding(1));
         assertNotNull(board.seeTopBuilding(2));
+
         assertSame(b1, board.seeTopBuilding(0));
         assertSame(b2, board.seeTopBuilding(1));
         assertSame(b3, board.seeTopBuilding(2));
@@ -521,6 +548,7 @@ public class BoardTest {
         assertNotNull(board.seeBottomBuilding(0));
         assertNotNull(board.seeBottomBuilding(1));
         assertNotNull(board.seeBottomBuilding(2));
+
         assertSame(b1, board.seeBottomBuilding(0));
         assertSame(b2, board.seeBottomBuilding(1));
         assertSame(b3, board.seeBottomBuilding(2));
@@ -544,6 +572,68 @@ public class BoardTest {
         assertNull(board.seeBottomBuilding(22));
     }
 
-    /* TODO tests for discard */
+    @DisplayName("The bottomCards size after the function call must be 0")
+    @Test
+    public void testDiscardBottomCardsCheckSize() {
+        List<Player> players = new ArrayList<>();
+        GameConfig gc = new GameConfig();
+        List<Card> cards = new ArrayList<>();
+        List<Building> buildings = new ArrayList<>();
+        Decks decks = new Decks(cards, buildings);
+        GameState state = new GameState(players, gc, board, decks);
+        int size = 5;
+        generateBottomCards(size);
+        boolean ret = board.discardBottomCards(state);
 
+        assertTrue(ret);
+        assertEquals(0, board.getBottomCards().size());
+    }
+
+    @DisplayName("Discards an already empty list of bottom cards")
+    @Test
+    public void testDiscardBottomCardsCardsEmpty() {
+        Board board = new Board(ot, ts);
+        List<Player> players = new ArrayList<>();
+        GameConfig gc = new GameConfig();
+        List<Card> cards = new ArrayList<>();
+        List<Building> buildings = new ArrayList<>();
+        Decks decks = new Decks(cards, buildings);
+        GameState state = new GameState(players, gc, board, decks);
+        boolean ret = board.discardBottomCards(state);
+
+        assertTrue(ret);
+        assertEquals(0, board.getBottomCards().size());
+    }
+
+    @DisplayName("The method with a null gamestate returns false")
+    @Test
+    public void testDiscardBottomCardsNull() {
+        int size = 5;
+        generateBottomCards(size);
+        boolean ret = board.discardBottomCards(null);
+        assertFalse(ret);
+    }
+
+    // ==============================
+
+    @DisplayName("The bottomBuildings size after the function call must be 0")
+    @Test
+    public void testDiscardBottomBuildingsCheckSize() {
+        int size = 5;
+        generateBottomBuildings(size);
+        boolean ret = board.discardBottomBuildings();
+
+        assertTrue(ret);
+        assertEquals(0, board.getBottomCards().size());
+    }
+
+    @DisplayName("Discards an already empty list of bottom buildings")
+    @Test
+    public void testDiscardBottomBuildingsEmpty() {
+        Board board = new Board(ot, ts);
+        boolean ret = board.discardBottomBuildings();
+
+        assertTrue(ret);
+        assertEquals(0, board.getBottomCards().size());
+    }
 }

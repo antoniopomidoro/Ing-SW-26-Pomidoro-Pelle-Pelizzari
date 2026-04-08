@@ -1,15 +1,18 @@
 package it.polimi.ingsw.model.cards.characters;
 
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.model.player.Totem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class GathererTest {
+    private final Totem TOTEM = null;
     private final int DIS = 1;
     private final Gatherer gatherer = new Gatherer();
-    private Player player = new Player(1, "aldo");
+    private Player player = new Player(TOTEM, "aldo");
 
     @BeforeEach
     public void setDis() {
@@ -19,10 +22,19 @@ public class GathererTest {
     @DisplayName("Add one gatherer to a player")
     @Test
     public void onAddedToPlayerOneAddiction() {
-        player = new Player(1, "aldo");
+        player = new Player(TOTEM, "aldo");
         gatherer.onAddedToPlayer(player);
         assertEquals(1, player.getStats().getCharacterCount(CharacterEnum.GATHERER));
         assertEquals(DIS, player.getStats().getSustainmentDiscount());
+    }
+
+    @DisplayName("Add one gatherer to a null player")
+    @Test
+    public void onAddedToPlayerNull() {
+        Gatherer gatherer = new Gatherer();
+        boolean ret = gatherer.onAddedToPlayer(null);
+        assertFalse(ret);
+        assertEquals(0, player.getStats().getCharacterCount(CharacterEnum.GATHERER));
     }
 
     @DisplayName("Add multiple gatherers to a player")
@@ -49,8 +61,8 @@ public class GathererTest {
     @DisplayName("Adding gatherers to player1 does not change player2's gatherers")
     @Test
     public void onAddedToPlayersMultiplePlayers() {
-        Player p2 = new Player(2, "Giovanni");
-        Player p3 = new Player(3, "Giacomo");
+        Player p2 = new Player(TOTEM, "Giovanni");
+        Player p3 = new Player(TOTEM, "Giacomo");
         int old1 = player.getStats().getCharacterCount(CharacterEnum.GATHERER);
         int old2 = p2.getStats().getCharacterCount(CharacterEnum.GATHERER);
         int old3 = p3.getStats().getCharacterCount(CharacterEnum.GATHERER);

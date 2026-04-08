@@ -26,6 +26,21 @@ public class Decks {
         }
         
     }
+
+    /* Protected methods for testing purposes */
+
+    protected Map<Age, List<Card>> getCards() {
+        return cards;
+    }
+
+    protected void setCards(Map<Age, List<Card>> cards) {
+        this.cards = cards;
+    }
+
+    protected void setBuildings(Map<Age, List<Building>> buildings) {
+        this.buildings = buildings;
+    }
+
     //the shuffle method remove the final methods then shuffle all non-empty decks then add final events
     public boolean shuffle() {
         if (cards == null) {
@@ -45,7 +60,7 @@ public class Decks {
     public Optional<Card> popCard(Age a){
         if(cards.get(a).isEmpty() && a.getValue() != Age.values()[a.ordinal()+1].getValue()){
             return Optional.empty();
-    }else if(cards.get(a).isEmpty() && a.getValue() == Age.values()[a.ordinal()+1].getValue()){
+        }else if(cards.get(a).isEmpty() && a.getValue() == Age.values()[a.ordinal()+1].getValue()){
             //this else if statement hide the Age_3_final enum to external classes
             if(cards.get(Age.values()[a.ordinal()+1]).isEmpty()){
                 return Optional.empty();

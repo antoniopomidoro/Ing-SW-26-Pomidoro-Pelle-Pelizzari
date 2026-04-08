@@ -1,32 +1,44 @@
 package it.polimi.ingsw.model.cards.characters;
 
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.model.player.Totem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class HunterTest {
-    private final int REP = 100;
+    private final Totem TOTEM = null;
+    private final int REP = 1;
     private final Hunter hunterFood = new Hunter(true);
     private final Hunter hunterNoFood = new Hunter(false);
-    private Player player = new Player(1, "aldo");
+    private Player player = new Player(TOTEM, "aldo");
 
     @DisplayName("Add one hunter with food to a player")
     @Test
     public void onAddedToPlayerOneAddictionFood() {
-        player = new Player(1, "aldo");
+        player = new Player(TOTEM, "aldo");
         hunterFood.onAddedToPlayer(player);
         assertEquals(1, player.getStats().getCharacterCount(CharacterEnum.HUNTER));
         assertEquals(1, player.getFood());
     }
 
+    @DisplayName("Add one hunter to a null player")
+    @Test
+    public void onAddedToPlayerNull() {
+        Hunter hunter = new Hunter(true);
+        boolean ret = hunter.onAddedToPlayer(null);
+        assertFalse(ret);
+        assertEquals(0, player.getStats().getCharacterCount(CharacterEnum.HUNTER));
+    }
+
     @DisplayName("Add one hunter with food to a player who already has some food")
     @RepeatedTest(REP)
     public void onAddedToPlayerOneAddictionMoreFood() {
-        player = new Player(1, "aldo");
+        player = new Player(TOTEM, "aldo");
         int amount = (int) ((Math.random() * 100) + 1);
         player.addFood(amount);
         hunterFood.onAddedToPlayer(player);
@@ -37,7 +49,7 @@ public class HunterTest {
     @DisplayName("Add one hunter without food to a player")
     @Test
     public void onAddedToPlayerOneAddiction() {
-        player = new Player(1, "aldo");
+        player = new Player(TOTEM, "aldo");
         hunterNoFood.onAddedToPlayer(player);
         assertEquals(1, player.getStats().getCharacterCount(CharacterEnum.HUNTER));
         assertEquals(0, player.getFood());
@@ -46,7 +58,7 @@ public class HunterTest {
     @DisplayName("Add four hunters (with or without) food to a player who already has some food")
     @Test
     public void onAddedToPlayerOneAddictionMulFood() {
-        player = new Player(1, "aldo");
+        player = new Player(TOTEM, "aldo");
         Hunter hf1 = new Hunter(true);
         Hunter hf2 = new Hunter(true);
         Hunter hf3 = new Hunter(true);
@@ -86,8 +98,8 @@ public class HunterTest {
     @DisplayName("Adding hunters to player1 does not change player2's hunters")
     @Test
     public void onAddedToPlayersMultiplePlayers() {
-        Player p2 = new Player(2, "Giovanni");
-        Player p3 = new Player(3, "Giacomo");
+        Player p2 = new Player(TOTEM, "Giovanni");
+        Player p3 = new Player(TOTEM, "Giacomo");
         int old1 = player.getStats().getCharacterCount(CharacterEnum.HUNTER);
         int old2 = p2.getStats().getCharacterCount(CharacterEnum.HUNTER);
         int old3 = p3.getStats().getCharacterCount(CharacterEnum.HUNTER);

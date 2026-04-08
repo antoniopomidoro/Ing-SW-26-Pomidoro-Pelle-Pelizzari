@@ -61,6 +61,14 @@ public abstract class Card{
 
     }
 
+    /* Protected methods for testing purposes */
+    protected void setMinPlayers(int minPlayers) {
+        this.minPlayers = minPlayers;
+    }
+
+    protected void setAge(Age age) {
+        this.age = age;
+    }
 
     /**
      * Gets the age (era) of the card.
