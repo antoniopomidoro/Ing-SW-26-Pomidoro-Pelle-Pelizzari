@@ -4,7 +4,6 @@ import java.io.IOException;
 import  java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
-
 import it.polimi.ingsw.controller.Actions.Executor;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.NUDEAnalyzer;
@@ -32,14 +31,16 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
             System.err.println("Error initializing client reader: " + e.getMessage());
             return;
         }
-        while(client.isConnected()){
-           try{ json =  reader.readLine();
-           NUDECommand(json);}
+        while(true){
+            try {
+                json =  reader.readLine();
+                if (json == null){
+                break;}
+                NUDECommand(json);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
-           catch (Exception e){
-               continue;
-
-           }
 
         }
 
@@ -61,6 +62,7 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
     protected void ping() {
         try{
             client.getOutputStream().write("ping\n".getBytes());
+            client.getOutputStream().flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
