@@ -37,7 +37,7 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
            NUDECommand(json);}
 
            catch (Exception e){
-               System.err.println("Error reading from client: " + e.getMessage());
+               continue;
 
            }
 
