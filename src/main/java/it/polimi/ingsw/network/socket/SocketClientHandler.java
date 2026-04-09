@@ -12,17 +12,24 @@ import it.polimi.ingsw.network.ServerManager;
 import it.polimi.ingsw.network.VirtualView;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 
+import java.time.Clock;
+import java.time.Instant;
 public class SocketClientHandler extends VirtualView implements Runnable  {
     private final ServerManager serverManager;
     private final Socket client;
+    private Instant lastPing;
+    private boolean going = true;
 
     public SocketClientHandler(ServerManager serverManager, Socket client){
         this.client = client;
         this.serverManager = serverManager;
+        going = true;
     }
 
     @Override
     public void run() {
+        Clock clock = Clock.systemDefaultZone();
+         lastPing = clock.instant();
         String json;
         BufferedReader reader;
         try{
@@ -31,13 +38,19 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
             System.err.println("Error initializing client reader: " + e.getMessage());
             return;
         }
-        while(true){
+        while(going){
+
             try {
                 json =  reader.readLine();
                 if (json == null){
+                Thread.currentThread().interrupt();
                 break;}
-                NUDECommand(json);
+                else if(json=="pong"){
+                    lastPing = clock.instant();
+                }else{
+                NUDECommand(json);}
             } catch (IOException e) {
+
                 throw new RuntimeException(e);
             }
 
@@ -47,7 +60,7 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
     }
 
     @Override
-    protected void sendToClient(GameEventDTO dto) {
+    protected synchronized void sendToClient(GameEventDTO dto) {
         try{String payload = NUDEAnalyzer.asJson(dto);
         if (payload != null) {
             client.getOutputStream().write((payload + "\n").getBytes(StandardCharsets.UTF_8));
@@ -59,7 +72,7 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
     }
 
     @Override
-    protected void ping() {
+    protected synchronized void ping() {
         try{
             client.getOutputStream().write("ping\n".getBytes());
             client.getOutputStream().flush();
@@ -67,6 +80,9 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
             throw new RuntimeException(e);
         }
 
+    }
+    public void stop(){
+        going = false;
     }
 
     public Boolean NUDECommand(String json) throws RemoteException {
@@ -79,5 +95,8 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
         executor.execute(player,game);
         return true;
 
+    }
+    public Instant GetLastPing(){
+        return lastPing;
     }
 }
