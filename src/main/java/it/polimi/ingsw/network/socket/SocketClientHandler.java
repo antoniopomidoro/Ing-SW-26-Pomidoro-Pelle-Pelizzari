@@ -11,7 +11,6 @@ import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.network.ServerManager;
 import it.polimi.ingsw.network.VirtualView;
 import it.polimi.ingsw.network.dto.GameEventDTO;
-
 import java.time.Clock;
 import java.time.Instant;
 public class SocketClientHandler extends VirtualView implements Runnable  {
@@ -28,6 +27,7 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
 
     @Override
     public void run() {
+
         Clock clock = Clock.systemDefaultZone();
          lastPing = clock.instant();
         String json;
@@ -45,8 +45,9 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
                 if (json == null){
                 Thread.currentThread().interrupt();
                 break;}
-                else if(json=="pong"){
+                else if(json.equalsIgnoreCase("pong")){
                     lastPing = clock.instant();
+                    ping();
                 }else{
                 NUDECommand(json);}
             } catch (IOException e) {

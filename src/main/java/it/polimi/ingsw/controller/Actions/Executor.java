@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.controller.*;
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.network.ServerManager;
+import it.polimi.ingsw.network.VirtualView;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -31,10 +33,10 @@ protected int index;
 protected int id;
 
 @JsonProperty
-protected int idGame;
+protected String idGame;
 
 @JsonProperty
-protected int idPlayer;
+protected String idPlayer;
 
 
 
@@ -42,13 +44,17 @@ protected int idPlayer;
         return false;
     }
 
+    public boolean connection(ServerManager server, VirtualView view){
+        return false;
+    }
 
 
 
-    public int getIdPartita() {
+
+    public String getIdPartita() {
         return idGame;
     }
-    public  int getIdPlayer(){
+    public  String getIdPlayer(){
         return idPlayer;
     }
 

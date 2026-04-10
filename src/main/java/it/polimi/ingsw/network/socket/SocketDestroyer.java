@@ -19,7 +19,7 @@ public class SocketDestroyer implements Runnable{
             }
         try{
         wait(5000);} catch (InterruptedException e) {
-            continue;
+            return;
         }}
     }
 

@@ -18,7 +18,7 @@ public class NUDESender {
          * @param idPlayer  L'id del giocatore che sta effettuando la mossa
          * @return Una stringa formattata regolarmente in JSON
          */
-        public static String build(ActionType action, int index, int id, int idGame, int idPlayer) {
+        public static String build(ActionType action, int index, int id, String idGame, String idPlayer) {
             ObjectNode rootNode = mapper.createObjectNode();
             rootNode.put("action", action.name());
             rootNode.put("index", index);
