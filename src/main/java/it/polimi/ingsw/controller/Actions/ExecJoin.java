@@ -27,7 +27,7 @@ public class ExecJoin extends Executor {
                         default: totem = Totem.BLACK_TOTEM;
                     }
                     try{
-                    server.joinGame(newgame,super.idPlayer,5,totem,view);}
+                    server.joinGame(newgame,super.nick,5,totem,view);}
                     catch (Exception e){
                         System.err.println("Error creating new game: " + e.getMessage());
                         return false;
@@ -44,7 +44,8 @@ public class ExecJoin extends Executor {
                         default: totem = Totem.BLACK_TOTEM;
                     }
                     try{
-                        server.joinGame(super.idGame,super.idPlayer,5,totem,view);}
+
+                        server.joinGame(super.idGame,super.nick,5,totem,view);}
                     catch (Exception e){
                         System.err.println("Error joining game: " + e.getMessage());
                         return false;

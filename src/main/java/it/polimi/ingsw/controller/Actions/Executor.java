@@ -30,13 +30,13 @@ public abstract class Executor {
 protected int index;
 
 @JsonProperty
-protected int id;
+protected String nick;
 
 @JsonProperty
 protected String idGame;
 
 @JsonProperty
-protected String idPlayer;
+protected int idPlayer;
 
 
 
@@ -54,7 +54,7 @@ protected String idPlayer;
     public String getIdPartita() {
         return idGame;
     }
-    public  String getIdPlayer(){
+    public  int getIdPlayer(){
         return idPlayer;
     }
 
