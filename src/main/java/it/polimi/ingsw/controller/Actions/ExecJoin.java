@@ -6,6 +6,10 @@ import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.ServerManager;
 import it.polimi.ingsw.network.VirtualView;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.Random;
 import java.util.random.*;
 public class ExecJoin extends Executor {
@@ -19,7 +23,6 @@ public class ExecJoin extends Executor {
                     color = super.idGame.charAt(3);
 
                     switch (color){
-                        case 'n': totem = Totem.BLACK_TOTEM; break;
                         case 'w': totem = Totem.WHITE_TOTEM;break;
                         case 'b': totem = Totem.BLUE_TOTEM;break;
                         case 'y':totem = Totem.YELLOW_TOTEM;break;
@@ -36,7 +39,6 @@ public class ExecJoin extends Executor {
                 }else{
                     color = super.idGame.charAt(4);
                     switch (color){
-                        case 'n': totem = Totem.BLACK_TOTEM; break;
                         case 'w': totem = Totem.WHITE_TOTEM;break;
                         case 'b': totem = Totem.BLUE_TOTEM;break;
                         case 'y':totem = Totem.YELLOW_TOTEM;break;
@@ -46,6 +48,26 @@ public class ExecJoin extends Executor {
                     try{
 
                         server.joinGame(super.idGame,super.nick,5,totem,view);}
+
+                    catch(IllegalArgumentException e){
+                       List<Player> lobby = server.getPendingGames().get(super.idGame).getJoinedPlayers();
+                        ArrayList<Totem> totems = new ArrayList<>();
+
+                       for(Player p : lobby){
+                           totems.add(p.getId());
+                       }
+                       for(Totem t:Totem.values()){
+                           if(!totems.contains(t)){
+                              try{ server.joinGame(super.idGame,super.nick,5,t,view);}
+                              catch (IOException ex) {
+                                  System.err.println("Error joining game: " + e.getMessage());
+                                  return false;
+                              }
+                           }
+                       }
+
+                                            }
+
                     catch (Exception e){
                         System.err.println("Error joining game: " + e.getMessage());
                         return false;
