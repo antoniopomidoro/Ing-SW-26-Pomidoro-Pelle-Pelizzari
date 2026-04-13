@@ -7,8 +7,7 @@ public class ExecBottomBuilding extends Executor {
 
     @Override
     public boolean execute(Player player, GameController controller){
-        controller.pickBottomBuilding(super.index,player);
-        return true;
+        return controller.pickBottomBuilding(super.index, player, super.cardId);
     }
 
 }

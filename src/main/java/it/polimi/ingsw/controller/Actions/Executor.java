@@ -38,6 +38,9 @@ protected String idGame;
 @JsonProperty
 protected int idPlayer;
 
+@JsonProperty
+protected String cardId;
+
 
 
     public boolean execute(Player player, GameController controller){

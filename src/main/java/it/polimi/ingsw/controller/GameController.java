@@ -113,11 +113,12 @@ public class GameController {
      *
      * @param index position in the offer trail
      * @param player the acting player
+     * @param cardId expected instance id of the selected card
      * @return {@code true} for a valid move, {@code false} for an illegal move
      */
-    public boolean pickTopCard(int index, Player player) {
+    public boolean pickTopCard(int index, Player player, String cardId) {
         try {
-            return state.pickTopCard(index, player);
+            return state.pickTopCard(index, player, cardId);
         } catch (IllegalMoveException e) {
             return false;
         }
@@ -128,11 +129,12 @@ public class GameController {
      *
      * @param index position in the offer trail
      * @param player the acting player
+     * @param cardId expected instance id of the selected card
      * @return {@code true} for a valid move, {@code false} for an illegal move
      */
-    public boolean pickBottomCard(int index, Player player) {
+    public boolean pickBottomCard(int index, Player player, String cardId) {
         try {
-            return state.pickBottomCard(index, player);
+            return state.pickBottomCard(index, player, cardId);
         } catch (IllegalMoveException e) {
             return false;
         }
@@ -143,11 +145,12 @@ public class GameController {
      *
      * @param index position in the offer trail
      * @param player the acting player
+     * @param cardId expected instance id of the selected building
      * @return {@code true} for a valid move, {@code false} for an illegal move
      */
-    public boolean pickTopBuilding(int index, Player player) {
+    public boolean pickTopBuilding(int index, Player player, String cardId) {
         try {
-            return state.pickTopBuilding(index, player);
+            return state.pickTopBuilding(index, player, cardId);
         } catch (IllegalMoveException e) {
             return false;
         }
@@ -158,11 +161,12 @@ public class GameController {
      *
      * @param index position in the offer trail
      * @param player the acting player
+     * @param cardId expected instance id of the selected building
      * @return {@code true} for a valid move, {@code false} for an illegal move
      */
-    public boolean pickBottomBuilding(int index, Player player) {
+    public boolean pickBottomBuilding(int index, Player player, String cardId) {
         try {
-            return state.pickBottomBuilding(index, player);
+            return state.pickBottomBuilding(index, player, cardId);
         } catch (IllegalMoveException e) {
             return false;
         }

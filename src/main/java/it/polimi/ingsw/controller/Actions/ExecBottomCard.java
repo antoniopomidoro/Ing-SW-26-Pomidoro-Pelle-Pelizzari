@@ -7,7 +7,6 @@ public class ExecBottomCard extends Executor {
 
     @Override
     public boolean execute(Player player, GameController controller){
-        controller.pickBottomCard(super.index,player);
-        return true;
+        return controller.pickBottomCard(super.index, player, super.cardId);
     }
 }

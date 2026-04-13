@@ -32,4 +32,5 @@ public interface ServerRMIInterface extends Remote {
      * @throws RemoteException if the remote call fails
      */
     boolean sendNUDECommand(String gameId, String jsonCommand) throws RemoteException;
+    LobbyState createGame(String playerName, int requiredPlayers, Totem requestedTotem, ClientRMIInterface clientCallback) throws RemoteException;
 }

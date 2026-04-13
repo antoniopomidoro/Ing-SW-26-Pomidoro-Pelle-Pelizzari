@@ -41,7 +41,7 @@ public class ServerManager {
      * @param view the player's {@link VirtualView}
      * @return The generated 6-digit gameId so the network layer can send it to the client
      */
-    public synchronized String createGame(String playerName, int requiredPlayers,
+    public synchronized LobbyState createGame(String playerName, int requiredPlayers,
                                           Totem requestedTotem, VirtualView view) {
         if (playerName == null || playerName.isBlank() || requestedTotem == null || view == null || requiredPlayers <= 1) {
             throw new IllegalArgumentException("Invalid input for creation");
@@ -59,7 +59,7 @@ public class ServerManager {
         // Notifica il creatore che è in attesa
         view.sendLobbyUpdate(pending.getCurrentPlayerCount(), pending.getRequiredPlayers());
 
-        return gameId;
+        return LobbyState.WAITING;
     }
 
     /**
