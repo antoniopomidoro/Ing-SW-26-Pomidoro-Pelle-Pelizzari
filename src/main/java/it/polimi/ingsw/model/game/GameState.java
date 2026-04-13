@@ -1,4 +1,5 @@
 package it.polimi.ingsw.model.game;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.controller.GameConfig;
 import it.polimi.ingsw.model.board.Board;
 import it.polimi.ingsw.model.board.Tile;
@@ -7,6 +8,8 @@ import it.polimi.ingsw.model.game.StatePhases.GamePhaseBehavior;
 import it.polimi.ingsw.model.game.StatePhases.SetupPhase;
 import it.polimi.ingsw.model.player.Player;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import it.polimi.ingsw.model.cards.Building;
@@ -28,6 +31,7 @@ public class GameState {
     private List<Player> turnOrder;
     private List<Player> orderTileOrder;
     private transient List<GameStateObserver> observers = new ArrayList<>();
+    private String gameId;
 
     // --- State Pattern support fields ---
     private int currentTileIndex;
@@ -42,7 +46,8 @@ public class GameState {
      * @param board The initial board instance.
      * @param deck The decks manager.
      */
-    public GameState(List<Player> players, GameConfig config, Board board, Decks deck) {
+    public GameState(List<Player> players, GameConfig config, Board board, Decks deck, String gameId) {
+        this.gameId = gameId;
         this.age = Age.AGE_1;
         this.turn = 1;
         this.currentTileIndex = 0;
@@ -284,9 +289,20 @@ public class GameState {
      */
     public void raiseEvent(GameEvent event) {
         if (event == null) return;
+        if (event.getType().requiresSave()) {
+            saveState();
+        }
         observers.forEach(o -> o.onGameEvent(event));
     }
-
+    private void saveState() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            File file = new File("saves/" + this.gameId + ".json");
+            mapper.writeValue(file, this);
+        } catch (IOException e) {
+            System.err.println("Errore durante il salvataggio: " + e.getMessage());
+        }
+    }
     /**
      * Emette un evento di azione riuscita per aggiornare le view osservatrici.
      */
@@ -310,60 +326,49 @@ public class GameState {
      * Delegates the top card picking action to the current phase.
      * @param index the position of the card.
      * @param player the player making the action.
+     * @param cardInstanceId the expected UUID of the card being picked.
      * @return true if successful, false otherwise.
      */
-    public boolean pickTopCard(int index, Player player) {
+    public boolean pickTopCard(int index, Player player, String cardInstanceId) {
         if (!hasCurrentPhase()) return false;
-        boolean success = currentPhase.pickTopCard(this, index, player);
-        if (success) {
-            raiseSuccessfulAction(player, "pickTopCard(index=" + index + ")");
-        }
-        return success;
+        return currentPhase.pickTopCard(this, index, player, cardInstanceId);
     }
 
     /**
      * Delegates the bottom card picking action to the current phase.
      * @param index the position of the card.
      * @param player the player making the action.
+     * @param cardInstanceId the expected UUID of the card being picked.
      * @return true if successful, false otherwise.
      */
-    public boolean pickBottomCard(int index, Player player) {
+    public boolean pickBottomCard(int index, Player player, String cardInstanceId) {
         if (!hasCurrentPhase()) return false;
-        boolean success = currentPhase.pickBottomCard(this, index, player);
-        if (success) {
-            raiseSuccessfulAction(player, "pickBottomCard(index=" + index + ")");
-        }
-        return success;
+        return currentPhase.pickBottomCard(this, index, player, cardInstanceId);
+
     }
 
     /**
      * Delegates the top building picking action to the current phase.
      * @param index the position of the building.
      * @param player the player making the action.
+     * @param cardInstanceId the expected UUID of the building being picked.
      * @return true if successful, false otherwise.
      */
-    public boolean pickTopBuilding(int index, Player player) {
+    public boolean pickTopBuilding(int index, Player player, String cardInstanceId) {
         if (!hasCurrentPhase()) return false;
-        boolean success = currentPhase.pickTopBuilding(this, index, player);
-        if (success) {
-            raiseSuccessfulAction(player, "pickTopBuilding(index=" + index + ")");
-        }
-        return success;
+        return currentPhase.pickTopBuilding(this, index, player, cardInstanceId);
     }
 
     /**
      * Delegates the bottom building picking action to the current phase.
      * @param index the position of the building.
      * @param player the player making the action.
+     * @param cardInstanceId the expected UUID of the building being picked.
      * @return true if successful, false otherwise.
      */
-    public boolean pickBottomBuilding(int index, Player player) {
+    public boolean pickBottomBuilding(int index, Player player, String cardInstanceId) {
         if (!hasCurrentPhase()) return false;
-        boolean success = currentPhase.pickBottomBuilding(this, index, player);
-        if (success) {
-            raiseSuccessfulAction(player, "pickBottomBuilding(index=" + index + ")");
-        }
-        return success;
+        return currentPhase.pickBottomBuilding(this, index, player, cardInstanceId);
     }
 
     /**
@@ -374,11 +379,7 @@ public class GameState {
      */
     public boolean occupyOfferTrailTile(int index, Player player) {
         if (!hasCurrentPhase()) return false;
-        boolean success = currentPhase.occupyOfferTrailTile(this, index, player);
-        if (success) {
-            raiseSuccessfulAction(player, "occupyOfferTrailTile(index=" + index + ")");
-        }
-        return success;
+        return currentPhase.occupyOfferTrailTile(this, index, player);
     }
 
     // ==========================================

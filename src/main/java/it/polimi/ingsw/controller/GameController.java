@@ -37,14 +37,17 @@ public class GameController {
      * @param players the players in the match
      * @throws IOException if loading data from JSON fails
      */
-    public GameController(List<Player> players) throws IOException {
+    public GameController(List<Player> players, String gameId) throws IOException {
         jsonGod.loadAllData();
         int playerCount = players.size();
         GameConfig config = jsonGod.getConfig();
         Decks deck = setupDeck(jsonGod.getCards(), jsonGod.getBuildings(), playerCount, config);
         Board board = setupBoard(jsonGod.getOrderTiles(), jsonGod.getTiles(), playerCount);
-        this.state = new GameState(players, config, board, deck);
+        this.state = new GameState(players, config, board, deck, gameId);
         
+    }
+    public GameController(GameState state) {
+        this.state = state;
     }
 
     /**

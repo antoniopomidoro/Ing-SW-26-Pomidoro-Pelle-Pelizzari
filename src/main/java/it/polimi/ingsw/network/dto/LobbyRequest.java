@@ -5,51 +5,63 @@ import it.polimi.ingsw.model.player.Totem;
 import java.io.Serializable;
 
 /**
- * Serializable lobby join request sent by clients.
+ * Serializable lobby request sent by clients.
+ * Handles both the creation of a new lobby and joining an existing one.
  */
 public class LobbyRequest implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String gameId;
+    public enum Type {
+        CREATE,
+        JOIN
+    }
+
+    private Type type;
+    private String gameId;          // Usato SOLO se type == JOIN
     private String playerName;
-    private int requiredPlayers;
+    private int requiredPlayers;    // Usato SOLO se type == CREATE
     private Totem requestedTotem;
 
     /**
-     * Empty constructor required by serialization frameworks.
+     * Empty constructor required by serialization frameworks (Jackson / RMI).
      */
     public LobbyRequest() {
-        // Costruttore vuoto richiesto dalla serializzazione.
     }
 
     /**
-     * Creates a lobby join request.
-     *
-     * @param gameId room identifier
-     * @param playerName player's nickname
-     * @param requiredPlayers number of players required to start the match
-     * @param requestedTotem requested totem/color
+     * Private constructor to force the use of Factory Methods.
      */
-    public LobbyRequest(String gameId, String playerName, int requiredPlayers, Totem requestedTotem) {
+    private LobbyRequest(Type type, String gameId, String playerName, int requiredPlayers, Totem requestedTotem) {
+        this.type = type;
         this.gameId = gameId;
         this.playerName = playerName;
         this.requiredPlayers = requiredPlayers;
         this.requestedTotem = requestedTotem;
     }
 
-    public String getGameId() {
-        return gameId;
+    // --- STATIC FACTORY METHODS ---
+
+    /**
+     * Creates a request to form a brand-new lobby.
+     * The gameId is deliberately null because the Server will generate it.
+     */
+    public static LobbyRequest createNewLobby(String playerName, int requiredPlayers, Totem requestedTotem) {
+        return new LobbyRequest(Type.CREATE, null, playerName, requiredPlayers, requestedTotem);
     }
 
-    public String getPlayerName() {
-        return playerName;
+    /**
+     * Creates a request to join an existing lobby.
+     * The requiredPlayers is deliberately 0 because the room size is already set.
+     */
+    public static LobbyRequest joinExistingLobby(String gameId, String playerName, Totem requestedTotem) {
+        return new LobbyRequest(Type.JOIN, gameId, playerName, 0, requestedTotem);
     }
 
-    public int getRequiredPlayers() {
-        return requiredPlayers;
-    }
+    // --- GETTERS ---
 
-    public Totem getRequestedTotem() {
-        return requestedTotem;
-    }
+    public Type getType() { return type; }
+    public String getGameId() { return gameId; }
+    public String getPlayerName() { return playerName; }
+    public int getRequiredPlayers() { return requiredPlayers; }
+    public Totem getRequestedTotem() { return requestedTotem; }
 }

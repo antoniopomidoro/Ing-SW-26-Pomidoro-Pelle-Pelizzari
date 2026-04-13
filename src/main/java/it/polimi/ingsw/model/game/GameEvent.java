@@ -13,35 +13,45 @@ public class GameEvent {
 
     /**
      * Enumeration of the semantic types of events that can be broadcasted.
-     * These represent the minimum set of event types handled by the error broadcasting flow.
+     * Each event knows independently whether it represents a state-altering action
+     * that requires saving the game to disk.
      */
     public enum Type {
+        // --- ERRORS ---
+        WRONG_TURN(false),
+        INSUFFICIENT_FOOD(false),
+        INVALID_INDEX(false),
+        INVALID_PHASE(false),
+        INSUFFICIENT_PICKS(false),
+        INVALID_ACTION(false),
+        OCCUPIED_TILE(false),
+
+        // --- VALID ACTIONS ---
+        SUCCESSFUL_ACTION(true),
+        UPPER_CARD(true),
+        BOTTOM_CARD(true),
+        UPPER_BUILDING(true),
+        BOTTOM_BUILDING(true),
+        BOARD_UPDATE(true),
+        AGE_CHANGED(true);
+
+        private final boolean requiresSave;
+
         /**
-         * Indicates that a player attempted to perform an action when it was not their turn.
+         * Enum constructor.
+         * @param requiresSave true if this event should trigger a disk save.
          */
-        WRONG_TURN,
+        Type(boolean requiresSave) {
+            this.requiresSave = requiresSave;
+        }
+
         /**
-         * Indicates that a player attempted an action requiring food but did not have enough.
+         * Indicates whether this event modified the game state.
+         * @return true if persistence is required.
          */
-        INSUFFICIENT_FOOD,
-        /**
-         * Indicates that an invalid index (e.g., for a card or board position) was provided.
-         */
-        INVALID_INDEX,
-        /**
-         * Indicates that an action was attempted in a game phase where it is not permitted.
-         */
-        INVALID_PHASE,
-        INSUFFICIENT_PICKS,
-        SUCCESSFUL_ACTION,
-        INVALID_ACTION,
-        UPPER_CARD,
-        BOTTOM_CARD,
-        UPPER_BUILDING,
-        BOTTOM_BUILDING,
-        OCCUPIED_TILE,
-        BOARD_UPDATE,
-        AGE_CHANGED
+        public boolean requiresSave() {
+            return requiresSave;
+        }
     }
 
     private final Type type;
