@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model.game;
 import it.polimi.ingsw.controller.GameConfig;
 import it.polimi.ingsw.model.board.Board;
+import it.polimi.ingsw.model.board.Tile;
 import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.StatePhases.GamePhaseBehavior;
 import it.polimi.ingsw.model.game.StatePhases.SetupPhase;
@@ -224,13 +225,16 @@ public class GameState {
     }
 
     /**
-     * Updates the turn order with a new player.
-     * @param p The player to add to the turn order.
-     * @return true if successful, false if the player is null or already present.
+     * Updates the turn order
+     * @return true if successful.
      */
-    public boolean updateTurnOrder(Player p){
-        if (p == null || turnOrder.contains(p)) return false;
-        this.turnOrder.add(p);
+    public boolean updateTurnOrder(){
+        turnOrder.clear();
+        for (Tile t : board.getTiles().getTiles()){
+            if (t.isOccupied() && t.getOccupier() != null && !turnOrder.contains(t.getOccupier())){
+                turnOrder.add(t.getOccupier());
+            }
+        }
         return true;
     }
 

@@ -79,6 +79,10 @@ public class StartTurnPhase implements GamePhaseBehavior {
     public boolean occupyOfferTrailTile(GameState context, int index, Player player) {
         Board board = context.getBoard();
         Player currentPlayer = context.getCurrentOrderTileOrderPlayer();
+        if (index < 0 || index >= board.getTiles().getTiles().size()) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player, "Index out of bounds"));
+            throw new IllegalMoveException("Invalid tile index");
+        }
         if (player != currentPlayer) {
             context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player, "Not your turn"));
             throw new IllegalMoveException("Not your turn");
@@ -89,9 +93,9 @@ public class StartTurnPhase implements GamePhaseBehavior {
             throw new IllegalMoveException("Tile already occupied");
         }
         targetTile.occupy(player);
-        context.updateTurnOrder(currentPlayer);
         boolean hasNextPlayer = context.nextPlayerInTurnOrderTile();
         if (!hasNextPlayer) {
+            context.updateTurnOrder();
             this.nextPhase(context);
         }
         return true;
