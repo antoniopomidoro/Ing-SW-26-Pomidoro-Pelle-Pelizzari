@@ -61,7 +61,7 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
      * seguito da {@link IllegalMoveException}.
      */
     @Override
-    public boolean pickTopCard(GameState context, int index, Player player){
+    public boolean pickTopCard(GameState context, int index, Player player, String cardInstanceId){
         if(player != activePlayer){
             context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player, "Only the active player can perform picks"));
             throw new IllegalMoveException("Only the active player can perform picks");
@@ -74,6 +74,10 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         if (c == null) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player, "Invalid card index"));
             throw new IllegalMoveException("Invalid card index");
+        }
+        if (cardInstanceId == null || !cardInstanceId.equals(c.getInstanceId())) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ID, player, "Invalid card instance id"));
+            throw new IllegalMoveException("Invalid card instance id");
         }
         if (!c.isBuyable()) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player, "Card is not buyable"));
@@ -93,7 +97,7 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
      * In caso di mossa non valida: broadcast evento seguito da {@link IllegalMoveException}.
      */
     @Override
-    public boolean pickBottomCard(GameState context, int index, Player player) {
+    public boolean pickBottomCard(GameState context, int index, Player player, String cardInstanceId) {
         if (player != activePlayer) {
             context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player, "Only the active player can perform picks"));
             throw new IllegalMoveException("Only the active player can perform picks");
@@ -106,6 +110,10 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         if (c == null) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player, "Invalid card index"));
             throw new IllegalMoveException("Invalid card index");
+        }
+        if (cardInstanceId == null || !cardInstanceId.equals(c.getInstanceId())) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ID, player, "Invalid card instance id"));
+            throw new IllegalMoveException("Invalid card instance id");
         }
         if (!c.isBuyable()) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player, "Card is not buyable"));
@@ -125,7 +133,7 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
      * In caso di mossa non valida: broadcast evento seguito da {@link IllegalMoveException}.
      */
     @Override
-    public boolean pickTopBuilding(GameState context, int index, Player player) {
+    public boolean pickTopBuilding(GameState context, int index, Player player, String cardInstanceId) {
         if (player != activePlayer) {
             context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player, "Only the active player can perform picks"));
             throw new IllegalMoveException("Only the active player can perform picks");
@@ -138,6 +146,10 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         if (b == null) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player, "Invalid card index"));
             throw new IllegalMoveException("Invalid card index");
+        }
+        if (cardInstanceId == null || !cardInstanceId.equals(b.getInstanceId())) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ID, player, "Invalid card instance id"));
+            throw new IllegalMoveException("Invalid card instance id");
         }
         if (!b.isBuyable()) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player, "Card is not buyable"));
@@ -160,7 +172,7 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
      * In caso di mossa non valida: broadcast evento seguito da {@link IllegalMoveException}.
      */
     @Override
-    public boolean pickBottomBuilding(GameState context, int index, Player player) {
+    public boolean pickBottomBuilding(GameState context, int index, Player player, String cardInstanceId) {
         if (player != activePlayer) {
             context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player, "Only the active player can perform picks"));
             throw new IllegalMoveException("Only the active player can perform picks");
@@ -173,6 +185,10 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         if (b == null) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player, "Invalid card index"));
             throw new IllegalMoveException("Invalid card index");
+        }
+        if (cardInstanceId == null || !cardInstanceId.equals(b.getInstanceId())) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ID, player, "Invalid card instance id"));
+            throw new IllegalMoveException("Invalid card instance id");
         }
         if (!b.isBuyable()) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player, "Card is not buyable"));
@@ -237,5 +253,3 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
     }
 
     }
-
-

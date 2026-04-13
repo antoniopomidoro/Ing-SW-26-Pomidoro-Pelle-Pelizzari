@@ -11,10 +11,7 @@ import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -41,6 +38,7 @@ import java.util.Map;
 public abstract class Card{
     protected Age age;
     protected int minPlayers = 0;
+    protected final String instanceId = UUID.randomUUID().toString();
 
     public enum CardCategory {
         CHARACTER,
@@ -87,6 +85,10 @@ public abstract class Card{
      */
     public int getMinPlayers() {
         return minPlayers;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
     }
 
     /**

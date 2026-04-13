@@ -55,10 +55,11 @@ public interface GamePhaseBehavior {
      * @param context The current game state.
      * @param index   The index of the deck from which to pick the card.
      * @param player  The player performing the action.
+     * @param cardInstanceId The expected UUID of the card being picked.
      * @return {@code true} if the action was successful, {@code false} otherwise.
      * @throws IllegalMoveException if this action is not allowed in the current phase.
      */
-    default boolean pickTopCard(GameState context, int index, Player player) {
+    default boolean pickTopCard(GameState context, int index, Player player, String cardInstanceId) {
         if (context != null) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player,
                     "Action not allowed in the current phase"));
@@ -72,10 +73,11 @@ public interface GamePhaseBehavior {
      * @param context The current game state.
      * @param index   The index of the deck from which to pick the card.
      * @param player  The player performing the action.
+     * @param cardInstanceId The expected UUID of the card being picked.
      * @return {@code true} if the action was successful, {@code false} otherwise.
      * @throws IllegalMoveException if this action is not allowed in the current phase.
      */
-    default boolean pickBottomCard(GameState context, int index, Player player) {
+    default boolean pickBottomCard(GameState context, int index, Player player, String cardInstanceId) {
         if (context != null) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player,
                     "Action not allowed in the current phase"));
@@ -89,10 +91,11 @@ public interface GamePhaseBehavior {
      * @param context The current game state.
      * @param index   The index of the building stack.
      * @param player  The player performing the action.
+     * @param cardInstanceId The expected UUID of the building being picked.
      * @return {@code true} if the action was successful, {@code false} otherwise.
      * @throws IllegalMoveException if this action is not allowed in the current phase.
      */
-    default boolean pickTopBuilding(GameState context, int index, Player player) {
+    default boolean pickTopBuilding(GameState context, int index, Player player, String cardInstanceId) {
         if (context != null) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player,
                     "Action not allowed in the current phase"));
@@ -106,10 +109,11 @@ public interface GamePhaseBehavior {
      * @param context The current game state.
      * @param index   The index of the building stack.
      * @param player  The player performing the action.
+     * @param cardInstanceId The expected UUID of the building being picked.
      * @return {@code true} if the action was successful, {@code false} otherwise.
      * @throws IllegalMoveException if this action is not allowed in the current phase.
      */
-    default boolean pickBottomBuilding(GameState context, int index, Player player) {
+    default boolean pickBottomBuilding(GameState context, int index, Player player, String cardInstanceId) {
         if (context != null) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player,
                     "Action not allowed in the current phase"));
