@@ -30,7 +30,7 @@ public class ExecJoin extends Executor {
                         default: totem = Totem.BLACK_TOTEM;
                     }
                     try{
-                    server.joinGame(newgame,super.nick,5,totem,view);}
+                    server.joinGame(newgame,super.nick,totem,view);}
                     catch (Exception e){
                         System.err.println("Error creating new game: " + e.getMessage());
                         return false;
@@ -47,7 +47,7 @@ public class ExecJoin extends Executor {
                     }
                     try{
 
-                        server.joinGame(super.idGame,super.nick,5,totem,view);}
+                        server.joinGame(super.idGame,super.nick,totem,view);}
 
                     catch(IllegalArgumentException e){
                        List<Player> lobby = server.getPendingGames().get(super.idGame).getJoinedPlayers();
@@ -58,7 +58,7 @@ public class ExecJoin extends Executor {
                        }
                        for(Totem t:Totem.values()){
                            if(!totems.contains(t)){
-                              try{ server.joinGame(super.idGame,super.nick,5,t,view);}
+                              try{ server.joinGame(super.idGame,super.nick,t,view);}
                               catch (IOException ex) {
                                   System.err.println("Error joining game: " + e.getMessage());
                                   return false;
