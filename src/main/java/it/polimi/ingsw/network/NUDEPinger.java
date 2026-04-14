@@ -1,6 +1,6 @@
 package it.polimi.ingsw.network;
 
-public class NUDEPinger {
+public class NUDEPinger implements Runnable{
     private final ServerManager serverManager;
     private boolean running = true;
 
@@ -16,7 +16,8 @@ public class NUDEPinger {
     /**
      * Periodically pings all registered virtual views and checks for timeouts.
      */
-    public void start() {
+    @Override
+    public void run() {
         new Thread(() -> {
             while (running) {
                 try {

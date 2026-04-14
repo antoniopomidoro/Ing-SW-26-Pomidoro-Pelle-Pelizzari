@@ -23,7 +23,7 @@ public class ServerManager {
     private final NUDEPinger pinger = new NUDEPinger(this);
 
     public ServerManager(){
-        pinger.start();
+        pinger.run();
         loadSavedGames();
     }
     /**
