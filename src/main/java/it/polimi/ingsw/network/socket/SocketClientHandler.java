@@ -29,7 +29,7 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
     public void run() {
 
         Clock clock = Clock.systemDefaultZone();
-         lastPing = clock.instant();
+        lastPing = clock.instant();
         String json;
         BufferedReader reader;
         try{
@@ -93,7 +93,9 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
         }
         GameController game = serverManager.getActiveGames().get(String.valueOf(executor.getIdPlayer()));
         Player player = game.getGameState().getPlayers().stream().filter(p -> p.getId().ordinal() == executor.getIdPlayer()).findFirst().orElse(null);
-        executor.execute(player,game);
+        if(executor.execute(player,game) == false){
+            executor.connection(serverManager,this);
+        }
         return true;
 
     }
