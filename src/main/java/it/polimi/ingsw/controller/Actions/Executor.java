@@ -54,7 +54,7 @@ protected String cardId;
 
 
 
-    public String getIdPartita() {
+    public String getIdGame() {
         return idGame;
     }
     public  int getIdPlayer(){

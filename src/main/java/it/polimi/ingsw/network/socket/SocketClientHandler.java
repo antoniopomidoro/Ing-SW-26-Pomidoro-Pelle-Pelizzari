@@ -91,11 +91,11 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
         if(executor == null){
             throw new RemoteException("Invalid NUDE command: " + json);
         }
-        GameController game = serverManager.getActiveGames().get(String.valueOf(executor.getIdPlayer()));
+        GameController game = serverManager.getActiveGames().get(String.valueOf(executor.getIdGame()));
         Player player = game.getGameState().getPlayers().stream().filter(p -> p.getId().ordinal() == executor.getIdPlayer()).findFirst().orElse(null);
-        if(executor.execute(player,game) == false){
+        synchronized (game){if(executor.execute(player,game) == false){
             executor.connection(serverManager,this);
-        }
+        }}
         return true;
 
     }
