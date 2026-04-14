@@ -28,7 +28,7 @@ public class SocketServer implements Runnable{
 
     public void start(){
         going = true;
-        SocketDestroyer destroyer = new SocketDestroyer(this);
+        SocketDestroyer destroyer = new SocketDestroyer(this,serverManager);
          DestroyerThread = new Thread(destroyer);
          DestroyerThread.start();
         while(going){

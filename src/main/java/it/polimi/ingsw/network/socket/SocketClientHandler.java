@@ -47,7 +47,7 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
                 break;}
                 else if(json.equalsIgnoreCase("pong")){
                     lastPing = clock.instant();
-                    ping();
+
                 }else{
                 NUDECommand(json);}
             } catch (IOException e) {
