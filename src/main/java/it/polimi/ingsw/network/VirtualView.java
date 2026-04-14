@@ -13,7 +13,7 @@ import it.polimi.ingsw.network.dto.GameStateDTO;
 public abstract class VirtualView implements GameStateObserver {
     protected Totem totem;
     protected GameController gameController;
-
+    protected String gameId;
     /**
      * Assigns the totem associated with this view.
      *
@@ -116,4 +116,11 @@ public abstract class VirtualView implements GameStateObserver {
 
     protected abstract void ping();
 
+    public String getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(String gameId) {
+        this.gameId = gameId;
+    }
 }
