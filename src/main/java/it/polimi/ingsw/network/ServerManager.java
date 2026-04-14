@@ -20,7 +20,12 @@ public class ServerManager {
     private final Map<String, GameController> activeGames = new ConcurrentHashMap<>();
     private final Map<String, Map<Totem, VirtualView>> viewRegistry = new ConcurrentHashMap<>();
     private final Random random = new Random();
+    private final NUDEPinger pinger = new NUDEPinger(this);
 
+    public ServerManager(){
+        pinger.start();
+        loadSavedGames();
+    }
     /**
      * Genera un codice a 6 cifre univoco, verificando che non ci siano collisioni.
      */
@@ -55,6 +60,8 @@ public class ServerManager {
 
         viewRegistry.computeIfAbsent(gameId, id -> new ConcurrentHashMap<>()).put(totem, view);
         view.setTotem(totem);
+        view.setGameId(gameId);
+
 
         // Notifica il creatore che è in attesa
         view.sendLobbyUpdate(pending.getCurrentPlayerCount(), pending.getRequiredPlayers());
@@ -105,6 +112,7 @@ public class ServerManager {
             viewRegistry.get(gameId).put(requestedTotem, view);
             view.setTotem(requestedTotem);
             view.setGameController(controller);
+            view.setGameId(gameId);
             state.addObserver(view);
             view.sendGameSnapshot();
             return LobbyState.REJOIN;
@@ -117,6 +125,7 @@ public class ServerManager {
 
             viewRegistry.computeIfAbsent(gameId, id -> new ConcurrentHashMap<>()).put(totem, view);
             view.setTotem(totem);
+            view.setGameId(gameId);
 
             if (pending.isFull()) {
                 List<Player> players = pending.getJoinedPlayers();
@@ -147,6 +156,22 @@ public class ServerManager {
 
         // 3. CASO ERRORE (La lobby non esiste)
         throw new IllegalArgumentException("Stanza " + gameId + " inesistente!");
+    }
+    public boolean disconnectPlayer(VirtualView view) {
+        if (view == null) return false;
+        if (viewRegistry.get(view.gameId) == null) return false;
+        VirtualView deadView = viewRegistry.get(view.gameId).remove(view.getTotem());
+        if (deadView == null) return false;
+        GameController controller = activeGames.get(view.gameId);
+        if (controller == null) return false;
+        controller.getGameState().removeObserver(deadView);
+        controller.disconnectPlayer(view.getTotem());
+        return true;
+    }
+
+    public boolean loadSavedGames(){
+        //TODO: add implementation
+        return true;
     }
 
     public GameController getGame(String gameId) {

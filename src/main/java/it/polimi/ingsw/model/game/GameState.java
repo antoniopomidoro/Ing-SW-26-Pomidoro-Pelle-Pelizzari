@@ -415,6 +415,12 @@ public class GameState {
             throw new IllegalStateException("Player not in game");
         }
         player.setConnected(false);
+        raiseEvent(new GameEvent(GameEvent.Type.PLAYER_DISCONNECTED, player, null));
+        return true;
+    }
+    public boolean removeObserver(GameStateObserver observer) {
+        if (observer == null) return false;
+        observers.remove(observer);
         return true;
     }
 

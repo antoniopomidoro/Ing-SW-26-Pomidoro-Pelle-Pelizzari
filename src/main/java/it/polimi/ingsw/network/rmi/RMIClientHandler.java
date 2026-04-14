@@ -1,7 +1,8 @@
-package it.polimi.ingsw.network;
+package it.polimi.ingsw.network.rmi;
 
+import it.polimi.ingsw.network.ServerManager;
+import it.polimi.ingsw.network.VirtualView;
 import it.polimi.ingsw.network.dto.GameEventDTO;
-import it.polimi.ingsw.network.rmi.ClientRMIInterface;
 
 import java.rmi.RemoteException;
 
@@ -10,14 +11,15 @@ import java.rmi.RemoteException;
  */
 public class RMIClientHandler extends VirtualView {
     private final ClientRMIInterface clientStub;
-
+    private final ServerManager serverManager;
     /**
      * Creates a handler bound to the provided client stub.
      *
      * @param clientStub RMI client callback
      */
-    public RMIClientHandler(ClientRMIInterface clientStub) {
+    public RMIClientHandler(ClientRMIInterface clientStub, ServerManager serverManager) {
         this.clientStub = clientStub;
+        this.serverManager = serverManager;
     }
 
     @Override
@@ -29,7 +31,7 @@ public class RMIClientHandler extends VirtualView {
         try {
             clientStub.receiveEvent(dto);
         } catch (RemoteException e) {
-            // TODO: rimuovere questa view dal registro della partita e liberare risorse.
+            serverManager.disconnectPlayer(this);
             System.err.println("[RMI] sending failed to player " + totem + ": " + e.getMessage());
         }
     }
@@ -38,7 +40,7 @@ public class RMIClientHandler extends VirtualView {
         try {
             clientStub.ping();
         } catch (RemoteException e) {
-            // TODO: rimuovere questa view dal registro della partita e liberare risorse.
+            serverManager.disconnectPlayer(this);
             System.err.println("[RMI] sending failed to player " + totem + ": " + e.getMessage());
         }
     }

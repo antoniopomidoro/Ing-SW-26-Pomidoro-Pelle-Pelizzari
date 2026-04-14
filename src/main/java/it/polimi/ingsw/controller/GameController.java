@@ -12,6 +12,7 @@ import it.polimi.ingsw.model.game.GameState;
 import it.polimi.ingsw.model.game.StatePhases.IllegalMoveException;
 import it.polimi.ingsw.model.game.StatePhases.TurnPhase;
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.model.player.Totem;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -199,10 +200,15 @@ public class GameController {
     /**
      * Disconnects a player and, if needed, resets the turn phase when the current player leaves.
      *
-     * @param p the player to disconnect
+     * @param totem the totem (id) of the player to disconnect
      * @return {@code true} if the player was disconnected, {@code false} otherwise
      */
-    public boolean disconnectPlayer(Player p){
+    public boolean disconnectPlayer(Totem totem){
+        Player p = state.getPlayers().stream()
+                .filter(player -> player.getId().equals(totem))
+                .findFirst()
+                .orElse(null);
+        if(p == null) return false;
         boolean disconnect = state.disconnectPlayer(p);
         if(p.equals(state.getCurrentTurnOrderPlayer())) {
             state.setPhase(new TurnPhase());

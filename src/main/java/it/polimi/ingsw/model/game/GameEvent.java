@@ -34,7 +34,8 @@ public class GameEvent {
         UPPER_BUILDING(true),
         BOTTOM_BUILDING(true),
         BOARD_UPDATE(true),
-        AGE_CHANGED(true);
+        AGE_CHANGED(true),
+        PLAYER_DISCONNECTED(true);
 
         private final boolean requiresSave;
 

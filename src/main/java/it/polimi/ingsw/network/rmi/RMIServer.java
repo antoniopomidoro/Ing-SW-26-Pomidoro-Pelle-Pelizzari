@@ -6,7 +6,6 @@ import it.polimi.ingsw.controller.NUDEAnalyzer;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.LobbyState;
-import it.polimi.ingsw.network.RMIClientHandler;
 import it.polimi.ingsw.network.ServerManager;
 
 import java.rmi.RemoteException;
@@ -37,7 +36,7 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
     @Override
     public LobbyState joinGame(String gameId, String playerName, int requiredPlayers, Totem requestedTotem, ClientRMIInterface clientCallback) throws RemoteException {
         try {
-            RMIClientHandler handler = new RMIClientHandler(clientCallback);
+            RMIClientHandler handler = new RMIClientHandler(clientCallback, serverManager);
             return serverManager.joinGame(gameId, playerName, requestedTotem, handler);
         } catch (Exception e) {
             // TODO: tradurre eccezioni dominio in codici errore RMI per il client.
@@ -48,7 +47,7 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
     @Override
     public LobbyState createGame(String playerName, int requiredPlayers, Totem requestedTotem, ClientRMIInterface clientCallback) throws RemoteException {
         try {
-            RMIClientHandler handler = new RMIClientHandler(clientCallback);
+            RMIClientHandler handler = new RMIClientHandler(clientCallback, serverManager);
             return serverManager.createGame(playerName, requiredPlayers, requestedTotem, handler);
         } catch (Exception e) {
             // TODO: tradurre eccezioni dominio in codici errore RMI per il client.
