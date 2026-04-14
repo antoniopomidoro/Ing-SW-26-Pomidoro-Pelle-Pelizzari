@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +62,7 @@ class PlayerTurnPhaseTest {
                 @Override
                 public Age getAge() {
                     return Age.AGE_1;
-                } // 关键：匹配 Setup 阶段需求
+                }
 
                 @Override
                 public CardCategory getCategory() {
@@ -84,16 +85,15 @@ class PlayerTurnPhaseTest {
             List<Integer> mockFood = new ArrayList<>(List.of(0, 0, 0, 0, 0));
             foodField.set(config, mockFood);
         } catch (NoSuchFieldException e) {
-            System.err.println("无法找到字段 startingFood，请核对字段名");
+            System.err.println("String startingFood non found");
         }
-
-
-
         context = new GameState(List.of(activePlayer), config, board, decks);
 
 
-        playerTurnPhase = new PlayerTurnPhase(activePlayer, activeTile);
+        if(context.getTurnOrder().isEmpty())
+        {safeInjectField(context,"turnOrder",new ArrayList<>(List.of(activePlayer)));}
 
+        playerTurnPhase = new PlayerTurnPhase(activePlayer, activeTile);
 
         Field activePlayerField = PlayerTurnPhase.class.getDeclaredField("activePlayer");
         activePlayerField.setAccessible(true);
@@ -109,7 +109,6 @@ class PlayerTurnPhaseTest {
     void testPickTopCardSuccess() throws Exception {
 
         Card targetCard = board.getTopCards().get(0);
-
 
         boolean result = playerTurnPhase.pickTopCard(context, 0, activePlayer);
 
@@ -144,8 +143,7 @@ class PlayerTurnPhaseTest {
 
         Field foodField = Player.class.getDeclaredField("food");
         foodField.setAccessible(true);
-        foodField.set(activePlayer, 10); // 存 10 块钱
-
+        foodField.set(activePlayer, 10);
 
         Field topBuildingsField = Board.class.getDeclaredField("topBuildings");
         topBuildingsField.setAccessible(true);
@@ -163,7 +161,6 @@ class PlayerTurnPhaseTest {
             }
         };
         topBuildings.add(affordableBuilding);
-
         // 2. Action
         boolean result = playerTurnPhase.pickTopBuilding(context, 0, activePlayer);
 
@@ -182,7 +179,6 @@ class PlayerTurnPhaseTest {
         foodField.setAccessible(true);
         foodField.set(activePlayer, 0);
 
-
         Field topBuildingsField = Board.class.getDeclaredField("topBuildings");
         topBuildingsField.setAccessible(true);
         List<Building> topBuildings = (List<Building>) topBuildingsField.get(board);
@@ -192,7 +188,6 @@ class PlayerTurnPhaseTest {
             public boolean isBuyable() {
                 return true;
             }
-
             @Override
             public int getFoodCost() {
                 return 5;
@@ -216,11 +211,9 @@ class PlayerTurnPhaseTest {
         foodField.setAccessible(true);
         foodField.set(activePlayer, 10);
 
-
         Field bottomPicksField = PlayerTurnPhase.class.getDeclaredField("bottomPicks");
         bottomPicksField.setAccessible(true);
         bottomPicksField.set(playerTurnPhase, 1);
-
 
         Field bottomBuildingsField = Board.class.getDeclaredField("bottomBuildings");
         bottomBuildingsField.setAccessible(true);
@@ -337,67 +330,176 @@ class PlayerTurnPhaseTest {
         assertEquals(initialFood + bonusAmount, (int) foodField.get(activePlayer),
                 "Player food should increase by the bonus amount");
 
-    }}
-
-   /* @Test
-    @DisplayName("验证没钱买牌时 nextPhase 自动跳转")
-    void testNextPhaseWhenBroke() {
-        // 1. Arrange: 准备一个给 5 次机会的 Tile
-        Tile multiPickTile = new Tile() {
-            @Override
-            public int getUpperPicks() {
-                return 0;
-            }
-
-            @Override
-            public int getBottomPicks() {
-                return 5;
-            }
-        };
-        playerTurnPhase = new PlayerTurnPhase(activePlayer, multiPickTile);
-
-        // 让玩家变穷 (0金币)
-        activePlayer.payFood(activePlayer.getFood());
-
-        // 板子上放一个很贵的建筑 (10金币)
-        board.getBottomBuildings().clear();
-        board.getBottomBuildings().add(new Building() {
-            @Override
-            public int getFoodCost() {
-                return 10;
-            }
-
-            @Override
-            public boolean isBuyable() {
-                return true;
-            }
-        });
-
-        // 2. Action: 触发状态审计
-        playerTurnPhase.nextPhase(context);
-
-        // 3. Assert: 验证是否跳转到了 TurnPhase
-        // 因为 canPickBottom 会检查 activePlayer.canBuy(b)，发现买不起会返回 false
-        assertTrue(context.getCurrentPhase() instanceof TurnPhase, "买不起任何东西时应跳转");
     }
-}*/
-    /*@Test
-    @DisplayName("当 Picks 次数为 0 时，nextPhase 应识别无法继续并切换相位")
-    void testCanPickReturnsFalseWhenPicksExhausted() {
 
-        // 2. 准备 0 次机会的 Phase
-        Tile zeroPickTile = new Tile() {
-            @Override public int getUpperPicks() { return 0; }
-            @Override public int getBottomPicks() { return 0; }
-        };
-        playerTurnPhase = new PlayerTurnPhase(activePlayer, zeroPickTile);
-        context.setPhase(playerTurnPhase);
+    @Test
+    @DisplayName("verify canPickTop")
+    void testCanPickTop_LogicShortCircuit() throws Exception {
 
-        // 3. Action
-        playerTurnPhase.nextPhase(context);
+        Player player = context.getTurnOrder().get(0);
+        Tile tile = new Tile();
+        PlayerTurnPhase phase = new PlayerTurnPhase(player, tile);
 
-        // 4. Assert
-        assertTrue(context.getCurrentPhase() instanceof TurnPhase,
-                "次数耗尽且 Board 为空，必须进入 TurnPhase");
+
+        safeInjectField(phase, "upperPicks", 1);
+        Card mockCard = createMockCard(Age.AGE_1);
+        context.getBoard().getTopCards().add(mockCard);
+
+
+        Method method = PlayerTurnPhase.class.getDeclaredMethod("canPickTop", GameState.class);
+        method.setAccessible(true);
+        boolean result = (boolean) method.invoke(phase, context);
+
+        // no Building，but topCards !=null,return true
+        assertTrue(result, "canPickTop should true");
     }
-}*/
+
+    @Test
+    @DisplayName("verify canPickBottom：no chance to pick cards")
+    void testCanPickBottom_FailureCondition() throws Exception {
+        Player player = context.getTurnOrder().get(0);
+        Tile tile = new Tile();
+        PlayerTurnPhase phase = new PlayerTurnPhase(player, tile);
+
+        safeInjectField(phase, "bottomPicks", 0);
+
+        Method method = PlayerTurnPhase.class.getDeclaredMethod("canPickBottom", GameState.class);
+        method.setAccessible(true);
+        boolean result = (boolean) method.invoke(phase, context);
+
+
+        assertFalse(result, " bottomPicks <= 0 ，canPickBottom return false");
+    }
+
+    @Test
+    @DisplayName("vetify life cicle：P1(TopPicks and BottomPicks==0) -> TurnPhase(P2) -> P2(remain in playerturnphase)")
+    void testNextPhase_FullLifecycleWithBottom() throws Exception {
+        List<Player> players = context.getTurnOrder();
+        if (players == null || players.size() < 2) {
+            players = new ArrayList<>(List.of(
+                    new Player(Totem.RED_TOTEM, "P1"),
+                    new Player(Totem.BLUE_TOTEM, "P2")
+            ));
+            safeInjectField(context, "turnOrder", players);
+        }
+        Player p1 = context.getTurnOrder().get(0);
+        Player p2 = context.getTurnOrder().get(1);
+        safeInjectField(p1, "isConnected", true);
+        safeInjectField(p2, "isConnected", true);
+
+        System.out.println("Step 1 - Players aligned: P1=" + p1.getNickname() + ", P2=" + p2.getNickname());
+
+
+        // Tile 1: P1 exit
+        Tile tile1 = new Tile();
+        safeInjectField(tile1, "occupier", p1);
+        safeInjectField(tile1, "isOccupied", true);
+        safeInjectField(tile1, "upperPicks", 0);
+        safeInjectField(tile1, "bottomPicks", 0);
+
+        // Tile 2: In TurnPhase,change to P2
+        Tile tile2 = new Tile();
+        safeInjectField(tile2, "occupier", p2);
+        safeInjectField(tile2, "isOccupied", true);
+        safeInjectField(tile2, "upperPicks", 1);
+        safeInjectField(tile2, "bottomPicks", 1);
+
+        // Inject tiles
+        List<Tile> tiles = new ArrayList<>(List.of(tile1, tile2));
+        Object tileSet = getPrivateField(context.getBoard(), "tiles");
+        safeInjectField(tileSet, "tiles", tiles);
+
+        System.out.println("Step 2 - Tiles Injected. Size: " + context.getBoard().getTiles().getTiles().size());
+
+        // Inject Board cards for p2
+        context.getBoard().getTopCards().clear();
+        context.getBoard().getBottomCards().clear();
+        context.getBoard().getTopCards().add(createMockCard(Age.AGE_1));
+        context.getBoard().getBottomCards().add(createMockCard(Age.AGE_1));
+
+
+        PlayerTurnPhase p1Phase = new PlayerTurnPhase(p1, tile1);
+        context.setPhase(p1Phase);
+        safeInjectField(context, "currentTileIndex", 0);
+
+
+        safeInjectField(p1Phase, "upperPicks", 0);
+        safeInjectField(p1Phase, "bottomPicks", 0);
+
+        System.out.println("Step 4 - Before execution: " + context.getCurrentPhase().getClass().getSimpleName());
+
+
+        //  (P1.nextPhase -> TurnPhase -> P2.PlayerTurnPhase)
+        p1Phase.nextPhase(context);
+
+        //  assert steps by steps
+        System.out.println("Step 6 - Final Phase: " + context.getCurrentPhase().getClass().getSimpleName());
+        System.out.println("Step 6 - Final Index: " + context.getCurrentTileIndex());
+
+        // reback to PlayerTurnPhase
+        assertTrue(context.getCurrentPhase() instanceof PlayerTurnPhase,
+                "unexpected phase: " + context.getCurrentPhase().getClass().getSimpleName());
+
+        // assert activeplayer:P2
+        Field activePlayerField = PlayerTurnPhase.class.getDeclaredField("activePlayer");
+        activePlayerField.setAccessible(true);
+        Player currentPlayer = (Player) activePlayerField.get(context.getCurrentPhase());
+        assertEquals(p2, currentPlayer, "wrong player");
+
+        // assert Tile index
+        assertEquals(2, context.getCurrentTileIndex(), "wrong tile index");
+    }
+
+
+    private void safeInjectField(Object target, String fieldName, Object value) throws Exception {
+        Field field = null;
+        Class<?> clazz = target.getClass();
+        while (clazz != null) {
+            try {
+                field = clazz.getDeclaredField(fieldName);
+                break;
+            } catch (NoSuchFieldException e) {
+                clazz = clazz.getSuperclass();
+            }
+        }
+        if (field == null) throw new NoSuchFieldException(fieldName);
+        field.setAccessible(true);
+        field.set(target, value);
+    }
+    /**
+     * Helper to physically retrieve a private field from an object.
+     * Necessary for reaching the TileSet inside the Board.
+     */
+    private Object getPrivateField(Object target, String fieldName) throws Exception {
+        Field field = null;
+        Class<?> clazz = target.getClass();
+        while (clazz != null) {
+            try {
+                field = clazz.getDeclaredField(fieldName);
+                break;
+            } catch (NoSuchFieldException e) {
+                clazz = clazz.getSuperclass();
+            }
+        }
+        if (field == null) throw new NoSuchFieldException("Field " + fieldName + " not found.");
+        field.setAccessible(true);
+        return field.get(target);
+    }
+    private Card createMockCard(Age age) {
+        return new Card() {
+            @Override public Age getAge() { return age; }
+            @Override public boolean isBuyable() { return true; }
+            @Override public CardCategory getCategory() { return CardCategory.CHARACTER; }
+            @Override public int getResolutionPriority() { return 0; }
+            @Override public boolean addToDeck(Decks d) { return true; }
+        };
+    }
+}
+
+
+
+
+
+
+
+
