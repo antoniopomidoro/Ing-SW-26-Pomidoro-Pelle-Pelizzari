@@ -20,10 +20,11 @@ public class ServerManager {
     private final Map<String, GameController> activeGames = new ConcurrentHashMap<>();
     private final Map<String, Map<Totem, VirtualView>> viewRegistry = new ConcurrentHashMap<>();
     private final Random random = new Random();
-    private final NUDEPinger pinger = new NUDEPinger(this);
 
     public ServerManager(){
-        pinger.run();
+        NUDEPinger pinger = new NUDEPinger(this);
+        Thread pingerThread = new Thread(pinger, "Pinger");
+        pingerThread.start();
         loadSavedGames();
     }
     /**

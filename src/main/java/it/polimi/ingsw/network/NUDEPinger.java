@@ -18,17 +18,15 @@ public class NUDEPinger implements Runnable{
      */
     @Override
     public void run() {
-        new Thread(() -> {
-            while (running) {
-                try {
-                    checkConnections();
-                    Thread.sleep(5000); // Check every 5 seconds
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+        while (running) {
+            try {
+                checkConnections();
+                Thread.sleep(5000); // Check every 5 seconds
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
             }
-        }, "NUDEPinger-Thread").start();
+        }
     }
 
     private void checkConnections() {
