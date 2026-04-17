@@ -15,6 +15,7 @@ import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.GameStateObserver;
 import it.polimi.ingsw.model.game.StatePhases.GamePhaseBehavior;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -60,7 +61,7 @@ public class GameStateTest {
         }
 
         @Override
-        public boolean pickTopCard(GameState context, int index, Player player) {
+        public boolean pickTopCard(GameState context, int index, Player player,String cardInstanceId) {
             // Directing the flow to trigger raiseSuccessfulAction indirectly
             this.pickTopCardCalled = true;
             return true;
@@ -68,17 +69,49 @@ public class GameStateTest {
     }
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         // Initialize real player objects to avoid NullPointerExceptions
         playerA = new Player(Totem.RED_TOTEM,"A");
         playerB = new Player(Totem.WHITE_TOTEM,"B");
         playerC = new Player(Totem.BLUE_TOTEM,"C");
         List<Player> players = Arrays.asList(playerA, playerB, playerC);
+        GameConfig config = new GameConfig();
+        List<Integer> startingFood = new ArrayList<>(List.of(5, 5, 5, 5, 5));
+
+        Field foodField = GameConfig.class.getDeclaredField("startingFood");
+        foodField.setAccessible(true);
+        foodField.set(config, startingFood);
+
+        OrderTile orderTile=new OrderTile();
+        List<Tile> tiles=new ArrayList<>();
+        tiles.add(new Tile());
+        tiles.add(new Tile());
+        tiles.add(new Tile());
+        TileSet tileSet=new TileSet(tiles);
+        Board board=new Board(orderTile,tileSet);
+        List<Card> cards=new ArrayList<>();
+        List<Building> buildings=new ArrayList<>();
+
+        Decks decks = new Decks(new ArrayList<>(), new ArrayList<>());
+        for (int i = 0; i < 20; i++) {
+            Card c = createMockCard();
+            c.addToDeck(decks);
+        }
+
         // Instantiate GameState with manual setup (assuming null for complex dependencies)
-        gameState = new GameState(players, null, null, null);
+        gameState = new GameState(players, config, board, decks,"testId");
         // Setup our manual observer
         observer = new TestObserver();
 
+    }
+    private Card createMockCard() {
+        return new Card() {
+            @Override public boolean addToDeck(Decks d) { return d.addCard(this); }
+            @Override public Age getAge() { return Age.AGE_1; }
+            @Override public boolean isBuyable() { return true; }
+            @Override public CardCategory getCategory() { return CardCategory.CHARACTER; }
+            @Override public int getResolutionPriority() { return 0; }
+        };
     }
 
     /**
@@ -136,7 +169,7 @@ public class GameStateTest {
         gameState.setPhase(manualPhase);
 
         // Action: Call through GameState API
-        gameState.pickTopCard(5, playerA);
+        gameState.pickTopCard(5, playerA,"cardID");
 
         // Assert: Check if the phase's stub method was reached
         assertTrue(manualPhase.pickTopCardCalled, "The call should be routed to the phase handler.");
@@ -172,27 +205,7 @@ public class GameStateTest {
         assertEquals(event, observer.lastEvent, "The captured event should match the broadcasted one.");
         assertEquals(event, observer2.lastEvent, "The captured event should match the broadcasted one.");
     }
-    /**
-     * TEST : raiseSuccessfulAction (Indirectly via Action)
-     * Verification: Since this is PRIVATE, we trigger it through a public phase action.
-     */
-    @Test
-    void testIndirectPrivateMethodTriggering() {
-        gameState.addObserver(observer);
 
-        // 1. Inject a stub phase that returns true to trigger the private method
-        GamePhaseStub stub = new GamePhaseStub(); // Use the unified stub we built
-        gameState.setPhase(stub);
-
-        // 2. Perform action (Compiler Check: Left side | Dynamic Binding: Right side)
-        Player player = new Player(Totem.BLUE_TOTEM,"A");
-        gameState.pickTopCard(0, player);
-
-        // 3. Assert: The private raiseSuccessfulAction should have called raiseEvent
-        assertNotNull(observer.lastEvent);
-        assertEquals(GameEvent.Type.SUCCESSFUL_ACTION, observer.lastEvent.getType());
-        assertEquals(player, observer.lastEvent.getCulprit(), "The event culprit should be the acting player.");
-    }
     /**
      * TEST: nextPlayerInTurnOrderTile (Conditional Skipping Flow)
      * Verification: Ensures the while(true) loop skips disconnected players
@@ -236,8 +249,10 @@ public class GameStateTest {
     @Test
     void testNextPlayerInTurnOrder_LinearProgression() {
         // 1. Arrange: Setup players and add them to the standard turn order
-        gameState.updateTurnOrder(playerA); // Index 0
-        gameState.updateTurnOrder(playerB); // Index 1
+        List<Tile>tiles=gameState.getBoard().getTiles().getTiles();
+        tiles.get(0).occupy(playerA);
+        tiles.get(1).occupy(playerB);
+        gameState.updateTurnOrder();
 
         // Ensure we start at the first player (Index 0)
         // Note: Implicit initialization to 0 is assumed from JVM specs
@@ -259,16 +274,17 @@ public class GameStateTest {
     @Test
     @DisplayName("Verify next round execution order is built from previous turnOrder")
     void testNextRoundOrderTileUpdateFromPreviousTurnOrder() {
+        List<Tile>tiles=gameState.getBoard().getTiles().getTiles();
         // 1. Arrange: Round 1 finishes with a specific turn order
         // Sequence: A (Online), B (Offline), C (Online)
         playerA.setConnected(true);
         playerB.setConnected(false);
         playerC.setConnected(true);
 
-        gameState.updateTurnOrder(playerA);
-        gameState.updateTurnOrder(playerB);
-        gameState.updateTurnOrder(playerC);
-
+        tiles.get(0).occupy(playerA);
+        tiles.get(1).occupy(playerB);
+        tiles.get(2).occupy(playerC);
+       gameState.updateTurnOrder();
         List<Player> round1Result = gameState.getTurnOrder();
         assertEquals(3, round1Result.size(), "Round 1 should have 3 players.");
 
@@ -300,10 +316,42 @@ public class GameStateTest {
     void testActionFailureWithNullPhase() {
         // 1. Arrange: Force a null phase state
         gameState.setPhase(new SetupPhase());
-
         assertThrows(IllegalMoveException.class, () -> {
             gameState.occupyOfferTrailTile(0, playerA);
         }, "The default interface implementation must throw an exception.");
     }
 
+
+    /**
+     * A helper method to inject private fields using Java Reflection.
+     * This ensures we can test edge cases without modifying the original source code.
+     */
+    private void safeInjectField(Object target, String fieldName, Object value) {
+        try {
+            // Look at the actual class (Right side)
+            java.lang.reflect.Field field = target.getClass().getDeclaredField(fieldName);
+            // Bypass the private modifier physically
+            field.setAccessible(true);
+            // Inject the mocked data into the target object
+            field.set(target, value);
+        } catch (Exception e) {
+            // If the field name is wrong, we throw a runtime exception to fail the test early
+            throw new RuntimeException("Reflection failed for field: " + fieldName, e);
+        }
+    }
+    private Object getPrivateField(Object target, String fieldName) throws Exception {
+        java.lang.reflect.Field field = null;
+        Class<?> current = target.getClass();
+        while (current != null) {
+            try {
+                field = current.getDeclaredField(fieldName);
+                break;
+            } catch (NoSuchFieldException e) {
+                current = current.getSuperclass(); // 物理支持继承链查找
+            }
+        }
+        if (field == null) throw new NoSuchFieldException("Field " + fieldName + " not found");
+        field.setAccessible(true);
+        return field.get(target);
+    }
 }

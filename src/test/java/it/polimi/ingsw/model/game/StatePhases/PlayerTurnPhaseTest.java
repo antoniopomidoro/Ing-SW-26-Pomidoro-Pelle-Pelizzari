@@ -87,7 +87,7 @@ class PlayerTurnPhaseTest {
         } catch (NoSuchFieldException e) {
             System.err.println("String startingFood non found");
         }
-        context = new GameState(List.of(activePlayer), config, board, decks);
+        context = new GameState(List.of(activePlayer), config, board, decks,"testId");
 
 
         if(context.getTurnOrder().isEmpty())
@@ -109,8 +109,8 @@ class PlayerTurnPhaseTest {
     void testPickTopCardSuccess() throws Exception {
 
         Card targetCard = board.getTopCards().get(0);
-
-        boolean result = playerTurnPhase.pickTopCard(context, 0, activePlayer);
+        String actualId=targetCard.getInstanceId();
+        boolean result = playerTurnPhase.pickTopCard(context, 0, activePlayer,actualId);
 
         // 3. Numerical Verification
         assertTrue(result, "Phase should return true for valid pick action.");
@@ -133,7 +133,7 @@ class PlayerTurnPhaseTest {
 
         // Action & Assert
         assertThrows(RuntimeException.class, () -> {
-            playerTurnPhase.pickTopCard(context, 0, activePlayer);
+            playerTurnPhase.pickTopCard(context, 0, activePlayer,"testCard");
         }, "Should fail when no upper picks remaining.");
     }
 
@@ -160,9 +160,12 @@ class PlayerTurnPhaseTest {
                 return 5;
             }
         };
+        String actualId=affordableBuilding.getInstanceId();
         topBuildings.add(affordableBuilding);
+
+
         // 2. Action
-        boolean result = playerTurnPhase.pickTopBuilding(context, 0, activePlayer);
+        boolean result = playerTurnPhase.pickTopBuilding(context, 0, activePlayer,actualId);
 
         // 3. Verification
         assertTrue(result, "Purchase should succeed");
@@ -196,7 +199,7 @@ class PlayerTurnPhaseTest {
         topBuildings.add(expensiveBuilding);
 
         assertThrows(IllegalMoveException.class, () -> {
-            playerTurnPhase.pickTopBuilding(context, 0, activePlayer);
+            playerTurnPhase.pickTopBuilding(context, 0, activePlayer,"testCard");
         }, "Player cannot afford this building");
 
         assertEquals(0, (int) foodField.get(activePlayer), "Food should not change on failure");
@@ -230,10 +233,11 @@ class PlayerTurnPhaseTest {
                 return 3;
             }
         };
+        String actualId=targetBuilding.getInstanceId();
         bottomBuildings.add(targetBuilding);
 
         // 2. Action
-        boolean result = playerTurnPhase.pickBottomBuilding(context, 0, activePlayer);
+        boolean result = playerTurnPhase.pickBottomBuilding(context, 0, activePlayer,actualId);
 
         // 3. Verification
         assertTrue(result);
@@ -253,7 +257,7 @@ class PlayerTurnPhaseTest {
 
 
         assertThrows(IllegalMoveException.class, () -> {
-            playerTurnPhase.pickBottomBuilding(context, 0, activePlayer);
+            playerTurnPhase.pickBottomBuilding(context, 0, activePlayer,"testCard");
         }, "No bottom picks remaining");
     }
 
@@ -265,10 +269,9 @@ class PlayerTurnPhaseTest {
         bottomPicksField.setAccessible(true);
         bottomPicksField.set(playerTurnPhase, 1);
 
-
         Card targetCard = board.getBottomCards().get(0);
-
-        boolean result = playerTurnPhase.pickBottomCard(context, 0, activePlayer);
+        String actualId=targetCard.getInstanceId();
+        boolean result = playerTurnPhase.pickBottomCard(context, 0, activePlayer,actualId);
 
 
         assertTrue(result, "Action should return true");
@@ -289,7 +292,7 @@ class PlayerTurnPhaseTest {
 
         // 2. Action & 3. Verification
         assertThrows(IllegalMoveException.class, () -> {
-            playerTurnPhase.pickBottomCard(context, 0, activePlayer);
+            playerTurnPhase.pickBottomCard(context, 0, activePlayer,"testCard");
         }, "No bottom picks remaining");
     }
 

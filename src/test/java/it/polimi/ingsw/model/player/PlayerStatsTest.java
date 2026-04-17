@@ -53,11 +53,11 @@ class PlayerStatsTest {
         stats.incrementCharacter(CharacterEnum.INVENTOR);
         stats.incrementCharacter(CharacterEnum.INVENTOR);
 
-
-        // Add 1 unique tools
+        // Add 2 unique tools
         stats.incrementTool(Tool.BOWL);
+        stats.incrementTool(Tool.BOAT);
 
-        // Calculation: 5 Inventors - 2 Unique Tools = 3 Pair
+        // Calculation: 3Inventors - 2 Unique Tools =1 Pair
         assertEquals(1, stats.getEqualInventorPair(), "Inventor pairs should accurately reflect count minus unique tools.");
     }
 

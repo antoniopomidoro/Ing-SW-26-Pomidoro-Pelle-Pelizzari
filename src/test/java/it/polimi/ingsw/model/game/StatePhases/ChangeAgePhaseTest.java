@@ -1,5 +1,4 @@
 package it.polimi.ingsw.model.game.StatePhases;
-
 import it.polimi.ingsw.controller.GameConfig;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
@@ -10,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 import java.lang.reflect.Field;
-
 class ChangeAgePhaseTest {
     private GameState context;
     private Board board;
@@ -76,10 +74,70 @@ class ChangeAgePhaseTest {
         // building card from Top to Bottom
         assertTrue(board.getBottomBuildings().contains(oldBuilding), "old buildings removed to bottom");
 
-        // 验证版面刷新
+        //new buildings
         List<Building> topBuildings = board.getTopBuildings();
         assertFalse(topBuildings.isEmpty(), "new top buildings");
         assertEquals(Age.AGE_2, topBuildings.get(0).getAge(), "new building age:AGE_2");
+    }
+
+    @Test
+    @DisplayName("Edge Case: Era Exhaustion (Final Age Reached)")
+    void testExecute_FinalAge_ReturnsFalse() throws Exception {
+
+        // Instantiate phase locally to ensure isolation
+        ChangeAgePhase phase = new ChangeAgePhase();
+
+        // Pitfall: Age is an enum, hasNext() is a method, not a field.
+        // Logic: Set age to the last enum constant; hasNext() will physically return false.
+        context.setAge(Age.AGE_3_FINAL);
+
+        // Look at the actual type (right): execute() checks !context.getAge().hasNext().
+        boolean result = phase.execute(context);
+
+        assertFalse(result, "Phase must return false when no subsequent era exists.");
+        // Confirm the state machine did not advance to StartTurnPhase.
+
+    }
+
+    @Test
+    @DisplayName("Edge Case: Atomic Board Refurbishment Flow")
+    void testExecute_AtomicRefurbishment_FlowCheck() throws Exception {
+        ChangeAgePhase phase = new ChangeAgePhase();
+
+        Board board = context.getBoard();
+
+        // Ensure there is a next era ( jumping from Age I to Age II).
+        context.setAge(Age.AGE_1);
+
+        // Inject a mock building to verify the discard logic during transition.
+        List<Building> bottomBuildings = new ArrayList<>(List.of(new StubBuilding(Age.AGE_1)));
+        // Use recursive injectField to reach private board fields.
+        injectField(board, "bottomBuildings", bottomBuildings);
+
+        phase.execute(context);
+
+        // Verify the refurbishment sequence: discardBottom -> topToBottom -> addTop.
+        assertTrue(board.getBottomBuildings().isEmpty(), "Bottom row must be physically cleared.");
+        // Verify that the era in context was physically incremented.
+        assertEquals(Age.AGE_2, context.getAge(), "Era should have physically advanced to Age II.");
+    }
+
+    @Test
+    @DisplayName("Edge Case: Empty Deck for the New Era")
+    void testExecute_EmptyDeck_HandlesGracefully() throws Exception {
+        ChangeAgePhase phase = new ChangeAgePhase();
+
+        context.setAge(Age.AGE_1);
+
+        // Simulate a scenario where the supply deck has no cards for the next era.
+        Decks emptyDeck = context.getDeck();
+        injectField(emptyDeck, "buildings", new EnumMap<>(Age.class));
+
+        boolean result = phase.execute(context);
+
+        assertTrue(result, "Phase should succeed even if the supply deck is empty.");
+        // Confirm it successfully transitioned to StartTurnPhase.
+        assertInstanceOf(StartTurnPhase.class, context.getCurrentPhase());
     }
 
     //inject tool
