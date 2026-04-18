@@ -51,14 +51,13 @@ class StartTurnPhaseTest {
         injectField(context, "turn", 2);
         Player p1 = context.getPlayers().get(0);
         p1.getStats().setTotemPlacementBonus(2);
-        System.out.println(p1.getStats().getTotemPlacementBonus());
         StartTurnPhase startTurnPhase = new StartTurnPhase();
         // 2. Action
         boolean result = startTurnPhase.execute(context);
         // 3. Assert
         assertTrue(result);
         //0+ OrderBonus(3) + TotemBonus(2) = 5
-        System.out.println(p1.getFood());
+        assertEquals(5,p1.getFood());
         // board top cards added:2 extra + 2 players
         assertEquals(4, context.getBoard().getTopCards().size(), "Board cards added to 4");
     }
@@ -119,12 +118,12 @@ class StartTurnPhaseTest {
         Player p1 = context.getPlayers().get(0);
         Player p2 = context.getPlayers().get(1);
 
-        // --- Step 1: Prepare valid physical environment ---
+        // : Prepare valid physical environment
         // Inject a valid TileSet so the logic passes the "Invalid tile index" check first
         List<Tile> tileList = new ArrayList<>(List.of(new Tile()));
         injectField(context.getBoard(), "tiles", new TileSet(tileList));
 
-        // --- Step 2: Set the current actor to P2 via orderTileOrder ---
+        // Set the current actor to P2 via orderTileOrder
         // Based on GameState.java, currentPlayer is pulled from orderTileOrder[index]
         List<Player> orderWithP2 = new ArrayList<>(List.of(p2));
         injectField(context, "orderTileOrder", orderWithP2);
@@ -133,12 +132,12 @@ class StartTurnPhaseTest {
         // Optional: Keep turnOrder in sync for consistency
         injectField(context, "turnOrder", new ArrayList<>(orderWithP2));
 
-        // --- Step 3: Diagnostic verification before execution ---
+        //  Diagnostic verification before execution ---
         // Physically verify that the system recognizes P2 as the one who SHOULD move
-        System.out.println("Current Player in Context: " + context.getCurrentOrderTileOrderPlayer().getNickname());
+        assertSame(p2, context.getCurrentTurnOrderPlayer());
         assertSame(p2, context.getCurrentOrderTileOrderPlayer(), "Setup Error: Context should consider P2 as the current player.");
 
-        // --- Step 4: Execute and Assert Exception ---
+        //  Execute and Assert Exception
         // When we pass p1 while p2 is the current player, the address comparison (p1 != p2) must trigger the exception
         IllegalMoveException exception = assertThrows(IllegalMoveException.class, () -> {
             phase.occupyOfferTrailTile(context, 0, p1); // p1 is not p2!

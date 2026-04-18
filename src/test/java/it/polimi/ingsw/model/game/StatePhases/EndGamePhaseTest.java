@@ -56,7 +56,7 @@ class EndGamePhaseTest {
     @Test
     @DisplayName("Edge Case: Final Scoring with High Character Multipliers")
     void testExecute_FinalScoringAccuracy() throws Exception {
-        // --- 1. Physical Setup ---
+        // Physical Setup
         EndGamePhase phase = new EndGamePhase();
         injectField(context, "currentPhase", phase);
         Player player = new Player(Totem.RED_TOTEM, "A");
@@ -87,7 +87,6 @@ class EndGamePhaseTest {
         // Look at Actual Type (Right): EndGamePhase triggers terminal scoring
         boolean result = phase.execute(context);
 
-        // --- 3. Physical Verification (Numerical Assertion) ---
 // Calculation: (3 Inventors * 4 Tools) + (2 Artist Pairs * 2 Gain) = 16 PP
 // Note: We injected 4 Artists to yield 2 pairs
 

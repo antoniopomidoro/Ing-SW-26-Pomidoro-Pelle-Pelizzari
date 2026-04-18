@@ -29,7 +29,6 @@ class CardSetTest {
         for (CharacterEnum c : CharacterEnum.values()) {
             player.getStats().incrementCharacter(c);
         }
-
         // Initializing the effect: baseSet should become 1.
         effect.onAddedToPlayer(player);
 
@@ -51,6 +50,47 @@ class CardSetTest {
         // Precise Numerical Verification: (2 sets - 1 base) * 4 food = 4 food.
         assertEquals(initialFood + FOOD_REWARD, player.getFood(),
                 "Should reward food only for the newly completed set.");
+    }
+    @Test
+    void testExecuteEffectWithNoSetIncrease() {
+        // Initial state: setup 1 set
+        for (CharacterEnum c : CharacterEnum.values()) {
+            player.getStats().incrementCharacter(c);
+        }
+        effect.onAddedToPlayer(player); // baseSet becomes 1
+
+        int foodBefore = player.getFood();
+
+        // Action: Execute without adding any new cards
+        effect.executeEffect(player, null);
+
+        // Precise Numerical Verification: Difference is 0, food should not change.
+        assertEquals(foodBefore, player.getFood(),
+                "Food should NOT increase if the number of sets remains the same.");
+    }
+
+    @Test
+    void testEffectIdempotencyOnDoubleExecution() {
+        // 1. Gain a new set
+        for (CharacterEnum c : CharacterEnum.values()) {
+            player.getStats().incrementCharacter(c);
+        }
+        effect.onAddedToPlayer(player); // baseSet = 1
+
+        for (CharacterEnum c : CharacterEnum.values()) {
+            player.getStats().incrementCharacter(c);
+        } // Now has 2 sets
+
+        // 2. First execution
+        effect.executeEffect(player, null);
+        int foodAfterFirstCall = player.getFood();
+
+        // 3. Second execution immediate (No state change in player)
+        effect.executeEffect(player, null);
+
+        // Verification: The second call should not reward food again.
+        assertEquals(foodAfterFirstCall, player.getFood(),
+                "Second execution without state change should be idempotent (no extra reward).");
     }
 
     private void setPrivateField(Object object, String fieldName, Object value) throws Exception {

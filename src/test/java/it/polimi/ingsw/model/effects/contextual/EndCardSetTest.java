@@ -16,7 +16,7 @@ class EndCardSetTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        player = new Player(Totem.RED_TOTEM, "Aldo");
+        player = new Player(Totem.RED_TOTEM, "A");
         effect = new EndCardSet();
         setPrivateField(effect, "pp", PP_PER_SET); //
     }
@@ -39,7 +39,7 @@ class EndCardSetTest {
 
     @Test
     void testExecuteEffectWithCompleteFullSet() {
-        // --- Setup: Provide all 6 character types ---
+        //  Provide all 6 character types
         int setsToCreate = 2;
         for (CharacterEnum character : CharacterEnum.values()) {
             for (int i = 0; i < setsToCreate; i++) {
@@ -53,7 +53,32 @@ class EndCardSetTest {
         assertEquals(30, player.getPP(),
                 "With 2 of every character, the player should receive PP for exactly 2 sets.");
     }
+    @Test
+    void testSequentialExecutionAccumulation() {
+        // Initial state: Complete 1 full set
+        for (CharacterEnum character : CharacterEnum.values()) {
+            player.getStats().incrementCharacter(character);
+        }
 
+        // Baseline: Player starts with 0 PP, 1 set * 15 PP = 15 PP per execution.
+        int initialPP = player.getPP(); // 0
+
+        // First Execution: 0 + (1 * 15) = 15
+        effect.executeEffect(player, null);
+        assertEquals(initialPP + PP_PER_SET, player.getPP(),
+                "First execution should add PP based on the current number of sets.");
+
+        // Second Execution: 15 + (1 * 15) = 30
+        // Implementation Check: Verify that it is additive, not a reset.
+        effect.executeEffect(player, null);
+        assertEquals(initialPP + (2 * PP_PER_SET), player.getPP(),
+                "Second execution should accumulate PP on top of the existing balance.");
+
+        // Third Execution: 30 + (1 * 15) = 45
+        effect.executeEffect(player, null);
+        assertEquals(initialPP + (3 * PP_PER_SET), player.getPP(),
+                "Multiple executions should result in a linear accumulation of PP.");
+    }
 
     private void setPrivateField(Object object, String fieldName, Object value) throws Exception {
         Field field = object.getClass().getDeclaredField(fieldName);

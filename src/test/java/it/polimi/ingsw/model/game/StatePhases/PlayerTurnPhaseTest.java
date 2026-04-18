@@ -370,7 +370,6 @@ class PlayerTurnPhaseTest {
         method.setAccessible(true);
         boolean result = (boolean) method.invoke(phase, context);
 
-
         assertFalse(result, " bottomPicks <= 0 ，canPickBottom return false");
     }
 
@@ -390,9 +389,6 @@ class PlayerTurnPhaseTest {
         safeInjectField(p1, "isConnected", true);
         safeInjectField(p2, "isConnected", true);
 
-        System.out.println("Step 1 - Players aligned: P1=" + p1.getNickname() + ", P2=" + p2.getNickname());
-
-
         // Tile 1: P1 exit
         Tile tile1 = new Tile();
         safeInjectField(tile1, "occupier", p1);
@@ -411,15 +407,12 @@ class PlayerTurnPhaseTest {
         List<Tile> tiles = new ArrayList<>(List.of(tile1, tile2));
         Object tileSet = getPrivateField(context.getBoard(), "tiles");
         safeInjectField(tileSet, "tiles", tiles);
-
-        System.out.println("Step 2 - Tiles Injected. Size: " + context.getBoard().getTiles().getTiles().size());
-
+        assertEquals(2,context.getBoard().getTiles().getTiles().size());
         // Inject Board cards for p2
         context.getBoard().getTopCards().clear();
         context.getBoard().getBottomCards().clear();
         context.getBoard().getTopCards().add(createMockCard(Age.AGE_1));
         context.getBoard().getBottomCards().add(createMockCard(Age.AGE_1));
-
 
         PlayerTurnPhase p1Phase = new PlayerTurnPhase(p1, tile1);
         context.setPhase(p1Phase);
@@ -428,16 +421,9 @@ class PlayerTurnPhaseTest {
 
         safeInjectField(p1Phase, "upperPicks", 0);
         safeInjectField(p1Phase, "bottomPicks", 0);
-
-        System.out.println("Step 4 - Before execution: " + context.getCurrentPhase().getClass().getSimpleName());
-
-
+        //before execution:player turn phase
         //  (P1.nextPhase -> TurnPhase -> P2.PlayerTurnPhase)
         p1Phase.nextPhase(context);
-
-        //  assert steps by steps
-        System.out.println("Step 6 - Final Phase: " + context.getCurrentPhase().getClass().getSimpleName());
-        System.out.println("Step 6 - Final Index: " + context.getCurrentTileIndex());
 
         // reback to PlayerTurnPhase
         assertTrue(context.getCurrentPhase() instanceof PlayerTurnPhase,

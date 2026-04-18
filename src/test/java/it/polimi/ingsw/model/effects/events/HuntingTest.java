@@ -27,7 +27,6 @@ class HuntingTest {
     private Player player;
     private Hunting hunting;
 
-
     @BeforeEach
     void setUp() throws Exception {
 
@@ -40,7 +39,7 @@ class HuntingTest {
         setPrivateField(config, "buildingPerPlayer", new int[5][3]);
 
         List<Card> cards = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 5; i++) {
             Card c = new Card() {
                 @Override
                 public CardCategory getCategory() { return null; }
@@ -53,14 +52,14 @@ class HuntingTest {
             cards.add(c);}
 
         List<Building> buildings = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 5; i++) {
             buildings.add(new Building());
         }
 
         Decks decks = new Decks(cards, buildings);
         Board board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
 
-        state = new GameState(players, config, board, decks);
+        state = new GameState(players, config, board, decks,"testId");
         state.setOrderTileOrder(players);}
 
     private void setPrivateField(Object object, String fieldName, Object value) throws Exception {
@@ -70,7 +69,7 @@ class HuntingTest {
     }
         @Test
     void testHuntingRewardCalculation() {
-        /* * Scenario:
+       /*
          * 1. Player has 3 HUNTER characters.
          * 2. Current age is AGE_2 (assume value = 2).
          * 3. Expected Reward: +3 Food, +6 PP (3 * 2).
@@ -79,12 +78,22 @@ class HuntingTest {
         for (int i = 0; i < hunterCount; i++) {
             player.getStats().incrementCharacter(CharacterEnum.HUNTER);
         }
-
         // Execution in AGE_2
         hunting.applyEffect(state, Age.AGE_2);
 
         // Numerical Verification
         assertEquals(8, player.getFood(), "Food reward should match hunter count.");
         assertEquals(6, player.getPP(), "PP reward should be hunter count * age value.");
+    }
+    @Test
+    void testHuntingRewardCalculation2() {
+        /*
+         * 1. Player has not HUNTER characters.
+         * 2. Current age is AGE_2 (assume value = 2).*/
+        // Execution in AGE_2
+        hunting.applyEffect(state, Age.AGE_2);
+        // Numerical Verification
+        assertEquals(5, player.getFood(), "Food reward should match hunter count.");
+        assertEquals(0, player.getPP(), "PP reward should be hunter count * age value.");
     }
 }

@@ -22,7 +22,6 @@ class ShamanicRitualTest {
     private Player p1, p2,p3;
     private ShamanicRitual ritual;
 
-
     @BeforeEach
     void setUp() throws Exception {
         // Setup environment as per player/gamestate requirement
@@ -35,7 +34,6 @@ class ShamanicRitualTest {
         GameConfig config = new GameConfig();
         setPrivateField(config, "startingFood", new ArrayList<>(List.of(0, 0, 0)));
         setPrivateField(config, "buildingPerPlayer", new int[5][3]);
-
 
         List<Card> cards = new ArrayList<>();
         for (int i = 0; i < 50; i++) {
@@ -58,7 +56,7 @@ class ShamanicRitualTest {
         Decks decks = new Decks(cards, buildings);
         Board board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
 
-        state = new GameState(players, config, board, decks);
+        state = new GameState(players, config, board, decks,"testId");
         state.setOrderTileOrder(players);
 
         // Use Reflection to inject values into private fields
@@ -93,7 +91,22 @@ class ShamanicRitualTest {
         assertEquals(0, p2.getPP(), "The median player's PP should remain unchanged.");
         assertEquals(-4, p3.getPP(), "The player with the fewest stars should lose 4 PP.");
     }
+    @Test
+    void testStandardRewards2() throws Exception {
+        // 1. Arrange: Set star counts as the condition for scoring
+        p1.getStats().addStars(10); // Highest stars -> Eligible for ppGain
+        p2.getStats().addStars(5);  // Median stars -> No change expected
+        p3.getStats().addStars(2);  // Lowest stars -> Eligible for ppLoss
 
+        p3.getStats().setRitualLossMultiplier(2);
+
+        // 2. Act: Trigger the Shamanic Ritual event
+        ritual.applyEffect(state, Age.AGE_1);
+        // 3. Assert: Verify the PP changes (Based on ppGain=10, ppLoss=4)
+        assertEquals(10, p1.getPP(), "The player with the most stars should gain 10 PP.");
+        assertEquals(0, p2.getPP(), "The median player's PP should remain unchanged.");
+        assertEquals(-8, p3.getPP(), "The player with the fewest stars should lose 8 PP.");
+    }
     /**
      * Case 2: Tied extremes (Multiple winners or multiple losers).
      */
@@ -131,6 +144,24 @@ class ShamanicRitualTest {
         // Sequence: 0 (Initial) + 10 (Gain Loop) - 4 (Loss Loop) = 6
         int expectedNetPP = 6;
         assertEquals(expectedNetPP, p1.getPP(), "When all are tied, everyone gains then loses PP, netting 6.");
+        assertEquals(expectedNetPP, p2.getPP());
+        assertEquals(expectedNetPP, p3.getPP());
+    }
+    @Test
+    void testAllEqual2() throws Exception {
+        // 1. Arrange: All players have exactly 5 stars
+        p1.getStats().addStars(5);
+        p2.getStats().addStars(5);
+        p3.getStats().addStars(5);
+        p1.getStats().setRitualWinBoost(2);
+        // 2. Act: This triggers the branch where everyone is both Max and Min
+        ritual.applyEffect(state, Age.AGE_1);
+
+        // 3. Assert: The net result should be (ppGain - ppLoss)
+        // Sequence: 0 (Initial) + 10 (Gain Loop) - 4 (Loss Loop) = 6
+        int expectedNetPP = 6;
+        int expectedP1Pp=16;
+        assertEquals(expectedP1Pp, p1.getPP());//p1 has extra win boost
         assertEquals(expectedNetPP, p2.getPP());
         assertEquals(expectedNetPP, p3.getPP());
     }

@@ -22,7 +22,7 @@ public class CavePaintingsTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        player = new Player(Totem.RED_TOTEM, "aldo");
+        player = new Player(Totem.RED_TOTEM, "A");
         List<Player> players = new ArrayList<>(List.of(player));
 
         GameConfig config = new GameConfig();
@@ -30,7 +30,7 @@ public class CavePaintingsTest {
         setPrivateField(config, "buildingPerPlayer", new int[5][3]);
 
         List<Card> cards = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 5; i++) {
             Card c = new Card() {
                 @Override
                 public CardCategory getCategory() { return null; }
@@ -43,20 +43,18 @@ public class CavePaintingsTest {
             cards.add(c);}
 
         List<Building> buildings = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 5; i++) {
             buildings.add(new Building());
         }
 
         Decks decks = new Decks(cards, buildings);
         Board board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
 
-        state = new GameState(players, config, board, decks);
+        state = new GameState(players, config, board, decks,"testId");
         state.setOrderTileOrder(players);
 
         cavePaintings = new CavePaintings();
     }
-
-
     private void setPrivateField(Object object, String fieldName, Object value) throws Exception {
         Field field = object.getClass().getDeclaredField(fieldName);
         field.setAccessible(true);
@@ -73,7 +71,6 @@ public class CavePaintingsTest {
         assertTrue(result);
         assertEquals(8, player.getPP(), "Should deduct 2 PP as a penalty."); //
     }
-
     @Test
     void applyEffect_MeetingThreshold_BonusApplied() {
         Age age2 = Age.AGE_2;
@@ -86,4 +83,16 @@ public class CavePaintingsTest {
         // Bonus = AgeValue (2) * ArtistCount (2) = 4
         assertEquals(14, player.getPP());
     }
+    @Test
+    void applyEffect_MeetingThreshold_BonusApplied2() {
+        Age age2 = Age.AGE_2;
+        player.getStats().incrementCharacter(CharacterEnum.ARTIST);
+        player.addPP(10);
+
+        cavePaintings.applyEffect(state, age2);
+
+        assertEquals(8, player.getPP());
+    }
 }
+
+

@@ -13,10 +13,8 @@ class TotemPlacementBonusTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        player = new Player(Totem.RED_TOTEM, "Aldo");
+        player = new Player(Totem.RED_TOTEM, "A");
         effect = new TotemPlacementBonus();
-
-        // Injecting 'bonus' field although the current logic uses a hardcoded '1'
         setPrivateField(effect, "bonus", 5);
     }
 
@@ -24,10 +22,8 @@ class TotemPlacementBonusTest {
     void testExecuteEffect() {
         // Act: Execute the effect (passing null for GameState if not used in current logic)
         boolean result = effect.executeEffect(player, null);
-
         // Assert:
         assertTrue(result);
-
         // The source code uses p.getStats().setTotemPlacementBonusFood(1)
         // So even if we injected 5, we expect 1.
         assertEquals(1, player.getStats().getTotemPlacementBonus(),

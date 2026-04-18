@@ -23,26 +23,38 @@ class GainByCharacterTest {
     private Player player;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         // Initialize the game environment and the test player
         Totem testTotem=Totem.RED_TOTEM;
         player=new Player(testTotem,"Tester");
         List<Player>players=List.of(player);
         GameConfig config = new GameConfig();
+        setPrivateField(config,"startingFood",new ArrayList<>(List.of(0,0,0,0,0)));
 
         OrderTile orderTile=new OrderTile();
         TileSet tiles=new TileSet(new ArrayList<>());
         Board board = new Board(orderTile,tiles);
-        List<Card> cards=new ArrayList<>();
-        List<Building> buildings=new ArrayList<>();
-        Decks deck= new Decks(cards,buildings);
-        state = new GameState(players,config,board,deck);
-    }
+        it.polimi.ingsw.model.cards.Decks deck  = new Decks(new ArrayList<>(), new ArrayList<>());
+        for (int i = 0; i < 20; i++) {
+            Card c = createMockCard();
+            c.addToDeck(deck);
+        }
 
+        state = new GameState(players,config,board,deck,"testId");
+    }
+    private Card createMockCard() {
+        return new Card() {
+            @Override public boolean addToDeck(Decks d) { return d.addCard(this); }
+            @Override public Age getAge() { return Age.AGE_1; }
+            @Override public boolean isBuyable() { return true; }
+            @Override public CardCategory getCategory() { return CardCategory.CHARACTER; }
+            @Override public int getResolutionPriority() { return 0; }
+        };
+    }
     @Test
     @DisplayName("Verify GainByCharacter - Scales PP and Food by specific character count")
     void testGainByCharacterEffect() throws Exception {
-        // [Look at Actual Type]: GainByCharacter
+
         GainByCharacter effect = new GainByCharacter();
         setPrivateField(effect, "type", CharacterEnum.HUNTER);
         setPrivateField(effect, "ppGain", 3);
@@ -59,22 +71,26 @@ class GainByCharacterTest {
                 () -> assertEquals(8, player.getFood(), "Food should be 4 * 2 = 8")
         );
     }
-
     @Test
-    @DisplayName("Verify EndCardSet - Absolute set-based PP settlement")
-    void testEndCardSetEffect() throws Exception {
-        EndCardSet effect = new EndCardSet();
-        setPrivateField(effect, "pp", 10);
+    @DisplayName("Verify GainByCharacter - Scales PP and Food by specific character count")
+    void testNotGainByCharacterEffect() throws Exception {
 
-        // Setup: 2 complete sets
-        addMultipleSets(player, 2);
+        GainByCharacter effect = new GainByCharacter();
+        setPrivateField(effect, "type", CharacterEnum.HUNTER);
+        setPrivateField(effect, "ppGain", 3);
+        setPrivateField(effect, "foodGain", 2);
+
+         player.getStats().incrementCharacter(CharacterEnum.BUILDER);
+
         effect.executeEffect(player, state);
 
-        assertEquals(20, player.getPP(), "Should reward 20 PP for 2 sets.");
+        assertAll("Resource verification",
+                () -> assertEquals(0, player.getPP(), "PP should not be added"),
+                () -> assertEquals(0, player.getFood(), "Food should not be added")
+        );
     }
 
     // HELPER METHODS
-
     private void addMultipleSets(Player p, int count) {
         for (int i = 0; i < count; i++) {
             for (CharacterEnum type : CharacterEnum.values()) {

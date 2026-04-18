@@ -61,7 +61,7 @@ class SustenanceTest {
     Board board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
 
 
-    state = new GameState(players, config, board, decks);
+    state = new GameState(players, config, board, decks,"testId");
         state.setOrderTileOrder(players);}
 
 private void setPrivateField(Object object, String fieldName, Object value) throws Exception {

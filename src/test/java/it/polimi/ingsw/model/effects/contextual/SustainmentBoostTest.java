@@ -23,10 +23,23 @@ class SustainmentBoostTest {
     }
 
     @Test
-    void testOnAddedToPlayer() {
-        boolean result = effect.onAddedToPlayer(player);
-        assertTrue(result, "The effect should be successfully applied.");
-        // Additional assertions can be added here to verify PlayerStats changes
+    void testGetSustainmentDiscountCalculation() throws Exception {
+        // base discount
+        setPrivateField(player.getStats(), "baseSustainmentDiscount", 5);
+
+        // 2. Every BUILDER takes 2 discount
+        player.getStats().addSustainmentBoost(CharacterEnum.GATHERER, 2);
+
+        // 3. add 3  Gatherer
+        for (int i = 0; i < 3; i++) {
+            player.getStats().incrementCharacter(CharacterEnum.GATHERER);
+        }
+        //  5 (base) + (3 characters * 2 gain) = 11
+        int expectedDiscount = 11;
+        int actualDiscount = player.getStats().getSustainmentDiscount();
+
+        assertEquals(expectedDiscount, actualDiscount,
+                "The total discount should sum the base value and the dynamic character-based boosts.");
     }
 
     private void setPrivateField(Object object, String fieldName, Object value) throws Exception {

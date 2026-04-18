@@ -73,13 +73,9 @@ class TurnPhaseTest {
         // start point
         safeInjectField(context, "currentTileIndex", 0);
 
-        System.out.println("Before Execute - Current Phase: " + context.getCurrentPhase().getClass().getSimpleName());
-
+        assertTrue(context.getCurrentPhase() instanceof StartTurnPhase);//before execute:playerturnphase
         TurnPhase turnPhase = new TurnPhase();
         boolean result = turnPhase.execute(context);
-
-        System.out.println("After Execute - Current Phase: " + context.getCurrentPhase().getClass().getSimpleName());
-        System.out.println("Result: " + result + ", Index: " + context.getCurrentTileIndex());
 
         assertTrue(result, "execute return true");
         // hit index=1 Tile，next index: 1+1=2
