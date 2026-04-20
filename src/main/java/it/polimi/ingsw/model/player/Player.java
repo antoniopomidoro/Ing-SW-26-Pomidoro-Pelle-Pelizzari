@@ -25,6 +25,13 @@ public class Player {
     private boolean isChoosing;
     private boolean isConnected = true;
 
+    /** Default constructor for Jackson deserialization. */
+    protected Player() {
+        this.buildings = new ArrayList<>();
+        this.cards = new ArrayList<>();
+        this.stats = new PlayerStats();
+    }
+
     public Player(Totem id, String nickname) {
 
         // Other initializations

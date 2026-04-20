@@ -20,6 +20,9 @@ import java.util.List;
 public class TileSet {
     private List<Tile> tiles;
 
+    /** Default constructor for Jackson deserialization. */
+    protected TileSet() { this.tiles = new ArrayList<>(); }
+
     /**
      * Constructs a TileSet with a given list of tiles.
      * @param tiles The initial list of tiles.
@@ -50,5 +53,10 @@ public class TileSet {
      */
     public List<Tile> getTiles() {
         return Collections.unmodifiableList(this.tiles);
+    }
+
+    /** Returns the index of a tile in the set, or -1 if not found. */
+    public int indexOf(Tile tile) {
+        return tiles.indexOf(tile);
     }
 }

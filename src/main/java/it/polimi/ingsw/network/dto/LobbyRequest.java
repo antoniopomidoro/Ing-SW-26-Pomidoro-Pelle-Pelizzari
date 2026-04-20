@@ -1,5 +1,6 @@
 package it.polimi.ingsw.network.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import it.polimi.ingsw.model.player.Totem;
 
 import java.io.Serializable;
@@ -8,6 +9,7 @@ import java.io.Serializable;
  * Serializable lobby request sent by clients.
  * Handles both the creation of a new lobby and joining an existing one.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LobbyRequest implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -17,9 +19,9 @@ public class LobbyRequest implements Serializable {
     }
 
     private Type type;
-    private String gameId;          // Usato SOLO se type == JOIN
+    private String gameId;          // Used ONLY if type == JOIN
     private String playerName;
-    private int requiredPlayers;    // Usato SOLO se type == CREATE
+    private int requiredPlayers;    // Used ONLY if type == CREATE
     private Totem requestedTotem;
 
     /**

@@ -40,7 +40,7 @@ public class EndGamePhase implements GamePhaseBehavior {
         }
 
         context.raiseEvent(new GameEvent(
-                GameEvent.Type.SUCCESSFUL_ACTION,
+                GameEvent.Type.END_GAME_COMPLETED,
                 null,
                 "phaseCompleted:END_GAME"
         ));

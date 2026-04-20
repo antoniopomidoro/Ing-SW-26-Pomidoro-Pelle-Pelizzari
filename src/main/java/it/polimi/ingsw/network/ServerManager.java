@@ -1,12 +1,17 @@
 package it.polimi.ingsw.network;
 
+import it.polimi.ingsw.network.dto.GameStateSaveDTO;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.GameState;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -28,7 +33,7 @@ public class ServerManager {
         loadSavedGames();
     }
     /**
-     * Genera un codice a 6 cifre univoco, verificando che non ci siano collisioni.
+     * Generates a unique 6-digit code, verifying that there are no collisions.
      */
     private String generateUniqueLobbyId() {
         String newId;
@@ -64,7 +69,7 @@ public class ServerManager {
         view.setGameId(gameId);
 
 
-        // Notifica il creatore che è in attesa
+        // Notify the creator that they are waiting
         view.sendLobbyUpdate(pending.getCurrentPlayerCount(), pending.getRequiredPlayers());
 
         return LobbyState.WAITING;
@@ -90,7 +95,7 @@ public class ServerManager {
             throw new IllegalArgumentException("Invalid input for join");
         }
 
-        // 1. CASO REJOIN (La partita è già in corso)
+        // 1. REJOIN CASE (The game is already in progress)
         if (activeGames.containsKey(gameId)) {
             GameController controller = activeGames.get(gameId);
             GameState state = controller.getGameState();
@@ -119,7 +124,7 @@ public class ServerManager {
             return LobbyState.REJOIN;
         }
 
-        // 2. CASO JOIN NORMALE (La lobby è in attesa)
+        // 2. NORMAL JOIN CASE (The lobby is waiting)
         if (pendingGames.containsKey(gameId)) {
             PendingGame pending = pendingGames.get(gameId);
             Totem totem = pending.addPlayer(playerName, requestedTotem);
@@ -146,7 +151,7 @@ public class ServerManager {
                 return LobbyState.STARTING_GAME;
             }
 
-            // Notifica tutti gli utenti nella lobby in attesa
+            // Notify all users in the waiting lobby
             Map<Totem, VirtualView> views = viewRegistry.get(gameId);
             for (Map.Entry<Totem, VirtualView> entry : views.entrySet()) {
                 VirtualView vv = entry.getValue();
@@ -155,8 +160,8 @@ public class ServerManager {
             return LobbyState.WAITING;
         }
 
-        // 3. CASO ERRORE (La lobby non esiste)
-        throw new IllegalArgumentException("Stanza " + gameId + " inesistente!");
+        // 3. ERROR CASE (The lobby does not exist)
+        throw new IllegalArgumentException("Room " + gameId + " does not exist!");
     }
     public boolean disconnectPlayer(VirtualView view) {
         if (view == null) return false;
@@ -171,7 +176,59 @@ public class ServerManager {
     }
 
     public boolean loadSavedGames(){
-        //TODO: add implementation
+        Path savesDir = Paths.get("saves");
+
+        if (Files.notExists(savesDir)) {
+            try {
+                Files.createDirectories(savesDir);
+                System.out.println("saves/ directory not found: created. No games to load.");
+            } catch (IOException e) {
+                System.err.println("Unable to create saves/ directory: " + e.getMessage());
+                return false;
+            }
+            return true;
+        }
+
+        if (!Files.isDirectory(savesDir)) {
+            System.err.println("The saves/ path exists but is not a directory.");
+            return false;
+        }
+
+        File[] saveFiles = savesDir.toFile().listFiles((dir, name) -> name != null && name.endsWith(".json"));
+        if (saveFiles == null) {
+            System.out.println("Loaded 0 games successfully, 0 failed.");
+            return true;
+        }
+
+        int loaded = 0;
+        int failed = 0;
+
+        for (File saveFile : saveFiles) {
+            try {
+                GameStateSaveDTO saveDto = JacksonConfig.mapper()
+                        .readValue(saveFile, GameStateSaveDTO.class);
+                GameState restoredState = GameStateSaveDTO.toGameState(saveDto);
+                String fileName = saveFile.getName();
+                String gameId = fileName.substring(0, fileName.length() - ".json".length());
+
+                if (gameId.isBlank()) {
+                    throw new IllegalStateException("Invalid save file name: " + fileName);
+                }
+                if (activeGames.containsKey(gameId)) {
+                    throw new IllegalStateException("Duplicate GameId found in saves: " + gameId);
+                }
+
+                GameController restoredController = new GameController(restoredState);
+                activeGames.put(gameId, restoredController);
+                viewRegistry.putIfAbsent(gameId, new ConcurrentHashMap<>());
+                loaded++;
+            } catch (Exception e) {
+                failed++;
+                System.err.println("Error loading save " + saveFile.getName() + ": " + e.getMessage());
+            }
+        }
+
+        System.out.println("Loaded " + loaded + " games successfully, " + failed + " failed.");
         return true;
     }
 

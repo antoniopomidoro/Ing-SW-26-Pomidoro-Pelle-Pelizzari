@@ -9,14 +9,14 @@ public class NUDESender {
 
         private static final ObjectMapper mapper = new ObjectMapper();
         /**
-         * Costruisce una stringa JSON compatibile con Jackson da inviare al server
+         * Builds a Jackson-compatible JSON string to send to the server
          *
-         * @param action    Il tipo di azione che corrisponderà alle sottoclassi di Executor
-         * @param index     L'indice selezionato
+         * @param action    The type of action that will correspond to Executor subclasses
+         * @param index     The selected index
          * @param nick      player nick
-         * @param idGame    L'id della partita in corso
-         * @param idPlayer  L'id del giocatore che sta effettuando la mossa
-         * @return Una stringa formattata regolarmente in JSON
+         * @param idGame    The id of the current game
+         * @param idPlayer  The id of the player making the move
+         * @return A regularly formatted JSON string
          */
         public static String build(ActionType action, int index, String nick, String idGame, String idPlayer, String cardId) {
             ObjectNode rootNode = mapper.createObjectNode();
@@ -33,6 +33,4 @@ public class NUDESender {
             return build(action, index, nick, idGame, idPlayer, null);
         }
     }
-
-
 

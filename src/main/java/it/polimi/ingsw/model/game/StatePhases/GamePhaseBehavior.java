@@ -18,6 +18,12 @@ import it.polimi.ingsw.model.player.Player;
 public interface GamePhaseBehavior {
 
     /**
+     * Exports the internal phase data using the Visitor pattern.
+     * By default, it does nothing since most phases are stateless.
+     */
+    default void exportData(PhaseDataExporter exporter) {}
+
+    /**
      * Executes the primary logic associated with this game phase.
      * This method is typically called once when the game transitions into this state.
      *

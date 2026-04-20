@@ -34,7 +34,7 @@ public class PendingGame {
      */
     public synchronized Totem addPlayer(String playerName, Totem requestedTotem) {
         if (playerName == null || playerName.isBlank()) {
-            throw new IllegalArgumentException("Invalid nickname: null o blank");
+            throw new IllegalArgumentException("Invalid nickname: null or blank");
         }
         if (isFull()) {
             throw new IllegalStateException("Lobby is full: " + gameId);
@@ -68,7 +68,7 @@ public class PendingGame {
      */
     public synchronized List<Player> getJoinedPlayers() {
         if (!isFull()) {
-            throw new IllegalStateException("Lobby non piena: " + joinedPlayers.size() + "/" + requiredPlayers);
+            throw new IllegalStateException("Lobby not full: " + joinedPlayers.size() + "/" + requiredPlayers);
         }
         return new ArrayList<>(joinedPlayers);
     }

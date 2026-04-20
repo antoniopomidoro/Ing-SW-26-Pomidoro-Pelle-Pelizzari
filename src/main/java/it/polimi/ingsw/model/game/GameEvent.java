@@ -35,7 +35,23 @@ public class GameEvent {
         BOTTOM_BUILDING(true),
         BOARD_UPDATE(true),
         AGE_CHANGED(true),
-        PLAYER_DISCONNECTED(true);
+        PLAYER_DISCONNECTED(true),
+
+        // --- PHASE TRANSITIONS ---
+        /** Setup completed: initial board and food ready. */
+        SETUP_COMPLETED(true),
+        /** StartTurn completed: cards reloaded, food distributed. */
+        START_TURN_COMPLETED(true),
+        /** A player has placed their totem on a tile. */
+        TILE_OCCUPIED(true),
+        /** All players have completed their picks in the turn. */
+        TURN_COMPLETED(true),
+        /** Start of a player's turn: the View can show the pick UI. */
+        PLAYER_TURN_STARTED(true),
+        /** End turn: cards discarded, tiles freed, counter incremented. */
+        END_TURN_COMPLETED(true),
+        /** End game: final scores calculated. */
+        END_GAME_COMPLETED(true);
 
         private final boolean requiresSave;
 

@@ -50,9 +50,9 @@ public class TurnPhase implements GamePhaseBehavior {
             extraIndex++;
         }
 
-        // Notifica fine turn phase prima della transizione
+        // Notify end of turn phase before transition
         context.raiseEvent(new GameEvent(
-                GameEvent.Type.SUCCESSFUL_ACTION,
+                GameEvent.Type.TURN_COMPLETED,
                 null,
                 "phaseCompleted:TURN"
         ));

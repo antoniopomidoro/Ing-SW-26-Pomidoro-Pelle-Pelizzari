@@ -8,6 +8,16 @@ import it.polimi.ingsw.model.game.Age;
 public class Decks {
     private  Map<Age,List<Building>> buildings;
     private  Map<Age,List<Card>> cards;
+    /** Default constructor for Jackson deserialization. */
+    public Decks() {
+        this.cards = new EnumMap<>(Age.class);
+        this.buildings = new EnumMap<>(Age.class);
+        for (Age a : Age.values()) {
+            this.cards.put(a, new ArrayList<>());
+            this.buildings.put(a, new ArrayList<>());
+        }
+    }
+
     //the constructor initialize 2 enum map that contains lists divided by era of cards and buildings
     //then for each card and buildin in the lists passed in input creates the ages decks using the function addToDeck of card
     //using visitors pattern
@@ -29,15 +39,23 @@ public class Decks {
 
     /* Protected methods for testing purposes */
 
-    protected Map<Age, List<Card>> getCards() {
+    public Map<Age, List<Card>> getCards() {
         return cards;
     }
 
-    protected void setCards(Map<Age, List<Card>> cards) {
+    /**
+     * Returns the full buildings map for all ages.
+     * @return the buildings map
+     */
+    public Map<Age, List<Building>> getAllBuildings() {
+        return buildings;
+    }
+
+    public void setCards(Map<Age, List<Card>> cards) {
         this.cards = cards;
     }
 
-    protected void setBuildings(Map<Age, List<Building>> buildings) {
+    public void setBuildings(Map<Age, List<Building>> buildings) {
         this.buildings = buildings;
     }
 

@@ -23,6 +23,16 @@ public class Board {
     private List<Building> topBuildings;
     private List<Building> bottomBuildings;
 
+    /**
+     * Default constructor for Jackson deserialization.
+     */
+    protected Board() {
+        this.topCards = new ArrayList<>();
+        this.bottomCards = new ArrayList<>();
+        this.topBuildings = new ArrayList<>();
+        this.bottomBuildings = new ArrayList<>();
+    }
+
     public Board(OrderTile orderTile, TileSet tiles) {
         this.topCards = new ArrayList<>();
         this.bottomCards = new ArrayList<>();
@@ -180,7 +190,10 @@ public class Board {
         return true;
     }
 
-
-
+    // --- Setters for save/load restoration ---
+    public void setTopCards(List<Card> cards) { this.topCards = new ArrayList<>(cards); }
+    public void setBottomCards(List<Card> cards) { this.bottomCards = new ArrayList<>(cards); }
+    public void setTopBuildings(List<Building> b) { this.topBuildings = new ArrayList<>(b); }
+    public void setBottomBuildings(List<Building> b) { this.bottomBuildings = new ArrayList<>(b); }
 
 }

@@ -26,10 +26,10 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
     private int bottomPicks = 0;
 
     /**
-     * Crea la fase del turno giocatore legandola al player e alla tile attiva.
+     * Creates the player turn phase binding it to the active player and tile.
      *
-     * @param player giocatore attivo
-     * @param tile tile occupata dal giocatore attivo
+     * @param player active player
+     * @param tile tile occupied by the active player
      */
     public PlayerTurnPhase(Player player, Tile tile) {
         this.activePlayer = player;
@@ -39,8 +39,32 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
     }
 
     /**
-     * Applica il bonus cibo della tile attiva e verifica immediatamente
-     * la possibile transizione di fase.
+     * Restore constructor: creates a PlayerTurnPhase with explicit pick counts.
+     * Does NOT call execute() — used during save/load restoration.
+     */
+    public PlayerTurnPhase(Player activePlayer, Tile activeTile, int upperPicks, int bottomPicks) {
+        this.activePlayer = activePlayer;
+        this.activeTile = activeTile;
+        this.upperPicks = upperPicks;
+        this.bottomPicks = bottomPicks;
+    }
+
+    // --- Data Exporter for SavePhaseDTO ---
+    @Override
+    public void exportData(PhaseDataExporter exporter) {
+        if (exporter != null) {
+            exporter.exportPlayerTurnData(activePlayer, activeTile, upperPicks, bottomPicks);
+        }
+    }
+
+    public Player getActivePlayer() { return activePlayer; }
+    public Tile getActiveTile() { return activeTile; }
+    public int getUpperPicks() { return upperPicks; }
+    public int getBottomPicks() { return bottomPicks; }
+
+    /**
+     * Applies the food bonus of the active tile and immediately checks
+     * for a possible phase transition.
      */
     @Override
     public boolean execute(GameState context) {
@@ -51,14 +75,16 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         if (food > 0){
             activePlayer.addFood(food);
         }
+        context.raiseEvent(new GameEvent(GameEvent.Type.PLAYER_TURN_STARTED, activePlayer,
+                "playerTurnStarted:" + activePlayer.getId()));
         nextPhase(context);
         return true;
     }
 
     /**
-     * Pick di una carta superiore.
-     * In caso di mossa non valida: broadcast evento ({@link GameState#raiseEvent(GameEvent)})
-     * seguito da {@link IllegalMoveException}.
+     * Pick of an upper card.
+     * In case of invalid move: event broadcast ({@link GameState#raiseEvent(GameEvent)})
+     * followed by {@link IllegalMoveException}.
      */
     @Override
     public boolean pickTopCard(GameState context, int index, Player player, String cardInstanceId){
@@ -86,6 +112,9 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         c = context.getBoard().pickTopCard(index);
         activePlayer.addCard(c);
         upperPicks--;
+        // Notify successful pick
+        context.raiseEvent(new GameEvent(GameEvent.Type.UPPER_CARD, activePlayer,
+                "pickedTopCard:" + index));
         // Trigger ON_CARD_PICK buildings (e.g. CardSet, InventorPair)
         triggerOnCardPick(activePlayer, context);
         nextPhase(context);
@@ -93,8 +122,8 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
     }
 
     /**
-     * Pick di una carta inferiore.
-     * In caso di mossa non valida: broadcast evento seguito da {@link IllegalMoveException}.
+     * Pick of a lower card.
+     * In case of invalid move: event broadcast followed by {@link IllegalMoveException}.
      */
     @Override
     public boolean pickBottomCard(GameState context, int index, Player player, String cardInstanceId) {
@@ -122,6 +151,9 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         c = context.getBoard().pickBottomCard(index);
         activePlayer.addCard(c);
         bottomPicks--;
+        // Notify successful pick
+        context.raiseEvent(new GameEvent(GameEvent.Type.BOTTOM_CARD, activePlayer,
+                "pickedBottomCard:" + index));
         // Trigger ON_CARD_PICK buildings (e.g. CardSet, InventorPair)
         triggerOnCardPick(activePlayer, context);
         nextPhase(context);
@@ -129,8 +161,8 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
     }
 
     /**
-     * Pick di un building superiore.
-     * In caso di mossa non valida: broadcast evento seguito da {@link IllegalMoveException}.
+     * Pick of an upper building.
+     * In case of invalid move: event broadcast followed by {@link IllegalMoveException}.
      */
     @Override
     public boolean pickTopBuilding(GameState context, int index, Player player, String cardInstanceId) {
@@ -163,13 +195,16 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         activePlayer.payBuilding(b);
         activePlayer.addBuilding(b);
         upperPicks--;
+        // Notify successful pick
+        context.raiseEvent(new GameEvent(GameEvent.Type.UPPER_BUILDING, activePlayer,
+                "pickedTopBuilding:" + index));
         nextPhase(context);
         return true;
     }
 
     /**
-     * Pick di un building inferiore.
-     * In caso di mossa non valida: broadcast evento seguito da {@link IllegalMoveException}.
+     * Pick of a lower building.
+     * In case of invalid move: event broadcast followed by {@link IllegalMoveException}.
      */
     @Override
     public boolean pickBottomBuilding(GameState context, int index, Player player, String cardInstanceId) {
@@ -202,6 +237,9 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         activePlayer.payBuilding(b);
         activePlayer.addBuilding(b);
         bottomPicks--;
+        // Notify successful pick
+        context.raiseEvent(new GameEvent(GameEvent.Type.BOTTOM_BUILDING, activePlayer,
+                "pickedBottomBuilding:" + index));
         nextPhase(context);
         return true;
     }
@@ -220,7 +258,7 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
     }
 
     /**
-     * Se non restano pick possibili, ritorna alla fase TURN.
+     * If no picks are possible, return to the TURN phase.
      */
     @Override
      public boolean nextPhase(GameState context){
@@ -253,3 +291,4 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
     }
 
     }
+

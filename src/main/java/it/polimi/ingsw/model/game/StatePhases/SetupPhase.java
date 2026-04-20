@@ -41,7 +41,7 @@ public class SetupPhase implements GamePhaseBehavior {
     @Override
     public boolean nextPhase(GameState context) {
         context.raiseEvent(new GameEvent(
-                GameEvent.Type.SUCCESSFUL_ACTION,
+                GameEvent.Type.SETUP_COMPLETED,
                 null,
                 "phaseCompleted:SETUP"
         ));

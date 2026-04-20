@@ -1,5 +1,4 @@
 package it.polimi.ingsw.model.game;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.controller.GameConfig;
 import it.polimi.ingsw.model.board.Board;
 import it.polimi.ingsw.model.board.Tile;
@@ -7,6 +6,8 @@ import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.StatePhases.GamePhaseBehavior;
 import it.polimi.ingsw.model.game.StatePhases.SetupPhase;
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.network.JacksonConfig;
+import it.polimi.ingsw.network.dto.GameStateSaveDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +40,14 @@ public class GameState {
     private int currentPlayerOrderIndex = 0;
     private int extraIndex = 0;
 
+    /** Default constructor for Jackson deserialization. */
+    public GameState() {
+        this.players = new ArrayList<>();
+        this.turnOrder = new ArrayList<>();
+        this.orderTileOrder = new ArrayList<>();
+        this.observers = new ArrayList<>();
+    }
+
     /**
      * Constructor: Initializes the game environment.
      * @param players The list of players provided from the login handler.
@@ -57,7 +66,16 @@ public class GameState {
         this.players = new ArrayList<>(players);
         this.turnOrder = new ArrayList<>();
         this.orderTileOrder = new ArrayList<>(this.players);
+        this.observers = new ArrayList<>();
         setPhase(new SetupPhase());
+    }
+
+    /**
+     * Restores the phase without calling execute().
+     * Used during save/load to avoid side effects.
+     */
+    public void restorePhase(GamePhaseBehavior phase) {
+        this.currentPhase = phase;
     }
 
     // ==========================================
@@ -119,6 +137,10 @@ public class GameState {
         return this.currentTileIndex;
     }
 
+    public String getGameId() {
+        return gameId;
+    }
+
     /**
      * Updates the game Age.
      * @param age The new Age to set.
@@ -152,7 +174,7 @@ public class GameState {
             return false;
         }
         this.currentPhase = newPhase;
-        // Autostart della fase non appena viene settata!
+        // Autostart the phase as soon as it is set!
         return this.currentPhase.execute(this);
     }
 
@@ -273,19 +295,40 @@ public class GameState {
         return true;
     }
 
+    // ==========================================
+    //  Public accessors for save/load
+    // ==========================================
+
+    /** @return The current player index in turnOrder. */
+    public int getCurrentPlayerIndex() { return currentPlayerIndex; }
+
+    /** @return The current player index in orderTileOrder. */
+    public int getCurrentPlayerOrderIndex() { return currentPlayerOrderIndex; }
+
+    public void setConfig(GameConfig config) { this.config = config; }
+    public void setPlayers(List<Player> players) { this.players = new ArrayList<>(players); }
+    public void setBoard(Board board) { this.board = board; }
+    public void setDeck(Decks deck) { this.deck = deck; }
+    public void setTurnOrder(List<Player> turnOrder) { this.turnOrder = new ArrayList<>(turnOrder); }
+    /** Restores orderTileOrder directly, without connected-first sorting. */
+    public void restoreOrderTileOrder(List<Player> order) { this.orderTileOrder = new ArrayList<>(order); }
+    public void setGameId(String gameId) { this.gameId = gameId; }
+    public void setCurrentPlayerIndex(int idx) { this.currentPlayerIndex = idx; }
+    public void setCurrentPlayerOrderIndex(int idx) { this.currentPlayerOrderIndex = idx; }
+
     /**
-     * Registra un osservatore per le notifiche {@link GameEvent}.
+     * Registers an observer for {@link GameEvent} notifications.
      *
-     * @param observer callback osservatore; valori null vengono ignorati
+     * @param observer observer callback; null values are ignored
      */
     public void addObserver(GameStateObserver observer) {
         if (observer != null) observers.add(observer);
     }
 
     /**
-     * Pubblica un evento a tutti gli osservatori registrati.
+     * Publishes an event to all registered observers.
      *
-     * @param event evento da notificare; null viene ignorato
+     * @param event event to notify; null is ignored
      */
     public void raiseEvent(GameEvent event) {
         if (event == null) return;
@@ -296,18 +339,15 @@ public class GameState {
     }
     private void saveState() {
         try {
-            ObjectMapper mapper = new ObjectMapper();
             File file = new File("saves/" + this.gameId + ".json");
-            mapper.writeValue(file, this);
+            File parent = file.getParentFile();
+            if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                throw new IOException("Unable to create save directory");
+            }
+            JacksonConfig.mapper().writeValue(file, GameStateSaveDTO.from(this));
         } catch (IOException e) {
-            System.err.println("Errore durante il salvataggio: " + e.getMessage());
+            System.err.println("Error during save: " + e.getMessage());
         }
-    }
-    /**
-     * Emette un evento di azione riuscita per aggiornare le view osservatrici.
-     */
-    private void raiseSuccessfulAction(Player player, String actionName) {
-        raiseEvent(new GameEvent(GameEvent.Type.SUCCESSFUL_ACTION, player, actionName));
     }
 
     // ==========================================
@@ -389,10 +429,10 @@ public class GameState {
     /**
      * Publishes a trigger: for each active player (orderTileOrder),
      * activates all buildings that match the given trigger key.
-     * Questo meccanismo e distinto dal broadcast error/event via {@link #raiseEvent(GameEvent)}.
+     * This mechanism is distinct from error/event broadcast via {@link #raiseEvent(GameEvent)}.
      *
      * @param key The trigger key (e.g. END_TURN, HUNTER_EVENT, etc.)
-     * @return true se il trigger viene iterato correttamente, false su input non valido
+     * @return true if the trigger is iterated correctly, false on invalid input
      */
     public boolean publishTrigger(TriggerKey key) {
         if (key == null || orderTileOrder == null) {
@@ -427,7 +467,7 @@ public class GameState {
     public boolean reintegratePlayer(Player player) {
         if (player == null) return false;
         if (!orderTileOrder.contains(player)) {
-            throw new IllegalStateException("Player non riconosciuto");
+            throw new IllegalStateException("Unknown player");
         }
         player.setConnected(true);
         return true;

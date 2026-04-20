@@ -23,8 +23,8 @@ import java.util.Optional;
 public class StartTurnPhase implements GamePhaseBehavior {
 
     /**
-     * Esegue la logica di start turno: refill carte, gestione cambio era,
-     * bonus/malus cibo e trigger START_TURN.
+     * Executes the start turn logic: refill cards, manage era change,
+     * food bonus/malus and trigger START_TURN.
      */
     @Override
     public boolean execute(GameState context) {
@@ -71,8 +71,8 @@ public class StartTurnPhase implements GamePhaseBehavior {
     }
 
     /**
-     * Permette al giocatore corrente in ordine offerta di occupare una tile.
-     * In caso di turno errato notifica prima un {@link GameEvent} e poi lancia
+     * Allows the current player in offer order to occupy a tile.
+     * In case of invalid turn, first notifies a {@link GameEvent} and then throws
      * {@link IllegalMoveException}.
      */
     @Override
@@ -93,6 +93,7 @@ public class StartTurnPhase implements GamePhaseBehavior {
             throw new IllegalMoveException("Tile already occupied");
         }
         targetTile.occupy(player);
+        context.raiseEvent(new GameEvent(GameEvent.Type.TILE_OCCUPIED, player, "Tile occupied"));
         boolean hasNextPlayer = context.nextPlayerInTurnOrderTile();
         if (!hasNextPlayer) {
             context.updateTurnOrder();
@@ -102,10 +103,15 @@ public class StartTurnPhase implements GamePhaseBehavior {
     }
 
     /**
-     * Transizione verso la fase TURN.
+     * Transition to the TURN phase.
      */
     @Override
     public boolean nextPhase(GameState context){
+            context.raiseEvent(new GameEvent(
+                    GameEvent.Type.START_TURN_COMPLETED,
+                    null,
+                    "phaseCompleted:START_TURN"
+            ));
             context.setPhase(new TurnPhase());
             return true;
     }

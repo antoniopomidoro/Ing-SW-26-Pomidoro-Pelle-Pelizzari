@@ -135,4 +135,13 @@ public class Tile {
     public int getFoodBonus() {
         return foodBonus;
     }
+
+    // --- Setters for save/load restoration ---
+    public void setFoodBonus(int foodBonus) { this.foodBonus = foodBonus; }
+    public void setUpperPicks(int upperPicks) { this.upperPicks = upperPicks; }
+    public void setBottomPicks(int bottomPicks) { this.bottomPicks = bottomPicks; }
+    public void setOccupier(Player p) {
+        this.occupier = p;
+        this.isOccupied = (p != null);
+    }
 }

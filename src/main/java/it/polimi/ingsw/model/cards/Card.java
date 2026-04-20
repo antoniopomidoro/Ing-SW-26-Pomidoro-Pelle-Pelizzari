@@ -38,7 +38,10 @@ import java.util.*;
 public abstract class Card{
     protected Age age;
     protected int minPlayers = 0;
-    protected final String instanceId = UUID.randomUUID().toString();
+    protected String instanceId = UUID.randomUUID().toString();
+
+    /** Numeric ID populated from JSON, used by the client to map card → PNG image. */
+    protected int cardId;
 
     public enum CardCategory {
         CHARACTER,
@@ -47,7 +50,7 @@ public abstract class Card{
     }
 
     /**
-     * Categoria semantica della carta usata per serializzazione DTO e rendering client.
+     * Semantic category of the card used for DTO serialization and client rendering.
      */
     public abstract CardCategory getCategory();
 
@@ -89,6 +92,11 @@ public abstract class Card{
 
     public String getInstanceId() {
         return instanceId;
+    }
+
+    /** @return Numeric card ID from JSON, used for client-side image association. */
+    public int getCardId() {
+        return cardId;
     }
 
     /**

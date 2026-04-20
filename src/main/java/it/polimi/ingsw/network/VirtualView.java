@@ -54,12 +54,12 @@ public abstract class VirtualView implements GameStateObserver {
 
         GameStateDTO snapshot = null;
 
-        // Per SUCCESSFUL_ACTION: includi lo snapshot completo del GameState
-        if (event.getType() == GameEvent.Type.SUCCESSFUL_ACTION && gameController != null) {
+        // For each event that modifies the state: include the full GameState snapshot
+        if (event.getType().requiresSave() && gameController != null) {
             snapshot = GameStateDTO.from(gameController.getGameState());
         }
 
-        // TODO-NET-403 [privacy]: filtrare eventuali dati sensibili/non pubblici prima di inviare al singolo client.
+        // TODO-NET-403 [privacy]: filter any sensitive/non-public data before sending to the individual client.
 
         GameEventDTO dto = new GameEventDTO(
                 event.getType() != null ? event.getType().name() : null,
