@@ -4,14 +4,16 @@ import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.network.dto.GameStateDTO;
 
 public class CLIinterface implements UserInterface, Runnable{
+
+
     private ClientManager user;
     private boolean going;
     GameEventDTO state;
     GameEventDTO buddyState;
     public CLIinterface(ClientManager user) {
         this.user = user;
-
         going = true;
+        new Thread(new CLIinsputSender(user,this)).start();
 
     }
 
@@ -22,8 +24,8 @@ public class CLIinterface implements UserInterface, Runnable{
     }
 
     @Override
-    public boolean update() {
-        state = user.GetState();
+    public boolean update(GameEventDTO state) {
+        this.state = state;
         notifyAll();
         return false;
     }
@@ -41,12 +43,17 @@ public class CLIinterface implements UserInterface, Runnable{
 
 
     public boolean print(){
+
         return true;
 
     }
     public boolean stop(){
         going = false;
         return true;
+    }
+
+    public GameEventDTO getState() {
+        return state;
     }
 
 }
