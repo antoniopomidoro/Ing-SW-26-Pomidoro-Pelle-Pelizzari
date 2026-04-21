@@ -6,6 +6,7 @@ import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.GameState;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
+import it.polimi.ingsw.network.socket.SocketServer;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,10 +26,16 @@ public class ServerManager {
     private final Map<String, GameController> activeGames = new ConcurrentHashMap<>();
     private final Map<String, Map<Totem, VirtualView>> viewRegistry = new ConcurrentHashMap<>();
     private final Random random = new Random();
+    private final NUDEqueue NUDEqueue;
 
     public ServerManager(){
         NUDEPinger pinger = new NUDEPinger(this);
         Thread pingerThread = new Thread(pinger, "Pinger");
+        Thread socketServer = new Thread(new SocketServer(this), "SocketServer");
+         NUDEqueue = new NUDEqueue(this);
+        Thread NUDEqueueThread = new Thread( NUDEqueue, "NUDEqueue");
+        socketServer.start();
+        NUDEqueueThread.start();
         pingerThread.start();
         loadSavedGames();
     }
@@ -247,4 +254,9 @@ public class ServerManager {
     public Map<String, Map<Totem, VirtualView>> getViewRegistry() {
         return viewRegistry;
     }
+
+    public NUDEqueue GetQueue(){
+        return NUDEqueue;
+    }
+
 }

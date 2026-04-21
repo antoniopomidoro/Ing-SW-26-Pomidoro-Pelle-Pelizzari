@@ -1,6 +1,7 @@
 package it.polimi.ingsw.view;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -19,18 +20,16 @@ public class NUDESender {
          * @return A regularly formatted JSON string
          */
         public static String build(ActionType action, int index, String nick, String idGame, String idPlayer, String cardId) {
-            ObjectNode rootNode = mapper.createObjectNode();
-            rootNode.put("action", action.name());
-            rootNode.put("index", index);
-            rootNode.put("nick", nick);
-            rootNode.put("idGame", idGame);
-            rootNode.put("idPlayer", idPlayer);
-            rootNode.put("cardId", cardId);
-            return rootNode.toString();
+            actionDTO fabrizio = new actionDTO( action,  index,  nick,  idGame, idPlayer,  cardId);
+            String NUDE;
+            try { NUDE = mapper.writeValueAsString(fabrizio);}
+            catch (JsonProcessingException e) {
+                return null;
+            }
+
+            return NUDE;
         }
 
-        public static String build(ActionType action, int index, String nick, String idGame, String idPlayer) {
-            return build(action, index, nick, idGame, idPlayer, null);
-        }
+
     }
 
