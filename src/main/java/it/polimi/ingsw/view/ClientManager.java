@@ -10,7 +10,7 @@ public class ClientManager {
 
     public ClientManager(boolean gui, boolean socket){
         if(gui){
-            userInterface = new GUIinterface();
+            userInterface = new GUInterface();
         }else{
              userInterface = new CLIinterface(this);
         }
