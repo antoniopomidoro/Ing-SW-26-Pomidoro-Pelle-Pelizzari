@@ -2,6 +2,7 @@ package it.polimi.ingsw.model.game.StatePhases;
 
 import it.polimi.ingsw.model.board.Board;
 import it.polimi.ingsw.model.board.OrderTile;
+import it.polimi.ingsw.model.board.Tile;
 import it.polimi.ingsw.model.cards.Card;
 import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.*;
@@ -87,7 +88,7 @@ public class StartTurnPhase implements GamePhaseBehavior {
             context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player, "Not your turn"));
             throw new IllegalMoveException("Not your turn");
         }
-        var targetTile = board.getTiles().getTile(index);
+        Tile targetTile = board.getTiles().getTile(index);
         if (targetTile.isOccupied()) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ACTION, player, "Tile already occupied"));
             throw new IllegalMoveException("Tile already occupied");

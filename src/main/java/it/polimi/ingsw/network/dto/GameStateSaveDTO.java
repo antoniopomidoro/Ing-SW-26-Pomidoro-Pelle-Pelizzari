@@ -160,22 +160,20 @@ public class GameStateSaveDTO {
 
         /**
          * Reconstructs the GamePhaseBehavior from this DTO.
-         * For PlayerTurnPhase, resolves Player and Tile references from the restored state.
          */
         public GamePhaseBehavior toPhase(List<Player> players, Board board) {
-            if ("PlayerTurnPhase".equals(phaseName)) {
-                Player active = players.stream()
-                        .filter(p -> p.getId() == activePlayerTotem)
-                        .findFirst()
-                        .orElseThrow(() -> new IllegalStateException(
-                                "Cannot find player for totem: " + activePlayerTotem));
-                Tile tile = board.getTiles().getTiles().get(activeTileIndex);
-                return new PlayerTurnPhase(active, tile, upperPicks, bottomPicks);
+            if (phaseName == null) {
+                throw new IllegalArgumentException("phaseName cannot be null");
             }
-            return GamePhase.valueOf(phaseName).create();
+            PhaseRestoreContext ctx = new PhaseRestoreContext(this, players, board);
+            return GamePhase.valueOf(phaseName).restore(ctx);
         }
 
         public String getPhaseName() { return phaseName; }
+        public Totem getActivePlayerTotem() { return activePlayerTotem; }
+        public int getActiveTileIndex() { return activeTileIndex; }
+        public int getUpperPicks() { return upperPicks; }
+        public int getBottomPicks() { return bottomPicks; }
     }
 
     // ==========================================

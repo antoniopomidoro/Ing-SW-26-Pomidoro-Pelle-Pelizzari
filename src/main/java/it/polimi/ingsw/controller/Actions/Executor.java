@@ -23,7 +23,7 @@ import it.polimi.ingsw.network.VirtualView;
         @JsonSubTypes.Type(value = ExecBottomBuilding.class,name="BOTTOM_BUILDING")
 })
 
-//executor is an interface that will be implemented by the controller and will be used to execute the commands received from the client
+// executor is an interface that will be implemented by the controller and will be used to execute the commands received from the client
 public abstract class Executor {
 
 @JsonProperty
