@@ -87,7 +87,7 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
     }
 
     public Boolean NUDECommand(String json) throws RemoteException {
-        serverManager.GetQueue().add(json);
+        serverManager.getQueue().add(json);
         return true;
 
     }

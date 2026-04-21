@@ -3,6 +3,7 @@ package it.polimi.ingsw.network.socket;
 
 import it.polimi.ingsw.network.ServerManager;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.ServerSocket;
 import  java.net.Socket;
 import java.util.ArrayList;
@@ -17,9 +18,9 @@ public class SocketServer implements Runnable{
     private volatile boolean going;
     private final ServerSocket serverSocket;
 
-    public SocketServer(ServerManager s){
+    public SocketServer(ServerManager s)throws ConnectException {
         try{this.serverSocket = new ServerSocket(port);} catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ConnectException("Could not start server on port " + port);
         }
         clients = new ArrayList<>();
         this.serverManager = s;
