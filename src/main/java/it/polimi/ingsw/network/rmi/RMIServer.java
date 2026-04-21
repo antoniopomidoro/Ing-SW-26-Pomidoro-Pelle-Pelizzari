@@ -6,6 +6,7 @@ import it.polimi.ingsw.controller.NUDEAnalyzer;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.LobbyState;
+import it.polimi.ingsw.network.NUDEqueue;
 import it.polimi.ingsw.network.ServerManager;
 
 import java.rmi.RemoteException;
@@ -39,9 +40,9 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
             RMIClientHandler handler = new RMIClientHandler(clientCallback, serverManager);
             return serverManager.joinGame(gameId, playerName, requestedTotem, handler);
         } catch (Exception e) {
-            // TODO: tradurre eccezioni dominio in codici errore RMI per il client.
-            // TODO: distinguere "in attesa lobby" da "join fallita" senza eccezioni generiche.
-            throw new RemoteException("TODO: gestire joinGame con errori dominio tipizzati", e);
+            // TODO: translate domain exceptions into RMI error codes for the client.
+            // TODO: distinguish "waiting in lobby" from "join failed" without generic exceptions.
+            throw new RemoteException("TODO: handle joinGame with typed domain errors", e);
         }
     }
     @Override
@@ -50,9 +51,9 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
             RMIClientHandler handler = new RMIClientHandler(clientCallback, serverManager);
             return serverManager.createGame(playerName, requiredPlayers, requestedTotem, handler);
         } catch (Exception e) {
-            // TODO: tradurre eccezioni dominio in codici errore RMI per il client.
-            // TODO: distinguere "in attesa lobby" da "join fallita" senza eccezioni generiche.
-            throw new RemoteException("TODO: gestire joinGame con errori dominio tipizzati", e);
+            // TODO: translate domain exceptions into RMI error codes for the client.
+            // TODO: distinguish "waiting in lobby" from "join failed" without generic exceptions.
+            throw new RemoteException("TODO: handle joinGame with typed domain errors", e);
         }
     }
 
@@ -60,31 +61,11 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
      * {@inheritDoc}
      */
     @Override
-    public boolean sendNUDECommand(String gameId, String jsonCommand) throws RemoteException {
-        if (gameId == null || gameId.isBlank() || jsonCommand == null || jsonCommand.isBlank()) {
+    public boolean sendNUDECommand(String jsonCommand) throws RemoteException {
+        if (jsonCommand == null || jsonCommand.isBlank()) {
             throw new RemoteException("gameId and jsonCommand cannot be null o blank");
         }
-        GameController controller = serverManager.getGame(gameId);
-        if (controller == null) {
-            throw new RemoteException("Game not found: " + gameId);
-        }
-
-        Executor executor = NUDEAnalyzer.action(jsonCommand);
-        if (executor == null) {
-            throw new RemoteException("invalid command");
-        }
-
-        Player player = controller.getGameState().getPlayers().stream()
-                .filter(p -> p.getId().ordinal() == executor.getIdPlayer())
-                .findFirst()
-                .orElse(null);
-
-        if (player == null) {
-            throw new RemoteException("Player not found");
-        }
-        synchronized (controller) {
-            executor.execute(player, controller);
-        }
+        serverManager.getQueue().add(jsonCommand);
         return true;
     }
 

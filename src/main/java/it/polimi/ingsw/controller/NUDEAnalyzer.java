@@ -25,7 +25,7 @@ public class NUDEAnalyzer {
        }
 
    }
-   public static String asJson(Object object){
+   public static synchronized String asJson(Object object){
         try{
         return  mapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {

@@ -31,10 +31,8 @@ public class ServerManager {
     public ServerManager(){
         NUDEPinger pinger = new NUDEPinger(this);
         Thread pingerThread = new Thread(pinger, "Pinger");
-        Thread socketServer = new Thread(new SocketServer(this), "SocketServer");
-         NUDEqueue = new NUDEqueue(this);
+        NUDEqueue = new NUDEqueue(this);
         Thread NUDEqueueThread = new Thread( NUDEqueue, "NUDEqueue");
-        socketServer.start();
         NUDEqueueThread.start();
         pingerThread.start();
         loadSavedGames();
@@ -170,7 +168,7 @@ public class ServerManager {
         // 3. ERROR CASE (The lobby does not exist)
         throw new IllegalArgumentException("Room " + gameId + " does not exist!");
     }
-    public boolean disconnectPlayer(VirtualView view) {
+    public synchronized boolean disconnectPlayer(VirtualView view) {
         if (view == null) return false;
         if (viewRegistry.get(view.gameId) == null) return false;
         VirtualView deadView = viewRegistry.get(view.gameId).remove(view.getTotem());
@@ -182,7 +180,7 @@ public class ServerManager {
         return true;
     }
 
-    public boolean loadSavedGames(){
+    public synchronized boolean loadSavedGames(){
         Path savesDir = Paths.get("saves");
 
         if (Files.notExists(savesDir)) {
@@ -255,7 +253,7 @@ public class ServerManager {
         return viewRegistry;
     }
 
-    public NUDEqueue GetQueue(){
+    public NUDEqueue getQueue(){
         return NUDEqueue;
     }
 
