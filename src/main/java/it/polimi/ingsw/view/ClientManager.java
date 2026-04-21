@@ -1,5 +1,6 @@
 package it.polimi.ingsw.view;
 
+import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 
 public class ClientManager {
@@ -7,6 +8,7 @@ public class ClientManager {
     private final UserInterface userInterface;
     private GameEventDTO Gamestate;
     private String id;
+    private Totem playerTotem;
 
     public ClientManager(boolean gui, boolean socket){
         if(gui){

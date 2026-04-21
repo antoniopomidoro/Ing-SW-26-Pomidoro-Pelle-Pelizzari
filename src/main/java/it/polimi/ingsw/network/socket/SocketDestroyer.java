@@ -15,11 +15,11 @@ public class SocketDestroyer implements Runnable{
         while(true){
             this.clients = dad.getClients();
             for (SocketClientHandler client : clients) {
-                if(client.GetLastPing().plusSeconds(10).isBefore(clock.instant())){
+                synchronized(client.GetLastPing()){if(client.GetLastPing().plusSeconds(10).isBefore(clock.instant())){
                     client.stop();
                     serverManager.disconnectPlayer(client);
                     clients.remove(client);
-                }
+                }}
             }
         try{
         wait(5000);} catch (InterruptedException e) {
