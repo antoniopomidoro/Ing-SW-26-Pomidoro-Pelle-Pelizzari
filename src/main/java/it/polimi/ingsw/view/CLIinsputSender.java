@@ -16,20 +16,29 @@ public class CLIinsputSender implements Runnable{
 
     @Override
     public void run() {
-        int operation;
+        String operation;
         Scanner sc = new Scanner(System.in);
+        String[] elements;
         while(going){
-            operation = sc.nextInt();
-            switch (operation){
-                case 1:
+            operation = sc.nextLine();
+            elements = operation.split(" ");
 
-                case 2:
 
-                case 3:
+            switch (elements[0].toLowerCase()){
+                case "topcard":
+                    pickTopCard(Integer.parseInt(elements[1]));
 
-                case 4:
+                case "bottomcard":
+                    pickBottomCard(Integer.parseInt(elements[1]));
 
-                case 5:
+                case "topbuild":
+                    pickTopBuilding(Integer.parseInt(elements[1]));
+
+                case "bottombuild":
+                    pickBottomBuilding(Integer.parseInt(elements[1]));
+
+                case "tile":
+                    pickTile(Integer.parseInt(elements[1]));
 
                 default:
             }
@@ -45,6 +54,32 @@ public class CLIinsputSender implements Runnable{
          user.GetConnection().send(message);
         return true;
     }
+
+    public boolean pickBottomCard(int index){
+        String message = NUDESender.build(ActionType.BOTTOM_CARD,index,user.getNickname(),user.getId(),user.getId(),cli.getState().getSnapshot().getBoard().getTopCards().get(index).getInstanceId());
+        user.GetConnection().send(message);
+        return true;
+    }
+
+    public boolean pickTopBuilding(int index){
+        String message = NUDESender.build(ActionType.TOP_BUILDING,index,user.getNickname(),user.getId(),user.getId(),cli.getState().getSnapshot().getBoard().getTopCards().get(index).getInstanceId());
+        user.GetConnection().send(message);
+        return true;
+    }
+
+    public boolean pickBottomBuilding(int index){
+        String message = NUDESender.build(ActionType.BOTTOM_BUILDING,index,user.getNickname(),user.getId(),user.getId(),cli.getState().getSnapshot().getBoard().getTopCards().get(index).getInstanceId());
+        user.GetConnection().send(message);
+        return true;
+    }
+
+    public boolean pickTile(int index){
+        String message = NUDESender.build(ActionType.TILE,index,user.getNickname(),user.getId(),user.getId(),cli.getState().getSnapshot().getBoard().getTopCards().get(index).getInstanceId());
+        user.GetConnection().send(message);
+        return true;
+    }
+
+
 
 
 
