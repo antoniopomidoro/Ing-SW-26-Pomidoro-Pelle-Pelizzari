@@ -580,7 +580,7 @@ public class BoardTest {
         List<Card> cards = new ArrayList<>();
         List<Building> buildings = new ArrayList<>();
         Decks decks = new Decks(cards, buildings);
-        GameState state = new GameState(players, gc, board, decks);
+        GameState state = new GameState(players, gc, board, decks, "1");
         int size = 5;
         generateBottomCards(size);
         boolean ret = board.discardBottomCards(state);
@@ -598,7 +598,7 @@ public class BoardTest {
         List<Card> cards = new ArrayList<>();
         List<Building> buildings = new ArrayList<>();
         Decks decks = new Decks(cards, buildings);
-        GameState state = new GameState(players, gc, board, decks);
+        GameState state = new GameState(players, gc, board, decks, "1");
         boolean ret = board.discardBottomCards(state);
 
         assertTrue(ret);

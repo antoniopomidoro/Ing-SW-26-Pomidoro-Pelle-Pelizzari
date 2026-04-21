@@ -44,7 +44,7 @@ public class BuildingTest {
         TileSet t = new TileSet(tiles);
         Board board = new Board(ot, t);
         Decks decks = new Decks(cards, buildings);
-        state = new GameState(players, gc, board, decks);
+        state = new GameState(players, gc, board, decks, "1");
     }
 
     /*
