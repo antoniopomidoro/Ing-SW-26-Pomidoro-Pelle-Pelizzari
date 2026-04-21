@@ -3,7 +3,7 @@ package it.polimi.ingsw.view;
 import java.io.IOException;
 import java.net.Socket;
 
-public class SocketClient {
+public class SocketClient implements ConnectionProtocol {
     private String host = "127.0.0.1";
     private int port= 1969;
     private final Socket socket;
