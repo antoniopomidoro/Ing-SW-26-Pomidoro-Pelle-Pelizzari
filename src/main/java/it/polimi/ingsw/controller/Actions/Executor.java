@@ -47,10 +47,6 @@ protected String cardId;
         return false;
     }
 
-    public boolean connection(ServerManager server, VirtualView view){
-        return false;
-    }
-
 
 
 
