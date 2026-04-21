@@ -145,5 +145,7 @@ public abstract class Card{
         return true;
     }
 
+    public String toString() {return null;}
+
 
 }

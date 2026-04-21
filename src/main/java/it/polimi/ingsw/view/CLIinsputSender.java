@@ -41,6 +41,7 @@ public class CLIinsputSender implements Runnable{
                     pickTile(Integer.parseInt(elements[1]));
 
                 default:
+                    System.out.println("invalid command please try again");
             }
 
         }

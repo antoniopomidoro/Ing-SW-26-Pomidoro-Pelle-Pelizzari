@@ -182,8 +182,8 @@ public class GameStateDTO {
         private int food;
         private int pp;
         private boolean connected;
-        private List<CardDTO> cards;
-        private List<BuildingDTO> buildings;
+        private List<Card> cards;
+        private List<Building> buildings;
         private Map<String, Integer> characterCounts;
         private int stars;
         private int buildingDiscount;
@@ -196,8 +196,8 @@ public class GameStateDTO {
                 @JsonProperty("food") int food,
                 @JsonProperty("pp") int pp,
                 @JsonProperty("connected") boolean connected,
-                @JsonProperty("cards") List<CardDTO> cards,
-                @JsonProperty("buildings") List<BuildingDTO> buildings,
+                @JsonProperty("cards") List<Card> cards,
+                @JsonProperty("buildings") List<Building> buildings,
                 @JsonProperty("characterCounts") Map<String, Integer> characterCounts,
                 @JsonProperty("stars") int stars,
                 @JsonProperty("buildingDiscount") int buildingDiscount,
@@ -208,8 +208,8 @@ public class GameStateDTO {
             this.food = food;
             this.pp = pp;
             this.connected = connected;
-            this.cards = cards == null ? List.of() : cards;
-            this.buildings = buildings == null ? List.of() : buildings;
+            this.cards = cards;
+            this.buildings = buildings;
             this.characterCounts = characterCounts == null ? Map.of() : characterCounts;
             this.stars = stars;
             this.buildingDiscount = buildingDiscount;
@@ -228,8 +228,8 @@ public class GameStateDTO {
                 this.food = 0;
                 this.pp = 0;
                 this.connected = false;
-                this.cards = List.of();
-                this.buildings = List.of();
+                this.cards = null;
+                this.buildings = null;
                 this.characterCounts = Map.of();
                 this.stars = 0;
                 this.buildingDiscount = 0;
@@ -237,13 +237,7 @@ public class GameStateDTO {
                 return;
             }
 
-            List<CardDTO> cards = player.getCards() == null
-                    ? List.of()
-                    : player.getCards().stream().map(CardDTO::new).toList();
 
-            List<BuildingDTO> buildings = player.getBuildings() == null
-                    ? List.of()
-                    : player.getBuildings().stream().map(BuildingDTO::new).toList();
 
             Map<String, Integer> characterCounts = player.getStats() == null
                     ? Map.of()
@@ -265,8 +259,8 @@ public class GameStateDTO {
             this.food = player.getFood();
             this.pp = player.getPP();
             this.connected = player.isConnected();
-            this.cards = cards;
-            this.buildings = buildings;
+            this.cards = player.getCards();
+            this.buildings = player.getBuildings();
             this.characterCounts = characterCounts;
             this.stars = stars;
             this.buildingDiscount = buildingDiscount;
@@ -278,8 +272,8 @@ public class GameStateDTO {
         public int getFood() { return food; }
         public int getPp() { return pp; }
         public boolean isConnected() { return connected; }
-        public List<CardDTO> getCards() { return cards; }
-        public List<BuildingDTO> getBuildings() { return buildings; }
+        public List<Card> getCards() { return cards; }
+        public List<Building> getBuildings() { return buildings; }
         public Map<String, Integer> getCharacterCounts() { return characterCounts; }
         public int getStars() { return stars; }
         public int getBuildingDiscount() { return buildingDiscount; }
@@ -293,24 +287,24 @@ public class GameStateDTO {
     public static class BoardDTO implements Serializable {
         private static final long serialVersionUID = 1L;
 
-        private final List<CardDTO> topCards;
-        private final List<CardDTO> bottomCards;
-        private final List<BuildingDTO> topBuildings;
-        private final List<BuildingDTO> bottomBuildings;
-        private final List<TileDTO> tiles;
+        private final List<Card> topCards;
+        private final List<Card> bottomCards;
+        private final List<Building> topBuildings;
+        private final List<Building> bottomBuildings;
+        private final List<Tile> tiles;
 
         @JsonCreator
         public BoardDTO(
-                @JsonProperty("topCards") List<CardDTO> topCards,
-                @JsonProperty("bottomCards") List<CardDTO> bottomCards,
-                @JsonProperty("topBuildings") List<BuildingDTO> topBuildings,
-                @JsonProperty("bottomBuildings") List<BuildingDTO> bottomBuildings,
-                @JsonProperty("tiles") List<TileDTO> tiles
+                @JsonProperty("topCards") List<Card> topCards,
+                @JsonProperty("bottomCards") List<Card> bottomCards,
+                @JsonProperty("topBuildings") List<Building> topBuildings,
+                @JsonProperty("bottomBuildings") List<Building> bottomBuildings,
+                @JsonProperty("tiles") List<Tile> tiles
         ) {
-            this.topCards = topCards == null ? new ArrayList<>() : new ArrayList<>(topCards);
-            this.bottomCards = bottomCards == null ? new ArrayList<>() : new ArrayList<>(bottomCards);
-            this.topBuildings = topBuildings == null ? new ArrayList<>() : new ArrayList<>(topBuildings);
-            this.bottomBuildings = bottomBuildings == null ? new ArrayList<>() : new ArrayList<>(bottomBuildings);
+            this.topCards = topCards;
+            this.bottomCards = bottomCards ;
+            this.topBuildings = topBuildings ;
+            this.bottomBuildings = bottomBuildings ;
             this.tiles = tiles == null ? new ArrayList<>() : new ArrayList<>(tiles);
         }
 
@@ -320,34 +314,30 @@ public class GameStateDTO {
          * @param board the source board
          */
         public BoardDTO(Board board) {
-            this(
-                    board == null ? List.of() : board.getTopCards().stream().map(CardDTO::new).toList(),
-                    board == null ? List.of() : board.getBottomCards().stream().map(CardDTO::new).toList(),
-                    board == null ? List.of() : board.getTopBuildings().stream().map(BuildingDTO::new).toList(),
-                    board == null ? List.of() : board.getBottomBuildings().stream().map(BuildingDTO::new).toList(),
-                    board == null ? List.of() : IntStream.range(0, board.getTiles().getTiles().size())
-                            .mapToObj(index -> new TileDTO(index, board.getTiles().getTiles().get(index)))
-                            .toList()
-            );
+            this.topCards = board.getTopCards();
+            this.bottomBuildings = board.getBottomBuildings();
+            this.bottomCards = board.getBottomCards();
+            this.topBuildings = board.getTopBuildings();
+            this.tiles = board.getTiles().getTiles();
          }
 
-        public List<CardDTO> getTopCards() {
+        public List<Card> getTopCards() {
             return Collections.unmodifiableList(topCards);
         }
 
-        public List<CardDTO> getBottomCards() {
+        public List<Card> getBottomCards() {
             return Collections.unmodifiableList(bottomCards);
         }
 
-        public List<BuildingDTO> getTopBuildings() {
+        public List<Building> getTopBuildings() {
             return Collections.unmodifiableList(topBuildings);
         }
 
-        public List<BuildingDTO> getBottomBuildings() {
+        public List<Building> getBottomBuildings() {
             return Collections.unmodifiableList(bottomBuildings);
         }
 
-        public List<TileDTO> getTiles() {
+        public List<Tile> getTiles() {
             return Collections.unmodifiableList(tiles);
         }
     }
