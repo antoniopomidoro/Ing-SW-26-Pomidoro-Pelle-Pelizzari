@@ -1,6 +1,8 @@
-package it.polimi.ingsw.view;
+package it.polimi.ingsw.network.dto;
 
-public class actionDTO {
+import it.polimi.ingsw.view.ActionType;
+
+public class ActionDTO implements DTO{
     private ActionType action;
     private int index;
     private String nick;
@@ -10,7 +12,7 @@ public class actionDTO {
 
 
 
-    public actionDTO(ActionType action, int index, String nick, String idGame, String idPlayer, String cardId) {
+    public ActionDTO(ActionType action, int index, String nick, String idGame, String idPlayer, String cardId) {
         this.action = action;
         this.index = index;
         this.nick = nick;

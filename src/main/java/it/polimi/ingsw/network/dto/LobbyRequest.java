@@ -10,7 +10,7 @@ import java.io.Serializable;
  * Handles both the creation of a new lobby and joining an existing one.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LobbyRequest implements Serializable {
+public class LobbyRequest implements DTO {
     private static final long serialVersionUID = 1L;
 
     public enum Type {

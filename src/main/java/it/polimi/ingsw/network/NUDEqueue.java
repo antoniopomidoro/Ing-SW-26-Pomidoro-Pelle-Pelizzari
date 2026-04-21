@@ -31,7 +31,7 @@ public class NUDEqueue implements Runnable{
             }else{
                 command = commands.removeLast();
                 executor = NUDEAnalyzer.action(command);
-                GameController game = serverManager.getActiveGames().get(String.valueOf(executor.getIdGame()));
+                GameController game = serverManager.getActiveGames().get(executor.getIdGame());
                 Player player = game.getGameState().getPlayers().stream().filter(p -> p.getId().ordinal() == executor.getIdPlayer()).findFirst().orElse(null);
                 executor.execute(player,game);
             }

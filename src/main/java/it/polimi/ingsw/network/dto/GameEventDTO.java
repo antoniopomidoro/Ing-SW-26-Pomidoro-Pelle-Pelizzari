@@ -11,7 +11,7 @@ import java.io.Serializable;
  * Serializable event payload sent to clients.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GameEventDTO implements Serializable {
+public class GameEventDTO implements DTO {
     private static final long serialVersionUID = 1L;
 
     private final String eventType;

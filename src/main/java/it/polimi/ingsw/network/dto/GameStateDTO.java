@@ -28,7 +28,7 @@ import java.util.stream.IntStream;
  * Serializable snapshot of the public game state for network transport.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GameStateDTO implements Serializable {
+public class GameStateDTO {
     private static final long serialVersionUID = 1L;
 
     private final String gameId;

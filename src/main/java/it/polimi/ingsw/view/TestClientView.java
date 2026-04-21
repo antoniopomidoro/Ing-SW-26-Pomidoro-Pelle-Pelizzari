@@ -6,17 +6,17 @@ import it.polimi.ingsw.network.rmi.ClientRMIInterface;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-// Questa classe vive sul Client!
+// This class lives on the Client!
 public class TestClientView extends UnicastRemoteObject implements ClientRMIInterface {
 
-    // Il costruttore DEVE lanciare RemoteException
+    // The constructor MUST throw RemoteException
     public TestClientView() throws RemoteException {
-        super(); // Questo "esporta" la tua view sulla porta RMI in ascolto
+        super(); // This "exports" your view on the listening RMI port
     }
 
     @Override
     public void receiveEvent(GameEventDTO event) throws RemoteException {
-        System.out.println("📢 EVENTO DAL SERVER: " + event.getMessage() +" "+ event.getSnapshot() +" "+ event.getEventType());
+        System.out.println("📢 EVENT FROM SERVER: " + event.getMessage() +" "+ event.getSnapshot() +" "+ event.getEventType());
     }
     @Override
     public void ping() throws RemoteException {

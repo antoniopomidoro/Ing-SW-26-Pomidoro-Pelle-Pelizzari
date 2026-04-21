@@ -3,7 +3,7 @@ package it.polimi.ingsw.view;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import it.polimi.ingsw.network.dto.ActionDTO;
 
 public class NUDESender {
 
@@ -20,7 +20,7 @@ public class NUDESender {
          * @return A regularly formatted JSON string
          */
         public static String build(ActionType action, int index, String nick, String idGame, String idPlayer, String cardId) {
-            actionDTO fabrizio = new actionDTO( action,  index,  nick,  idGame, idPlayer,  cardId);
+            ActionDTO fabrizio = new ActionDTO( action,  index,  nick,  idGame, idPlayer,  cardId);
             String NUDE;
             try { NUDE = mapper.writeValueAsString(fabrizio);}
             catch (JsonProcessingException e) {

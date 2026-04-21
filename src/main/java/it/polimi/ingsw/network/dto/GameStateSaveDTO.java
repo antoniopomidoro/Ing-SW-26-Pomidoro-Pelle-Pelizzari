@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * Unlike {@link GameStateDTO} (network snapshot), this captures the entire
  * model state needed for lossless round-trip serialization via Jackson.
  */
-public class GameStateSaveDTO {
+public class GameStateSaveDTO{
 
     // --- Scalars ---
     private String gameId;

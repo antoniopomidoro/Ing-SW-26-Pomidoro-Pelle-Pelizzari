@@ -90,8 +90,8 @@ public class Player {
     }
 
     public boolean payFood(int amount) {
-        if(amount < 0) {
-            amount = 0;
+        if(amount < 0 || amount > food) {
+            throw new IllegalArgumentException("Invalid food amount to pay");
         }
         this.food -= amount;
         return true;

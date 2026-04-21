@@ -29,12 +29,18 @@ public class ServerManager {
     private final NUDEqueue NUDEqueue;
 
     public ServerManager(){
-        NUDEPinger pinger = new NUDEPinger(this);
-        Thread pingerThread = new Thread(pinger, "Pinger");
+        this(true);
+    }
+
+    ServerManager(boolean startBackgroundThreads){
         NUDEqueue = new NUDEqueue(this);
-        Thread NUDEqueueThread = new Thread( NUDEqueue, "NUDEqueue");
-        NUDEqueueThread.start();
-        pingerThread.start();
+        if (startBackgroundThreads) {
+            NUDEPinger pinger = new NUDEPinger(this);
+            Thread pingerThread = new Thread(pinger, "Pinger");
+            Thread NUDEqueueThread = new Thread(NUDEqueue, "NUDEqueue");
+            NUDEqueueThread.start();
+            pingerThread.start();
+        }
         loadSavedGames();
     }
     /**
