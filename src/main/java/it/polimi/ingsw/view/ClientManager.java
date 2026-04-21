@@ -6,9 +6,11 @@ import it.polimi.ingsw.network.dto.GameEventDTO;
 public class ClientManager {
     private final ConnectionProtocol Connection;
     private final UserInterface userInterface;
-    private GameEventDTO Gamestate;
+
+
     private String id;
     private Totem playerTotem;
+    private String nickname;
 
     public ClientManager(boolean gui, boolean socket){
         if(gui){
@@ -25,21 +27,27 @@ public class ClientManager {
 
 
 
-
-
-    public boolean Update(GameEventDTO event){
-        Gamestate = event;
-        return true;
+    public ConnectionProtocol GetConnection(){
+        return Connection;
     }
 
-    public GameEventDTO GetState(){
-        return Gamestate;
+    public UserInterface getUser(){
+        return userInterface;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Totem getPlayerTotem() {
+        return playerTotem;
+    }
+
+    public String getNickname() {
+        return nickname;
     }
 
 
-    public boolean SendCommand(){
-        //todo
-        return true;
-    }
+
 
 }

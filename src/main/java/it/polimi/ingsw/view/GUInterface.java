@@ -4,7 +4,7 @@ import it.polimi.ingsw.network.dto.GameEventDTO;
 
 public class GUInterface implements UserInterface{
     @Override
-    public boolean update() {
+    public boolean update(GameEventDTO state) {
         return false;
     }
 
