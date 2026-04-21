@@ -4,8 +4,10 @@ import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.GameStateObserver;
 import it.polimi.ingsw.model.player.Totem;
+import it.polimi.ingsw.network.dto.DTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.network.dto.GameStateDTO;
+import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
 
 /**
  * Base class for network-facing views that observe the game state and relay events to clients.
@@ -70,38 +72,28 @@ public abstract class VirtualView implements GameStateObserver {
 
         sendToClient(dto);
     }
-
-    /**
-     * Sends a full game-state snapshot to the client.
-     *
-     * @return {@code true} if the snapshot was sent, {@code false} if no controller is attached
-     */
-    public boolean sendGameSnapshot(){
-        if (gameController == null) {
-            return false;
-        }
-        GameStateDTO snapshot = GameStateDTO.from(gameController.getGameState());
-        GameEventDTO syncDto = new GameEventDTO(
-                "SYNC",
-                null,
-                "Game state synchronization",
-                snapshot
-        );
-        sendToClient(syncDto);
-        return true;
-    }
     /**
      * Sends a lobby progress update to the client.
      *
      * @param currentPlayers current number of connected players
      * @param requiredPlayers total players required to start the match
      */
-    public void sendLobbyUpdate(int currentPlayers, int requiredPlayers) {
-        GameEventDTO lobbyDto = new GameEventDTO(
-                "LOBBY_UPDATE",
-                this.totem,
-                "Waiting for players... (" + currentPlayers + "/" + requiredPlayers + ")",
-                null
+    public void sendLobbyUpdate(LobbyState lobbyState, int currentPlayers, int requiredPlayers) {
+        LobbyUpdateDTO lobbyDto = new LobbyUpdateDTO(
+                lobbyState,
+                gameId,
+                currentPlayers,
+                requiredPlayers
+        );
+
+        sendToClient(lobbyDto);
+    }
+    public void sendLobbyUpdate(LobbyState lobbyState) {
+        GameStateDTO snapshot = GameStateDTO.from(gameController.getGameState());
+        LobbyUpdateDTO lobbyDto = new LobbyUpdateDTO(
+                lobbyState,
+                gameId,
+                snapshot
         );
 
         sendToClient(lobbyDto);
@@ -112,7 +104,7 @@ public abstract class VirtualView implements GameStateObserver {
      *
      * @param dto event payload to send
      */
-    protected abstract void sendToClient(GameEventDTO dto);
+    protected abstract void sendToClient(DTO dto);
 
     protected abstract void ping();
 

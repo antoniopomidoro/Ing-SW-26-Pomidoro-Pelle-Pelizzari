@@ -15,6 +15,6 @@ public interface ClientRMIInterface extends Remote {
      * @param event event payload
      * @throws RemoteException if the remote call fails
      */
-    void receiveEvent(GameEventDTO event) throws RemoteException;
+    void receiveEvent(String event) throws RemoteException;
     void ping() throws RemoteException;
 }

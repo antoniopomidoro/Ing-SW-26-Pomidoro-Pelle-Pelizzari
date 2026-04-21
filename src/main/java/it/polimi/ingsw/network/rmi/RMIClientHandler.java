@@ -1,7 +1,10 @@
 package it.polimi.ingsw.network.rmi;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import it.polimi.ingsw.network.JacksonConfig;
 import it.polimi.ingsw.network.ServerManager;
 import it.polimi.ingsw.network.VirtualView;
+import it.polimi.ingsw.network.dto.DTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 
 import java.rmi.RemoteException;
@@ -23,16 +26,17 @@ public class RMIClientHandler extends VirtualView {
     }
 
     @Override
-    protected void sendToClient(GameEventDTO dto) {
+    protected void sendToClient(DTO dto) {
         if (dto == null) {
             return;
         }
-
         try {
-            clientStub.receiveEvent(dto);
+            clientStub.receiveEvent(JacksonConfig.mapper().writeValueAsString(dto));
         } catch (RemoteException e) {
             serverManager.disconnectPlayer(this);
             System.err.println("[RMI] sending failed to player " + totem + ": " + e.getMessage());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
     @Override

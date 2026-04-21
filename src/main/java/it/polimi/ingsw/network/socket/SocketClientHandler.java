@@ -10,6 +10,7 @@ import it.polimi.ingsw.controller.NUDEAnalyzer;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.network.ServerManager;
 import it.polimi.ingsw.network.VirtualView;
+import it.polimi.ingsw.network.dto.DTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 import java.time.Clock;
 import java.time.Instant;
@@ -61,7 +62,7 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
     }
 
     @Override
-    protected synchronized void sendToClient(GameEventDTO dto) {
+    protected synchronized void sendToClient(DTO dto) {
         try{String payload = NUDEAnalyzer.asJson(dto);
         if (payload != null) {
             client.getOutputStream().write((payload + "\n").getBytes(StandardCharsets.UTF_8));

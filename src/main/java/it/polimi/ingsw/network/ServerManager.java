@@ -81,7 +81,7 @@ public class ServerManager {
 
 
         // Notify the creator that they are waiting
-        view.sendLobbyUpdate(pending.getCurrentPlayerCount(), pending.getRequiredPlayers());
+        view.sendLobbyUpdate(LobbyState.WAITING ,pending.getCurrentPlayerCount(), pending.getRequiredPlayers());
 
         return LobbyState.WAITING;
     }
@@ -131,7 +131,7 @@ public class ServerManager {
             view.setGameController(controller);
             view.setGameId(gameId);
             state.addObserver(view);
-            view.sendGameSnapshot();
+            view.sendLobbyUpdate(LobbyState.REJOIN);
             return LobbyState.REJOIN;
         }
 
@@ -153,7 +153,7 @@ public class ServerManager {
                     VirtualView vv = entry.getValue();
                     vv.setGameController(controller);
                     controller.getGameState().addObserver(vv);
-                    vv.sendGameSnapshot();
+                    vv.sendLobbyUpdate(LobbyState.STARTING_GAME);
                 }
 
                 activeGames.put(gameId, controller);
@@ -166,7 +166,7 @@ public class ServerManager {
             Map<Totem, VirtualView> views = viewRegistry.get(gameId);
             for (Map.Entry<Totem, VirtualView> entry : views.entrySet()) {
                 VirtualView vv = entry.getValue();
-                vv.sendLobbyUpdate(pending.getCurrentPlayerCount(), pending.getRequiredPlayers());
+                vv.sendLobbyUpdate(LobbyState.WAITING ,pending.getCurrentPlayerCount(), pending.getRequiredPlayers());
             }
             return LobbyState.WAITING;
         }
