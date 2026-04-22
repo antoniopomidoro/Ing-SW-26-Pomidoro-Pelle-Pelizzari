@@ -27,4 +27,16 @@ public class GainByCharacter implements ContextualEffect {
         p.addFood(foodGain * charCount);
         return true;
     }
+
+    @Override
+    public String toString(){
+        if(foodGain == 0){
+            return "AT THE END GIVE " + ppGain + " PP FOR EACH " + type;
+        }else if(ppGain == 0){
+            return "DURING CAVE PAINTINGS EVENT GAIN " + foodGain +" FOOD FOR EACH " + type;
+
+        }else{
+            return " DURING HUNTING EVENT GIVE " + ppGain + "PP AND " +foodGain + "FOOD FOR EACH " + type;
+        }
+    }
 }

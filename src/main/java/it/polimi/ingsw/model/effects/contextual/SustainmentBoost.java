@@ -23,4 +23,7 @@ public class SustainmentBoost implements ContextualEffect {
         p.getStats().addSustainmentBoost(type, gain);
         return true;
     }
+    public String toString(){
+        return "GAIN " + gain + " SUSTAINMENT DISCOUNT FOR EVERY" + type;
+    }
 }

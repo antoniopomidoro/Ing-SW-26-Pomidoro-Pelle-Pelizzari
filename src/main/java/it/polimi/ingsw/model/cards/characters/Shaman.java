@@ -52,4 +52,9 @@ public class Shaman extends Character {
         return p.getStats().incrementCharacter(CharacterEnum.SHAMAN)
                 && p.getStats().addStars(stars);
     }
+
+    @Override
+    public String toString(){
+        return "SHAMAN, " + super.age + ", STARS: " + stars + "\n";
+    }
 }

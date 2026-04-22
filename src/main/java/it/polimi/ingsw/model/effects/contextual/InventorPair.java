@@ -30,4 +30,7 @@ public class InventorPair implements ContextualEffect {
         }
         return true;
     }
+    public String toString(){
+        return "GIVE " + bonus + " FOOD FOR EACH NEW INVENTOR PAIR COMPLETED";
+    }
 }

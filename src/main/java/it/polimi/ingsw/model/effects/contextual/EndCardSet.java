@@ -22,4 +22,9 @@ public class EndCardSet implements ContextualEffect {
         p.addPP(p.getStats().calculateSet() * pp);
         return true;
     }
+
+    @Override
+    public String toString(){
+        return " IN THE END GIVE " + pp +" PP FOR EACH 6 DIFFERENT CARD SET";
+    }
 }

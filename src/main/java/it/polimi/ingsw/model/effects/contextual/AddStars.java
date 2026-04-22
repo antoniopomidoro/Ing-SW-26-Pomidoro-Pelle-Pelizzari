@@ -17,4 +17,8 @@ public class AddStars implements ContextualEffect {
         p.getStats().addStars(stars);
         return true;
     }
+    @Override
+    public String toString(){
+        return "ADD " + stars +" STARS";
+    }
 }

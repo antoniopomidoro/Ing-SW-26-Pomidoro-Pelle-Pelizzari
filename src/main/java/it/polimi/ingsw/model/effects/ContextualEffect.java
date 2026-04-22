@@ -36,4 +36,6 @@ public interface ContextualEffect {
     default boolean onAddedToPlayer(Player p){
         return true;
     }
+
+    public String toString();
 }

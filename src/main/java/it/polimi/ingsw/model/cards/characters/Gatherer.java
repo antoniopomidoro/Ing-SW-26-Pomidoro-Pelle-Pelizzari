@@ -48,4 +48,10 @@ public class Gatherer extends Character {
     public int getSustDisc() {
         return sustDisc;
     }
+
+    @Override
+    public  String toString(){
+        return "GATHERER, AGE " + super.age + " SUSTAINMENT DISCOUNT: " + sustDisc + "\n";
+    }
+
 }

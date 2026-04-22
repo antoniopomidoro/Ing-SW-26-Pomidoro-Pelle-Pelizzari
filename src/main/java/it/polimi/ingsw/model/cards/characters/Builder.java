@@ -63,4 +63,10 @@ public class Builder extends Character {
                 && p.getStats().addBuilderPp(pp)
                 && p.getStats().addBuildingDiscount(discount);
     }
+
+
+    @Override
+    public String toString(){
+        return "BUILDER, AGE: " + super.age +", DISCOUNT: " + discount + ", PP: " + pp + "\n" ;
+    }
 }

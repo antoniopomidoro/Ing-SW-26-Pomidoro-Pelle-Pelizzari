@@ -20,4 +20,10 @@ public class EndOfTurnExtraPick implements ContextualEffect {
         p.getStats().setExtraUpperPick(upperPick);
         return true;
     }
+
+    @Override
+
+    public String toString(){
+        return "AT THE END OF THE TURN YOU CAN PICK EXTRA CARD FROM THE UPPER LINE";
+    }
 }

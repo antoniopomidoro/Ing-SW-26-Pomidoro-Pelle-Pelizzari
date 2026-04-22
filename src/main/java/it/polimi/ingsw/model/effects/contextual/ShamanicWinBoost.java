@@ -15,4 +15,7 @@ public class ShamanicWinBoost implements ContextualEffect {
         p.getStats().setRitualWinBoost(bonus);
         return true;
     }
+    public String toString(){
+        return "BOOST PP FROM SHAMANIC EVENT WIN X " + bonus;
+    }
 }

@@ -49,4 +49,8 @@ public class Inventor extends Character {
         return p.getStats().incrementCharacter(CharacterEnum.INVENTOR)
                 && p.getStats().incrementTool(tool);
     }
+    @Override
+    public String toString(){
+        return "INVENTOR, " + super.age + ", TOOL: " + tool + "\n";
+    }
 }

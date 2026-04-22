@@ -39,4 +39,9 @@ public class Artist extends Character {
         }
         return p.getStats().incrementCharacter(CharacterEnum.ARTIST);
     }
+
+    @Override
+    public String toString() {
+        return "ARTIST, AGE: " + super.age +"\n" ;
+    }
 }

@@ -41,4 +41,13 @@ public class Hunter extends Character {
         int food = p.getStats().getCharacterCount(CharacterEnum.HUNTER)*(hasFood ? 1 : 0);
         return p.addFood(food);
     }
+
+    @Override
+    public String toString(){
+        if(hasFood){
+            return "HUNTER, " +super.age + ", HAS FOOD \n";
+        }else{
+            return "HUNTER, " +super.age + ", HASN'T FOOD \n";
+        }
+    }
 }

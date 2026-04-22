@@ -20,4 +20,8 @@ public class EndBuilderPpMultiplier implements ContextualEffect {
         p.getStats().setBuilderPp(mult * p.getStats().getBuilderPp());
         return true;
     }
+    @Override
+    public String toString(){
+        return "MULTIPLY BUILDER PP BY " + mult;
+    }
 }

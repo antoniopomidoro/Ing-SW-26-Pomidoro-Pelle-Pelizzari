@@ -117,4 +117,9 @@ public class Building extends Card {
     public CardCategory getCategory() {
         return CardCategory.BUILDING;
     }
+
+    @Override
+    public String toString(){
+        return "BUILDING, " + super.age + ", FOOD COST: " + foodCost + ", PP: " + pp + ", EFFECT: " + effect.toString() + "\n";
+    }
 }

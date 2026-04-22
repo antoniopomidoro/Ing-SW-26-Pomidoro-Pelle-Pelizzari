@@ -15,4 +15,7 @@ public class ShamanicLossProtection implements ContextualEffect {
         p.getStats().setRitualLossMultiplier(protect);
         return true;
     }
+    public String toString(){
+        return "PROTECT PP FROM SHAMANIC EVENT LOSS";
+    }
 }
