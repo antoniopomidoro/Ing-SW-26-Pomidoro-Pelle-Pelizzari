@@ -46,15 +46,15 @@ public class CLIinterface implements UserInterface, Runnable{
 
     public boolean print(){
         if(state == null || state.getSnapshot() == null) return false;
-
+        System.out.flush();
         System.out.println("\n=========== STATO DELLA PARTITA ===========");
         System.out.println("--- BOARD ---");
         var board = state.getSnapshot().getBoard();
         if (board != null) {
-            System.out.println("Top Cards: " + board.getTopCards());
-            System.out.println("Bottom Cards: " + board.getBottomCards());
-            System.out.println("Top Buildings: " + board.getTopBuildings());
-            System.out.println("Bottom Buildings: " + board.getBottomBuildings());
+            System.out.println("-----TOP CARDS--------\n " + board.getTopCards());
+            System.out.println("-------BOTTOM CARDS--------\n" + board.getBottomCards());
+            System.out.println("-------TOP BUILDING------- \n" + board.getTopBuildings());
+            System.out.println("-------BOTTOM BUILDINGS-------\n" + board.getBottomBuildings());
             // Eventuali altre liste come getTiles() possono essere aggiunte qui
         }
 
@@ -70,6 +70,16 @@ public class CLIinterface implements UserInterface, Runnable{
             }
         }
         System.out.println("===========================================\n");
+
+        System.out.print("digita uno dei seguenti comandi seguito dal numero della carta o del tile da selezionare: \n" +
+                "topcard + number for pick top card\n" +
+                "bottomcard + number for pick bottom card\n" +
+                "topbuilding + number for pick top building\n" +
+                "bottombuilding + number for pick bottom building\n" +
+                "tile + number for select a tile\n"+
+                "insert a command: ");
+
+
         return true;
     }
 
