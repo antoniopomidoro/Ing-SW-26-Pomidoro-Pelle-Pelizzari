@@ -6,24 +6,17 @@ import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
 
 import java.util.Objects;
-import java.util.function.Supplier;
-
-@FunctionalInterface
-interface PhaseRestoreFactory {
-    GamePhaseBehavior restore(PhaseRestoreContext ctx);
-}
+import java.util.function.Function;
 
 /**
  * Registry enum for game phases.
  * Maps each phase name to its factory and restore strategy.
  */
 public enum GamePhase {
-    SetupPhase(SetupPhase::new, ctx -> new SetupPhase()),
-    StartTurnPhase(StartTurnPhase::new, ctx -> new StartTurnPhase()),
-    TurnPhase(TurnPhase::new, ctx -> new TurnPhase()),
-    PlayerTurnPhase(() -> {
-        throw new IllegalStateException("PlayerTurnPhase requires restore context");
-    }, ctx -> {
+    SetupPhase(ctx -> new SetupPhase()),
+    StartTurnPhase(ctx -> new StartTurnPhase()),
+    TurnPhase(ctx -> new TurnPhase()),
+    PlayerTurnPhase(ctx -> {
         Totem totem = ctx.getDto().getActivePlayerTotem();
         Player player = ctx.getPlayers().stream()
                 .filter(p -> p.getId() == totem)
@@ -32,20 +25,18 @@ public enum GamePhase {
         Tile tile = ctx.getBoard().getTiles().getTiles().get(ctx.getDto().getActiveTileIndex());
         return new PlayerTurnPhase(player, tile, ctx.getDto().getUpperPicks(), ctx.getDto().getBottomPicks());
     }),
-    EndTurnPhase(EndTurnPhase::new, ctx -> new EndTurnPhase()),
-    ChangeAgePhase(ChangeAgePhase::new, ctx -> new ChangeAgePhase()),
-    EndGamePhase(EndGamePhase::new, ctx -> new EndGamePhase());
+    EndTurnPhase(ctx -> new EndTurnPhase()),
+    ChangeAgePhase(ctx -> new ChangeAgePhase()),
+    EndGamePhase(ctx -> new EndGamePhase());
 
-    private final Supplier<GamePhaseBehavior> factory;
-    private final PhaseRestoreFactory restoreFactory;
+    private final Function<PhaseRestoreContext, GamePhaseBehavior> restoreFactory;
 
-    GamePhase(Supplier<GamePhaseBehavior> factory, PhaseRestoreFactory restoreFactory) {
-        this.factory = Objects.requireNonNull(factory, "factory cannot be null");
+    GamePhase(Function<PhaseRestoreContext, GamePhaseBehavior> restoreFactory) {
         this.restoreFactory = Objects.requireNonNull(restoreFactory, "restoreFactory cannot be null");
     }
 
     public GamePhaseBehavior restore(PhaseRestoreContext ctx) {
         Objects.requireNonNull(ctx, "ctx cannot be null");
-        return restoreFactory.restore(ctx);
+        return restoreFactory.apply(ctx);
     }
 }

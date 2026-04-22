@@ -3,7 +3,6 @@ package it.polimi.ingsw.network;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
-import it.polimi.ingsw.network.dto.GameStateSaveDTO;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,8 +101,7 @@ class ServerManagerTest {
                 new Player(Totem.BLUE_TOTEM, "p2")
         );
         GameController controller = new GameController(players, "fixture-game");
-        GameStateSaveDTO dto = GameStateSaveDTO.from(controller.getGameState());
-        JacksonConfig.mapper().writeValue(savePath.toFile(), dto);
+        JacksonConfig.mapper().writeValue(savePath.toFile(), GameStatePersistence.toDTO(controller.getGameState()));
     }
 
     private void deleteRecursivelyIfExists(Path path) throws IOException {

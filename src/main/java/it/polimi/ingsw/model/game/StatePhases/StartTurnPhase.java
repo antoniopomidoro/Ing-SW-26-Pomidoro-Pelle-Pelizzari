@@ -81,20 +81,20 @@ public class StartTurnPhase implements GamePhaseBehavior {
         Board board = context.getBoard();
         Player currentPlayer = context.getCurrentOrderTileOrderPlayer();
         if (index < 0 || index >= board.getTiles().getTiles().size()) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player, "Index out of bounds"));
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player));
             throw new IllegalMoveException("Invalid tile index");
         }
         if (player != currentPlayer) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player, "Not your turn"));
+            context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player));
             throw new IllegalMoveException("Not your turn");
         }
         Tile targetTile = board.getTiles().getTile(index);
         if (targetTile.isOccupied()) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ACTION, player, "Tile already occupied"));
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ACTION, player));
             throw new IllegalMoveException("Tile already occupied");
         }
         targetTile.occupy(player);
-        context.raiseEvent(new GameEvent(GameEvent.Type.TILE_OCCUPIED, player, "Tile occupied"));
+        context.raiseEvent(new GameEvent(GameEvent.Type.TILE_OCCUPIED, player));
         boolean hasNextPlayer = context.nextPlayerInTurnOrderTile();
         if (!hasNextPlayer) {
             context.updateTurnOrder();
@@ -110,8 +110,7 @@ public class StartTurnPhase implements GamePhaseBehavior {
     public boolean nextPhase(GameState context){
             context.raiseEvent(new GameEvent(
                     GameEvent.Type.START_TURN_COMPLETED,
-                    null,
-                    "phaseCompleted:START_TURN"
+                    null
             ));
             context.setPhase(new TurnPhase());
             return true;

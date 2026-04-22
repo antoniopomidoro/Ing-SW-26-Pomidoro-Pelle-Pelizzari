@@ -27,8 +27,7 @@ public class EndTurnPhase implements GamePhaseBehavior {
         if (context.getTurn() >= maxTurns) {
             context.raiseEvent(new GameEvent(
                     GameEvent.Type.END_TURN_COMPLETED,
-                    null,
-                    "phaseCompleted:END_TURN"
+                    null
             ));
             context.setPhase(new EndGamePhase());
             return true;
@@ -58,8 +57,7 @@ public class EndTurnPhase implements GamePhaseBehavior {
 
         context.raiseEvent(new GameEvent(
                 GameEvent.Type.END_TURN_COMPLETED,
-                null,
-                "phaseCompleted:END_TURN"
+                null
         ));
         context.setPhase(new StartTurnPhase());
         return true;

@@ -13,7 +13,7 @@ public class RMIclient implements ConnectionProtocol, ClientRMIInterface {
     }
 
     @Override
-    public void receiveEvent(GameEventDTO event) throws RemoteException {
+    public void receiveEvent(String event) throws RemoteException {
 
     }
 

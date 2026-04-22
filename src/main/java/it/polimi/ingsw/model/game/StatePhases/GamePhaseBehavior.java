@@ -33,8 +33,7 @@ public interface GamePhaseBehavior {
      */
     default boolean execute(GameState context) {
         if (context != null) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, null,
-                    "Action not allowed in the current phase"));
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, null));
         }
         throw new IllegalMoveException("Action not allowed in the current phase");
     }
@@ -49,8 +48,7 @@ public interface GamePhaseBehavior {
      */
     default boolean nextPhase(GameState context) {
         if (context != null) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, null,
-                    "Action not allowed in the current phase"));
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, null));
         }
         throw new IllegalMoveException("Action not allowed in the current phase");
     }
@@ -67,8 +65,7 @@ public interface GamePhaseBehavior {
      */
     default boolean pickTopCard(GameState context, int index, Player player, String cardInstanceId) {
         if (context != null) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player,
-                    "Action not allowed in the current phase"));
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player));
         }
         throw new IllegalMoveException("Action not allowed in the current phase");
     }
@@ -85,8 +82,7 @@ public interface GamePhaseBehavior {
      */
     default boolean pickBottomCard(GameState context, int index, Player player, String cardInstanceId) {
         if (context != null) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player,
-                    "Action not allowed in the current phase"));
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player));
         }
         throw new IllegalMoveException("Action not allowed in the current phase");
     }
@@ -103,8 +99,7 @@ public interface GamePhaseBehavior {
      */
     default boolean pickTopBuilding(GameState context, int index, Player player, String cardInstanceId) {
         if (context != null) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player,
-                    "Action not allowed in the current phase"));
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player));
         }
         throw new IllegalMoveException("Action not allowed in the current phase");
     }
@@ -121,8 +116,7 @@ public interface GamePhaseBehavior {
      */
     default boolean pickBottomBuilding(GameState context, int index, Player player, String cardInstanceId) {
         if (context != null) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player,
-                    "Action not allowed in the current phase"));
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player));
         }
         throw new IllegalMoveException("Action not allowed in the current phase");
     }
@@ -138,8 +132,7 @@ public interface GamePhaseBehavior {
      */
     default boolean occupyOfferTrailTile(GameState context, int index, Player player) {
         if (context != null) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player,
-                    "Action not allowed in the current phase"));
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player));
         }
         throw new IllegalMoveException("Action not allowed in the current phase");
     }
@@ -153,8 +146,7 @@ public interface GamePhaseBehavior {
      */
     default boolean nextAge(GameState context) {
         if (context != null) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, null,
-                    "Action not allowed in the current phase"));
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, null));
         }
         throw new IllegalMoveException("Action not allowed in the current phase");
     }

@@ -1,6 +1,5 @@
 package it.polimi.ingsw.network;
 
-import it.polimi.ingsw.network.dto.GameStateSaveDTO;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.GameState;
@@ -82,7 +81,7 @@ public class ServerManager {
 
         // Notify the creator that they are waiting
         view.sendLobbyUpdate(LobbyState.WAITING ,pending.getCurrentPlayerCount(), pending.getRequiredPlayers());
-
+        System.out.println("Lobby created with ID: " + gameId);
         return LobbyState.WAITING;
     }
 
@@ -216,9 +215,6 @@ public class ServerManager {
 
         for (File saveFile : saveFiles) {
             try {
-                GameStateSaveDTO saveDto = JacksonConfig.mapper()
-                        .readValue(saveFile, GameStateSaveDTO.class);
-                GameState restoredState = GameStateSaveDTO.toGameState(saveDto);
                 String fileName = saveFile.getName();
                 String gameId = fileName.substring(0, fileName.length() - ".json".length());
 
@@ -228,6 +224,8 @@ public class ServerManager {
                 if (activeGames.containsKey(gameId)) {
                     throw new IllegalStateException("Duplicate GameId found in saves: " + gameId);
                 }
+
+                GameState restoredState = GameStatePersistence.load(gameId);
 
                 GameController restoredController = new GameController(restoredState);
                 activeGames.put(gameId, restoredController);

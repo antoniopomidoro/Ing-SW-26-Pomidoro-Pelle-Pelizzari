@@ -6,11 +6,8 @@ import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.StatePhases.GamePhaseBehavior;
 import it.polimi.ingsw.model.game.StatePhases.SetupPhase;
 import it.polimi.ingsw.model.player.Player;
-import it.polimi.ingsw.network.JacksonConfig;
-import it.polimi.ingsw.network.dto.GameStateSaveDTO;
+import it.polimi.ingsw.network.GameStatePersistence;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import it.polimi.ingsw.model.cards.Building;
@@ -339,13 +336,8 @@ public class GameState {
     }
     private void saveState() {
         try {
-            File file = new File("saves/" + this.gameId + ".json");
-            File parent = file.getParentFile();
-            if (parent != null && !parent.exists() && !parent.mkdirs()) {
-                throw new IOException("Unable to create save directory");
-            }
-            JacksonConfig.mapper().writeValue(file, GameStateSaveDTO.from(this));
-        } catch (IOException e) {
+            GameStatePersistence.save(this, this.gameId);
+        } catch (IllegalStateException e) {
             System.err.println("Error during save: " + e.getMessage());
         }
     }
@@ -455,7 +447,7 @@ public class GameState {
             throw new IllegalStateException("Player not in game");
         }
         player.setConnected(false);
-        raiseEvent(new GameEvent(GameEvent.Type.PLAYER_DISCONNECTED, player, null));
+        raiseEvent(new GameEvent(GameEvent.Type.PLAYER_DISCONNECTED, player));
         return true;
     }
     public boolean removeObserver(GameStateObserver observer) {

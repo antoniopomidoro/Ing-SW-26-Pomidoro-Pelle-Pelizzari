@@ -36,8 +36,7 @@ public class ChangeAgePhase implements GamePhaseBehavior {
         // Notify end of age change before transition
         context.raiseEvent(new GameEvent(
                 GameEvent.Type.AGE_CHANGED,
-                null,
-                "phaseCompleted:CHANGE_AGE"
+                null
         ));
 
         // Transition to START_TURN

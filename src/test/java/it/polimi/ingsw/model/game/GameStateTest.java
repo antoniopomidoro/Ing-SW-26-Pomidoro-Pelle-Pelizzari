@@ -182,7 +182,7 @@ public class GameStateTest {
     void testAddObserver() {
         gameState.addObserver(observer);
         // We verify it was added by triggering an event later
-        gameState.raiseEvent(new GameEvent(GameEvent.Type.SUCCESSFUL_ACTION, null, "Test"));
+        gameState.raiseEvent(new GameEvent(GameEvent.Type.SUCCESSFUL_ACTION, null));
         assertEquals(1, observer.callCount, "Observer should have been added and notified.");
     }
 
@@ -196,7 +196,7 @@ public class GameStateTest {
         gameState.addObserver(observer);
         gameState.addObserver(observer2);
 
-        GameEvent event = new GameEvent(GameEvent.Type.SUCCESSFUL_ACTION, null, "Broadcast");
+        GameEvent event = new GameEvent(GameEvent.Type.SUCCESSFUL_ACTION, null);
         gameState.raiseEvent(event);
 
         // Precise Numerical Verification

@@ -42,8 +42,7 @@ public class SetupPhase implements GamePhaseBehavior {
     public boolean nextPhase(GameState context) {
         context.raiseEvent(new GameEvent(
                 GameEvent.Type.SETUP_COMPLETED,
-                null,
-                "phaseCompleted:SETUP"
+                null
         ));
         context.setPhase(new StartTurnPhase());
         return true;

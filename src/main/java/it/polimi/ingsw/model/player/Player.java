@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model.player;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import it.polimi.ingsw.model.board.*;
 import it.polimi.ingsw.model.cards.*;
 import it.polimi.ingsw.model.cards.Character;
@@ -14,6 +15,7 @@ import it.polimi.ingsw.model.player.*;
 import java.util.*;
 
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Player {
     private Totem id;
     private String nickname;

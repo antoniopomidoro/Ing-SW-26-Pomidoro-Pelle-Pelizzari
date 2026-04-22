@@ -41,8 +41,7 @@ public class EndGamePhase implements GamePhaseBehavior {
 
         context.raiseEvent(new GameEvent(
                 GameEvent.Type.END_GAME_COMPLETED,
-                null,
-                "phaseCompleted:END_GAME"
+                null
         ));
 
         // Terminal state — no transition

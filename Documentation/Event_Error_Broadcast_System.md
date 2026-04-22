@@ -18,7 +18,6 @@ Percorso: `src/main/java/it/polimi/ingsw/model/game/GameEvent.java`
 Contiene:
 - `Type` (enum): `WRONG_TURN`, `INSUFFICIENT_FOOD`, `INVALID_INDEX`, `INVALID_PHASE`;
 - `culprit`: player associato all'evento;
-- `message`: messaggio descrittivo per UI/logica view.
 
 ### `GameStateObserver`
 Percorso: `src/main/java/it/polimi/ingsw/model/game/GameStateObserver.java`
@@ -50,7 +49,7 @@ Note:
 Percorso: `src/main/java/it/polimi/ingsw/model/game/StartTurnPhase.java`
 
 Nel metodo `occupyOfferTrailTile(...)`, se il player non e quello corrente:
-1. `context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player, "It's not your turn to place a totem."));`
+1. `context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player));`
 2. `throw new IllegalMoveException("It's not your turn to place a totem.");`
 
 ### `PlayerTurnPhase`
