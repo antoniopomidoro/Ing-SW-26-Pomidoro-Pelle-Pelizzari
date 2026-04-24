@@ -196,6 +196,20 @@ class PlayerTest {
         // Assert: The actual internal list must remain unchanged
         assertEquals(1, player.getBuildings().size(), "Internal buildings list must be shielded from external clearing.");
     }
+
+    @DisplayName("Pay food throws an exception when an illegal amount of food is passed")
+    @Test
+    public void payFoodIllegalAmount() {
+        assertThrows(IllegalArgumentException.class, () -> player.payFood(-1));
+        assertThrows(IllegalArgumentException.class, () -> player.payFood(player.getFood() + 1));
+    }
+
+    @DisplayName("Equals returns false when the passed object is null or it is a different type")
+    @Test
+    public void equalsNullOrDifferentType() {
+        assertFalse(player.equals(null));
+        assertFalse(player.equals("not a player"));
+    }
 }
 
 
