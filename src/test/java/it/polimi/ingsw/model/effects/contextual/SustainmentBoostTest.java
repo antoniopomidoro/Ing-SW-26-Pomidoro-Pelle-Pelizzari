@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.cards.characters.CharacterEnum;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,5 +47,14 @@ class SustainmentBoostTest {
         Field field = object.getClass().getDeclaredField(fieldName);
         field.setAccessible(true);
         field.set(object, value);
+    }
+
+    @DisplayName("onAddedToPlayer works correctly")
+    @Test
+    void onAddedToPlayerCorrect() {
+        int oldGain = player.getStats().getSustainmentDiscount();
+        effect.onAddedToPlayer(player);
+        assertEquals(CharacterEnum.GATHERER, effect.getType());
+        assertEquals(oldGain + effect.getGain(), effect.getGain());
     }
 }
