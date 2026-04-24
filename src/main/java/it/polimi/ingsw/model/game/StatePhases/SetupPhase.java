@@ -28,12 +28,14 @@ public class SetupPhase implements GamePhaseBehavior {
         // 2. Board population
         int bottomCardsNumber = config.getBottomCardsQuantity(context.getPlayers());
         int topCardsNumber = config.getTopCardsQuantity(context.getPlayers());
+        int topBuildingsNumber = config.getBuildingsCount(context.getPlayers().size(), context.getAge().getValue());
         while (board.getBottomCards().size() < bottomCardsNumber) {
             deck.popCard(context.getAge()).ifPresentOrElse(board::addBottomCard, () -> { throw new IllegalStateException("the deck is empty");});
         }
         while (board.getTopCards().size() < topCardsNumber) {
             deck.popCard(context.getAge()).ifPresentOrElse(board::addTopCard, () -> { throw new IllegalStateException("the deck is empty");});
         }
+        board.addTopBuildings(deck.getBuildings(context.getAge(), topBuildingsNumber));
         // 3. Transition to START_TURN phase
         return nextPhase(context);
     }

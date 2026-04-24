@@ -13,6 +13,7 @@ import it.polimi.ingsw.model.game.StatePhases.IllegalMoveException;
 import it.polimi.ingsw.model.game.StatePhases.TurnPhase;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
+import it.polimi.ingsw.network.SaveObserver;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,10 +46,12 @@ public class GameController {
         Decks deck = setupDeck(jsonGod.getCards(), jsonGod.getBuildings(), playerCount, config);
         Board board = setupBoard(jsonGod.getOrderTiles(), jsonGod.getTiles(), playerCount);
         this.state = new GameState(players, config, board, deck, gameId);
-        
+        this.state.addObserver(new SaveObserver(this.state));
     }
+
     public GameController(GameState state) {
         this.state = state;
+        this.state.addObserver(new SaveObserver(this.state));
     }
 
     /**

@@ -454,6 +454,15 @@ public class ServerManager {
         return viewRegistry;
     }
 
+    /**
+     * Pings all registered virtual views — both confirmed (viewRegistry) and pending (pendingViews).
+     * Invoked by {@link NUDEPinger} to detect silent disconnections in every lobby phase.
+     */
+    public synchronized void pingAllViews() {
+        viewRegistry.values().forEach(gameViews -> gameViews.values().forEach(VirtualView::ping));
+        pendingViews.values().forEach(gameViews -> gameViews.values().forEach(VirtualView::ping));
+    }
+
     public NUDEqueue getQueue(){
         return NUDEqueue;
     }

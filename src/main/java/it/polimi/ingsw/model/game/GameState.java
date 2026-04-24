@@ -6,8 +6,6 @@ import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.StatePhases.GamePhaseBehavior;
 import it.polimi.ingsw.model.game.StatePhases.SetupPhase;
 import it.polimi.ingsw.model.player.Player;
-import it.polimi.ingsw.network.GameStatePersistence;
-
 import java.util.*;
 import java.util.List;
 import it.polimi.ingsw.model.cards.Building;
@@ -121,9 +119,9 @@ public class GameState {
 
     /** @return The current player in turn order, or null if unavailable. */
     public Player getCurrentTurnOrderPlayer() {
-        return this.turnOrder.get(currentPlayerIndex);
+        if (turnOrder.isEmpty() || currentPlayerIndex >= turnOrder.size()) return null;
+        return turnOrder.get(currentPlayerIndex);
     }
-
     /** @return The current player in order-tile order, or null if unavailable. */
     public Player getCurrentOrderTileOrderPlayer() {
         return this.orderTileOrder.get(currentPlayerOrderIndex);
@@ -329,17 +327,7 @@ public class GameState {
      */
     public void raiseEvent(GameEvent event) {
         if (event == null) return;
-        if (event.getType().requiresSave()) {
-            saveState();
-        }
         observers.forEach(o -> o.onGameEvent(event));
-    }
-    private void saveState() {
-        try {
-            GameStatePersistence.save(this, this.gameId);
-        } catch (IllegalStateException e) {
-            System.err.println("Error during save: " + e.getMessage());
-        }
     }
 
     // ==========================================

@@ -15,12 +15,14 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.ExportException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * RMI server entry point for lobby management and command execution.
  */
 public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface {
     private final ServerManager serverManager;
+    private final ConcurrentHashMap<ClientRMIInterface, RMIClientHandler> sessions = new ConcurrentHashMap<>();
 
     /**
      * Creates an RMI server wrapper around the {@link ServerManager}.
@@ -32,15 +34,25 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
         this.serverManager = serverManager;
     }
 
+    /**
+     * Returns the existing handler for the given client stub, or creates one if none exists.
+     * The handler removes itself from the session cache when the client disconnects.
+     *
+     * @param callback RMI client callback stub
+     * @return handler bound to {@code callback}
+     */
+    private RMIClientHandler getOrCreateHandler(ClientRMIInterface callback) {
+        return sessions.computeIfAbsent(callback,
+                cb -> new RMIClientHandler(cb, serverManager, () -> sessions.remove(cb)));
+    }
+
     @Override
     public LobbyState createGame(String playerName, int requiredPlayers, Totem requestedTotem, ClientRMIInterface clientCallback) throws RemoteException {
         try {
-            RMIClientHandler handler = new RMIClientHandler(clientCallback, serverManager);
-            return serverManager.createGame(playerName, requiredPlayers, requestedTotem, handler);
+        return serverManager.createGame(playerName, requiredPlayers, requestedTotem, getOrCreateHandler(clientCallback));
         } catch (Exception e) {
-            // TODO: translate domain exceptions into RMI error codes for the client.
-            // TODO: distinguish "waiting in lobby" from "join failed" without generic exceptions.
-            throw new RemoteException("TODO: handle createGame with typed domain errors", e);
+            System.err.println("Error during game creation: " + e.getMessage());
+            return LobbyState.WAITING;
         }
     }
 
@@ -51,8 +63,7 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
     public void enterLobby(String gameId, String playerName,
                            ClientRMIInterface clientCallback) throws RemoteException {
         try {
-            RMIClientHandler handler = new RMIClientHandler(clientCallback, serverManager);
-            serverManager.enterLobby(gameId, playerName, handler);
+            serverManager.enterLobby(gameId, playerName, getOrCreateHandler(clientCallback));
         } catch (Exception e) {
             throw new RemoteException("Failed to enter lobby", e);
         }
@@ -65,8 +76,7 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
     public void selectTotem(String gameId, String playerName, Totem requestedTotem,
                             ClientRMIInterface clientCallback) throws RemoteException {
         try {
-            RMIClientHandler handler = new RMIClientHandler(clientCallback, serverManager);
-            serverManager.selectTotem(gameId, playerName, requestedTotem, handler);
+            serverManager.selectTotem(gameId, playerName, requestedTotem, getOrCreateHandler(clientCallback));
         } catch (Exception e) {
             throw new RemoteException("Failed to select totem", e);
         }

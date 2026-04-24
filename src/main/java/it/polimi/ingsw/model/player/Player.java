@@ -183,4 +183,8 @@ public class Player {
         Player otherPlayer = (Player) obj;
         return Objects.equals(this.nickname, otherPlayer.nickname) && Objects.equals(this.id, otherPlayer.id);
     }
+    @Override
+    public int hashCode() {
+        return Objects.hash(nickname, id);
+    }
 }

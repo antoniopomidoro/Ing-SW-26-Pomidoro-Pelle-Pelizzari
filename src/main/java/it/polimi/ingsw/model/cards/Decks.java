@@ -92,8 +92,10 @@ public class Decks {
         }
     }
 
-    public List<Building> getBuildings(Age age) {
-        List<Building> sup = buildings.get(age);
+    public List<Building> getBuildings(Age age, int n) {
+        List<Building> sup = buildings.get(age).stream()
+                .limit(n)
+                .toList();
         return sup;
     }
     public boolean addCard(Card c) {

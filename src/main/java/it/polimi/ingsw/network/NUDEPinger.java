@@ -30,7 +30,7 @@ public class NUDEPinger implements Runnable{
     }
 
     private void checkConnections() {
-        serverManager.getViewRegistry().values().forEach(gameViews -> {gameViews.values().forEach(VirtualView::ping);});
+        serverManager.pingAllViews();
     }
 
     public void stop() {

@@ -59,6 +59,9 @@ public class EndTurnPhase implements GamePhaseBehavior {
                 GameEvent.Type.END_TURN_COMPLETED,
                 null
         ));
+        context.setCurrentTileIndex(0);
+        context.setExtraIndex(0);
+
         context.setPhase(new StartTurnPhase());
         return true;
     }
