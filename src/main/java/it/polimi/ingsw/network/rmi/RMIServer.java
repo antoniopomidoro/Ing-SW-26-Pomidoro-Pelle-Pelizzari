@@ -8,6 +8,7 @@ import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.LobbyState;
 import it.polimi.ingsw.network.NUDEqueue;
 import it.polimi.ingsw.network.ServerManager;
+import it.polimi.ingsw.network.dto.ErrorDTO;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -31,20 +32,6 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
         this.serverManager = serverManager;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public LobbyState joinGame(String gameId, String playerName, int requiredPlayers, Totem requestedTotem, ClientRMIInterface clientCallback) throws RemoteException {
-        try {
-            RMIClientHandler handler = new RMIClientHandler(clientCallback, serverManager);
-            return serverManager.joinGame(gameId, playerName, requestedTotem, handler);
-        } catch (Exception e) {
-            // TODO: translate domain exceptions into RMI error codes for the client.
-            // TODO: distinguish "waiting in lobby" from "join failed" without generic exceptions.
-            throw new RemoteException("TODO: handle joinGame with typed domain errors", e);
-        }
-    }
     @Override
     public LobbyState createGame(String playerName, int requiredPlayers, Totem requestedTotem, ClientRMIInterface clientCallback) throws RemoteException {
         try {
@@ -53,7 +40,35 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
         } catch (Exception e) {
             // TODO: translate domain exceptions into RMI error codes for the client.
             // TODO: distinguish "waiting in lobby" from "join failed" without generic exceptions.
-            throw new RemoteException("TODO: handle joinGame with typed domain errors", e);
+            throw new RemoteException("TODO: handle createGame with typed domain errors", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void enterLobby(String gameId, String playerName,
+                           ClientRMIInterface clientCallback) throws RemoteException {
+        try {
+            RMIClientHandler handler = new RMIClientHandler(clientCallback, serverManager);
+            serverManager.enterLobby(gameId, playerName, handler);
+        } catch (Exception e) {
+            throw new RemoteException("Failed to enter lobby", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void selectTotem(String gameId, String playerName, Totem requestedTotem,
+                            ClientRMIInterface clientCallback) throws RemoteException {
+        try {
+            RMIClientHandler handler = new RMIClientHandler(clientCallback, serverManager);
+            serverManager.selectTotem(gameId, playerName, requestedTotem, handler);
+        } catch (Exception e) {
+            throw new RemoteException("Failed to select totem", e);
         }
     }
 

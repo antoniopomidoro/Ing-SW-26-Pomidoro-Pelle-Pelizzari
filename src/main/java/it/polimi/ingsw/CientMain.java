@@ -1,7 +1,6 @@
 package it.polimi.ingsw;
 
 import it.polimi.ingsw.model.player.Totem;
-import it.polimi.ingsw.network.dto.LobbyRequest;
 import it.polimi.ingsw.network.rmi.ServerRMIInterface;
 import it.polimi.ingsw.view.TestClientView;
 
@@ -19,7 +18,7 @@ public class CientMain {
             String rmiBindName = "palle";
             Registry registry = LocateRegistry.getRegistry(serverIP, rmiPort);
             ServerRMIInterface serverStub = (ServerRMIInterface) registry.lookup(rmiBindName);
-            serverStub.joinGame("game1", "player1", 2, Totem.BLACK_TOTEM, new TestClientView());
+            serverStub.createGame("player1", 2, Totem.BLACK_TOTEM, new TestClientView());
         }catch (RemoteException e) {
             System.err.println("Client error: " + e.getMessage());
         } catch (NotBoundException e) {

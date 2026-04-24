@@ -5,6 +5,8 @@ import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.GameState;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
+import it.polimi.ingsw.network.dto.ErrorDTO;
+import it.polimi.ingsw.network.dto.TotemSelectionDTO;
 import it.polimi.ingsw.network.socket.SocketServer;
 
 import java.io.File;
@@ -12,8 +14,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,25 +25,25 @@ import java.util.concurrent.ConcurrentHashMap;
  * Coordinates lobby creation, player rejoin, and the lifecycle of active games.
  */
 public class ServerManager {
+    private static final String INVALID_INPUT_ENTER = "Invalid input for lobby entry";
+    private static final String INVALID_INPUT_SELECT = "Invalid input for totem selection";
+    private static final String INVALID_INPUT_CREATION = "Invalid input for creation";
+    private static final String GAME_SAVE_EXTENSION = ".json";
+
     private final Map<String, PendingGame> pendingGames = new ConcurrentHashMap<>();
     private final Map<String, GameController> activeGames = new ConcurrentHashMap<>();
     private final Map<String, Map<Totem, VirtualView>> viewRegistry = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, VirtualView>> pendingViews = new ConcurrentHashMap<>();
     private final Random random = new Random();
     private final NUDEqueue NUDEqueue;
 
     public ServerManager(){
-        this(true);
-    }
-
-    ServerManager(boolean startBackgroundThreads){
         NUDEqueue = new NUDEqueue(this);
-        if (startBackgroundThreads) {
-            NUDEPinger pinger = new NUDEPinger(this);
-            Thread pingerThread = new Thread(pinger, "Pinger");
-            Thread NUDEqueueThread = new Thread(NUDEqueue, "NUDEqueue");
-            NUDEqueueThread.start();
-            pingerThread.start();
-        }
+        NUDEPinger pinger = new NUDEPinger(this);
+        Thread pingerThread = new Thread(pinger, "Pinger");
+        Thread NUDEqueueThread = new Thread(NUDEqueue, "NUDEqueue");
+        NUDEqueueThread.start();
+        pingerThread.start();
         loadSavedGames();
     }
     /**
@@ -54,6 +58,77 @@ public class ServerManager {
     }
 
     /**
+     * Registers a player in a pending lobby before totem confirmation.
+     *
+     * @param gameId target lobby identifier
+     * @param playerName player's nickname
+     * @param view player's virtual view
+     * @throws IllegalArgumentException when {@code view} is {@code null} and no client can be notified
+     */
+    public synchronized void enterLobby(String gameId, String playerName, VirtualView view) {
+        if (view == null) {
+            throw new IllegalArgumentException(INVALID_INPUT_ENTER);
+        }
+        if (gameId == null || gameId.isBlank() || playerName == null || playerName.isBlank()) {
+            view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.INVALID_INPUT));
+            return;
+        }
+
+        GameController activeGame = activeGames.get(gameId);
+        if (activeGame != null) {
+            GameState state = activeGame.getGameState();
+            Optional<Player> returningPlayer = state.getPlayers().stream()
+                    .filter(player -> playerName.equals(player.getNickname()))
+                    .findFirst();
+
+            if (returningPlayer.isEmpty()) {
+                view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.NOT_A_PARTICIPANT));
+                return;
+            }
+
+            Player player = returningPlayer.get();
+            if (player.isConnected()) {
+                view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.ALREADY_CONNECTED));
+                return;
+            }
+
+            state.reintegratePlayer(player);
+            viewRegistry.computeIfAbsent(gameId, id -> new ConcurrentHashMap<>()).put(player.getId(), view);
+            view.setTotem(player.getId());
+            view.setGameController(activeGame);
+            view.setGameId(gameId);
+            view.setNickname(playerName);
+            state.addObserver(view);
+            view.sendLobbyUpdate(LobbyState.REJOIN);
+            return;
+        }
+
+        PendingGame pending = pendingGames.get(gameId);
+        if (pending == null) {
+            view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.LOBBY_NOT_FOUND));
+            return;
+        }
+
+        if (pending.isFull()) {
+            view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.LOBBY_FULL));
+            return;
+        }
+
+        try {
+            pending.registerPending(playerName);
+        } catch (IllegalArgumentException e) {
+            view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.NICKNAME_TAKEN));
+            return;
+        }
+
+        pendingViews.computeIfAbsent(gameId, id -> new ConcurrentHashMap<>()).put(playerName, view);
+        view.setGameId(gameId);
+        view.setNickname(playerName);
+
+        broadcastTotemSelection(gameId, pending);
+    }
+
+    /**
      * Creates a brand new game lobby.
      *
      * @param playerName player's nickname (the host)
@@ -64,8 +139,12 @@ public class ServerManager {
      */
     public synchronized LobbyState createGame(String playerName, int requiredPlayers,
                                           Totem requestedTotem, VirtualView view) {
-        if (playerName == null || playerName.isBlank() || requestedTotem == null || view == null || requiredPlayers <= 1) {
-            throw new IllegalArgumentException("Invalid input for creation");
+        if (view == null) {
+            throw new IllegalArgumentException(INVALID_INPUT_CREATION);
+        }
+        if (playerName == null || playerName.isBlank() || requestedTotem == null || requiredPlayers <= 1) {
+            view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.INVALID_INPUT));
+            return LobbyState.WAITING;
         }
 
         String gameId = generateUniqueLobbyId();
@@ -77,6 +156,9 @@ public class ServerManager {
         viewRegistry.computeIfAbsent(gameId, id -> new ConcurrentHashMap<>()).put(totem, view);
         view.setTotem(totem);
         view.setGameId(gameId);
+        view.setNickname(playerName);
+
+        broadcastTotemSelection(gameId, pending);
 
 
         // Notify the creator that they are waiting
@@ -86,65 +168,54 @@ public class ServerManager {
     }
 
     /**
-     * A player requests to join an existing game (either pending or active for rejoin).
+     * Confirms a player's totem selection in a pending lobby.
      *
-     * @param gameId ID of the room to join
+     * @param gameId target lobby identifier
      * @param playerName player's nickname
-     * @param requestedTotem totem/color requested by the player
-     * @param view the player's {@link VirtualView}
-     * @return {@link LobbyState#STARTING_GAME} when the match starts, {@link LobbyState#WAITING}
-     * while the lobby is filling, or {@link LobbyState#REJOIN} for a returning player
-     * @throws IllegalArgumentException if lobby doesn't exist or input is invalid
-     * @throws IllegalStateException if the game is already active and player cannot rejoin
-     * @throws IOException if the game initialization fails
+     * @param requestedTotem requested totem
+     * @param view player's virtual view
+     * @throws IllegalArgumentException when {@code view} is {@code null} and no client can be notified
      */
-    public synchronized LobbyState joinGame(String gameId, String playerName,
-                                            Totem requestedTotem, VirtualView view) throws IOException {
+    public synchronized void selectTotem(String gameId, String playerName,
+                                         Totem requestedTotem, VirtualView view) {
+        if (view == null) {
+            throw new IllegalArgumentException(INVALID_INPUT_SELECT);
+        }
         if (gameId == null || gameId.isBlank() || playerName == null || playerName.isBlank()
-                || requestedTotem == null || view == null) {
-            throw new IllegalArgumentException("Invalid input for join");
+                || requestedTotem == null) {
+            view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.INVALID_INPUT));
+            return;
         }
 
-        // 1. REJOIN CASE (The game is already in progress)
-        if (activeGames.containsKey(gameId)) {
-            GameController controller = activeGames.get(gameId);
-            GameState state = controller.getGameState();
-            Player returningPlayer = state.getPlayers().stream()
-                    .filter(p -> p.getNickname().equals(playerName))
-                    .findFirst()
-                    .orElse(null);
-
-            if (returningPlayer == null) {
-                throw new IllegalStateException("Game already started and you are not a participant: " + gameId);
-            }
-            if (!returningPlayer.getId().equals(requestedTotem)) {
-                throw new IllegalArgumentException("Wrong totem color for rejoin");
-            }
-            if (returningPlayer.isConnected()) {
-                throw new IllegalStateException("Player " + playerName + " is already online");
-            }
-
-            state.reintegratePlayer(returningPlayer);
-            viewRegistry.get(gameId).put(requestedTotem, view);
-            view.setTotem(requestedTotem);
-            view.setGameController(controller);
-            view.setGameId(gameId);
-            state.addObserver(view);
-            view.sendLobbyUpdate(LobbyState.REJOIN);
-            return LobbyState.REJOIN;
+        PendingGame pending = pendingGames.get(gameId);
+        if (pending == null) {
+            view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.LOBBY_NOT_FOUND));
+            return;
         }
 
-        // 2. NORMAL JOIN CASE (The lobby is waiting)
-        if (pendingGames.containsKey(gameId)) {
-            PendingGame pending = pendingGames.get(gameId);
-            Totem totem = pending.addPlayer(playerName, requestedTotem);
+        if (pending.isFull()) {
+            view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.LOBBY_FULL));
+            return;
+        }
 
-            viewRegistry.computeIfAbsent(gameId, id -> new ConcurrentHashMap<>()).put(totem, view);
-            view.setTotem(totem);
-            view.setGameId(gameId);
+        try {
+            pending.addPlayer(playerName, requestedTotem);
+        } catch (IllegalArgumentException e) {
+            view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.TOTEM_NOT_AVAILABLE));
+            return;
+        }
 
-            if (pending.isFull()) {
-                List<Player> players = pending.getJoinedPlayers();
+        VirtualView confirmedView = takePendingView(gameId, playerName, view);
+        viewRegistry.computeIfAbsent(gameId, id -> new ConcurrentHashMap<>()).put(requestedTotem, confirmedView);
+        confirmedView.setTotem(requestedTotem);
+        confirmedView.setGameId(gameId);
+        confirmedView.setNickname(playerName);
+
+        broadcastTotemSelection(gameId, pending);
+
+        if (pending.isFull()) {
+            List<Player> players = pending.getJoinedPlayers();
+            try {
                 GameController controller = new GameController(players, gameId);
 
                 Map<Totem, VirtualView> views = viewRegistry.get(gameId);
@@ -157,32 +228,158 @@ public class ServerManager {
 
                 activeGames.put(gameId, controller);
                 pendingGames.remove(gameId);
-
-                return LobbyState.STARTING_GAME;
+                pendingViews.remove(gameId);
+            } catch (IOException e) {
+                ErrorDTO gameStartFailed = new ErrorDTO(ErrorDTO.ErrorCode.GAME_START_FAILED);
+                broadcastError(gameId, gameStartFailed);
+                pendingGames.remove(gameId);
+                activeGames.remove(gameId);
+                viewRegistry.remove(gameId);
+                pendingViews.remove(gameId);
+                return;
             }
+        }
+    }
 
-            // Notify all users in the waiting lobby
-            Map<Totem, VirtualView> views = viewRegistry.get(gameId);
-            for (Map.Entry<Totem, VirtualView> entry : views.entrySet()) {
-                VirtualView vv = entry.getValue();
-                vv.sendLobbyUpdate(LobbyState.WAITING ,pending.getCurrentPlayerCount(), pending.getRequiredPlayers());
-            }
-            return LobbyState.WAITING;
+    private VirtualView takePendingView(String gameId, String playerName, VirtualView fallbackView) {
+        Map<String, VirtualView> gamePendingViews = pendingViews.get(gameId);
+        if (gamePendingViews == null) {
+            return fallbackView;
         }
 
-        // 3. ERROR CASE (The lobby does not exist)
-        throw new IllegalArgumentException("Room " + gameId + " does not exist!");
+        VirtualView pendingView = gamePendingViews.remove(playerName);
+        if (gamePendingViews.isEmpty()) {
+            pendingViews.remove(gameId);
+        }
+
+        return pendingView == null ? fallbackView : pendingView;
     }
+
+    private void broadcastTotemSelection(String gameId, PendingGame pending) {
+        TotemSelectionDTO totemSelectionDTO = new TotemSelectionDTO(
+                gameId,
+                pending.getAvailableTotems(),
+                pending.getTakenTotems()
+        );
+
+        Map<Totem, VirtualView> confirmedViews = viewRegistry.getOrDefault(gameId, Collections.emptyMap());
+        for (VirtualView lobbyView : confirmedViews.values()) {
+            lobbyView.sendTotemSelection(totemSelectionDTO);
+        }
+
+        Map<String, VirtualView> waitingViews = pendingViews.getOrDefault(gameId, Collections.emptyMap());
+        for (VirtualView lobbyView : waitingViews.values()) {
+            lobbyView.sendTotemSelection(totemSelectionDTO);
+        }
+    }
+
+    private void broadcastError(String gameId, ErrorDTO error) {
+        viewRegistry.getOrDefault(gameId, Collections.emptyMap())
+                .values().forEach(v -> v.sendError(error));
+        pendingViews.getOrDefault(gameId, Collections.emptyMap())
+                .values().forEach(v -> v.sendError(error));
+    }
+
+    /**
+     * Disconnects a player view from pending or active sessions.
+     *
+     * @param view virtual view to disconnect
+     * @return {@code true} when the view is found and removed from a known session, {@code false} otherwise
+     */
     public synchronized boolean disconnectPlayer(VirtualView view) {
-        if (view == null) return false;
-        if (viewRegistry.get(view.gameId) == null) return false;
-        VirtualView deadView = viewRegistry.get(view.gameId).remove(view.getTotem());
-        if (deadView == null) return false;
-        GameController controller = activeGames.get(view.gameId);
-        if (controller == null) return false;
-        controller.getGameState().removeObserver(deadView);
-        controller.disconnectPlayer(view.getTotem());
+        if (view == null) {
+            return false;
+        }
+        String gameId = view.getGameId();
+        if (gameId == null || gameId.isBlank()) {
+            return false;
+        }
+
+        // CASE A: player is in pendingViews (entered lobby but no totem yet)
+        Map<String, VirtualView> waiting = pendingViews.get(gameId);
+        if (waiting != null && waiting.containsValue(view)) {
+            String playerName = view.getNickname();
+            waiting.remove(playerName);
+            if (waiting.isEmpty()) {
+                pendingViews.remove(gameId);
+            }
+
+            PendingGame pending = pendingGames.get(gameId);
+            if (pending == null) {
+                return false;
+            }
+
+            try {
+                pending.removePending(playerName);
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+
+            cleanupLobbyIfEmpty(gameId);
+            return true;
+        }
+
+        // CASE B: player confirmed totem in pending lobby
+        GameController controller = activeGames.get(gameId);
+        if (controller == null) {
+            Map<Totem, VirtualView> registry = viewRegistry.get(gameId);
+            if (registry == null) {
+                return false;
+            }
+
+            Totem totem = view.getTotem();
+            if (totem == null) {
+                return false;
+            }
+
+            registry.remove(totem);
+            if (registry.isEmpty()) {
+                viewRegistry.remove(gameId);
+            }
+
+            PendingGame pending = pendingGames.get(gameId);
+            if (pending == null) {
+                return false;
+            }
+
+            try {
+                pending.removePlayer(totem);
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+
+            cleanupLobbyIfEmpty(gameId);
+            if (pendingGames.containsKey(gameId)) {
+                broadcastTotemSelection(gameId, pending);
+            }
+            return true;
+        }
+
+        // CASE C: player is in an active game
+        Map<Totem, VirtualView> registry = viewRegistry.get(gameId);
+        if (registry == null) {
+            return false;
+        }
+
+        Totem totem = view.getTotem();
+        if (totem == null) {
+            return false;
+        }
+
+        registry.remove(totem);
+        controller.getGameState().removeObserver(view);
+        controller.disconnectPlayer(totem);
         return true;
+    }
+
+    private void cleanupLobbyIfEmpty(String gameId) {
+        boolean noConfirmed = viewRegistry.getOrDefault(gameId, Collections.emptyMap()).isEmpty();
+        boolean noWaiting = pendingViews.getOrDefault(gameId, Collections.emptyMap()).isEmpty();
+        if (noConfirmed && noWaiting) {
+            pendingGames.remove(gameId);
+            viewRegistry.remove(gameId);
+            pendingViews.remove(gameId);
+        }
     }
 
     public synchronized boolean loadSavedGames(){
@@ -204,7 +401,7 @@ public class ServerManager {
             return false;
         }
 
-        File[] saveFiles = savesDir.toFile().listFiles((dir, name) -> name != null && name.endsWith(".json"));
+        File[] saveFiles = savesDir.toFile().listFiles((dir, name) -> name != null && name.endsWith(GAME_SAVE_EXTENSION));
         if (saveFiles == null) {
             System.out.println("Loaded 0 games successfully, 0 failed.");
             return true;
@@ -216,7 +413,7 @@ public class ServerManager {
         for (File saveFile : saveFiles) {
             try {
                 String fileName = saveFile.getName();
-                String gameId = fileName.substring(0, fileName.length() - ".json".length());
+                String gameId = fileName.substring(0, fileName.length() - GAME_SAVE_EXTENSION.length());
 
                 if (gameId.isBlank()) {
                     throw new IllegalStateException("Invalid save file name: " + fileName);

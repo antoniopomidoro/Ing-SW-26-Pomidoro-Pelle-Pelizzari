@@ -5,17 +5,22 @@ import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.GameStateObserver;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.DTO;
+import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.network.dto.GameStateDTO;
 import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
+import it.polimi.ingsw.network.dto.TotemSelectionDTO;
 
 /**
  * Base class for network-facing views that observe the game state and relay events to clients.
  */
 public abstract class VirtualView implements GameStateObserver {
+    private static final String EMPTY_NICKNAME = "";
+
     protected Totem totem;
     protected GameController gameController;
     protected String gameId;
+    protected String nickname;
     /**
      * Assigns the totem associated with this view.
      *
@@ -99,6 +104,24 @@ public abstract class VirtualView implements GameStateObserver {
     }
 
     /**
+     * Sends a structured error payload to the client.
+     *
+     * @param error error dto to deliver
+     */
+    public void sendError(ErrorDTO error) {
+        sendToClient(error);
+    }
+
+    /**
+     * Sends current totem-selection status to the client.
+     *
+     * @param totemSelection totem-selection payload
+     */
+    public void sendTotemSelection(TotemSelectionDTO totemSelection) {
+        sendToClient(totemSelection);
+    }
+
+    /**
      * Transmits a DTO to the concrete client implementation.
      *
      * @param dto event payload to send
@@ -113,5 +136,23 @@ public abstract class VirtualView implements GameStateObserver {
 
     public void setGameId(String gameId) {
         this.gameId = gameId;
+    }
+
+    /**
+     * Stores the nickname associated with this network view.
+     *
+     * @param nickname player's nickname
+     */
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    /**
+     * Returns the nickname associated with this view.
+     *
+     * @return non-null nickname, or empty string when unset
+     */
+    public String getNickname() {
+        return nickname == null ? EMPTY_NICKNAME : nickname;
     }
 }

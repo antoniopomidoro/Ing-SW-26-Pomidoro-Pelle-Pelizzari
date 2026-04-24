@@ -15,10 +15,10 @@ public class App {
             RMIServer.start(RMI_PORT, address, serverManager);
             System.out.println("RMI server started");
         } catch (Exception e) {
-            System.err.println("[Server] Errore avvio RMI: " + e.getMessage());
+            System.err.println("[Server] Error starting RMI: " + e.getMessage());
         }
 
-        // TODO-BOOT-004: aggiungere shutdown hook per fermare SocketServer e deregistrare endpoint RMI.
-        System.out.println("[Server] Pronto. Socket:" + SOCKET_PORT + " RMI:" + RMI_PORT);
+        // TODO-BOOT-004: add shutdown hook to stop SocketServer and unregister RMI endpoint.
+        System.out.println("[Server] Ready. Socket:" + SOCKET_PORT + " RMI:" + RMI_PORT);
     }
 }
