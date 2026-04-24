@@ -1,8 +1,13 @@
 package it.polimi.ingsw.model.effects.contextual;
 
 import it.polimi.ingsw.model.cards.characters.CharacterEnum;
+import it.polimi.ingsw.model.cards.characters.Inventor;
 import it.polimi.ingsw.model.cards.characters.Tool;
+import it.polimi.ingsw.model.game.Age;
+import it.polimi.ingsw.model.game.GameState;
+import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.PlayerStats;
+import it.polimi.ingsw.model.player.Totem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,8 +17,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * Rule: Pairs = Total Inventors - Unique Tools (Valid only when Max 2 Inventors per Tool)
  */
 public class InventorPairTest {
+    Player player = new Player(Totem.RED_TOTEM, "Ramon");
 
     private PlayerStats stats;
+    private InventorPair inventorPair = new InventorPair();
 
     @BeforeEach
     void setUp() {
@@ -59,5 +66,49 @@ public class InventorPairTest {
         // Numerical Verification: 5 inventors - 3 unique tools = 2 pairs
         // Implementation Check: This reflects the "subtraction shortcut" under the max-2 constraint
         assertEquals(2, stats.getEqualInventorPair(), "5 inventors with 2 tools implies a 3rd person joined a pair");
+    }
+
+    @DisplayName("OnAddedToPlayer works correctly")
+    @Test
+    public void onAddedToPlayerCorrect() {
+        Inventor i1 = new Inventor(Age.AGE_1, Tool.BOWL);
+        Inventor i2 = new Inventor(Age.AGE_2, Tool.BOWL);
+        Inventor i3 = new Inventor(Age.AGE_3, Tool.BREAD);
+        i1.onAddedToPlayer(player);
+        i2.onAddedToPlayer(player);
+        i3.onAddedToPlayer(player);
+        inventorPair.onAddedToPlayer(player);
+        assertEquals(1, inventorPair.getOldPairs());
+        Inventor i4 = new Inventor(Age.AGE_2, Tool.BREAD);
+        i4.onAddedToPlayer(player);
+        inventorPair.onAddedToPlayer(player);
+        assertEquals(2, inventorPair.getOldPairs());
+    }
+
+    @DisplayName("ExecuteEffect works correctly")
+    @Test
+    public void executeEffectCorrect() {
+        GameState gs = new GameState();
+        Inventor i1 = new Inventor(Age.AGE_1, Tool.BOWL);
+        Inventor i2 = new Inventor(Age.AGE_2, Tool.BOWL);
+        Inventor i3 = new Inventor(Age.AGE_3, Tool.BREAD);
+        i1.onAddedToPlayer(player);
+        i2.onAddedToPlayer(player);
+        i3.onAddedToPlayer(player);
+        inventorPair.onAddedToPlayer(player);
+        int oldFood = player.getFood();
+
+        Inventor i4 = new Inventor(Age.AGE_2, Tool.BREAD);
+        i4.onAddedToPlayer(player);
+        boolean res = inventorPair.executeEffect(player, gs);
+        assertTrue(res);
+        assertEquals(oldFood + inventorPair.getBonus(), player.getFood());
+
+        oldFood = player.getFood();
+        Inventor i5 = new Inventor(Age.AGE_1, Tool.RING);
+        i5.onAddedToPlayer(player);
+        res = inventorPair.executeEffect(player, gs);
+        assertTrue(res);
+        assertEquals(oldFood, player.getFood());
     }
 }

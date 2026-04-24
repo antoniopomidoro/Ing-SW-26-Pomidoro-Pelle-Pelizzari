@@ -2,7 +2,7 @@ package it.polimi.ingsw.view;
 
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.GameEventDTO;
-
+import java.util.Scanner;
 public class ClientManager {
     private final ConnectionProtocol Connection;
     private final UserInterface userInterface;

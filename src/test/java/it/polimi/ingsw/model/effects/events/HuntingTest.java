@@ -11,6 +11,7 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 import it.polimi.ingsw.model.cards.characters.CharacterEnum;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -95,5 +96,14 @@ class HuntingTest {
         // Numerical Verification
         assertEquals(5, player.getFood(), "Food reward should match hunter count.");
         assertEquals(0, player.getPP(), "PP reward should be hunter count * age value.");
+    }
+
+    @DisplayName("applyEffect returns false if state or age is null")
+    @Test
+    void applyEffectNullValues() {
+        boolean res = hunting.applyEffect(null, Age.AGE_1);
+        assertFalse(res);
+        res = hunting.applyEffect(state, null);
+        assertFalse(res);
     }
 }

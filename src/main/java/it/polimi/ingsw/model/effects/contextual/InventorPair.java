@@ -14,6 +14,14 @@ public class InventorPair implements ContextualEffect {
     private int bonus;
     private int oldPairs;
 
+    protected int getOldPairs() {
+        return oldPairs;
+    }
+
+    protected int getBonus() {
+        return bonus;
+    }
+
     @Override
     public boolean onAddedToPlayer(Player p) {
         this.oldPairs = p.getStats().getEqualInventorPair();

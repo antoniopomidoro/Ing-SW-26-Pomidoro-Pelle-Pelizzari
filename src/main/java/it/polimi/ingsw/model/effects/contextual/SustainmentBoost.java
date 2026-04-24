@@ -17,6 +17,14 @@ public class SustainmentBoost implements ContextualEffect {
     @JsonProperty("gain")
     private int gain;
 
+    protected CharacterEnum getType() {
+        return type;
+    }
+
+    protected int getGain() {
+        return gain;
+    }
+
     @Override
     public boolean onAddedToPlayer(Player p) {
 

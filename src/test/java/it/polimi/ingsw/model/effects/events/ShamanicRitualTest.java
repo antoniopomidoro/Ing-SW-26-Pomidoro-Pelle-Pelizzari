@@ -10,6 +10,7 @@ import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -166,4 +167,12 @@ class ShamanicRitualTest {
         assertEquals(expectedNetPP, p3.getPP());
     }
 
+    @DisplayName("applyEffect returns false if state or age is null")
+    @Test
+    void applyEffectNullValues() {
+        boolean res = ritual.applyEffect(null, Age.AGE_1);
+        assertFalse(res);
+        res = ritual.applyEffect(state, null);
+        assertFalse(res);
+    }
 }
