@@ -43,9 +43,9 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
 
             try {
                 json =  reader.readLine();
-                if (json == null){
-                Thread.currentThread().interrupt();
-                break;}
+                if (json == null || json == ""){
+                continue;
+                }
                 else if(json.equalsIgnoreCase("pong")){
                     lastPing = clock.instant();
 
@@ -53,7 +53,7 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
                 NUDECommand(json);}
             } catch (IOException e) {
 
-                throw new RuntimeException(e);
+                System.err.println("ERRORE DI CONNESSIONE");
             }
 
 
