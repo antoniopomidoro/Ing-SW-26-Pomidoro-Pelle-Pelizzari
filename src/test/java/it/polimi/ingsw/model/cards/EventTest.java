@@ -57,7 +57,6 @@ public class EventTest {
     /** Tests for
      * - onDiscard()
      */
-    /* TODO scoppia */
     @DisplayName("The method works correctly if the effect is not null")
     @Test
     public void onDiscardCorrectValues() {
