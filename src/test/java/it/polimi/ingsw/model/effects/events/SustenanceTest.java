@@ -11,6 +11,7 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 import it.polimi.ingsw.model.cards.characters.CharacterEnum;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -138,5 +139,14 @@ private void setPrivateField(Object object, String fieldName, Object value) thro
 
         assertEquals(10, player.getFood(), "no food cost,because food boost>food needed");
         assertEquals(100, player.getPP(), "no pp penalty");
+    }
+
+    @DisplayName("applyEffect returns false if state or age is null")
+    @Test
+    void applyEffectNullValues() {
+        boolean res = sustenance.applyEffect(null, Age.AGE_1);
+        assertFalse(res);
+        res = sustenance.applyEffect(state, null);
+        assertFalse(res);
     }
 }
