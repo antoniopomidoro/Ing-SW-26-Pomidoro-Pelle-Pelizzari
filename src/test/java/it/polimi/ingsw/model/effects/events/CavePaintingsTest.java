@@ -9,6 +9,7 @@ import it.polimi.ingsw.model.board.*;
 import it.polimi.ingsw.model.cards.*;
 import it.polimi.ingsw.controller.GameConfig;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -92,6 +93,15 @@ public class CavePaintingsTest {
         cavePaintings.applyEffect(state, age2);
 
         assertEquals(8, player.getPP());
+    }
+
+    @DisplayName("applyEffect returns false if state or age is null")
+    @Test
+    void applyEffectNullValues() {
+        boolean res = cavePaintings.applyEffect(null, Age.AGE_1);
+        assertFalse(res);
+        res = cavePaintings.applyEffect(state, null);
+        assertFalse(res);
     }
 }
 
