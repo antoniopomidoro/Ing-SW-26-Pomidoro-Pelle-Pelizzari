@@ -47,7 +47,7 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
 
             try {
                 json =  reader.readLine();
-                if (json == null || json == ""){
+                if (json == null || json.equals("")){
                 continue;
                 }
                 else if(json.equalsIgnoreCase("pong")){

@@ -12,14 +12,14 @@ public class SocketDestroyer implements Runnable{
     Clock clock = Clock.systemDefaultZone();
     @Override
     public void run() {
-        while(true){
+        while(!Thread.currentThread().isInterrupted()){
             this.clients = dad.getClients();
             for (SocketClientHandler client : clients) {
-                synchronized(client.GetLastPing()){if(client.GetLastPing().plusSeconds(10).isBefore(clock.instant())){
+                if(client.GetLastPing().plusSeconds(10).isBefore(clock.instant())){
                     client.stop();
                     serverManager.disconnectPlayer(client);
                     clients.remove(client);
-                }}
+                }
             }
         try{
         wait(5000);} catch (InterruptedException e) {
