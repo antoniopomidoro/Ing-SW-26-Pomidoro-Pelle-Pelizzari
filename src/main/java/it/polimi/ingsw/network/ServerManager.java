@@ -7,6 +7,7 @@ import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.TotemSelectionDTO;
+import it.polimi.ingsw.network.lobby.LobbyQueue;
 import it.polimi.ingsw.network.socket.SocketServer;
 
 import java.io.File;
@@ -36,13 +37,17 @@ public class ServerManager {
     private final Map<String, Map<String, VirtualView>> pendingViews = new ConcurrentHashMap<>();
     private final Random random = new Random();
     private final NUDEqueue NUDEqueue;
+    private final LobbyQueue lobbyQueue;
 
     public ServerManager(){
         NUDEqueue = new NUDEqueue(this);
+        lobbyQueue = new LobbyQueue(this);
         NUDEPinger pinger = new NUDEPinger(this);
         Thread pingerThread = new Thread(pinger, "Pinger");
         Thread NUDEqueueThread = new Thread(NUDEqueue, "NUDEqueue");
+        Thread lobbyQueueThread = new Thread(lobbyQueue, "LobbyQueue");
         NUDEqueueThread.start();
+        lobbyQueueThread.start();
         pingerThread.start();
         loadSavedGames();
     }
@@ -465,6 +470,10 @@ public class ServerManager {
 
     public NUDEqueue getQueue(){
         return NUDEqueue;
+    }
+
+    public LobbyQueue getLobbyQueue() {
+        return lobbyQueue;
     }
 
 }

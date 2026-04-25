@@ -12,6 +12,10 @@ import it.polimi.ingsw.network.ServerManager;
 import it.polimi.ingsw.network.VirtualView;
 import it.polimi.ingsw.network.dto.DTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
+import it.polimi.ingsw.network.lobby.LobbyAnalyzer;
+import it.polimi.ingsw.network.lobby.LobbyCommand;
+
+import java.util.Optional;
 import java.time.Clock;
 import java.time.Instant;
 public class SocketClientHandler extends VirtualView implements Runnable  {
@@ -88,9 +92,13 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
     }
 
     public Boolean NUDECommand(String json) throws RemoteException {
-        serverManager.getQueue().add(json);
+        Optional<LobbyCommand> lobbyCmd = LobbyAnalyzer.parse(json, this);
+        if (lobbyCmd.isPresent()) {
+            serverManager.getLobbyQueue().add(lobbyCmd.get());
+        } else {
+            serverManager.getQueue().add(json);
+        }
         return true;
-
     }
     public Instant GetLastPing(){
         return lastPing;

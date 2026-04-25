@@ -1,14 +1,11 @@
 package it.polimi.ingsw.network.rmi;
 
-import it.polimi.ingsw.controller.Actions.Executor;
-import it.polimi.ingsw.controller.GameController;
-import it.polimi.ingsw.controller.NUDEAnalyzer;
-import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.LobbyState;
-import it.polimi.ingsw.network.NUDEqueue;
 import it.polimi.ingsw.network.ServerManager;
-import it.polimi.ingsw.network.dto.ErrorDTO;
+import it.polimi.ingsw.network.lobby.CreateGameCommand;
+import it.polimi.ingsw.network.lobby.EnterLobbyCommand;
+import it.polimi.ingsw.network.lobby.SelectTotemCommand;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -47,13 +44,11 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
     }
 
     @Override
-    public LobbyState createGame(String playerName, int requiredPlayers, Totem requestedTotem, ClientRMIInterface clientCallback) throws RemoteException {
-        try {
-        return serverManager.createGame(playerName, requiredPlayers, requestedTotem, getOrCreateHandler(clientCallback));
-        } catch (Exception e) {
-            System.err.println("Error during game creation: " + e.getMessage());
-            return LobbyState.WAITING;
-        }
+    public LobbyState createGame(String playerName, int requiredPlayers, Totem requestedTotem,
+                                 ClientRMIInterface clientCallback) throws RemoteException {
+        serverManager.getLobbyQueue().add(
+                new CreateGameCommand(playerName, requiredPlayers, requestedTotem, getOrCreateHandler(clientCallback)));
+        return LobbyState.WAITING;
     }
 
     /**
@@ -62,11 +57,8 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
     @Override
     public void enterLobby(String gameId, String playerName,
                            ClientRMIInterface clientCallback) throws RemoteException {
-        try {
-            serverManager.enterLobby(gameId, playerName, getOrCreateHandler(clientCallback));
-        } catch (Exception e) {
-            throw new RemoteException("Failed to enter lobby", e);
-        }
+        serverManager.getLobbyQueue().add(
+                new EnterLobbyCommand(gameId, playerName, getOrCreateHandler(clientCallback)));
     }
 
     /**
@@ -75,11 +67,8 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
     @Override
     public void selectTotem(String gameId, String playerName, Totem requestedTotem,
                             ClientRMIInterface clientCallback) throws RemoteException {
-        try {
-            serverManager.selectTotem(gameId, playerName, requestedTotem, getOrCreateHandler(clientCallback));
-        } catch (Exception e) {
-            throw new RemoteException("Failed to select totem", e);
-        }
+        serverManager.getLobbyQueue().add(
+                new SelectTotemCommand(gameId, playerName, requestedTotem, getOrCreateHandler(clientCallback)));
     }
 
     /**

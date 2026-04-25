@@ -15,7 +15,8 @@ public class LobbyRequest implements DTO {
 
     public enum Type {
         CREATE,
-        JOIN
+        ENTER_LOBBY,
+        SELECT_TOTEM
     }
 
     private Type type;
@@ -52,11 +53,17 @@ public class LobbyRequest implements DTO {
     }
 
     /**
-     * Creates a request to join an existing lobby.
-     * The requiredPlayers is deliberately 0 because the room size is already set.
+     * Creates a request to enter an existing lobby before totem selection.
      */
-    public static LobbyRequest joinExistingLobby(String gameId, String playerName, Totem requestedTotem) {
-        return new LobbyRequest(Type.JOIN, gameId, playerName, 0, requestedTotem);
+    public static LobbyRequest enterLobby(String gameId, String playerName) {
+        return new LobbyRequest(Type.ENTER_LOBBY, gameId, playerName, 0, null);
+    }
+
+    /**
+     * Creates a request to confirm totem selection in a lobby the player already entered.
+     */
+    public static LobbyRequest selectTotem(String gameId, String playerName, Totem requestedTotem) {
+        return new LobbyRequest(Type.SELECT_TOTEM, gameId, playerName, 0, requestedTotem);
     }
 
     // --- GETTERS ---
