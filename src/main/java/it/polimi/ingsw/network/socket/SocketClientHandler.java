@@ -56,7 +56,8 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
                 }else{
                 NUDECommand(json);}
             } catch (IOException e) {
-
+                serverManager.disconnectPlayer(this);
+                going = false;
                 System.err.println("ERRORE DI CONNESSIONE");
             }
 

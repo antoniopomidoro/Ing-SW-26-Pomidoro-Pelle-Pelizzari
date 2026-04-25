@@ -72,6 +72,11 @@ public class TotemSelectionDTO implements DTO {
     public Map<Totem, String> getTakenBy() {
         return takenBy;
     }
+
+    @Override
+    public void accept(DTOVisitor visitor) {
+        visitor.visit(this);
+    }
 }
 
 

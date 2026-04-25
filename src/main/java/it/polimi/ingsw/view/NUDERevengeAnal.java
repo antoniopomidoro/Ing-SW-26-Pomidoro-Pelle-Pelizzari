@@ -1,29 +1,18 @@
 package it.polimi.ingsw.view;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import it.polimi.ingsw.controller.Actions.Executor;
-import it.polimi.ingsw.network.dto.GameEventDTO;
+import it.polimi.ingsw.network.JacksonConfig;
+import it.polimi.ingsw.network.dto.DTO;
 
+import java.util.Optional;
 
 public class NUDERevengeAnal {
-    static ObjectMapper mapper = new ObjectMapper();
 
-
-    static{
-        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-    }
-
-    public static synchronized GameEventDTO action(String json){
+    public static Optional<DTO> action(String json) {
         try {
-            return mapper.readValue(json, GameEventDTO.class);
-        }       catch (JsonProcessingException e){
-            return null;
+            return Optional.of(JacksonConfig.mapper().readValue(json, DTO.class));
+        } catch (JsonProcessingException e) {
+            return Optional.empty();
         }
-
     }
-
 }

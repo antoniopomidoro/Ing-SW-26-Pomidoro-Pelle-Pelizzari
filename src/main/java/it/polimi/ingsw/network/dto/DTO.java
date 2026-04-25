@@ -17,4 +17,5 @@ import it.polimi.ingsw.network.dto.TotemSelectionDTO;
 		@JsonSubTypes.Type(value = ErrorDTO.class, name = "ERROR")
 })
 public interface DTO {
+    void accept(DTOVisitor visitor);
 }

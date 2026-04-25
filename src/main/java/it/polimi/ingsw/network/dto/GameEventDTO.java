@@ -3,6 +3,7 @@ package it.polimi.ingsw.network.dto;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.player.Totem;
 
 /**
@@ -10,20 +11,13 @@ import it.polimi.ingsw.model.player.Totem;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GameEventDTO implements DTO {
-    private final String eventType;
+    private final GameEvent.Type eventType;
     private final Totem culprit;
     private final GameStateDTO snapshot;
 
-    /**
-     * Creates an event payload.
-     *
-     * @param eventType event type identifier
-     * @param culprit totem responsible for the event
-     * @param snapshot optional game-state snapshot
-     */
     @JsonCreator
     public GameEventDTO(
-            @JsonProperty("eventType") String eventType,
+            @JsonProperty("eventType") GameEvent.Type eventType,
             @JsonProperty("culprit") Totem culprit,
             @JsonProperty("snapshot") GameStateDTO snapshot
     ) {
@@ -32,7 +26,7 @@ public class GameEventDTO implements DTO {
         this.snapshot = snapshot;
     }
 
-    public String getEventType() {
+    public GameEvent.Type getEventType() {
         return eventType;
     }
 
@@ -40,8 +34,12 @@ public class GameEventDTO implements DTO {
         return culprit;
     }
 
-
     public GameStateDTO getSnapshot() {
         return snapshot;
+    }
+
+    @Override
+    public void accept(DTOVisitor visitor) {
+        visitor.visit(this);
     }
 }

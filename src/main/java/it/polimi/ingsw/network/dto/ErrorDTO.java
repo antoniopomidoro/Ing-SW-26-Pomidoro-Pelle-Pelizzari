@@ -45,6 +45,10 @@ public class ErrorDTO implements DTO {
         return errorCode;
     }
 
+    @Override
+    public void accept(DTOVisitor visitor) {
+        visitor.visit(this);
+    }
 }
 
 

@@ -66,7 +66,7 @@ public abstract class VirtualView implements GameStateObserver {
             snapshot = GameStateDTO.from(gameController.getGameState());
         }
         GameEventDTO dto = new GameEventDTO(
-                event.getType() != null ? event.getType().name() : null,
+                event.getType(),
                 event.getCulprit() != null ? event.getCulprit().getId() : null,
                 snapshot
         );
