@@ -30,10 +30,10 @@ public class ClientManager {
         new Thread(dtoQueue, "dto-consumer").start();
 
         if (socket) {
-            connection = new SocketClient(dtoQueue);
+            connection = new SocketClient(dtoQueue, "localhost");
             new Thread((Runnable) connection, "socket-client").start();
         } else {
-            connection = new RMIclient(dtoQueue);
+            connection = new RMIclient(dtoQueue, "localhost");
         }
     }
 

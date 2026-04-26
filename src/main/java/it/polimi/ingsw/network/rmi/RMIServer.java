@@ -1,17 +1,15 @@
 package it.polimi.ingsw.network.rmi;
 
-import it.polimi.ingsw.model.player.Totem;
-import it.polimi.ingsw.network.LobbyState;
 import it.polimi.ingsw.network.ServerManager;
-import it.polimi.ingsw.network.lobby.CreateGameCommand;
-import it.polimi.ingsw.network.lobby.EnterLobbyCommand;
-import it.polimi.ingsw.network.lobby.SelectTotemCommand;
+import it.polimi.ingsw.network.lobby.LobbyAnalyzer;
+import it.polimi.ingsw.network.lobby.LobbyCommand;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.ExportException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -43,43 +41,21 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
                 cb -> new RMIClientHandler(cb, serverManager, () -> sessions.remove(cb)));
     }
 
-    @Override
-    public LobbyState createGame(String playerName, int requiredPlayers, Totem requestedTotem,
-                                 ClientRMIInterface clientCallback) throws RemoteException {
-        serverManager.getLobbyQueue().add(
-                new CreateGameCommand(playerName, requiredPlayers, requestedTotem, getOrCreateHandler(clientCallback)));
-        return LobbyState.WAITING;
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
-    public void enterLobby(String gameId, String playerName,
-                           ClientRMIInterface clientCallback) throws RemoteException {
-        serverManager.getLobbyQueue().add(
-                new EnterLobbyCommand(gameId, playerName, getOrCreateHandler(clientCallback)));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void selectTotem(String gameId, String playerName, Totem requestedTotem,
-                            ClientRMIInterface clientCallback) throws RemoteException {
-        serverManager.getLobbyQueue().add(
-                new SelectTotemCommand(gameId, playerName, requestedTotem, getOrCreateHandler(clientCallback)));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean sendNUDECommand(String jsonCommand) throws RemoteException {
-        if (jsonCommand == null || jsonCommand.isBlank()) {
-            throw new RemoteException("gameId and jsonCommand cannot be null o blank");
+    public boolean receive(String json, ClientRMIInterface callback) throws RemoteException {
+        if (json == null || json.isBlank()) {
+            throw new RemoteException("json cannot be null or blank");
         }
-        serverManager.getQueue().add(jsonCommand);
+        RMIClientHandler handler = getOrCreateHandler(callback);
+        Optional<LobbyCommand> lobbyCmd = LobbyAnalyzer.parse(json, handler);
+        if (lobbyCmd.isPresent()) {
+            serverManager.getLobbyQueue().add(lobbyCmd.get());
+        } else {
+            serverManager.getQueue().add(json);
+        }
         return true;
     }
 

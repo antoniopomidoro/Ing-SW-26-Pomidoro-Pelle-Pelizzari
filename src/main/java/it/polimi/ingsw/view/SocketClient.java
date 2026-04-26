@@ -10,7 +10,6 @@ import java.time.Instant;
 
 public class SocketClient implements ConnectionProtocol, Runnable {
 
-    private static final String HOST = "127.0.0.1";
     private static final int PORT = 1969;
     private static final int KEEP_ALIVE_INTERVAL_MS = 5000;
     private static final int CONNECTION_TIMEOUT_SECONDS = 10;
@@ -23,13 +22,13 @@ public class SocketClient implements ConnectionProtocol, Runnable {
     private final Socket socket;
     private final DTOQueue dtoQueue;
 
-    public SocketClient(DTOQueue dtoQueue) {
+    public SocketClient(DTOQueue dtoQueue, String host) {
         this.dtoQueue = dtoQueue;
         this.clock = Clock.systemDefaultZone();
         this.lastPing = clock.instant();
         socket = new Socket();
         try {
-            socket.connect(new java.net.InetSocketAddress(HOST, PORT));
+            socket.connect(new java.net.InetSocketAddress(host, PORT));
             reader = new BufferedReader(new java.io.InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream(), true);
             System.out.println("connessione riuscita");
