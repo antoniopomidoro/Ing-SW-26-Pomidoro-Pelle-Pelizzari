@@ -25,7 +25,7 @@ public class GainByCharacter implements ContextualEffect {
         int charCount = p.getStats().getCharacterCount(type);
         p.addPP(ppGain * charCount);
         p.addFood(foodGain * charCount);
-        return true;
+        return charCount > 0;
     }
 
     @Override

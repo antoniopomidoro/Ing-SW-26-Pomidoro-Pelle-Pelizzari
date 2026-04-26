@@ -31,12 +31,12 @@ public class InventorPair implements ContextualEffect {
     @Override
     public boolean executeEffect(Player p, GameState state) {
         int newPairs = p.getStats().getEqualInventorPair();
-        if(newPairs > oldPairs) {
-            int pairsGained = newPairs - oldPairs;
-            p.addFood(pairsGained * bonus);
+        if (newPairs > oldPairs) {
+            p.addFood((newPairs - oldPairs) * bonus);
             oldPairs = newPairs;
+            return true;
         }
-        return true;
+        return false;
     }
     public String toString(){
         return "GIVE " + bonus + " FOOD FOR EACH NEW INVENTOR PAIR COMPLETED";

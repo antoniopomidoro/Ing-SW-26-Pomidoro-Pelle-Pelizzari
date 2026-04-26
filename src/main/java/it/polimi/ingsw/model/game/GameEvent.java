@@ -36,6 +36,10 @@ public class GameEvent {
         BOARD_UPDATE(true),
         AGE_CHANGED(true),
         PLAYER_DISCONNECTED(true),
+        /** An event card was discarded and its effect resolved. */
+        EVENT_CARD_TRIGGERED(true),
+        /** At least one building effect was activated by a trigger. */
+        BUILDING_ACTIVATED(false),
 
         // --- PHASE TRANSITIONS ---
         /** Setup completed: initial board and food ready. */
@@ -50,6 +54,8 @@ public class GameEvent {
         PLAYER_TURN_STARTED(true),
         /** End turn: cards discarded, tiles freed, counter incremented. */
         END_TURN_COMPLETED(true),
+
+        STARTING_END_GAME(true),
         /** End game: final scores calculated. */
         END_GAME_COMPLETED(true);
 
@@ -74,6 +80,7 @@ public class GameEvent {
 
     private final Type type;
     private final Player culprit;
+    private final TriggerKey triggerKey;
 
     /**
      * Constructs a new broadcastable game event.
@@ -82,8 +89,20 @@ public class GameEvent {
      * @param culprit The {@link Player} associated with the event. Can be null if the event is not specific to a single player.
      */
     public GameEvent(Type type, Player culprit) {
+        this(type, culprit, null);
+    }
+
+    /**
+     * Constructs a game event carrying the trigger key that caused it (e.g. EVENT_CARD_TRIGGERED).
+     *
+     * @param type       The semantic type of the event.
+     * @param culprit    The player associated with the event, or null.
+     * @param triggerKey The trigger key that originated the event, or null.
+     */
+    public GameEvent(Type type, Player culprit, TriggerKey triggerKey) {
         this.type = type;
         this.culprit = culprit;
+        this.triggerKey = triggerKey;
     }
 
     /**
@@ -102,5 +121,14 @@ public class GameEvent {
      */
     public Player getCulprit() {
         return culprit;
+    }
+
+    /**
+     * Retrieves the trigger key associated with this event, if any.
+     *
+     * @return The {@link TriggerKey}, or null if not applicable.
+     */
+    public TriggerKey getTriggerKey() {
+        return triggerKey;
     }
 }

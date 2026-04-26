@@ -66,8 +66,12 @@ public class Decks {
         }
         for(Age a:Age.values()){
             List<Card> ageDeck = cards.get(a);
+            List<Building> ageBuildings = buildings.get(a);
             if (ageDeck != null) {
                 Collections.shuffle(ageDeck);
+            }
+            if (ageBuildings != null) {
+                Collections.shuffle(ageBuildings);
             }
         }
         return true;

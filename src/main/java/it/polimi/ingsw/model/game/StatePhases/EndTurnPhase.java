@@ -25,8 +25,9 @@ public class EndTurnPhase implements GamePhaseBehavior {
         Board board = context.getBoard();
         int maxTurns = context.getConfig().getMaxTurns();
         if (context.getTurn() >= maxTurns) {
+            board.discardBoard(context);
             context.raiseEvent(new GameEvent(
-                    GameEvent.Type.END_TURN_COMPLETED,
+                    GameEvent.Type.STARTING_END_GAME,
                     null
             ));
             context.setPhase(new EndGamePhase());

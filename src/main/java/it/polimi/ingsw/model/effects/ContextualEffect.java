@@ -31,7 +31,7 @@ import it.polimi.ingsw.model.player.*;
 })
 public interface ContextualEffect {
     default boolean executeEffect(Player p, GameState state){
-        return true;
+        return false;
     }
     default boolean onAddedToPlayer(Player p){
         return true;

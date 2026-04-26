@@ -67,6 +67,10 @@ public class StartTurnPhase implements GamePhaseBehavior {
         }
         // Trigger START_TURN buildings
         context.publishTrigger(TriggerKey.START_TURN);
+        context.raiseEvent(new GameEvent(
+                GameEvent.Type.START_TURN_COMPLETED,
+                null
+        ));
         return true;
 
     }
@@ -108,10 +112,7 @@ public class StartTurnPhase implements GamePhaseBehavior {
      */
     @Override
     public boolean nextPhase(GameState context){
-            context.raiseEvent(new GameEvent(
-                    GameEvent.Type.START_TURN_COMPLETED,
-                    null
-            ));
+
             context.setPhase(new TurnPhase());
             return true;
     }

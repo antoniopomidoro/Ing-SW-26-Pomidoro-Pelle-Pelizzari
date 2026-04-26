@@ -62,7 +62,7 @@ public class GameState {
         this.turnOrder = new ArrayList<>();
         this.orderTileOrder = new ArrayList<>(this.players);
         this.observers = new ArrayList<>();
-        setPhase(new SetupPhase());
+        restorePhase(new SetupPhase());
     }
 
     /**
@@ -418,21 +418,27 @@ public class GameState {
         if (key == null || orderTileOrder == null) {
             return false;
         }
+        boolean anyActivated = false;
         for (Player p : orderTileOrder) {
             if (p == null) {
                 continue;
             }
             List<Building> triggered = p.getBuildingsByTrigger(key);
             for (Building b : triggered) {
-                b.triggerBuildingEffect(p, this);
+                if (b.triggerBuildingEffect(p, this)) {
+                    anyActivated = true;
+                }
             }
+        }
+        if (anyActivated) {
+            raiseEvent(new GameEvent(GameEvent.Type.BUILDING_ACTIVATED, null));
         }
         return true;
     }
     public boolean disconnectPlayer(Player player) {
         if (player == null) return false;
         if (!orderTileOrder.contains(player)) {
-            throw new IllegalStateException("Player not in game");
+            return false;
         }
         player.setConnected(false);
         raiseEvent(new GameEvent(GameEvent.Type.PLAYER_DISCONNECTED, player));
@@ -447,7 +453,7 @@ public class GameState {
     public boolean reintegratePlayer(Player player) {
         if (player == null) return false;
         if (!orderTileOrder.contains(player)) {
-            throw new IllegalStateException("Unknown player");
+            return false;
         }
         player.setConnected(true);
         return true;

@@ -30,10 +30,14 @@ public class SetupPhase implements GamePhaseBehavior {
         int topCardsNumber = config.getTopCardsQuantity(context.getPlayers());
         int topBuildingsNumber = config.getBuildingsCount(context.getPlayers().size(), context.getAge().getValue());
         while (board.getBottomCards().size() < bottomCardsNumber) {
-            deck.popCard(context.getAge()).ifPresentOrElse(board::addBottomCard, () -> { throw new IllegalStateException("the deck is empty");});
+            var card = deck.popCard(context.getAge());
+            if (card.isEmpty()) return false;
+            board.addBottomCard(card.get());
         }
         while (board.getTopCards().size() < topCardsNumber) {
-            deck.popCard(context.getAge()).ifPresentOrElse(board::addTopCard, () -> { throw new IllegalStateException("the deck is empty");});
+            var card = deck.popCard(context.getAge());
+            if (card.isEmpty()) return false;
+            board.addTopCard(card.get());
         }
         board.addTopBuildings(deck.getBuildings(context.getAge(), topBuildingsNumber));
         // 3. Transition to START_TURN phase

@@ -61,10 +61,14 @@ public class Event extends Card {
      */
     @Override
     public boolean onDiscard(GameState state){
-        if (effect != null) {
-            return effect.executeEffect(state, triggerKey, this.getAge());
+        if (effect == null) {
+            return false;
         }
-        return false;
+        boolean result = effect.executeEffect(state, triggerKey, this.getAge());
+        if (result) {
+            state.raiseEvent(new GameEvent(GameEvent.Type.EVENT_CARD_TRIGGERED, null, triggerKey));
+        }
+        return result;
     }
     @Override
     public boolean isBuyable(){

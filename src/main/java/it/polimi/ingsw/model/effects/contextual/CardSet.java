@@ -27,10 +27,10 @@ public class CardSet implements ContextualEffect {
         int newSet = p.getStats().calculateSet();
         if (newSet > baseSet) {
             p.addFood((newSet - baseSet) * food);
-            baseSet = newSet; // Update baseSet to the new set value
+            baseSet = newSet;
             return true;
         }
-        return true;
+        return false;
     }
     @Override
     public String toString(){

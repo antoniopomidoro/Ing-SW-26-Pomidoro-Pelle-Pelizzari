@@ -130,6 +130,18 @@ public class Board {
         bottomCards.clear();
         return true;
     }
+    public boolean discardBoard(GameState state){
+        if (state == null) return false;
+        List<Card> allCards = new ArrayList<>();
+        allCards.addAll(topCards);
+        allCards.addAll(bottomCards);
+        allCards.stream()
+                .sorted(Comparator.comparingInt(Card::getResolutionPriority))
+                .forEach(c -> c.onDiscard(state));
+        topCards.clear();
+        bottomCards.clear();
+        return true;
+    }
     //getter for top and bottom cards and buildings, returns a copy of the list to avoid external modification
     public List<Card> getTopCards(){
         List<Card> sup = new ArrayList<>();
