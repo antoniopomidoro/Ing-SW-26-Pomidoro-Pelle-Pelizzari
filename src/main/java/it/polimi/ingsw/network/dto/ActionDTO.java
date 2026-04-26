@@ -46,4 +46,8 @@ public class ActionDTO implements DTO{
         return cardId;
     }
 
+    @Override
+    public void accept(DTOVisitor visitor) {
+        return;
+    }
 }

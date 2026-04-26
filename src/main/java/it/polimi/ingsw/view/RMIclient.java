@@ -25,4 +25,9 @@ public class RMIclient implements ConnectionProtocol, ClientRMIInterface {
     @Override
     public void ping() throws RemoteException {
     }
+
+    @Override
+    public Boolean isConnected() {
+        return null;
+    }
 }

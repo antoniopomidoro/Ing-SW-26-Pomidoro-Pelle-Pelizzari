@@ -2,6 +2,9 @@ package it.polimi.ingsw.view;
 
 import it.polimi.ingsw.model.player.Totem;
 
+import java.time.Clock;
+import java.time.Instant;
+
 public class ClientManager {
 
     private final ConnectionProtocol connection;
@@ -31,6 +34,13 @@ public class ClientManager {
             new Thread((Runnable) connection, "socket-client").start();
         } else {
             connection = new RMIclient(dtoQueue);
+        }
+    }
+
+    public static void main(){
+        ClientManager client = new ClientManager(false, true);
+        while(client.GetConnection().isConnected()){
+
         }
     }
 

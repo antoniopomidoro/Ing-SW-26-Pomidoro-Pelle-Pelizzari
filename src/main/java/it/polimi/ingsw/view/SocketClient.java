@@ -4,19 +4,26 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.time.Clock;
+import java.time.Instant;
+
 
 public class SocketClient implements ConnectionProtocol, Runnable {
 
     private boolean going;
     private BufferedReader reader;
     private PrintWriter writer;
-
+    private Clock clock;
+    private Instant lastPing;
     private final String host = "127.0.0.1";
     private final int port = 1969;
     private final Socket socket;
     private final DTOQueue dtoQueue;
 
     public SocketClient(DTOQueue dtoQueue) {
+        clock = Clock.systemDefaultZone();
+        lastPing = clock.instant();
+        send("ping");
         this.dtoQueue = dtoQueue;
         socket = new Socket();
         try {
@@ -43,11 +50,25 @@ public class SocketClient implements ConnectionProtocol, Runnable {
             try {
                 String line = reader.readLine();
                 if (line == null || line.isEmpty()) continue;
-                NUDERevengeAnal.action(line).ifPresent(dtoQueue::push);
+                else if(line.equalsIgnoreCase("ping")){ send("pong");
+                    lastPing = clock.instant();
+
+               }
+                else{NUDERevengeAnal.action(line).ifPresent(dtoQueue::push);}
             } catch (IOException e) {
                 System.err.println("ERRORE DI CONNESSIONE");
                 going = false;
             }
         }
+    }
+
+    public Instant getLastPing() {
+        return lastPing;
+    }
+
+    @Override
+    public Boolean isConnected() {
+        if(lastPing.plusSeconds(10).isBefore(clock.instant())) return false;
+        else{return true;}
     }
 }

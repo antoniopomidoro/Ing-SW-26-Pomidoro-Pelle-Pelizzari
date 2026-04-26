@@ -73,4 +73,9 @@ public class LobbyRequest implements DTO {
     public String getPlayerName() { return playerName; }
     public int getRequiredPlayers() { return requiredPlayers; }
     public Totem getRequestedTotem() { return requestedTotem; }
+
+    @Override
+    public void accept(DTOVisitor visitor) {
+        return;
+    }
 }
