@@ -78,25 +78,26 @@ public class Decks {
     }
 
 
-    //return the first card on the age deck if the deck is empty send an empty optional
-    public Optional<Card> popCard(Age a){
-        if(cards.get(a).isEmpty() && a.getValue() != Age.values()[a.ordinal()+1].getValue()){
-            return Optional.empty();
-        }else if(cards.get(a).isEmpty() && a.getValue() == Age.values()[a.ordinal()+1].getValue()){
-            //this else if statement hide the Age_3_final enum to external classes
-            if(cards.get(Age.values()[a.ordinal()+1]).isEmpty()){
-                return Optional.empty();
-            }else{
-                return Optional.of(cards.get(Age.values()[a.ordinal()+1]).removeLast());
-
+    public Optional<Card> popCard(Age a) {
+        List<Card> deck = cards.get(a);
+        if (deck == null) return Optional.empty();
+        if (!deck.isEmpty()) {
+            return Optional.of(deck.removeLast());
+        }
+        // If the next age shares the same numeric value it is an overflow deck for this age
+        if (a.hasNext() && a.getNext().getValue() == a.getValue()) {
+            List<Card> overflowDeck = cards.get(a.getNext());
+            if (overflowDeck != null && !overflowDeck.isEmpty()) {
+                return Optional.of(overflowDeck.removeLast());
             }
         }
-        else{
-            return Optional.of(cards.get(Age.values()[a.ordinal()]).removeLast());
-        }
+        return Optional.empty();
     }
 
     public List<Building> getBuildings(Age age, int n) {
+        if (buildings == null || buildings.get(age) == null) {
+            return Collections.emptyList();
+        }
         List<Building> sup = buildings.get(age).stream()
                 .limit(n)
                 .toList();

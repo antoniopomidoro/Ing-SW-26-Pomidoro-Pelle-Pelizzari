@@ -10,26 +10,26 @@ import java.time.Instant;
 
 public class SocketClient implements ConnectionProtocol, Runnable {
 
+    private static final String HOST = "127.0.0.1";
+    private static final int PORT = 1969;
     private static final int KEEP_ALIVE_INTERVAL_MS = 5000;
+    private static final int CONNECTION_TIMEOUT_SECONDS = 10;
 
     private volatile boolean going;
     private BufferedReader reader;
     private PrintWriter writer;
-    private Clock clock;
-    private Instant lastPing;
-    private final String host = "127.0.0.1";
-    private final int port = 1969;
+    private final Clock clock;
+    private volatile Instant lastPing;
     private final Socket socket;
     private final DTOQueue dtoQueue;
 
     public SocketClient(DTOQueue dtoQueue) {
-        clock = Clock.systemDefaultZone();
-        lastPing = clock.instant();
-        send("ping");
         this.dtoQueue = dtoQueue;
+        this.clock = Clock.systemDefaultZone();
+        this.lastPing = clock.instant();
         socket = new Socket();
         try {
-            socket.connect(new java.net.InetSocketAddress(host, port));
+            socket.connect(new java.net.InetSocketAddress(HOST, PORT));
             reader = new BufferedReader(new java.io.InputStreamReader(socket.getInputStream()));
             writer = new PrintWriter(socket.getOutputStream(), true);
             System.out.println("connessione riuscita");
@@ -70,11 +70,10 @@ public class SocketClient implements ConnectionProtocol, Runnable {
             try {
                 String line = reader.readLine();
                 if (line == null || line.isEmpty()) continue;
-                else if(line.equalsIgnoreCase("ping")){ send("pong");
-                    lastPing = clock.instant();
-
-               }
-                else{NUDERevengeAnal.action(line).ifPresent(dtoQueue::push);}
+                lastPing = clock.instant();
+                if (!line.equalsIgnoreCase("ping")) {
+                    NUDERevengeAnal.action(line).ifPresent(dtoQueue::push);
+                }
             } catch (IOException e) {
                 System.err.println("ERRORE DI CONNESSIONE");
                 going = false;
@@ -88,7 +87,6 @@ public class SocketClient implements ConnectionProtocol, Runnable {
 
     @Override
     public Boolean isConnected() {
-        if(lastPing.plusSeconds(10).isBefore(clock.instant())) return false;
-        else{return true;}
+        return !lastPing.plusSeconds(CONNECTION_TIMEOUT_SECONDS).isBefore(clock.instant());
     }
 }
