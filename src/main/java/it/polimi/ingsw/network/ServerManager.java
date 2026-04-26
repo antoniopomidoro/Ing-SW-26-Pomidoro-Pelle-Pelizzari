@@ -130,6 +130,7 @@ public class ServerManager {
         view.setGameId(gameId);
         view.setNickname(playerName);
 
+        broadcastWaiting(gameId, pending);
         broadcastTotemSelection(gameId, pending);
     }
 
@@ -164,10 +165,7 @@ public class ServerManager {
         view.setNickname(playerName);
 
         broadcastTotemSelection(gameId, pending);
-
-
-        // Notify the creator that they are waiting
-        view.sendLobbyUpdate(LobbyState.WAITING ,pending.getCurrentPlayerCount(), pending.getRequiredPlayers());
+        broadcastWaiting(gameId, pending);
         System.out.println("Lobby created with ID: " + gameId);
         return LobbyState.WAITING;
     }
@@ -218,6 +216,10 @@ public class ServerManager {
 
         broadcastTotemSelection(gameId, pending);
 
+        if (!pending.isFull()) {
+            broadcastWaiting(gameId, pending);
+        }
+
         if (pending.isFull()) {
             List<Player> players = pending.getJoinedPlayers();
             try {
@@ -228,13 +230,18 @@ public class ServerManager {
                     VirtualView vv = entry.getValue();
                     vv.setGameController(controller);
                     controller.getGameState().addObserver(vv);
+                }
+
+                for (VirtualView vv : views.values()) {
                     vv.sendLobbyUpdate(LobbyState.STARTING_GAME);
                 }
+
+                controller.start();
 
                 activeGames.put(gameId, controller);
                 pendingGames.remove(gameId);
                 pendingViews.remove(gameId);
-            } catch (IOException e) {
+            } catch (IllegalStateException e) {
                 ErrorDTO gameStartFailed = new ErrorDTO(ErrorDTO.ErrorCode.GAME_START_FAILED);
                 broadcastError(gameId, gameStartFailed);
                 pendingGames.remove(gameId);
@@ -258,6 +265,15 @@ public class ServerManager {
         }
 
         return pendingView == null ? fallbackView : pendingView;
+    }
+
+    private void broadcastWaiting(String gameId, PendingGame pending) {
+        int current = pending.getCurrentPlayerCount();
+        int required = pending.getRequiredPlayers();
+        viewRegistry.getOrDefault(gameId, Collections.emptyMap())
+                .values().forEach(v -> v.sendLobbyUpdate(LobbyState.WAITING, current, required));
+        pendingViews.getOrDefault(gameId, Collections.emptyMap())
+                .values().forEach(v -> v.sendLobbyUpdate(LobbyState.WAITING, current, required));
     }
 
     private void broadcastTotemSelection(String gameId, PendingGame pending) {

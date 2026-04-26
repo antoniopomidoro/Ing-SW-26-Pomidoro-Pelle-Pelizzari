@@ -7,7 +7,9 @@ import java.net.Socket;
 
 public class SocketClient implements ConnectionProtocol, Runnable {
 
-    private boolean going;
+    private static final int KEEP_ALIVE_INTERVAL_MS = 5000;
+
+    private volatile boolean going;
     private BufferedReader reader;
     private PrintWriter writer;
 
@@ -28,6 +30,23 @@ public class SocketClient implements ConnectionProtocol, Runnable {
             System.out.println("connection error");
         }
         going = true;
+        startKeepAlive();
+    }
+
+    private void startKeepAlive() {
+        Thread keepAlive = new Thread(() -> {
+            while (going) {
+                try {
+                    Thread.sleep(KEEP_ALIVE_INTERVAL_MS);
+                    send("pong");
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+        }, "socket-keepalive");
+        keepAlive.setDaemon(true);
+        keepAlive.start();
     }
 
     @Override
@@ -39,6 +58,7 @@ public class SocketClient implements ConnectionProtocol, Runnable {
 
     @Override
     public void run() {
+        if (reader == null) return;
         while (going) {
             try {
                 String line = reader.readLine();

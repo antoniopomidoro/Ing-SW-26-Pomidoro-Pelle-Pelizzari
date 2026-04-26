@@ -53,4 +53,11 @@ public interface ServerRMIInterface extends Remote {
      * @throws RemoteException if the remote call fails
      */
     LobbyState createGame(String playerName, int requiredPlayers, Totem requestedTotem, ClientRMIInterface clientCallback) throws RemoteException;
+
+    /**
+     * Liveness check: throws {@link RemoteException} if the server is unreachable.
+     *
+     * @throws RemoteException if the remote call fails
+     */
+    void ping() throws RemoteException;
 }

@@ -37,9 +37,9 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
         lastPing = clock.instant();
         String json;
         BufferedReader reader;
-        try{
+        try {
             reader = new BufferedReader(new java.io.InputStreamReader(client.getInputStream()));
-        }catch (Exception e){
+        } catch (IOException e) {
             System.err.println("Error initializing client reader: " + e.getMessage());
             return;
         }

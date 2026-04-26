@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.model.game.GameEvent;
+import it.polimi.ingsw.model.game.TriggerKey;
 import it.polimi.ingsw.model.player.Totem;
 
 /**
@@ -14,16 +15,19 @@ public class GameEventDTO implements DTO {
     private final GameEvent.Type eventType;
     private final Totem culprit;
     private final GameStateDTO snapshot;
+    private final TriggerKey triggeredBy;
 
     @JsonCreator
     public GameEventDTO(
             @JsonProperty("eventType") GameEvent.Type eventType,
             @JsonProperty("culprit") Totem culprit,
-            @JsonProperty("snapshot") GameStateDTO snapshot
+            @JsonProperty("snapshot") GameStateDTO snapshot,
+            @JsonProperty("triggeredBy") TriggerKey triggeredBy
     ) {
         this.eventType = eventType;
         this.culprit = culprit;
         this.snapshot = snapshot;
+        this.triggeredBy = triggeredBy;
     }
 
     public GameEvent.Type getEventType() {
@@ -36,6 +40,10 @@ public class GameEventDTO implements DTO {
 
     public GameStateDTO getSnapshot() {
         return snapshot;
+    }
+
+    public TriggerKey getTriggeredBy() {
+        return triggeredBy;
     }
 
     @Override

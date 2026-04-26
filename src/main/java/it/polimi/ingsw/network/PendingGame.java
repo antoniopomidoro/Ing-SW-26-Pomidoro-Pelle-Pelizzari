@@ -120,7 +120,7 @@ public class PendingGame {
     }
 
     public synchronized boolean isFull() {
-        return joinedPlayers.size() + pendingNicknames.size()>= requiredPlayers;
+        return getCurrentPlayerCount()>= requiredPlayers;
     }
 
     /**
@@ -145,7 +145,7 @@ public class PendingGame {
     }
 
     public synchronized int getCurrentPlayerCount() {
-        return joinedPlayers.size();
+        return joinedPlayers.size() + pendingNicknames.size();
     }
 
     /**

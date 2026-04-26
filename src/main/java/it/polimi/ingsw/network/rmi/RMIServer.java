@@ -84,6 +84,14 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void ping() throws RemoteException {
+        // intentionally empty: a successful return proves the server is reachable
+    }
+
+    /**
      * Starts and binds the RMI server.
      *
      * @param port registry port

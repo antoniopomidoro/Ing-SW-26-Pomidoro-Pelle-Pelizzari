@@ -10,6 +10,7 @@ import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.game.GameState;
 import it.polimi.ingsw.model.game.StatePhases.IllegalMoveException;
+import it.polimi.ingsw.model.game.StatePhases.SetupPhase;
 import it.polimi.ingsw.model.game.StatePhases.TurnPhase;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
@@ -37,10 +38,14 @@ public class GameController {
      * Initializes configuration, decks, and board from JSON data.
      *
      * @param players the players in the match
-     * @throws IOException if loading data from JSON fails
+     * @throws IllegalStateException if loading data from JSON fails
      */
-    public GameController(List<Player> players, String gameId) throws IOException {
-        jsonGod.loadAllData();
+    public GameController(List<Player> players, String gameId) {
+        try {
+            jsonGod.loadAllData();
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to load game data: " + e.getMessage(), e);
+        }
         int playerCount = players.size();
         GameConfig config = jsonGod.getConfig();
         Decks deck = setupDeck(jsonGod.getCards(), jsonGod.getBuildings(), playerCount, config);
@@ -189,6 +194,15 @@ public class GameController {
         } catch (IllegalMoveException e) {
             return false;
         }
+    }
+
+    /**
+     * Starts the game state machine by executing the initial {@link it.polimi.ingsw.model.game.StatePhases.SetupPhase}.
+     * Must be called only after all {@link it.polimi.ingsw.model.game.GameStateObserver}s have been registered,
+     * so that {@code SETUP_COMPLETED} and {@code START_TURN_COMPLETED} events reach every view.
+     */
+    public void start() {
+        state.setPhase(new SetupPhase());
     }
 
     /**

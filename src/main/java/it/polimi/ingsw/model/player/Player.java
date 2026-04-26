@@ -91,8 +91,19 @@ public class Player {
         return true;
     }
 
+    /**
+     * Deducts food from this player's supply.
+     *
+     * <p><strong>Precondition:</strong> the caller must verify affordability before invoking
+     * this method (e.g. {@code player.getFood() >= amount}). This is an internal model
+     * operation and is never invoked without prior validation.
+     *
+     * @param amount the quantity of food to remove; must be &ge; 0 and &le; current food balance
+     * @return {@code true} after the deduction succeeds
+     * @throws IllegalArgumentException if {@code amount < 0} or {@code amount > getFood()}
+     */
     public boolean payFood(int amount) {
-        if(amount < 0 || amount > food) {
+        if (amount < 0 || amount > food) {
             throw new IllegalArgumentException("Invalid food amount to pay");
         }
         this.food -= amount;
