@@ -29,6 +29,9 @@ public class CLIinterface implements UserInterface, Runnable {
     private final ClientManager user;
     private boolean going;
     private GameEventDTO state;
+    private LobbyUpdateDTO currentLobby;
+    private TotemSelectionDTO currentTotems;
+    private it.polimi.ingsw.model.player.Totem currentActivePlayer;
 
     public CLIinterface(ClientManager user) {
         this.user = user;
@@ -46,20 +49,32 @@ public class CLIinterface implements UserInterface, Runnable {
     @Override
     public synchronized boolean update(GameEventDTO state) {
         this.state = state;
+        if (state != null) {
+            if (state.getEventType() == it.polimi.ingsw.model.game.GameEvent.Type.PLAYER_TURN_STARTED && state.getCulprit() != null) {
+                this.currentActivePlayer = state.getCulprit();
+            } else if (state.getEventType() == it.polimi.ingsw.model.game.GameEvent.Type.END_TURN_COMPLETED
+                    || state.getEventType() == it.polimi.ingsw.model.game.GameEvent.Type.TURN_COMPLETED) {
+                this.currentActivePlayer = null;
+            }
+        }
         notifyAll();
         return true;
     }
 
 
     public synchronized boolean updateLobby(LobbyUpdateDTO lobbyUpdate) {
-        printLobby(lobbyUpdate);
+        this.currentLobby = lobbyUpdate;
+        System.out.flush();
+        printCombinedLobby();
         notifyAll();
         return true;
     }
 
 
     public synchronized boolean showTotemSelection(TotemSelectionDTO totemSelection) {
-        printTotemSelection(totemSelection);
+        this.currentTotems = totemSelection;
+        System.out.flush();
+        printCombinedLobby();
         notifyAll();
         return true;
     }
@@ -67,7 +82,7 @@ public class CLIinterface implements UserInterface, Runnable {
 
     public synchronized boolean showError(ErrorDTO error) {
         System.out.println();
-        System.out.println(RED + BOLD + "  ✖ ERRORE: " + error.getErrorCode().name() + RESET);
+        System.out.println(RED + BOLD + "  ✖ ERROR: " + error.getErrorCode().name() + RESET);
         System.out.println();
         return true;
     }
@@ -101,6 +116,9 @@ public class CLIinterface implements UserInterface, Runnable {
         printPlayers(snap);
         printSelfHand(snap);
         printPrompt();
+        if (user.getPlayerTotem() == snap.getActivePlayer()) {
+            System.out.println(BOLD + GREEN + "\n  ►►► IT IS YOUR TURN! ◄◄◄" + RESET);
+        }
         return true;
     }
 
@@ -113,19 +131,21 @@ public class CLIinterface implements UserInterface, Runnable {
                         RESET;
         System.out.println(banner);
 
+        it.polimi.ingsw.model.player.Totem displayActive = this.currentActivePlayer != null ? this.currentActivePlayer : snap.getActivePlayer();
+
         System.out.printf("%s Game:%s %s   %sAge:%s %s   %sTurn:%s %d   %sPhase:%s %s   %sActive:%s %s%n",
                 BOLD, RESET, safe(snap.getGameId()),
                 BOLD, RESET, snap.getAge() == null ? "-" : snap.getAge().name(),
                 BOLD, RESET, snap.getTurn(),
                 BOLD, RESET, safe(snap.getCurrentPhaseName()),
-                BOLD, RESET, snap.getActivePlayer() == null ? "-" : snap.getActivePlayer().name());
+                BOLD, RESET, displayActive == null ? "-" : displayActive.name());
         System.out.println(DIM + "──────────────────────────────────────────────────────────────────" + RESET);
     }
 
     private void printBoard(GameStateDTO snap) {
         var board = snap.getBoard();
         if (board == null) {
-            System.out.println(DIM + "(board non disponibile)" + RESET);
+            System.out.println(DIM + "(board not available)" + RESET);
             return;
         }
 
@@ -148,7 +168,7 @@ public class CLIinterface implements UserInterface, Runnable {
 
     private void printCardsRow(List<Card> cards) {
         if (cards == null || cards.isEmpty()) {
-            System.out.println(DIM + "  (vuoto)" + RESET);
+            System.out.println(DIM + "  (empty)" + RESET);
             return;
         }
         // Render each card as a 16-wide, 5-line "card box".
@@ -160,7 +180,7 @@ public class CLIinterface implements UserInterface, Runnable {
 
     private void printBuildingsRow(List<Building> buildings) {
         if (buildings == null || buildings.isEmpty()) {
-            System.out.println(DIM + "  (vuoto)" + RESET);
+            System.out.println(DIM + "  (empty)" + RESET);
             return;
         }
         int n = buildings.size();
@@ -171,7 +191,7 @@ public class CLIinterface implements UserInterface, Runnable {
 
     private void printTilesRow(List<Tile> tiles) {
         if (tiles == null || tiles.isEmpty()) {
-            System.out.println(DIM + "  (vuoto)" + RESET);
+            System.out.println(DIM + "  (empty)" + RESET);
             return;
         }
         int n = tiles.size();
@@ -192,28 +212,36 @@ public class CLIinterface implements UserInterface, Runnable {
 
     private String[] renderCardBox(Card card, int index) {
         String type = card == null || card.getCategory() == null ? "?" : card.getCategory().name();
-        String age  = card == null || card.getAge() == null ? "-" : card.getAge().name();
         String id   = card == null ? "-" : String.valueOf(card.getCardId());
         String color = colorForType(type);
+
+        List<String> chunks = splitText(card != null ? card.toString() : "?", 36, 4);
+
         return new String[]{
-                color + "┌──────────────┐" + RESET,
-                color + "│ " + pad("[" + index + "] " + age, 12) + " │" + RESET,
-                color + "│ " + pad(type,                    12) + " │" + RESET,
-                color + "│ " + pad("id:" + id,              12) + " │" + RESET,
-                color + "└──────────────┘" + RESET
+                color + "┌" + "─".repeat(38) + "┐" + RESET,
+                color + "│ " + pad("[" + index + "] id:" + id, 36) + " │" + RESET,
+                color + "│ " + pad(chunks.get(0), 36) + " │" + RESET,
+                color + "│ " + pad(chunks.get(1), 36) + " │" + RESET,
+                color + "│ " + pad(chunks.get(2), 36) + " │" + RESET,
+                color + "│ " + pad(chunks.get(3), 36) + " │" + RESET,
+                color + "└" + "─".repeat(38) + "┘" + RESET
         };
     }
 
     private String[] renderBuildingBox(Building b, int index) {
-        String age  = b == null || b.getAge() == null ? "-" : b.getAge().name();
-        String pp   = b == null ? "?" : String.valueOf(b.getPP());
-        String food = b == null ? "?" : String.valueOf(b.getFoodCost());
+        String color = GREEN;
+        String id = b == null ? "-" : String.valueOf(b.getCardId());
+
+        List<String> chunks = splitText(b != null ? b.toString() : "?", 36, 4);
+
         return new String[]{
-                GREEN + "┌──────────────┐" + RESET,
-                GREEN + "│ " + pad("[" + index + "] " + age, 12) + " │" + RESET,
-                GREEN + "│ " + pad("PP:" + pp,               12) + " │" + RESET,
-                GREEN + "│ " + pad("Food:" + food,           12) + " │" + RESET,
-                GREEN + "└──────────────┘" + RESET
+                color + "┌" + "─".repeat(38) + "┐" + RESET,
+                color + "│ " + pad("[" + index + "] id:" + id, 36) + " │" + RESET,
+                color + "│ " + pad(chunks.get(0), 36) + " │" + RESET,
+                color + "│ " + pad(chunks.get(1), 36) + " │" + RESET,
+                color + "│ " + pad(chunks.get(2), 36) + " │" + RESET,
+                color + "│ " + pad(chunks.get(3), 36) + " │" + RESET,
+                color + "└" + "─".repeat(38) + "┘" + RESET
         };
     }
 
@@ -223,30 +251,43 @@ public class CLIinterface implements UserInterface, Runnable {
         String up  = t == null ? "?" : String.valueOf(t.getUpperPicks());
         String bp  = t == null ? "?" : String.valueOf(t.getBottomPicks());
         return new String[]{
-                MAG + "┌──────────────┐" + RESET,
-                MAG + "│ " + pad("Tile [" + index + "]", 12) + " │" + RESET,
-                MAG + "│ " + pad("U:" + up + " B:" + bp,12) + " │" + RESET,
-                MAG + "│ " + pad("food:" + fb,           12) + " │" + RESET,
-                MAG + "│ " + pad(occ,                    12) + " │" + RESET,
-                MAG + "└──────────────┘" + RESET
+                MAG + "┌" + "─".repeat(38) + "┐" + RESET,
+                MAG + "│ " + pad("Tile [" + index + "]", 36) + " │" + RESET,
+                MAG + "│ " + pad("U:" + up + " B:" + bp, 36) + " │" + RESET,
+                MAG + "│ " + pad("food:" + fb,           36) + " │" + RESET,
+                MAG + "│ " + pad(occ,                    36) + " │" + RESET,
+                MAG + "│ " + pad("",                     36) + " │" + RESET,
+                MAG + "└" + "─".repeat(38) + "┘" + RESET
         };
     }
 
     private void printPlayers(GameStateDTO snap) {
         var players = snap.getPlayers();
         if (players == null || players.isEmpty()) return;
-        System.out.println(BOLD + BLUE + "▼ GIOCATORI" + RESET);
+        System.out.println(BOLD + BLUE + "▼ PLAYERS" + RESET);
         System.out.printf("  %-3s %-12s %-6s %-4s %-4s %-6s %-9s%n",
                 "TT", "Nick", "Conn", "PP", "Food", "Stars", "Cards/Build");
         System.out.println(DIM + "  ───────────────────────────────────────────────────────────" + RESET);
+        it.polimi.ingsw.model.player.Totem displayActive = this.currentActivePlayer != null ? this.currentActivePlayer : snap.getActivePlayer();
+
+
         for (var p : players) {
             String tt = p.getTotem() == null ? "-" : p.getTotem().name().substring(0, Math.min(3, p.getTotem().name().length()));
             String conn = p.isConnected() ? GREEN + "ON " + RESET : RED + "OFF" + RESET;
             int cards = p.getCards() == null ? 0 : p.getCards().size();
             int builds = p.getBuildings() == null ? 0 : p.getBuildings().size();
-            System.out.printf("  %-3s %-12s %-6s %-4d %-4d %-6d %d/%d%n",
-                    tt, safe(p.getNickname()), conn, p.getPp(), p.getFood(), p.getStars(), cards, builds);
+
+            boolean isActive = displayActive != null && displayActive.equals(p.getTotem());
+            String activeMarker = isActive ? YELLOW + " [ACTIVE]" + RESET : "";
+
+
+
+            System.out.printf("  %-3s %-12s %-6s %-4d %-4d %-6d %d/%d%s%n",
+                    tt, safe(p.getNickname()), conn, p.getPp(), p.getFood(), p.getStars(), cards, builds, activeMarker);
         }
+
+
+
         System.out.println();
     }
 
@@ -256,10 +297,10 @@ public class CLIinterface implements UserInterface, Runnable {
                 .filter(p -> user.getPlayerTotem().equals(p.getTotem()))
                 .findFirst()
                 .ifPresent(self -> {
-                    System.out.println(BOLD + CYAN + "▼ LA TUA MANO" + RESET);
-                    System.out.println("  Carte:");
+                    System.out.println(BOLD + CYAN + "▼ YOUR HAND" + RESET);
+                    System.out.println("  Cards:");
                     printCardsRow(self.getCards());
-                    System.out.println("  Edifici:");
+                    System.out.println("  Buildings:");
                     printBuildingsRow(self.getBuildings());
                     System.out.println();
                 });
@@ -267,7 +308,7 @@ public class CLIinterface implements UserInterface, Runnable {
 
     private void printPrompt() {
         System.out.println(DIM + "──────────────────────────────────────────────────────────────────" + RESET);
-        System.out.println(BOLD + "Comandi:" + RESET);
+        System.out.println(BOLD + "Commands:" + RESET);
         System.out.println("  topcard <i> | bottomcard <i> | topbuild <i> | bottombuild <i> | tile <i>");
         System.out.print(BOLD + "> " + RESET);
     }
@@ -275,62 +316,75 @@ public class CLIinterface implements UserInterface, Runnable {
     // ============================================================
     //                    LOBBY / TOTEM / UTIL
     // ============================================================
-    private void printLobby(LobbyUpdateDTO lobby) {
+    private void printCombinedLobby() {
         clearScreen();
-        System.out.println(BOLD + CYAN + "╔════════════════════ LOBBY ════════════════════╗" + RESET);
-        System.out.printf("  %sStato:%s %s%n", BOLD, RESET, lobby.getLobbyState());
-        System.out.printf("  %sGame ID:%s %s%n", BOLD, RESET, safe(lobby.getIdGame()));
-        if (lobby.getRequiredPlayers() > 0) {
-            System.out.printf("  %sGiocatori:%s %d / %d%n", BOLD, RESET,
-                    lobby.getCurrentPlayers(), lobby.getRequiredPlayers());
+        if (currentLobby != null) {
+            System.out.println(BOLD + CYAN + "╔════════════════════ LOBBY ════════════════════╗" + RESET);
+            System.out.printf("  %sState:%s %s%n", BOLD, RESET, currentLobby.getLobbyState());
+            System.out.printf("  %sGame ID:%s %s%n", BOLD, RESET, safe(currentLobby.getIdGame()));
+            if (currentLobby.getRequiredPlayers() > 0) {
+                System.out.printf("  %sPlayers:%s %d / %d%n", BOLD, RESET,
+                        currentLobby.getCurrentPlayers(), currentLobby.getRequiredPlayers());
+            }
+            if (currentLobby.getSnapshot() != null) {
+                System.out.println(DIM + "  (snapshot attached — game is about to start)" + RESET);
+            }
+            System.out.println(BOLD + CYAN + "╚════════════════════════════════════════════════╝" + RESET);
         }
-        if (lobby.getSnapshot() != null) {
-            System.out.println(DIM + "  (snapshot allegato — la partita sta per partire)" + RESET);
+
+        if (currentTotems != null) {
+            System.out.println();
+            System.out.println(BOLD + YELLOW + "▼ TOTEM SELECTION (game " + safe(currentTotems.getGameId()) + ")" + RESET);
+            System.out.println("  Available: " + GREEN + currentTotems.getAvailableTotems() + RESET);
+            if (!currentTotems.getTakenBy().isEmpty()) {
+                System.out.println("  Already taken:");
+                for (Map.Entry<?, ?> e : currentTotems.getTakenBy().entrySet()) {
+                    System.out.println("    - " + e.getKey() + DIM + " → " + RESET + e.getValue());
+                }
+            }
+            System.out.println();
         }
-        System.out.println(BOLD + CYAN + "╚════════════════════════════════════════════════╝" + RESET);
+    }
+
+    private void printLobby(LobbyUpdateDTO lobby) {
+        // Obsolete, keeping for compatibility if strictly needed, but replaced by printCombinedLobby
     }
 
     private void printTotemSelection(TotemSelectionDTO sel) {
-        System.out.println();
-        System.out.println(BOLD + YELLOW + "▼ SELEZIONE TOTEM (game " + safe(sel.getGameId()) + ")" + RESET);
-        System.out.println("  Disponibili: " + GREEN + sel.getAvailableTotems() + RESET);
-        if (!sel.getTakenBy().isEmpty()) {
-            System.out.println("  Già presi:");
-            for (Map.Entry<?, ?> e : sel.getTakenBy().entrySet()) {
-                System.out.println("    - " + e.getKey() + DIM + " → " + RESET + e.getValue());
-            }
-        }
-        System.out.println();
+        // Obsolete, replaced by printCombinedLobby
     }
 
     // ============================================================
-    //                    UserInterface — 9 new methods
+    //                    UserInterface
     // ============================================================
 
     @Override
     public void onGameError(GameEventDTO dto) {
         System.out.println();
-        System.out.println(RED + BOLD + "  ✖ ERRORE PARTITA: " + (dto.getEventType() != null ? dto.getEventType().name() : "?") + RESET);
+        System.out.println(RED + BOLD + "  ✖ GAME ERROR: " + (dto.getEventType() != null ? dto.getEventType().name() : "?") + RESET);
         System.out.println();
     }
 
     @Override
     public synchronized void onPlayerTurnStarted(GameEventDTO dto) {
+        if (dto.getCulprit() != null) {
+            this.currentActivePlayer = dto.getCulprit();
+        }
         update(dto);
-        System.out.println(BOLD + GREEN + "  ▶ Turno di: " + (dto.getCulprit() != null ? dto.getCulprit().name() : "?") + RESET);
+        System.out.println(BOLD + GREEN + "  ▶ Turn of: " + (dto.getCulprit() != null ? dto.getCulprit().name() : "?") + RESET);
     }
 
     @Override
     public synchronized void onPlayerDisconnected(GameEventDTO dto) {
         System.out.println();
-        System.out.println(RED + "  ⚠ Giocatore disconnesso: " + (dto.getCulprit() != null ? dto.getCulprit().name() : "?") + RESET);
+        System.out.println(RED + "  ⚠ Player disconnected: " + (dto.getCulprit() != null ? dto.getCulprit().name() : "?") + RESET);
         System.out.println();
     }
 
     @Override
     public synchronized void onGameEnded(GameEventDTO dto) {
         update(dto);
-        System.out.println(BOLD + CYAN + "  ★ PARTITA TERMINATA ★" + RESET);
+        System.out.println(BOLD + CYAN + "  ★ GAME ENDED ★" + RESET);
     }
 
     @Override
@@ -355,14 +409,14 @@ public class CLIinterface implements UserInterface, Runnable {
             this.state = new GameEventDTO(GameEvent.Type.BOARD_UPDATE, null, dto.getSnapshot(), null);
             notifyAll();
         }
-        System.out.println(BOLD + YELLOW + "  ↩ Reconnessione alla partita in corso..." + RESET);
+        System.out.println(BOLD + YELLOW + "  ↩ Reconnecting to ongoing game..." + RESET);
     }
 
     @Override
     public synchronized void onGameStarting(LobbyUpdateDTO dto) {
         if (dto.getIdGame() != null) user.setId(dto.getIdGame());
         updateLobby(dto);
-        System.out.println(BOLD + GREEN + "  ✔ La partita sta per iniziare!" + RESET);
+        System.out.println(BOLD + GREEN + "  ✔ The game is about to start!" + RESET);
     }
 
     @Override
@@ -410,5 +464,31 @@ public class CLIinterface implements UserInterface, Runnable {
         // Clear & home cursor — opzionale, utile su terminali ANSI.
         System.out.print("\u001B[H\u001B[2J");
         System.out.flush();
+    }
+
+    private List<String> splitText(String text, int maxLen, int maxLines) {
+        List<String> res = new java.util.ArrayList<>();
+        if (text == null) text = "";
+        text = text.replace("\n", " ").trim();
+        while (!text.isEmpty() && res.size() < maxLines - 1) {
+            if (text.length() <= maxLen) {
+                res.add(text);
+                text = "";
+            } else {
+                int splitAt = text.lastIndexOf(' ', maxLen);
+                if (splitAt == -1) splitAt = maxLen;
+                res.add(text.substring(0, splitAt));
+                text = text.substring(splitAt).trim();
+            }
+        }
+        if (!text.isEmpty() && res.size() < maxLines) {
+            if (text.length() > maxLen) {
+                res.add(text.substring(0, maxLen - 3) + "...");
+            } else {
+                res.add(text);
+            }
+        }
+        while (res.size() < maxLines) res.add("");
+        return res;
     }
 }

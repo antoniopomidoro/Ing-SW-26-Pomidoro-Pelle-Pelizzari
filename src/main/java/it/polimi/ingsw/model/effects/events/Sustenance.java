@@ -25,4 +25,7 @@ public class Sustenance implements EventEffect {
         }
         return true;
     }
+    public String toString(){
+        return "SUSTAINMENT";
+    }
 }

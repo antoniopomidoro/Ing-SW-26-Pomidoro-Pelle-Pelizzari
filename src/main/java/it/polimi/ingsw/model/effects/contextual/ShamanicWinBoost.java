@@ -16,6 +16,6 @@ public class ShamanicWinBoost implements ContextualEffect {
         return true;
     }
     public String toString(){
-        return "BOOST PP FROM SHAMANIC EVENT WIN X " + bonus;
+        return "SHAMANIC EVENT WIN X " + bonus;
     }
 }

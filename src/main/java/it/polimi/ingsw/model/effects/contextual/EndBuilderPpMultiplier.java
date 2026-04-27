@@ -22,6 +22,6 @@ public class EndBuilderPpMultiplier implements ContextualEffect {
     }
     @Override
     public String toString(){
-        return "MULTIPLY BUILDER PP BY " + mult;
+        return "MULT BUILDER PP BY " + mult;
     }
 }

@@ -34,6 +34,6 @@ public class CardSet implements ContextualEffect {
     }
     @Override
     public String toString(){
-        return " GIVE FOOD EVERY 6 CARDS SET COMPLETED ";
+        return "FOOD EVERY 6 CARDS SET";
     }
 }
