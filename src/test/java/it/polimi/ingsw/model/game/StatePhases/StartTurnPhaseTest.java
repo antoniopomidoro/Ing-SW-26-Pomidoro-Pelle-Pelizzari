@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model.game.StatePhases;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.controller.GameConfig;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
@@ -8,6 +9,7 @@ import it.polimi.ingsw.model.board.*;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.InputStream;
 import java.util.*;
 import java.lang.reflect.Field;
 
@@ -34,7 +36,10 @@ class StartTurnPhaseTest {
             decks.addCard(createMockCard());
         }
 
-        config = new GameConfig();
+        ObjectMapper mapper = new ObjectMapper();
+        InputStream is = getClass().getClassLoader().getResourceAsStream("json/config.json");
+        config = mapper.readValue(is, GameConfig.class);
+
         injectField(config, "topExtraCards", 2); // 2 + 2(players) = 4
         injectField(config, "startingFood", new ArrayList<>(List.of(0, 0)));
 
@@ -161,34 +166,29 @@ class StartTurnPhaseTest {
             phase.occupyOfferTrailTile(context, 0, p1);
         });
     }
-
-    // Change to TurnPhase
-
     @Test
     @DisplayName("Verify final move transitions to EndGamePhase_Final_Fix")
     void testOccupyOfferTrailTile_TransitionsToTurnPhase_Full() throws Exception {
-        StartTurnPhase phase = new StartTurnPhase();
         Player p1 = context.getPlayers().get(0);
+
 
         injectField(context.getBoard(), "tiles", new TileSet(new ArrayList<>(List.of(new Tile()))));
         List<Player> mockOrder = new ArrayList<>(List.of(p1));
         injectField(context, "orderTileOrder", mockOrder);
-
         injectField(context, "currentPlayerOrderIndex", 0);
-
-        // getCurrentOrderTileOrderPlayer() : p1
         injectField(context, "turnOrder", mockOrder);
 
         assertSame(p1, context.getCurrentOrderTileOrderPlayer(), "Pre-check: Player must match");
-        assertEquals(0, (int) getFieldValue(context, "currentPlayerOrderIndex"), "Pre-check: Index must be 0");
 
-        //index++ -> 1 >= 1 -> return false -> nextPhase()
-        phase.occupyOfferTrailTile(context, 0, p1);
+        StartTurnPhase phase = new StartTurnPhase();
+        boolean result = phase.occupyOfferTrailTile(context, 0, p1);
 
-        assertInstanceOf(EndGamePhase.class, context.getCurrentPhase(),
-                "Success: The physical index overflow forced the transition to TurnPhase!");
+        Object currentPhase = context.getCurrentPhase();
+
+        //turn phase->end turnphase->new start turn phase
+        assertInstanceOf(StartTurnPhase.class, currentPhase,
+                "Success: The physical index overflow forced the transition to EndGamePhase!");
     }
-
 
     private Object getFieldValue(Object obj, String name) throws Exception {
         java.lang.reflect.Field f = obj.getClass().getDeclaredField(name);

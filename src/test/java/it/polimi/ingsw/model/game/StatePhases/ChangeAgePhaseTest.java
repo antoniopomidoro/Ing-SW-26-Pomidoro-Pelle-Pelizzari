@@ -1,4 +1,5 @@
 package it.polimi.ingsw.model.game.StatePhases;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.controller.GameConfig;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
@@ -7,6 +8,7 @@ import it.polimi.ingsw.model.board.*;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.InputStream;
 import java.util.*;
 import java.lang.reflect.Field;
 class ChangeAgePhaseTest {
@@ -39,17 +41,18 @@ class ChangeAgePhaseTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        players = new ArrayList<>(List.of(new Player(Totem.BLUE_TOTEM, "P1")));
+        players = new ArrayList<>(List.of(new Player(Totem.BLUE_TOTEM, "P1"),new Player(Totem.RED_TOTEM, "P2")));
         board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
         config = new GameConfig();
-
 
         decks = new Decks(new ArrayList<>(), new ArrayList<>());
 
         // inject tool
         injectDecksData(decks);
 
-        injectField(config, "startingFood", new ArrayList<>(List.of(10)));
+        ObjectMapper mapper = new ObjectMapper();
+        InputStream is = getClass().getClassLoader().getResourceAsStream("json/config.json");
+        config = mapper.readValue(is, GameConfig.class);
 
         // 4. Inilization GameState,now run SetupPhase
         context = new GameState(players, config, board, decks,"testId");

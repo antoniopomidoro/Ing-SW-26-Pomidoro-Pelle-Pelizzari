@@ -43,10 +43,8 @@ class TurnPhaseTest {
     @Test
     @DisplayName("Verify TurnPhase phase change")
     void testTurnPhaseExecution() throws Exception {
-
         Player realPlayer = context.getTurnOrder().get(0);
         safeInjectField(realPlayer, "isConnected", true); //
-
 
         Tile occupiedTile = new Tile();
         safeInjectField(occupiedTile, "occupier", realPlayer);
@@ -73,13 +71,18 @@ class TurnPhaseTest {
         // start point
         safeInjectField(context, "currentTileIndex", 0);
 
+        StartTurnPhase phase = new StartTurnPhase();
+        safeInjectField(context,"currentPhase", phase);
+
         assertTrue(context.getCurrentPhase() instanceof StartTurnPhase);//before execute:playerturnphase
         TurnPhase turnPhase = new TurnPhase();
+
         boolean result = turnPhase.execute(context);
 
         assertTrue(result, "execute return true");
         // hit index=1 Tile，next index: 1+1=2
         assertEquals(2, context.getCurrentTileIndex(), "wrong index");
+        System.out.println(context.getCurrentPhase().getClass().getSimpleName());
         assertTrue(context.getCurrentPhase() instanceof PlayerTurnPhase, "wrong phase");
     }
     /**
