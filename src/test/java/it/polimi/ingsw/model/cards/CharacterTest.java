@@ -16,7 +16,7 @@ public class CharacterTest {
     }
 
     private DummyCharacter character = new DummyCharacter();
-    private Player player = new Player(Totem.RED_TOTEM, "nick");
+    private Player player = new Player(Totem.RED, "nick");
 
     /*
      * TEST METHODS

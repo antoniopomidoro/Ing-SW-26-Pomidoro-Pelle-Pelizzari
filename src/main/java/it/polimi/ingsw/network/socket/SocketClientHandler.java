@@ -6,8 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import it.polimi.ingsw.controller.Actions.Executor;
 import it.polimi.ingsw.controller.GameController;
-import it.polimi.ingsw.controller.NUDEAnalyzer;
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.network.JacksonConfig;
 import it.polimi.ingsw.network.ServerManager;
 import it.polimi.ingsw.network.VirtualView;
 import it.polimi.ingsw.network.dto.DTO;
@@ -43,6 +43,8 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
             System.err.println("Error initializing client reader: " + e.getMessage());
             return;
         }
+        serverManager.registerRawClient(this);
+        ping();
         while(going){
 
             try {
@@ -68,7 +70,7 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
 
     @Override
     protected synchronized void sendToClient(DTO dto) {
-        try{String payload = NUDEAnalyzer.asJson(dto);
+        try{String payload = JacksonConfig.mapper().writeValueAsString(dto);
         if (payload != null) {
             client.getOutputStream().write((payload + "\n").getBytes(StandardCharsets.UTF_8));
             client.getOutputStream().flush();

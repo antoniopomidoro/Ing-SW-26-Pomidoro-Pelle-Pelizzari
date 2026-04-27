@@ -21,8 +21,8 @@ class StartTurnPhaseTest {
     @BeforeEach
     void setUp() throws Exception {
         players = new ArrayList<>();
-        players.add(new Player(Totem.BLUE_TOTEM, "Player1"));
-        players.add(new Player(Totem.RED_TOTEM, "Player2"));
+        players.add(new Player(Totem.BLUE, "Player1"));
+        players.add(new Player(Totem.RED, "Player2"));
 
         orderTile = new OrderTile();
         injectField(orderTile, "orderBonus", new ArrayList<>(List.of(3, 1)));

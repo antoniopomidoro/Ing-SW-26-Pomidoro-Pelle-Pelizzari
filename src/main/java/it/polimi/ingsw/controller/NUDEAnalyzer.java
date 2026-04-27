@@ -12,16 +12,13 @@ public class NUDEAnalyzer {
     static ObjectMapper mapper = new ObjectMapper();
 
 
-    static{
-        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-    }
 
     public static synchronized Executor action(String json){
        try {
            return mapper.readValue(json, Executor.class);
-       }       catch (JsonProcessingException e){
-               return null;
+       } catch (JsonProcessingException e){
+           System.err.println("[NUDEAnalyzer] Parse error: " + e.getMessage());
+           return null;
        }
 
    }

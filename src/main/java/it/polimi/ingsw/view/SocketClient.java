@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.time.Clock;
 import java.time.Instant;
 
-
 public class SocketClient implements ConnectionProtocol, Runnable {
 
     private static final int PORT = 1969;

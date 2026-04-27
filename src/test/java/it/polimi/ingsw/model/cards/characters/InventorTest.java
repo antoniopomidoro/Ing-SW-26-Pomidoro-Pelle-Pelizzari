@@ -11,13 +11,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class InventorTest {
     private final int REP = 1;
-    private Player player = new Player(Totem.RED_TOTEM, "aldo");
+    private Player player = new Player(Totem.RED, "aldo");
 
     @DisplayName("Add one inventor to a player")
     @Test
     public void onAddedToPlayerOneAddiction() {
         Inventor inventor = new Inventor(Tool.BOAT);
-        player = new Player(Totem.RED_TOTEM, "aldo");
+        player = new Player(Totem.RED, "aldo");
         boolean ret = inventor.onAddedToPlayer(player);
         assertTrue(ret);
         assertEquals(1, player.getStats().getCharacterCount(CharacterEnum.INVENTOR));
@@ -69,8 +69,8 @@ public class InventorTest {
     @DisplayName("Adding inventors to player1 does not change player2's inventors")
     @Test
     public void onAddedToPlayersMultiplePlayers() {
-        Player p2 = new Player(Totem.BLUE_TOTEM, "Giovanni");
-        Player p3 = new Player(Totem.BLUE_TOTEM, "Giacomo");
+        Player p2 = new Player(Totem.BLUE, "Giovanni");
+        Player p3 = new Player(Totem.BLUE, "Giacomo");
         int old1 = player.getStats().getCharacterCount(CharacterEnum.INVENTOR);
         int old2 = p2.getStats().getCharacterCount(CharacterEnum.INVENTOR);
         int old3 = p3.getStats().getCharacterCount(CharacterEnum.INVENTOR);

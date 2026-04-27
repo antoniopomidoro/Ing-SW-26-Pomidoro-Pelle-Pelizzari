@@ -31,7 +31,7 @@ class PlayerTurnPhaseTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        activePlayer = new Player(Totem.BLUE_TOTEM, "TestPlayer");
+        activePlayer = new Player(Totem.BLUE, "TestPlayer");
         Tile activeTile = new Tile() {
             @Override
             public int getUpperPicks() {
@@ -379,8 +379,8 @@ class PlayerTurnPhaseTest {
         List<Player> players = context.getTurnOrder();
         if (players == null || players.size() < 2) {
             players = new ArrayList<>(List.of(
-                    new Player(Totem.RED_TOTEM, "P1"),
-                    new Player(Totem.BLUE_TOTEM, "P2")
+                    new Player(Totem.RED, "P1"),
+                    new Player(Totem.BLUE, "P2")
             ));
             safeInjectField(context, "turnOrder", players);
         }

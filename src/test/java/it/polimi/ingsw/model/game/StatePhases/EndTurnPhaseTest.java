@@ -25,8 +25,8 @@ class EndTurnPhaseTest {
     @BeforeEach
     void setUp() throws Exception {
         players = new ArrayList<>();
-        players.add(new Player(Totem.BLUE_TOTEM, "Player1"));
-        players.add(new Player(Totem.RED_TOTEM, "Player2"));
+        players.add(new Player(Totem.BLUE, "Player1"));
+        players.add(new Player(Totem.RED, "Player2"));
 
         board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
 
@@ -83,7 +83,7 @@ class EndTurnPhaseTest {
 
         // Mock current turn order and players to verify sequence: save -> clear
         List<Player> turnOrder = new ArrayList<Player>();
-        turnOrder.add(new Player(Totem.BLUE_TOTEM, "Player1"));
+        turnOrder.add(new Player(Totem.BLUE, "Player1"));
         injectField(context, "turnOrder", turnOrder);
 
         phase.execute(context);

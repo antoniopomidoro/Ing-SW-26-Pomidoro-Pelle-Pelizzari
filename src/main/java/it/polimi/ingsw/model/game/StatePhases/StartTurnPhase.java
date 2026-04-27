@@ -88,7 +88,7 @@ public class StartTurnPhase implements GamePhaseBehavior {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player));
             throw new IllegalMoveException("Invalid tile index");
         }
-        if (player != currentPlayer) {
+        if (!player.equals(currentPlayer)) {
             context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player));
             throw new IllegalMoveException("Not your turn");
         }

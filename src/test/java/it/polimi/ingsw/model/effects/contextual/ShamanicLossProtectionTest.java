@@ -16,7 +16,7 @@ class ShamanicLossProtectionTest {
     @BeforeEach
     void setUp() throws Exception {
         // 1. Arrange: Initialize player and the protection effect
-        player = new Player(Totem.RED_TOTEM, "Aldo");
+        player = new Player(Totem.RED, "Aldo");
         effect = new ShamanicLossProtection();
 
         // 2. Action: Use reflection to inject the private 'protect' value

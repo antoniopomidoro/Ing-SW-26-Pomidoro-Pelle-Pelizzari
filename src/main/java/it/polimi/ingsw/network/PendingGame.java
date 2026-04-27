@@ -46,7 +46,7 @@ public class PendingGame {
      */
     public synchronized Totem addPlayer(String playerName, Totem requestedTotem) {
         validatePlayerName(playerName);
-        if (isFull()) {
+        if (!pendingNicknames.contains(playerName) && isFull()) {
             throw new IllegalStateException(LOBBY_FULL_MESSAGE_PREFIX + gameId);
         }
         if (requestedTotem == null) {
@@ -120,7 +120,17 @@ public class PendingGame {
     }
 
     public synchronized boolean isFull() {
-        return getCurrentPlayerCount()>= requiredPlayers;
+        return getCurrentPlayerCount() >= requiredPlayers;
+    }
+
+    /**
+     * Returns whether a player is registered as pending totem selection.
+     *
+     * @param playerName the nickname to check
+     * @return {@code true} if the player has entered the lobby but not yet selected a totem
+     */
+    public synchronized boolean isPending(String playerName) {
+        return pendingNicknames.contains(playerName);
     }
 
     /**

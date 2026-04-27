@@ -19,6 +19,7 @@ public final class JacksonConfig {
 
     private static ObjectMapper createMapper() {
         ObjectMapper om = new ObjectMapper();
+        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
         om.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         om.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
         om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);

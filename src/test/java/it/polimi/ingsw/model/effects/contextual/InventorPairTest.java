@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Rule: Pairs = Total Inventors - Unique Tools (Valid only when Max 2 Inventors per Tool)
  */
 public class InventorPairTest {
-    Player player = new Player(Totem.RED_TOTEM, "Ramon");
+    Player player = new Player(Totem.RED, "Ramon");
 
     private PlayerStats stats;
     private InventorPair inventorPair = new InventorPair();

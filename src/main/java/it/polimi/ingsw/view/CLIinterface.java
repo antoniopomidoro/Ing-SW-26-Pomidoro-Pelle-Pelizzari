@@ -335,17 +335,32 @@ public class CLIinterface implements UserInterface, Runnable {
 
     @Override
     public synchronized void onLobbyWaiting(LobbyUpdateDTO dto) {
+        if (dto.getIdGame() != null) user.setId(dto.getIdGame());
         updateLobby(dto);
     }
 
     @Override
     public synchronized void onLobbyRejoin(LobbyUpdateDTO dto) {
+        if (dto.getIdGame() != null) user.setId(dto.getIdGame());
         updateLobby(dto);
+        if (dto.getSnapshot() != null) {
+            String nickname = user.getNickname();
+            if (nickname != null) {
+                dto.getSnapshot().getPlayers().stream()
+                        .filter(player -> nickname.equalsIgnoreCase(player.getNickname()))
+                        .findFirst()
+                        .map(GameStateDTO.PlayerDTO::getTotem)
+                        .ifPresent(user::setPlayerTotem);
+            }
+            this.state = new GameEventDTO(GameEvent.Type.BOARD_UPDATE, null, dto.getSnapshot(), null);
+            notifyAll();
+        }
         System.out.println(BOLD + YELLOW + "  ↩ Reconnessione alla partita in corso..." + RESET);
     }
 
     @Override
     public synchronized void onGameStarting(LobbyUpdateDTO dto) {
+        if (dto.getIdGame() != null) user.setId(dto.getIdGame());
         updateLobby(dto);
         System.out.println(BOLD + GREEN + "  ✔ La partita sta per iniziare!" + RESET);
     }

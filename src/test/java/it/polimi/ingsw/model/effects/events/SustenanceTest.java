@@ -31,7 +31,7 @@ class SustenanceTest {
     @BeforeEach
     void setUp() throws Exception {
         sustenance=new Sustenance();
-    player = new Player(Totem.RED_TOTEM, "aldo");
+    player = new Player(Totem.RED, "aldo");
     List<Player> players = new ArrayList<>(List.of(player));
 
 

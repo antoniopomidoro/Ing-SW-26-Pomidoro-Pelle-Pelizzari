@@ -16,7 +16,7 @@ class EndCardSetTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        player = new Player(Totem.RED_TOTEM, "A");
+        player = new Player(Totem.RED, "A");
         effect = new EndCardSet();
         setPrivateField(effect, "pp", PP_PER_SET); //
     }

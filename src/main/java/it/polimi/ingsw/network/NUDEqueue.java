@@ -4,6 +4,7 @@ import it.polimi.ingsw.controller.Actions.Executor;
 import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.NUDEAnalyzer;
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.model.player.Totem;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -24,32 +25,39 @@ public class NUDEqueue implements Runnable{
 
     @Override
     public void run() {
-        while(going){
-            if(commands.isEmpty()){
-                try{wait();} catch (InterruptedException e) {
-                    return;
-                }
-            }else{
-                command = commands.poll();
-                executor = NUDEAnalyzer.action(command);
-                GameController game = serverManager.getActiveGames().get(executor.getIdGame());
-                Player player = game.getGameState().getPlayers().stream().filter(p -> p.getId().ordinal() == executor.getIdPlayer()).findFirst().orElse(null);
-                executor.execute(player,game);
+        while (going) {
+            try {
+                command = commands.take();
+            } catch (InterruptedException e) {
+                return;
             }
-
-
+            System.err.println("[NUDEqueue] raw command: " + command);
+            executor = NUDEAnalyzer.action(command);
+            if (executor == null) {
+                System.err.println("[NUDEqueue] Failed to parse command: " + command);
+                continue;
+            }
+            if (executor.getIdGame() == null) {
+                System.err.println("[NUDEqueue] executor.idGame is null, executor type: " + executor.getClass().getSimpleName() + ", player: " + executor.getIdPlayer());
+                continue;
+            }
+            GameController game = serverManager.getActiveGames().get(executor.getIdGame());
+            if (game == null) {
+                System.err.println("[NUDEqueue] No active game for id: " + executor.getIdGame());
+                continue;
+            }
+            Player player = game.getGameState().getPlayers().stream()
+                    .filter(p -> p.getId().equals(executor.getIdPlayer()))
+                    .findFirst().orElse(null);
+            executor.execute(player, game);
         }
-
     }
 
-
-    public void stop(){
+    public void stop() {
         going = false;
     }
 
-    public boolean add(String command){
-        commands.add(command);
-        notifyAll();
-        return true;
+    public boolean add(String command) {
+        return commands.offer(command);
     }
 }

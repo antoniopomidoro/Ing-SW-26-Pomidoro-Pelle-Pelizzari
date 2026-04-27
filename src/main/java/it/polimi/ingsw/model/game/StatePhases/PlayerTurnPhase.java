@@ -87,27 +87,9 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
      */
     @Override
     public boolean pickTopCard(GameState context, int index, Player player, String cardInstanceId){
-        if(player != activePlayer){
-            context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player));
-            throw new IllegalMoveException("Only the active player can perform picks");
-        }
-        if (upperPicks <= 0){
-            context.raiseEvent(new GameEvent(GameEvent.Type.INSUFFICIENT_PICKS, player));
-            throw new IllegalMoveException("No upper picks remaining");
-        }
+        topCheck(context, player);
         Card c = context.getBoard().seeTopCard(index);
-        if (c == null) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player));
-            throw new IllegalMoveException("Invalid card index");
-        }
-        if (cardInstanceId == null || !cardInstanceId.equals(c.getInstanceId())) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ID, player));
-            throw new IllegalMoveException("Invalid card instance id");
-        }
-        if (!c.isBuyable()) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player));
-            throw new IllegalMoveException("Card is not buyable");
-        }
+        cardCheck(context, player, cardInstanceId, c);
         c = context.getBoard().pickTopCard(index);
         activePlayer.addCard(c);
         upperPicks--;
@@ -125,27 +107,9 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
      */
     @Override
     public boolean pickBottomCard(GameState context, int index, Player player, String cardInstanceId) {
-        if (player != activePlayer) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player));
-            throw new IllegalMoveException("Only the active player can perform picks");
-        }
-        if (bottomPicks <= 0) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INSUFFICIENT_PICKS, player));
-            throw new IllegalMoveException("No bottom picks remaining");
-        }
+        bottomCheck(context, player);
         Card c = context.getBoard().seeBottomCard(index);
-        if (c == null) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player));
-            throw new IllegalMoveException("Invalid card index");
-        }
-        if (cardInstanceId == null || !cardInstanceId.equals(c.getInstanceId())) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ID, player));
-            throw new IllegalMoveException("Invalid card instance id");
-        }
-        if (!c.isBuyable()) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player));
-            throw new IllegalMoveException("Card is not buyable");
-        }
+        cardCheck(context, player, cardInstanceId, c);
         c = context.getBoard().pickBottomCard(index);
         activePlayer.addCard(c);
         bottomPicks--;
@@ -157,37 +121,30 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         return true;
     }
 
+    private void cardCheck(GameState context, Player player, String cardInstanceId, Card c) {
+        if (c == null) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player));
+            throw new IllegalMoveException("Invalid card index");
+        }
+        if (cardInstanceId == null || !cardInstanceId.equals(c.getInstanceId())) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ID, player));
+            throw new IllegalMoveException("Invalid card instance id");
+        }
+        if (!c.isBuyable()) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_CARD, player));
+            throw new IllegalMoveException("Card is not buyable");
+        }
+    }
+
     /**
      * Pick of an upper building.
      * In case of invalid move: event broadcast followed by {@link IllegalMoveException}.
      */
     @Override
     public boolean pickTopBuilding(GameState context, int index, Player player, String cardInstanceId) {
-        if (player != activePlayer) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player));
-            throw new IllegalMoveException("Only the active player can perform picks");
-        }
-        if (upperPicks <= 0) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INSUFFICIENT_PICKS, player));
-            throw new IllegalMoveException("No upper picks remaining");
-        }
+        topCheck(context, player);
         Building b = context.getBoard().seeTopBuilding(index);
-        if (b == null) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player));
-            throw new IllegalMoveException("Invalid card index");
-        }
-        if (cardInstanceId == null || !cardInstanceId.equals(b.getInstanceId())) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ID, player));
-            throw new IllegalMoveException("Invalid card instance id");
-        }
-        if (!b.isBuyable()) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player));
-            throw new IllegalMoveException("Card is not buyable");
-        }
-        if (!activePlayer.canBuy(b)) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INSUFFICIENT_FOOD, player));
-            throw new IllegalMoveException("Player cannot afford this building");
-        }
+        buildingCheck(context, player, cardInstanceId, b);
         b = context.getBoard().pickTopBuilding(index);
         activePlayer.payBuilding(b);
         activePlayer.addBuilding(b);
@@ -198,37 +155,26 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         return true;
     }
 
+    private void topCheck(GameState context, Player player) {
+        if (!player.equals(activePlayer)) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player));
+            throw new IllegalMoveException("Only the active player can perform picks");
+        }
+        if (upperPicks <= 0) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INSUFFICIENT_PICKS, player));
+            throw new IllegalMoveException("No upper picks remaining");
+        }
+    }
+
     /**
      * Pick of a lower building.
      * In case of invalid move: event broadcast followed by {@link IllegalMoveException}.
      */
     @Override
     public boolean pickBottomBuilding(GameState context, int index, Player player, String cardInstanceId) {
-        if (player != activePlayer) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player));
-            throw new IllegalMoveException("Only the active player can perform picks");
-        }
-        if (bottomPicks <= 0) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INSUFFICIENT_PICKS, player));
-            throw new IllegalMoveException("No bottom picks remaining");
-        }
+        bottomCheck(context, player);
         Building b = context.getBoard().seeBottomBuilding(index);
-        if (b == null) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player));
-            throw new IllegalMoveException("Invalid card index");
-        }
-        if (cardInstanceId == null || !cardInstanceId.equals(b.getInstanceId())) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ID, player));
-            throw new IllegalMoveException("Invalid card instance id");
-        }
-        if (!b.isBuyable()) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, player));
-            throw new IllegalMoveException("Card is not buyable");
-        }
-        if (!activePlayer.canBuy(b)) {
-            context.raiseEvent(new GameEvent(GameEvent.Type.INSUFFICIENT_FOOD, player));
-            throw new IllegalMoveException("Player cannot afford this building");
-        }
+        buildingCheck(context, player, cardInstanceId, b);
         b = context.getBoard().pickBottomBuilding(index);
         activePlayer.payBuilding(b);
         activePlayer.addBuilding(b);
@@ -237,6 +183,25 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         context.raiseEvent(new GameEvent(GameEvent.Type.BOTTOM_BUILDING, activePlayer));
         nextPhase(context);
         return true;
+    }
+
+    private void bottomCheck(GameState context, Player player) {
+        if (!player.equals(activePlayer)) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player));
+            throw new IllegalMoveException("Only the active player can perform picks");
+        }
+        if (bottomPicks <= 0) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INSUFFICIENT_PICKS, player));
+            throw new IllegalMoveException("No bottom picks remaining");
+        }
+    }
+
+    private void buildingCheck(GameState context, Player player, String cardInstanceId, Building b) {
+        cardCheck(context, player, cardInstanceId, b);
+        if (!activePlayer.canBuy(b)) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INSUFFICIENT_FOOD, player));
+            throw new IllegalMoveException("Player cannot afford this building");
+        }
     }
 
     /**

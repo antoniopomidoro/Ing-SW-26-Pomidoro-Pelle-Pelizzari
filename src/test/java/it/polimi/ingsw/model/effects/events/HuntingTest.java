@@ -32,7 +32,7 @@ class HuntingTest {
     void setUp() throws Exception {
 
         hunting = new Hunting();
-        player = new Player(Totem.RED_TOTEM, "aldo");
+        player = new Player(Totem.RED, "aldo");
         List<Player> players = new ArrayList<>(List.of(player));
 
         GameConfig config = new GameConfig();

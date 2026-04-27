@@ -23,7 +23,7 @@ public class CavePaintingsTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        player = new Player(Totem.RED_TOTEM, "A");
+        player = new Player(Totem.RED, "A");
         List<Player> players = new ArrayList<>(List.of(player));
 
         GameConfig config = new GameConfig();

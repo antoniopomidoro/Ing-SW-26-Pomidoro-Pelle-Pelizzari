@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TileTest {
     Tile tile = new Tile();
-    Player player = new Player(Totem.RED_TOTEM, "aldo");
+    Player player = new Player(Totem.RED, "aldo");
 
     /*
      * TEST METHODS
@@ -32,7 +32,7 @@ public class TileTest {
     @Test
     public void occupyAlreadyOccupied() {
         tile.occupy(player);
-        Player player2 = new Player(Totem.YELLOW_TOTEM, "giovanni");
+        Player player2 = new Player(Totem.YELLOW, "giovanni");
         boolean ret = tile.occupy(player2);
         assertFalse(ret);
     }
