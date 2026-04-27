@@ -31,7 +31,7 @@ class PlayerTurnPhaseTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        activePlayer = new Player(Totem.BLUE_TOTEM, "TestPlayer");
+        activePlayer = new Player(Totem.BLUE, "TestPlayer");
         Tile activeTile = new Tile() {
             @Override
             public int getUpperPicks() {

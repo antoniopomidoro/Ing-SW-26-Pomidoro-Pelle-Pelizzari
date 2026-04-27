@@ -23,8 +23,8 @@ class SetupPhaseTest {
     @BeforeEach
     void setUp() throws Exception {
         players = new ArrayList<>();
-        players.add(new Player(Totem.BLUE_TOTEM, "Player1"));
-        players.add(new Player(Totem.RED_TOTEM, "Player2"));
+        players.add(new Player(Totem.RED, "Player1"));
+        players.add(new Player(Totem.BLUE, "Player2"));
 
         board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
 
@@ -94,11 +94,11 @@ class SetupPhaseTest {
     void testExecute_FoodListTooShort_ShouldThrowIndexOutOfBounds() {
         // 1. Setup the physical environment: Create 5 players
         List<Player> players = new ArrayList<>();
-        players.add(new Player(Totem.BLUE_TOTEM, "Player1"));
-        players.add(new Player(Totem.RED_TOTEM, "Player2"));
-        players.add(new Player(Totem.WHITE_TOTEM, "Player3"));
-        players.add(new Player(Totem.BLACK_TOTEM, "Player4"));
-        players.add(new Player(Totem.YELLOW_TOTEM, "Player5"));
+        players.add(new Player(Totem.BLUE, "Player1"));
+        players.add(new Player(Totem.RED, "Player2"));
+        players.add(new Player(Totem.WHITE, "Player3"));
+        players.add(new Player(Totem.BLACK, "Player4"));
+        players.add(new Player(Totem.YELLOW, "Player5"));
         // 2. Create an invalid configuration: Only 4 food values provided (Index 0-3)
         List<Integer> insufficientFood = new ArrayList<>(List.of(1, 2, 3, 4));
         // 3. Inject data using reflection (Keep the source code pristine)

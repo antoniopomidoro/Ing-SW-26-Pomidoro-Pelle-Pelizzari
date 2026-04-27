@@ -82,7 +82,6 @@ class TurnPhaseTest {
         assertTrue(result, "execute return true");
         // hit index=1 Tile，next index: 1+1=2
         assertEquals(2, context.getCurrentTileIndex(), "wrong index");
-        System.out.println(context.getCurrentPhase().getClass().getSimpleName());
         assertTrue(context.getCurrentPhase() instanceof PlayerTurnPhase, "wrong phase");
     }
     /**

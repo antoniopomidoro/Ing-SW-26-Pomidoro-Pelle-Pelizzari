@@ -41,7 +41,7 @@ class ChangeAgePhaseTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        players = new ArrayList<>(List.of(new Player(Totem.BLUE_TOTEM, "P1"),new Player(Totem.RED_TOTEM, "P2")));
+        players = new ArrayList<>(List.of(new Player(Totem.BLUE, "P1"),new Player(Totem.RED, "P2")));
         board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
         config = new GameConfig();
 
