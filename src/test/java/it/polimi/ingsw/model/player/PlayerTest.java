@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class PlayerTest {
     private Player player;
     private final String TEST_NICKNAME = "MasterArchitect";
-    private final Totem TEST_TOTEM = Totem.RED_TOTEM;
+    private final Totem TEST_TOTEM = Totem.RED;
 
     @BeforeEach
     void setUp() {

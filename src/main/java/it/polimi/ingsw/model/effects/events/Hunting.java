@@ -25,4 +25,7 @@ public class Hunting implements EventEffect {
         }
         return true;
     }
+    public String toString(){
+        return "HUNTING";
+    }
 }

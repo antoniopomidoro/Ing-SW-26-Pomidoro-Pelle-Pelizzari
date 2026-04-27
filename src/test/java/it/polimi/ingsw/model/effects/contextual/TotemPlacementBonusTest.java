@@ -13,7 +13,7 @@ class TotemPlacementBonusTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        player = new Player(Totem.RED_TOTEM, "A");
+        player = new Player(Totem.RED, "A");
         effect = new TotemPlacementBonus();
         setPrivateField(effect, "bonus", 5);
     }

@@ -25,6 +25,6 @@ public class EndCardSet implements ContextualEffect {
 
     @Override
     public String toString(){
-        return " IN THE END GIVE " + pp +" PP FOR EACH 6 DIFFERENT CARD SET";
+        return  pp +" PP FOR EACH SET";
     }
 }

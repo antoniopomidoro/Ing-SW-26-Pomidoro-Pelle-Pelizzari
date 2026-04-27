@@ -19,7 +19,7 @@ class EndOfTurnExtraPickTest {
     @BeforeEach
     void setUp() throws Exception {
         // Step 1: Initialize the core components.
-        player = new Player(Totem.RED_TOTEM, "Aldo");
+        player = new Player(Totem.RED, "Aldo");
         effect = new EndOfTurnExtraPick();
 
         // Step 2: Inject the 'upperPick' value reflectively to simulate JSON property loading.

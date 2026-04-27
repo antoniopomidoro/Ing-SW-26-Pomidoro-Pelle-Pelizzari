@@ -78,5 +78,9 @@ public class Event extends Card {
     public CardCategory getCategory() {
         return CardCategory.EVENT;
     }
+    @Override
+    public String toString(){
+        return "EVENT, " + super.age + ", EFFECT: " + effect.toString() + "\n";
+    }
 
 }

@@ -1,18 +1,19 @@
 package it.polimi.ingsw.network.dto;
 
+import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.view.ActionType;
 
-public class ActionDTO implements DTO{
+public class ActionDTO {
     private ActionType action;
     private int index;
     private String nick;
     private String idGame;
-    private String idPlayer;
+    private Totem idPlayer;
     private String cardId;
 
 
 
-    public ActionDTO(ActionType action, int index, String nick, String idGame, String idPlayer, String cardId) {
+    public ActionDTO(ActionType action, int index, String nick, String idGame, Totem idPlayer, String cardId) {
         this.action = action;
         this.index = index;
         this.nick = nick;
@@ -38,7 +39,7 @@ public class ActionDTO implements DTO{
         return idGame;
     }
 
-    public String getIdPlayer() {
+    public Totem getIdPlayer() {
         return idPlayer;
     }
 
@@ -46,8 +47,4 @@ public class ActionDTO implements DTO{
         return cardId;
     }
 
-    @Override
-    public void accept(DTOVisitor visitor) {
-        return;
-    }
 }

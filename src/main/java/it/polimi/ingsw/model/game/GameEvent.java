@@ -26,6 +26,7 @@ public class GameEvent {
         INVALID_ACTION(false),
         OCCUPIED_TILE(false),
         INVALID_ID(false),
+        INVALID_CARD(false),
 
         // --- VALID ACTIONS ---
         SUCCESSFUL_ACTION(true),

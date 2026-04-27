@@ -13,7 +13,7 @@ class ShamanicWinBoostTest {
     @BeforeEach
     void setUp() throws Exception {
         // 1. Arrange: Initialize the target player and the effect object
-        player = new Player(Totem.RED_TOTEM, "Aldo");
+        player = new Player(Totem.RED, "Aldo");
         boost = new ShamanicWinBoost();
 
         // 2. Action: Inject the private 'bonus' field using reflection

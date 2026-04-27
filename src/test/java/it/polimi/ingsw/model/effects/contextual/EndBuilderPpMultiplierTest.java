@@ -14,7 +14,7 @@ class EndBuilderPpMultiplierTest {
     private final int MULTIPLIER = 2;
     @BeforeEach
     void setUp() throws Exception {
-        player = new Player(Totem.RED_TOTEM, "A");
+        player = new Player(Totem.RED, "A");
         effect = new EndBuilderPpMultiplier();
 
         // Step 1: Inject the multiplier value via reflection.

@@ -3,6 +3,7 @@ package it.polimi.ingsw.network.socket;
 import it.polimi.ingsw.network.ServerManager;
 
 import java.time.Clock;
+import java.util.Iterator;
 import java.util.List;
 
 public class SocketDestroyer implements Runnable{
@@ -12,19 +13,23 @@ public class SocketDestroyer implements Runnable{
     Clock clock = Clock.systemDefaultZone();
     @Override
     public void run() {
-        while(!Thread.currentThread().isInterrupted()){
+        while (!Thread.currentThread().isInterrupted()) {
             this.clients = dad.getClients();
-            for (SocketClientHandler client : clients) {
-                if(client.GetLastPing().plusSeconds(10).isBefore(clock.instant())){
+            Iterator<SocketClientHandler> it = clients.iterator();
+            while (it.hasNext()) {
+                SocketClientHandler client = it.next();
+                if (client.GetLastPing().plusSeconds(10).isBefore(clock.instant())) {
                     client.stop();
                     serverManager.disconnectPlayer(client);
-                    clients.remove(client);
+                    it.remove();
                 }
             }
-        try{
-        wait(5000);} catch (InterruptedException e) {
-            return;
-        }}
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                return;
+            }
+        }
     }
 
 

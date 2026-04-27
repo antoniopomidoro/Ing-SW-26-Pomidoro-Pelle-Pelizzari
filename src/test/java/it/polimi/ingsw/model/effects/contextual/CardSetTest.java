@@ -16,7 +16,7 @@ class CardSetTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        player = new Player(Totem.RED_TOTEM, "Aldo");
+        player = new Player(Totem.RED, "Aldo");
         effect = new CardSet();
 
         // Step 1: Inject reward value.

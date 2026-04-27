@@ -68,7 +68,7 @@ public class DTOQueue implements Runnable {
     public void run() {
         while (going) {
             try {
-                DTO dto = queue.take(); // blocks until an element is available
+                DTO dto = queue.take();// blocks until an element is available
                 dto.accept(visitor);   // double dispatch: routes to the right visit() overload
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

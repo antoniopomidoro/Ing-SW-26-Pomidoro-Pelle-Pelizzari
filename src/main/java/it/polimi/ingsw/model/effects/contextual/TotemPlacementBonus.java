@@ -16,6 +16,6 @@ public class TotemPlacementBonus implements ContextualEffect {
     }
 
     public String toString(){
-        return "GAIN " + bonus + " FOOD FROM PLACING TOTEM IN FOOD POSITION AT END OF TURN";
+        return "+" + bonus + " FOOD FROM TOTEM";
     }
 }

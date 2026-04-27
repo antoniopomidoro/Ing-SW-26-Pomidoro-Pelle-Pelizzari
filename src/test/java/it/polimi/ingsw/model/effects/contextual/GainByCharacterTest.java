@@ -25,7 +25,7 @@ class GainByCharacterTest {
     @BeforeEach
     void setUp() throws Exception {
         // Initialize the game environment and the test player
-        Totem testTotem=Totem.RED_TOTEM;
+        Totem testTotem=Totem.RED;
         player=new Player(testTotem,"Tester");
         List<Player>players=List.of(player);
         GameConfig config = new GameConfig();

@@ -50,7 +50,11 @@ public class LobbyDTOHandler implements DTOVisitor {
         this.ui = ui;
 
         lobbyDispatch.put(LobbyState.WAITING,       ui::onLobbyWaiting);
-        lobbyDispatch.put(LobbyState.REJOIN,         ui::onLobbyRejoin);
+        lobbyDispatch.put(LobbyState.REJOIN,         dto -> {
+            ui.onLobbyRejoin(dto);
+            // Rejoin enters an already running game: switch visitor immediately.
+            if (onGameStart != null) onGameStart.run();
+        });
         lobbyDispatch.put(LobbyState.STARTING_GAME,  dto -> {
             ui.onGameStarting(dto);
             // Fire the swap: from this point on, DTOQueue will route to GameDTOHandler.

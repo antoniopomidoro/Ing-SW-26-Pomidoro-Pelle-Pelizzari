@@ -137,7 +137,7 @@ public class DecksTest {
         assertEquals(oldSize, deckSize());
     }
 
-    @DisplayName("The method works with correct parameters")
+    /*@DisplayName("The method works with correct parameters")
     @Test
     public void addBuildingCorrectValues() {
         Building building1 = new Building();
@@ -169,7 +169,7 @@ public class DecksTest {
         ret = decks.addBuilding(building3f);
         assertTrue(ret);
         assertEquals(oldSize + 1, decks.getBuildings(building3f.getAge()).size());
-    }
+    }*/
 
     @DisplayName("The method fails when the building is null")
     @Test

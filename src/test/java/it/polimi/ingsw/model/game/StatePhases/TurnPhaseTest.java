@@ -21,8 +21,8 @@ class TurnPhaseTest {
     @BeforeEach
     void setUp() throws Exception {
         players = new ArrayList<>(List.of(
-                new Player(Totem.RED_TOTEM, "P1"),
-                new Player(Totem.BLUE_TOTEM, "P2")
+                new Player(Totem.RED, "P1"),
+                new Player(Totem.BLUE, "P2")
         ));
         board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
         config = new GameConfig();

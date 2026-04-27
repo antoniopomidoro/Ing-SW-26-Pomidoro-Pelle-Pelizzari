@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model.board;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.model.board.*;
 import it.polimi.ingsw.model.cards.*;
 import it.polimi.ingsw.model.cards.characters.*;
@@ -15,7 +16,9 @@ import it.polimi.ingsw.model.player.*;
  * Instances of this class are intended to be created from JSON data.
  */
 public class Tile {
+
     private TileId tileId;
+    @JsonProperty("occupied")
     private boolean isOccupied;
     private Player occupier;
     private int upperPicks;

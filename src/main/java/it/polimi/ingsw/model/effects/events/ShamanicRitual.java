@@ -61,4 +61,7 @@ public class ShamanicRitual implements EventEffect {
         }
         return true;
     }
+    public String toString(){
+        return "SHAMANIC RITUAL";
+    }
 }

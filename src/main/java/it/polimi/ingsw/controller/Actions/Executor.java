@@ -1,14 +1,17 @@
 package it.polimi.ingsw.controller.Actions;
 
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import it.polimi.ingsw.controller.*;
 import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.ServerManager;
 import it.polimi.ingsw.network.VirtualView;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
@@ -36,7 +39,7 @@ protected String nick;
 protected String idGame;
 
 @JsonProperty
-protected int idPlayer;
+protected Totem idPlayer;
 
 @JsonProperty
 protected String cardId;
@@ -53,7 +56,7 @@ protected String cardId;
     public String getIdGame() {
         return idGame;
     }
-    public  int getIdPlayer(){
+    public Totem getIdPlayer(){
         return idPlayer;
     }
 

@@ -16,6 +16,6 @@ public class ShamanicLossProtection implements ContextualEffect {
         return true;
     }
     public String toString(){
-        return "PROTECT PP FROM SHAMANIC EVENT LOSS";
+        return "SHAMANIC LOSS PROTECTION";
     }
 }

@@ -9,6 +9,7 @@ import it.polimi.ingsw.network.dto.TotemSelectionDTO;
 
 import java.util.EnumMap;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 /**
  * DTOVisitor active during the game phase (after STARTING_GAME is received).
@@ -34,6 +35,8 @@ import java.util.function.Consumer;
  * the game phase and silently ignored.
  */
 public class GameDTOHandler implements DTOVisitor {
+
+    private static final Logger LOGGER = Logger.getLogger(GameDTOHandler.class.getName());
 
     private final UserInterface ui;
 
@@ -66,6 +69,9 @@ public class GameDTOHandler implements DTOVisitor {
         gameDispatch.put(GameEvent.Type.TURN_COMPLETED,       updateDisplay);
         gameDispatch.put(GameEvent.Type.END_TURN_COMPLETED,   updateDisplay);
         gameDispatch.put(GameEvent.Type.START_TURN_COMPLETED, updateDisplay);
+        gameDispatch.put(GameEvent.Type.EVENT_CARD_TRIGGERED, updateDisplay);
+        gameDispatch.put(GameEvent.Type.BUILDING_ACTIVATED,   updateDisplay);
+        gameDispatch.put(GameEvent.Type.STARTING_END_GAME,    updateDisplay);
 
         // SETUP_COMPLETED is the very first event: use setUp() instead of update()
         // so the UI can initialize its state before the main render loop starts.
@@ -81,7 +87,11 @@ public class GameDTOHandler implements DTOVisitor {
     public void visit(GameEventDTO dto) {
         if (dto.getEventType() == null) return;
         Consumer<GameEventDTO> handler = gameDispatch.get(dto.getEventType());
-        if (handler != null) handler.accept(dto);
+        if (handler != null) {
+            handler.accept(dto);
+            return;
+        }
+        LOGGER.warning(() -> "[GameDTOHandler] Unmapped eventType=" + dto.getEventType());
     }
 
     /** LobbyUpdateDTOs are not expected during the game phase — ignore silently. */

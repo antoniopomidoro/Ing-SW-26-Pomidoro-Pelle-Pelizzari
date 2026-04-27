@@ -30,8 +30,8 @@ class EndGamePhaseTest {
     @BeforeEach
     void setUp() throws Exception {
         players = new ArrayList<>();
-        players.add(new Player(Totem.BLUE_TOTEM, "Player1"));
-        players.add(new Player(Totem.RED_TOTEM, "Player2"));
+        players.add(new Player(Totem.BLUE, "Player1"));
+        players.add(new Player(Totem.RED, "Player2"));
 
         board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
 
@@ -59,7 +59,7 @@ class EndGamePhaseTest {
         // Physical Setup
         EndGamePhase phase = new EndGamePhase();
         injectField(context, "currentPhase", phase);
-        Player player = new Player(Totem.RED_TOTEM, "A");
+        Player player = new Player(Totem.RED, "A");
         PlayerStats stats = player.getStats();
 
         // Physical Setup: Inject 4 unique tools to align with the "16 PP" calculation

@@ -71,9 +71,9 @@ public class GameStateTest {
     @BeforeEach
     void setUp() throws Exception {
         // Initialize real player objects to avoid NullPointerExceptions
-        playerA = new Player(Totem.RED_TOTEM,"A");
-        playerB = new Player(Totem.WHITE_TOTEM,"B");
-        playerC = new Player(Totem.BLUE_TOTEM,"C");
+        playerA = new Player(Totem.RED,"A");
+        playerB = new Player(Totem.WHITE,"B");
+        playerC = new Player(Totem.BLUE,"C");
         List<Player> players = Arrays.asList(playerA, playerB, playerC);
         GameConfig config = new GameConfig();
         List<Integer> startingFood = new ArrayList<>(List.of(5, 5, 5, 5, 5));

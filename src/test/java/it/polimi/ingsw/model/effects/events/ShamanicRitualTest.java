@@ -26,9 +26,9 @@ class ShamanicRitualTest {
     @BeforeEach
     void setUp() throws Exception {
         // Setup environment as per player/gamestate requirement
-        p1 = new Player(Totem.RED_TOTEM, "A");
-        p2 = new Player(Totem.WHITE_TOTEM, "B");
-        p3 = new Player(Totem.BLUE_TOTEM, "C");
+        p1 = new Player(Totem.RED, "A");
+        p2 = new Player(Totem.WHITE, "B");
+        p3 = new Player(Totem.BLUE, "C");
         List<Player>players=List.of(p1, p2,p3);
 
         ritual = new ShamanicRitual();

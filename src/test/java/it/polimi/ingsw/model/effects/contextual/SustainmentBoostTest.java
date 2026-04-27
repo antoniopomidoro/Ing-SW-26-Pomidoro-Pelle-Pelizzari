@@ -15,7 +15,7 @@ class SustainmentBoostTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        player = new Player(Totem.RED_TOTEM, "Aldo");
+        player = new Player(Totem.RED, "Aldo");
         effect = new SustainmentBoost();
 
         // Use reflection to populate private fields 'type' and 'gain'

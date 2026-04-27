@@ -24,6 +24,6 @@ public class EndOfTurnExtraPick implements ContextualEffect {
     @Override
 
     public String toString(){
-        return "AT THE END OF THE TURN YOU CAN PICK EXTRA CARD FROM THE UPPER LINE";
+        return "EXTRA UPPER PICK";
     }
 }

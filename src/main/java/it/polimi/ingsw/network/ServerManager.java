@@ -15,11 +15,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -35,6 +37,7 @@ public class ServerManager {
     private final Map<String, GameController> activeGames = new ConcurrentHashMap<>();
     private final Map<String, Map<Totem, VirtualView>> viewRegistry = new ConcurrentHashMap<>();
     private final Map<String, Map<String, VirtualView>> pendingViews = new ConcurrentHashMap<>();
+    private final Set<VirtualView> rawClients = ConcurrentHashMap.newKeySet();
     private final Random random = new Random();
     private final NUDEqueue NUDEqueue;
     private final LobbyQueue lobbyQueue;
@@ -196,7 +199,7 @@ public class ServerManager {
             return;
         }
 
-        if (pending.isFull()) {
+        if (pending.isFull() && !pending.isPending(playerName)) {
             view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.LOBBY_FULL));
             return;
         }
@@ -311,6 +314,7 @@ public class ServerManager {
         if (view == null) {
             return false;
         }
+        rawClients.remove(view);
         String gameId = view.getGameId();
         if (gameId == null || gameId.isBlank()) {
             return false;
@@ -430,6 +434,7 @@ public class ServerManager {
 
         int loaded = 0;
         int failed = 0;
+        List<String> loadedGameIds = new ArrayList<>();
 
         for (File saveFile : saveFiles) {
             try {
@@ -449,10 +454,17 @@ public class ServerManager {
                 activeGames.put(gameId, restoredController);
                 viewRegistry.putIfAbsent(gameId, new ConcurrentHashMap<>());
                 loaded++;
+                loadedGameIds.add(gameId);
             } catch (Exception e) {
                 failed++;
                 System.err.println("Error loading save " + saveFile.getName() + ": " + e.getMessage());
             }
+        }
+
+        if (loadedGameIds.isEmpty()) {
+            System.out.println("Loaded game IDs: none");
+        } else {
+            System.out.println("Loaded game IDs: " + loadedGameIds);
         }
 
         System.out.println("Loaded " + loaded + " games successfully, " + failed + " failed.");
@@ -479,9 +491,14 @@ public class ServerManager {
      * Pings all registered virtual views — both confirmed (viewRegistry) and pending (pendingViews).
      * Invoked by {@link NUDEPinger} to detect silent disconnections in every lobby phase.
      */
+    public void registerRawClient(VirtualView view) {
+        rawClients.add(view);
+    }
+
     public synchronized void pingAllViews() {
         viewRegistry.values().forEach(gameViews -> gameViews.values().forEach(VirtualView::ping));
         pendingViews.values().forEach(gameViews -> gameViews.values().forEach(VirtualView::ping));
+        rawClients.forEach(VirtualView::ping);
     }
 
     public NUDEqueue getQueue(){
