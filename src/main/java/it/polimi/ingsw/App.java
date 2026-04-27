@@ -2,6 +2,9 @@ package it.polimi.ingsw;
 
 import it.polimi.ingsw.network.ServerManager;
 import it.polimi.ingsw.network.rmi.RMIServer;
+import it.polimi.ingsw.network.socket.SocketServer;
+
+import java.net.ConnectException;
 
 public class App {
     private static final int SOCKET_PORT = 12345;
@@ -16,6 +19,11 @@ public class App {
             System.out.println("RMI server started");
         } catch (Exception e) {
             System.err.println("[Server] Error starting RMI: " + e.getMessage());
+        }
+        try{
+            Thread socket = new Thread(new SocketServer(serverManager));
+        }catch (ConnectException e){
+            System.err.println("[Server] Error starting Socket: " + e.getMessage());
         }
 
         // TODO-BOOT-004: add shutdown hook to stop SocketServer and unregister RMI endpoint.
