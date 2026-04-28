@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="root"
+           fx:controller="it.polimi.ingsw.view.gui.LobbyController"
+           prefWidth="1280" prefHeight="720"
+           style="-fx-background-color: #1a1108;">
+
+    <!-- Background art -->
+    <ImageView fx:id="background" fitWidth="1280" fitHeight="720"
+               preserveRatio="false" mouseTransparent="true">
+        <image><Image url="@../images/box_art_background.png" backgroundLoading="true"/></image>
+    </ImageView>
+
+    <!-- Logo — loaded in code; starts centred/large, animates to top/small -->
+    <ImageView fx:id="logo" fitWidth="480" fitHeight="240"
+               preserveRatio="true" translateY="-60"/>
+
+    <!-- Lobby ID shown after server acknowledges lobby creation/join -->
+    <Label fx:id="lobbyIdLabel" visible="false" styleClass="lobby-id"
+           StackPane.alignment="TOP_CENTER" translateY="24"/>
+
+    <!-- Totem strip visible only during WELCOME -->
+    <HBox fx:id="welcomeTotems" alignment="CENTER" spacing="30" translateY="230">
+        <ImageView fitWidth="60" fitHeight="80" preserveRatio="true">
+            <image><Image url="@../images/totem_front_red.png" backgroundLoading="true"/></image>
+        </ImageView>
+        <ImageView fitWidth="60" fitHeight="80" preserveRatio="true">
+            <image><Image url="@../images/totem_front_white.png" backgroundLoading="true"/></image>
+        </ImageView>
+        <ImageView fitWidth="60" fitHeight="80" preserveRatio="true">
+            <image><Image url="@../images/totem_front_purple.png" backgroundLoading="true"/></image>
+        </ImageView>
+        <ImageView fitWidth="60" fitHeight="80" preserveRatio="true">
+            <image><Image url="@../images/totem_front_yellow.png" backgroundLoading="true"/></image>
+        </ImageView>
+        <ImageView fitWidth="60" fitHeight="80" preserveRatio="true">
+            <image><Image url="@../images/totem_front_cyan.png" backgroundLoading="true"/></image>
+        </ImageView>
+    </HBox>
+
+    <!-- "Press to start" button visible only during WELCOME -->
+    <Button fx:id="startButton" text="PLAY" styleClass="start-button"
+            onAction="#onStartClicked" translateY="310"/>
+
+    <!-- Form wizard area (hidden until WELCOME→CHOICE animation completes) -->
+    <VBox fx:id="formArea" visible="false" alignment="CENTER" spacing="16"
+          maxWidth="520" translateY="100">
+        <Label fx:id="promptLabel" styleClass="form-prompt"/>
+        <TextField fx:id="inputField" styleClass="form-input" maxWidth="320"
+                   visible="false" onAction="#onConfirm"/>
+        <HBox fx:id="choiceButtons" alignment="CENTER" spacing="30" visible="false">
+            <Button text="CREATE GAME" styleClass="choice-button" onAction="#onCreateClicked"/>
+            <Button text="JOIN"        styleClass="choice-button" onAction="#onJoinClicked"/>
+        </HBox>
+        <Button fx:id="confirmButton" text="Confirm" styleClass="confirm-button"
+                onAction="#onConfirm" visible="false"/>
+        <Label fx:id="errorLabel" visible="false" styleClass="error-label"/>
+    </VBox>
+
+    <!-- Totem selection panel — used by both CREATE (local) and JOIN (server-driven) -->
+    <HBox fx:id="totemSelection" visible="false" alignment="CENTER" spacing="40" translateY="60"/>
+
+    <!-- Confirm totem button — shown after totem selection panel appears -->
+    <Button fx:id="totemConfirmButton" text="Confirm Totem" styleClass="confirm-button"
+            visible="false" onAction="#onTotemConfirmed" translateY="280"/>
+
+    <!-- Player nickname shown in the post-totem waiting phase -->
+    <Label fx:id="playerNameLabel" visible="false" styleClass="player-name"
+           translateY="260"/>
+
+    <!-- Animated "Waiting..." label shown after totem is confirmed -->
+    <Label fx:id="waitingLabel" visible="false" text="Waiting..." styleClass="waiting-label"
+           translateY="310"/>
+
+</StackPane>

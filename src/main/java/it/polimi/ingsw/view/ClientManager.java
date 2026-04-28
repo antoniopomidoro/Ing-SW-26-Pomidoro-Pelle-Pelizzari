@@ -1,6 +1,7 @@
 package it.polimi.ingsw.view;
 
 import it.polimi.ingsw.model.player.Totem;
+import it.polimi.ingsw.view.gui.JavaFXApp;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -17,35 +18,58 @@ public class ClientManager {
     private Totem playerTotem;
     private String nickname;
 
-    public ClientManager(boolean gui, boolean socket, String serverIp) {
-        Objects.requireNonNull(serverIp, "serverIp");
-
-        if (gui) {
-            userInterface = new GUInterface();
-        } else {
-            userInterface = new CLIinterface(this);
-        }
-
-        GameDTOHandler gameHandler = new GameDTOHandler(userInterface);
-        LobbyDTOHandler lobbyHandler = new LobbyDTOHandler(userInterface);
-        dtoQueue = new DTOQueue(lobbyHandler);
-        lobbyHandler.setOnGameStart(() -> dtoQueue.setVisitor(gameHandler));
-
-        new Thread(dtoQueue, "dto-consumer").start();
-
-        if (socket) {
-            connection = new SocketClient(dtoQueue, serverIp);
-            new Thread((Runnable) connection, "socket-client").start();
-        } else {
-            RMIclient rmi = new RMIclient(dtoQueue, serverIp);
-            try {
-                rmi.connect();
-            } catch (RemoteException | NotBoundException e) {
-                throw new RuntimeException("RMI connection failed: " + e.getMessage(), e);
-            }
-            connection = rmi;
-        }
+    /**
+     * GUI path: caller provides the pre-built {@link UserInterface} (e.g. {@code LobbyController}).
+     *
+     * @param ui       pre-built user interface implementation
+     * @param socket   {@code true} for Socket transport, {@code false} for RMI
+     * @param serverIp server host address
+     */
+    public ClientManager(UserInterface ui, boolean socket, String serverIp) {
+        this.userInterface = Objects.requireNonNull(ui, "ui");
+        this.dtoQueue      = buildQueue(ui);
+        this.connection    = buildConnection(dtoQueue, socket, Objects.requireNonNull(serverIp, "serverIp"));
     }
+
+    /**
+     * CLI path. Internally creates a {@link CLIinterface} bound to this manager.
+     *
+     * @param socket   {@code true} for Socket transport, {@code false} for RMI
+     * @param serverIp server host address
+     */
+    public ClientManager(boolean socket, String serverIp) {
+        this.userInterface = new CLIinterface(this);
+        this.dtoQueue      = buildQueue(userInterface);
+        this.connection    = buildConnection(dtoQueue, socket, Objects.requireNonNull(serverIp, "serverIp"));
+    }
+
+    // ── Wiring helpers ────────────────────────────────────────────────────────
+
+    private static DTOQueue buildQueue(UserInterface ui) {
+        GameDTOHandler  gameHandler  = new GameDTOHandler(ui);
+        LobbyDTOHandler lobbyHandler = new LobbyDTOHandler(ui);
+        DTOQueue queue = new DTOQueue(lobbyHandler);
+        lobbyHandler.setOnGameStart(() -> queue.setVisitor(gameHandler));
+        new Thread(queue, "dto-consumer").start();
+        return queue;
+    }
+
+    private static ConnectionProtocol buildConnection(DTOQueue queue, boolean socket, String serverIp) {
+        if (socket) {
+            SocketClient sc = new SocketClient(queue, serverIp);
+            new Thread(sc, "socket-client").start();
+            return sc;
+        }
+        RMIclient rmi = new RMIclient(queue, serverIp);
+        try {
+            rmi.connect();
+        } catch (RemoteException | NotBoundException e) {
+            throw new RuntimeException("RMI connection failed: " + e.getMessage(), e);
+        }
+        return rmi;
+    }
+
+    // ── Entry point ───────────────────────────────────────────────────────────
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
@@ -54,15 +78,19 @@ public class ClientManager {
         String serverIp = sc.nextLine().trim();
         if (serverIp.isEmpty()) serverIp = "localhost";
 
-        System.out.print("Use GUI? (y/n) [n]: ");
-        boolean gui = "y".equalsIgnoreCase(sc.nextLine().trim());
+        System.out.print("Use GUI? (y/n) [y]: ");
+        boolean gui = !"n".equalsIgnoreCase(sc.nextLine().trim());
 
         System.out.print("Use Socket? (y/n) [y]: ");
         boolean socket = !"n".equalsIgnoreCase(sc.nextLine().trim());
 
-        ClientManager client = new ClientManager(gui, socket, serverIp);
+        if (gui) {
+            JavaFXApp.launchGui(serverIp, socket);
+            return;
+        }
 
-        while (client.GetConnection().isConnected()) {
+        ClientManager client = new ClientManager(socket, serverIp);
+        while (client.getConnection().isConnected()) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -73,35 +101,15 @@ public class ClientManager {
         System.out.println("[Client] Disconnected from server.");
     }
 
-    public ConnectionProtocol GetConnection() {
-        return connection;
-    }
+    // ── Accessors ─────────────────────────────────────────────────────────────
 
-    public UserInterface getUser() {
-        return userInterface;
-    }
+    public ConnectionProtocol getConnection() { return connection; }
+    public UserInterface       getUser()       { return userInterface; }
+    public String              getId()         { return id; }
+    public Totem               getPlayerTotem(){ return playerTotem; }
+    public String              getNickname()   { return nickname; }
 
-    public String getId() {
-        return id;
-    }
-
-    public Totem getPlayerTotem() {
-        return playerTotem;
-    }
-
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setPlayerTotem(Totem totem) {
-        this.playerTotem = totem;
-    }
+    public void setNickname(String nickname)  { this.nickname    = nickname; }
+    public void setId(String id)              { this.id          = id; }
+    public void setPlayerTotem(Totem totem)   { this.playerTotem = totem; }
 }

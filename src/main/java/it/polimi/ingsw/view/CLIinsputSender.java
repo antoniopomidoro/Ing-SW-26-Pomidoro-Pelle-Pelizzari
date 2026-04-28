@@ -2,6 +2,7 @@ package it.polimi.ingsw.view;
 
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.GameStateDTO;
+import it.polimi.ingsw.view.gui.ActionSender;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -14,11 +15,13 @@ public class CLIinsputSender implements Runnable {
     private boolean going;
     private final ClientManager user;
     private final CLIinterface cli;
+    private final ActionSender actionSender;
     private final Map<String, Consumer<String[]>> handlers = new LinkedHashMap<>();
 
     public CLIinsputSender(ClientManager user, CLIinterface cli) {
         this.user = user;
         this.cli = cli;
+        this.actionSender = new ActionSender(user);
         this.going = true;
         handlers.put("create",      this::lobbyCreate);
         handlers.put("enter",       this::lobbyEnter);
@@ -73,21 +76,14 @@ public class CLIinsputSender implements Runnable {
         int numPlayers = Integer.parseInt(args[1]);
         Totem totem = Totem.valueOf(args[2].toUpperCase());
         String nick = args[3];
-        user.setNickname(nick);
-        user.setPlayerTotem(totem);
-        String json = NUDESender.buildLobbyCreate(nick, numPlayers, totem);
-        if (json != null) user.GetConnection().send(json);
+        actionSender.sendCreateGame(nick, numPlayers, totem);
     }
 
     private void lobbyEnter(String[] args) {
         if (args.length < 3) { System.out.println("Uso: enter <gameId> <nickname>"); return; }
         String gameId = args[1];
         String nick = args[2];
-        user.setNickname(nick);
-        user.setId(gameId);
-        user.setPlayerTotem(null);
-        String json = NUDESender.buildLobbyEnter(gameId, nick);
-        if (json != null) user.GetConnection().send(json);
+        actionSender.sendJoinGame(gameId, nick);
     }
 
     private void lobbySelectTotem(String[] args) {
@@ -96,9 +92,8 @@ public class CLIinsputSender implements Runnable {
         Totem totem = Totem.valueOf(args[2].toUpperCase());
         String nick = user.getNickname();
         if (nick == null) { System.out.println("Prima esegui 'create' o 'enter' con un nickname."); return; }
-        user.setPlayerTotem(totem);
-        String json = NUDESender.buildLobbySelectTotem(gameId, nick, totem);
-        if (json != null) user.GetConnection().send(json);
+        user.setId(gameId);
+        actionSender.sendSelectTotem(totem);
     }
 
     public boolean pickTopCard(int index) {
@@ -108,7 +103,7 @@ public class CLIinsputSender implements Runnable {
         if (!isValidIndex(index, topCards.size(), "topcard")) return false;
         String cardId = snapshot.getBoard().getTopCards().get(index).getInstanceId();
         String message = NUDESender.build(ActionType.TOP_CARD, index, user.getNickname(), user.getId(), user.getPlayerTotem(), cardId);
-        if (message != null) user.GetConnection().send(message);
+        if (message != null) user.getConnection().send(message);
         return true;
     }
 
@@ -119,7 +114,7 @@ public class CLIinsputSender implements Runnable {
         if (!isValidIndex(index, bottomCards.size(), "bottomcard")) return false;
         String cardId = snapshot.getBoard().getBottomCards().get(index).getInstanceId();
         String message = NUDESender.build(ActionType.BOTTOM_CARD, index, user.getNickname(), user.getId(), user.getPlayerTotem(), cardId);
-        if (message != null) user.GetConnection().send(message);
+        if (message != null) user.getConnection().send(message);
         return true;
     }
 
@@ -130,7 +125,7 @@ public class CLIinsputSender implements Runnable {
         if (!isValidIndex(index, topBuildings.size(), "topbuild")) return false;
         String cardId = snapshot.getBoard().getTopBuildings().get(index).getInstanceId();
         String message = NUDESender.build(ActionType.TOP_BUILDING, index, user.getNickname(), user.getId(), user.getPlayerTotem(), cardId);
-        if (message != null) user.GetConnection().send(message);
+        if (message != null) user.getConnection().send(message);
         return true;
     }
 
@@ -141,7 +136,7 @@ public class CLIinsputSender implements Runnable {
         if (!isValidIndex(index, bottomBuildings.size(), "bottombuild")) return false;
         String cardId = snapshot.getBoard().getBottomBuildings().get(index).getInstanceId();
         String message = NUDESender.build(ActionType.BOTTOM_BUILDING, index, user.getNickname(), user.getId(), user.getPlayerTotem(), cardId);
-        if (message != null) user.GetConnection().send(message);
+        if (message != null) user.getConnection().send(message);
         return true;
     }
 
@@ -151,7 +146,7 @@ public class CLIinsputSender implements Runnable {
         List<?> tiles = snapshot.getBoard().getTiles();
         if (!isValidIndex(index, tiles.size(), "tile")) return false;
         String message = NUDESender.build(ActionType.TILE, index, user.getNickname(), user.getId(), user.getPlayerTotem(), null);
-        if (message != null) user.GetConnection().send(message);
+        if (message != null) user.getConnection().send(message);
         return true;
     }
 
