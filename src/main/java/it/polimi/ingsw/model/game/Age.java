@@ -11,19 +11,25 @@ import it.polimi.ingsw.model.player.*;
 
 
 public enum Age {
-    AGE_1(1),
-    AGE_2(2),
-    AGE_3(3),
-    AGE_3_FINAL(3);
+    AGE_1(1, true),
+    AGE_2(2, true),
+    AGE_3(3, true),
+    AGE_3_FINAL(3, false);
 
     private final int numericValue;
+    private final boolean age;
 
-    Age(int numericValue) {
+    Age(int numericValue, boolean age) {
         this.numericValue = numericValue;
+        this.age = age;
     }
 
     public int getValue() {
         return this.numericValue;
+    }
+
+    public boolean isAge() {
+        return this.age;
     }
 
     public boolean hasNext() {

@@ -31,8 +31,7 @@ public class ChangeAgePhase implements GamePhaseBehavior {
         // Update buildings on the board for the new era
         board.discardBottomBuildings();
         board.topToBottomBuildings();
-        board.addTopBuildings(context.getDeck().getBuildings(context.getAge(), context.getConfig().getBuildingsCount(context.getPlayers().size(), context.getAge().getValue())));
-
+        board.addTopBuildings(context.getDeck().getBuildings(context.getAge()));
         // Notify end of age change before transition
         context.raiseEvent(new GameEvent(
                 GameEvent.Type.AGE_CHANGED,

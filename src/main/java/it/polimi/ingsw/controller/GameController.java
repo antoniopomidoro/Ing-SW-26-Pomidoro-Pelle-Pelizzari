@@ -76,7 +76,8 @@ public class GameController {
 
         List<Building> selectedBuildings = new ArrayList<>();
         for (Age age : Age.values()) {
-            int required = config.getBuildingsCount(playerCount, age.ordinal());
+            if (!age.isAge()) continue;
+            int required = config.getBuildingsCount(playerCount, age);
             List<Building> ageBuildings = buildings.stream()
                     .filter(building -> building.getAge() == age)
                     .collect(Collectors.toCollection(ArrayList::new));

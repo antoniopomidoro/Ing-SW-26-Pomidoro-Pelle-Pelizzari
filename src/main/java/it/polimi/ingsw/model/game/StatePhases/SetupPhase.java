@@ -28,7 +28,6 @@ public class SetupPhase implements GamePhaseBehavior {
         // 2. Board population
         int bottomCardsNumber = config.getBottomCardsQuantity(context.getPlayers());
         int topCardsNumber = config.getTopCardsQuantity(context.getPlayers());
-        int topBuildingsNumber = config.getBuildingsCount(context.getPlayers().size(), context.getAge().getValue());
         while (board.getBottomCards().size() < bottomCardsNumber) {
             var card = deck.popCard(context.getAge());
             if (card.isEmpty()) return false;
@@ -39,7 +38,7 @@ public class SetupPhase implements GamePhaseBehavior {
             if (card.isEmpty()) return false;
             board.addTopCard(card.get());
         }
-        board.addTopBuildings(deck.getBuildings(context.getAge(), topBuildingsNumber));
+        board.addTopBuildings(deck.getBuildings(context.getAge()));
         // 3. Transition to START_TURN phase
         return nextPhase(context);
     }

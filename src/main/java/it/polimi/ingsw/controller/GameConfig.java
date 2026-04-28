@@ -1,5 +1,6 @@
 package it.polimi.ingsw.controller;
 
+import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.player.Player;
 
 import java.util.List;
@@ -36,11 +37,15 @@ public class GameConfig {
      * Returns the number of buildings to draw for the given player count and age.
      *
      * @param playerCount number of players (2–5)
-     * @param age         age index (0 = Era I, 1 = Era II, 2 = Era III)
+     * @param age         age (must satisfy {@link Age#isAge()})
      * @return number of buildings to draw
+     * @throws IllegalArgumentException if the age has no associated buildings
      */
-    public int getBuildingsCount(int playerCount, int age) {
-        return buildingPerPlayer[playerCount - gameMinPlayers][age];
+    public int getBuildingsCount(int playerCount, Age age) {
+        if (!age.isAge()) {
+            throw new IllegalArgumentException("Age " + age + " has no buildings");
+        }
+        return buildingPerPlayer[playerCount - gameMinPlayers][age.getValue() - 1];
     }
 
     /**

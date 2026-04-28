@@ -70,9 +70,6 @@ public class Decks {
             if (ageDeck != null) {
                 Collections.shuffle(ageDeck);
             }
-            if (ageBuildings != null) {
-                Collections.shuffle(ageBuildings);
-            }
         }
         return true;
     }
@@ -94,14 +91,12 @@ public class Decks {
         return Optional.empty();
     }
 
-    public List<Building> getBuildings(Age age, int n) {
+    public List<Building> getBuildings(Age age) {
         if (buildings == null || buildings.get(age) == null) {
             return Collections.emptyList();
         }
-        List<Building> sup = buildings.get(age).stream()
-                .limit(n)
-                .toList();
-        return sup;
+        return buildings.get(age);
+
     }
     public boolean addCard(Card c) {
         if (c == null || c.getAge() == null || this.cards.get(c.getAge()) == null) {
