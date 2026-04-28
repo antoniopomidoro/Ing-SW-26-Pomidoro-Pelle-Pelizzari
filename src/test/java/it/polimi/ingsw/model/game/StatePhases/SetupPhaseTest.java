@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model.game.StatePhases;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polimi.ingsw.controller.GameConfig;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
@@ -7,6 +8,8 @@ import it.polimi.ingsw.model.cards.*;
 import it.polimi.ingsw.model.board.*;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.InputStream;
 import java.util.*;
 import java.lang.reflect.Field;
 
@@ -20,8 +23,8 @@ class SetupPhaseTest {
     @BeforeEach
     void setUp() throws Exception {
         players = new ArrayList<>();
-        players.add(new Player(Totem.BLUE, "Player1"));
-        players.add(new Player(Totem.RED, "Player2"));
+        players.add(new Player(Totem.RED, "Player1"));
+        players.add(new Player(Totem.BLUE, "Player2"));
 
         board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
 
@@ -30,14 +33,13 @@ class SetupPhaseTest {
             Card c = createMockCard();
             c.addToDeck(decks);
         }
-        config = new GameConfig();
-        List<Integer> startingFood = new ArrayList<>(List.of(5, 5, 5, 5, 5));
 
-        Field foodField = GameConfig.class.getDeclaredField("startingFood");
-        foodField.setAccessible(true);
-        foodField.set(config, startingFood);
+        ObjectMapper mapper = new ObjectMapper();
+        InputStream is = getClass().getClassLoader().getResourceAsStream("json/config.json");
+        config = mapper.readValue(is, GameConfig.class);
 
         context = new GameState(players, config, board, decks,"testId");
+
     }
 
 
@@ -46,7 +48,7 @@ class SetupPhaseTest {
             @Override public boolean addToDeck(Decks d) { return d.addCard(this); }
             @Override public Age getAge() { return Age.AGE_1; }
             @Override public boolean isBuyable() { return true; }
-            @Override public CardCategory getCategory() { return CardCategory.CHARACTER; }
+            @Override public CardCategory getCategory() { return CardCategory.BUILDING; }
             @Override public int getResolutionPriority() { return 0; }
         };
     }
@@ -54,10 +56,10 @@ class SetupPhaseTest {
     @Test
     void testSetupPhaseExecute() {
         SetupPhase setupPhase = new SetupPhase();
+        setupPhase.execute(context);
 
-        for (Player p : players) {
-            assertEquals(5, p.getFood(), "every player gets 5 food");
-        }
+        assertEquals(2,players.get(0).getFood());
+        assertEquals(3,players.get(1).getFood());
         assertFalse(board.getTopCards().isEmpty(), "board top is inserted");
         assertFalse(board.getBottomCards().isEmpty(), "board bottom is inserted");
         assertFalse(context.getCurrentPhase() instanceof SetupPhase, "next phase is setted");
@@ -114,33 +116,64 @@ class SetupPhaseTest {
         assertEquals("Index 4 out of bounds for length 4", exception.getMessage());
     }
 
+    /**
+     * Physical Verification: SetupPhase state verification.
+     * Confirms that the Board correctly receives buildings from Decks based on Config.
+     */
     @Test
-    @DisplayName("Verify SetupPhase successfully transitions to StartTurnPhase")
-    void testExecute_Success_ShouldTransitionToNextPhase() throws Exception {
-        // 1. Arrange: Prepare players and sufficient resources
-        List<Player> players = new ArrayList<>(List.of(
-                new Player(Totem.RED, "A"),
-                new Player(Totem.WHITE, "B")
-        ));
-        List<Integer> sufficientFood = new ArrayList<>(List.of(5, 5));
+    void testAddTopBuildingsStateVerification() throws Exception {
+        //  Synchronize Physical Environment
+        int playerCount = context.getPlayers().size();
+        int ageValue = context.getAge().getValue();
+        assertEquals(2, playerCount, "Physical Check: Current game must be 2-player.");
 
-        // 2. Inject valid data using reflection to avoid failures
-        safeInjectField(context, "players", players);
-        safeInjectField(config, "startingFood", sufficientFood);
+        // We inject 2 to ensure Decks has enough supply for any potential matrix value
+        Decks decks = context.getDeck();
+        Building b1 = createMockBuilding(Age.AGE_1);
+        Building b2 = createMockBuilding(Age.AGE_1);
+        injectBuildingToDecksInternal(decks, Age.AGE_1, b1);
+        injectBuildingToDecksInternal(decks, Age.AGE_1, b2);
 
-        // 3. Action: Execute the setup phase
-        // The execute method should return true upon successful transition logic
+        int expectedFromConfig = config.getBuildingsCount(playerCount, ageValue);
+
         SetupPhase setupPhase = new SetupPhase();
-        boolean result = setupPhase.execute(context);
+        setupPhase.execute(context);
 
-        // 4. Assert: Verify the state transition
-        assertTrue(result, "The execute method should return true.");
+        List<Building> topBuildings = board.getTopBuildings();
 
-        // Look at the actual type (Right side): check if phase is now StartTurnPhase
-        assertInstanceOf(StartTurnPhase.class, context.getCurrentPhase(),
-                "The game state should have transitioned to StartTurnPhase.");
+        // Assertions
+        assertNotNull(topBuildings, "Physical Error: Board's building list is null.");
+        assertEquals(expectedFromConfig, topBuildings.size(),
+                "Board count must physically match the value defined in config.json.");
+    }
+    /**
+     * Helper: Creates a mock Building object satisfying interface requirements.
+     */
+    private Building createMockBuilding(Age age) {
+        return new Building() {
+            @Override public CardCategory getCategory() { return CardCategory.BUILDING; }
+            @Override public Age getAge() { return age; }
+            @Override public boolean addToDeck(Decks d) { return true; }
+            @Override public boolean isBuyable() { return true; }
+            @Override public int getResolutionPriority() { return 0; }
+        };
     }
 
+    /**
+     * Helper: Injects buildings into the private 'buildings' Map within Decks
+     * to align with the retrieval logic in Decks.getBuildings.
+     */
+    private void injectBuildingToDecksInternal(Decks decks, Age age, Building b) throws Exception {
+        // Access the private 'buildings' field via reflection.
+        java.lang.reflect.Field field = Decks.class.getDeclaredField("buildings");
+        field.setAccessible(true);
+
+        @SuppressWarnings("unchecked")
+        Map<Age, List<Building>> buildingsMap = (Map<Age, List<Building>>) field.get(decks);
+
+        // Ensure the list for the specific age is initialized and populated.
+        buildingsMap.computeIfAbsent(age, k -> new ArrayList<>()).add(b);
+    }
     /**
      * A helper method to inject private fields using Java Reflection.
      * This ensures we can test edge cases without modifying the original source code.

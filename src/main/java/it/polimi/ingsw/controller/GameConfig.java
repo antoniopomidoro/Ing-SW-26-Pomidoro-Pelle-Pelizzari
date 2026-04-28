@@ -90,4 +90,8 @@ public class GameConfig {
     public int getArtistGain() {
         return artistGain;
     }
+
+    public int getBottomExtraCards() { return bottomExtraCards; }
+
+    public int getTopExtraCards() { return topExtraCards; }
 }
