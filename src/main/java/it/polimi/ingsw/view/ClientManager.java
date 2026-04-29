@@ -1,6 +1,7 @@
 package it.polimi.ingsw.view;
 
 import it.polimi.ingsw.model.player.Totem;
+import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.view.gui.JavaFXApp;
 
 import java.rmi.NotBoundException;
@@ -86,7 +87,10 @@ public class ClientManager {
 
         if (gui) {
             JavaFXApp.launchGui(serverIp, socket);
-            return;
+            // Ensure JVM exits when the GUI is closed: JavaFX may return while
+            // background threads (dto-consumer / socket threads) are still alive.
+            // Force termination to avoid leaving the process running during local preview.
+            System.exit(0);
         }
 
         ClientManager client = new ClientManager(socket, serverIp);
@@ -112,4 +116,22 @@ public class ClientManager {
     public void setNickname(String nickname)  { this.nickname    = nickname; }
     public void setId(String id)              { this.id          = id; }
     public void setPlayerTotem(Totem totem)   { this.playerTotem = totem; }
+
+    /**
+     * Swaps the active DTO visitor so that all subsequent game events are routed to
+     * {@code gameUi} instead of the original lobby interface.
+     * Must be called on the JavaFX thread, after the game screen controller is ready.
+     *
+     * @param gameUi the game-phase UserInterface (e.g. GameViewController)
+     */
+    public void redirectGameEventsTo(UserInterface gameUi) {
+        GameEventDTO lastEvent = null;
+        if (dtoQueue.getVisitor() instanceof GameDTOHandler old) {
+            lastEvent = old.getLastEvent();
+        }
+        dtoQueue.setVisitor(new GameDTOHandler(Objects.requireNonNull(gameUi, "gameUi")));
+        if (lastEvent != null) {
+            gameUi.setUp(lastEvent);
+        }
+    }
 }

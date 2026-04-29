@@ -8,6 +8,7 @@ import it.polimi.ingsw.model.board.Tile;
 import it.polimi.ingsw.model.cards.Building;
 import it.polimi.ingsw.model.cards.Card;
 import it.polimi.ingsw.model.cards.characters.CharacterEnum;
+import it.polimi.ingsw.model.cards.characters.Tool;
 import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.game.GameState;
 import it.polimi.ingsw.model.player.Player;
@@ -21,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -39,6 +41,7 @@ public class GameStateDTO {
     private final List<Totem> turnOrder;
     private final List<Totem> orderTileOrder;
     private final Totem activePlayer;
+    private final int deckSize;
 
     @JsonCreator
     public GameStateDTO(
@@ -52,7 +55,8 @@ public class GameStateDTO {
             @JsonProperty("board") BoardDTO board,
             @JsonProperty("turnOrder") List<Totem> turnOrder,
             @JsonProperty("orderTileOrder") List<Totem> orderTileOrder,
-            @JsonProperty("activePlayer") Totem activePlayer
+            @JsonProperty("activePlayer") Totem activePlayer,
+            @JsonProperty("deckSize") int deckSize
     ) {
         this.gameId = gameId;
         this.age = age;
@@ -65,6 +69,7 @@ public class GameStateDTO {
         this.turnOrder = turnOrder == null ? List.of() : turnOrder;
         this.orderTileOrder = orderTileOrder == null ? List.of() : orderTileOrder;
         this.activePlayer = activePlayer;
+        this.deckSize = deckSize;
     }
 
     /**
@@ -75,7 +80,7 @@ public class GameStateDTO {
      */
     public static GameStateDTO from(GameState state) {
         if (state == null) {
-            return new GameStateDTO(null, null, 0, 0, 0, null, List.of(), null, List.of(), List.of(), null);
+            return new GameStateDTO(null, null, 0, 0, 0, null, List.of(), null, List.of(), List.of(), null, 0);
         }
 
         String phaseName = state.getCurrentPhase() != null
@@ -96,11 +101,27 @@ public class GameStateDTO {
                 ? List.of()
                 : state.getOrderTileOrder().stream().map(Player::getId).toList();
 
+        // During StartTurnPhase the active player is the one currently choosing a tile
+        // (tracked by currentPlayerOrderIndex in orderTileOrder), NOT the turnOrder player.
         Totem activePlayer = null;
-        if (state.getTurnOrder() != null && !state.getTurnOrder().isEmpty()) {
+        if ("StartTurnPhase".equals(phaseName)) {
+            if (state.getOrderTileOrder() != null && !state.getOrderTileOrder().isEmpty()) {
+                Player current = state.getCurrentOrderTileOrderPlayer();
+                activePlayer = current != null ? current.getId() : null;
+                System.out.println("[DTO] StartTurnPhase: currentPlayerOrderIndex="
+                        + state.getCurrentPlayerOrderIndex()
+                        + " activePlayer=" + activePlayer
+                        + " orderTileOrder=" + state.getOrderTileOrder().stream()
+                                .map(p -> p.getId().name()).toList());
+            }
+        } else if (state.getTurnOrder() != null && !state.getTurnOrder().isEmpty()) {
             Player currentPlayer = state.getCurrentTurnOrderPlayer();
             activePlayer = currentPlayer != null ? currentPlayer.getId() : null;
         }
+
+        int deckSize = state.getDeck() != null
+                ? state.getDeck().remainingCards(state.getAge())
+                : 0;
 
         return new GameStateDTO(
                 state.getGameId(),
@@ -113,7 +134,8 @@ public class GameStateDTO {
                 board,
                 turnOrder,
                 orderTileOrder,
-                activePlayer
+                activePlayer,
+                deckSize
         );
     }
 
@@ -168,6 +190,16 @@ public class GameStateDTO {
     }
 
     /**
+     * Number of remaining cards in the deck for the current age.
+     * Zero means the deck is exhausted and no back image should be shown.
+     *
+     * @return remaining card count
+     */
+    public int getDeckSize() {
+        return deckSize;
+    }
+
+    /**
      * Player data included in the public snapshot.
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -185,6 +217,7 @@ public class GameStateDTO {
         private int stars;
         private int buildingDiscount;
         private int sustainmentDiscount;
+        private Set<String> ownedTools;
 
         @JsonCreator
         public PlayerDTO(
@@ -198,7 +231,8 @@ public class GameStateDTO {
                 @JsonProperty("characterCounts") Map<String, Integer> characterCounts,
                 @JsonProperty("stars") int stars,
                 @JsonProperty("buildingDiscount") int buildingDiscount,
-                @JsonProperty("sustainmentDiscount") int sustainmentDiscount
+                @JsonProperty("sustainmentDiscount") int sustainmentDiscount,
+                @JsonProperty("ownedTools") Set<String> ownedTools
         ) {
             this.totem = totem;
             this.nickname = nickname;
@@ -211,6 +245,7 @@ public class GameStateDTO {
             this.stars = stars;
             this.buildingDiscount = buildingDiscount;
             this.sustainmentDiscount = sustainmentDiscount;
+            this.ownedTools = ownedTools == null ? Set.of() : ownedTools;
         }
 
         /**
@@ -231,6 +266,7 @@ public class GameStateDTO {
                 this.stars = 0;
                 this.buildingDiscount = 0;
                 this.sustainmentDiscount = 0;
+                this.ownedTools = Set.of();
                 return;
             }
 
@@ -262,6 +298,9 @@ public class GameStateDTO {
             this.stars = stars;
             this.buildingDiscount = buildingDiscount;
             this.sustainmentDiscount = sustainmentDiscount;
+            this.ownedTools = stats != null
+                    ? stats.getOwnedTools().stream().map(Tool::name).collect(Collectors.toSet())
+                    : Set.of();
         }
 
         public Totem getTotem() { return totem; }
@@ -275,6 +314,7 @@ public class GameStateDTO {
         public int getStars() { return stars; }
         public int getBuildingDiscount() { return buildingDiscount; }
         public int getSustainmentDiscount() { return sustainmentDiscount; }
+        public Set<String> getOwnedTools() { return ownedTools == null ? Set.of() : ownedTools; }
     }
 
     /**

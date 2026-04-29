@@ -70,6 +70,7 @@ public class SocketClient implements ConnectionProtocol, Runnable {
                 if (line == null || line.isEmpty()) continue;
                 lastPing = clock.instant();
                 if (!line.equalsIgnoreCase("ping")) {
+                    System.out.println("[NET][IN][CLIENT][SOCKET] " + line);
                     NUDERevengeAnal.action(line).ifPresent(dtoQueue::push);
                 }
             } catch (IOException e) {

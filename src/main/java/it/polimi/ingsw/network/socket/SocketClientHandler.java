@@ -56,6 +56,7 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
                     lastPing = clock.instant();
 
                 }else{
+                System.out.println("[NET][IN][SERVER][SOCKET] " + json);
                 NUDECommand(json);}
             } catch (IOException e) {
                 serverManager.disconnectPlayer(this);

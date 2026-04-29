@@ -6,9 +6,9 @@ import java.util.Objects;
 
 public class GUIInputSender {
 
-    private final ActionSender sender;
+    private final LobbyCommandSender sender;
 
-    public GUIInputSender(ActionSender sender) {
+    public GUIInputSender(LobbyCommandSender sender) {
         this.sender = Objects.requireNonNull(sender, "sender");
     }
 

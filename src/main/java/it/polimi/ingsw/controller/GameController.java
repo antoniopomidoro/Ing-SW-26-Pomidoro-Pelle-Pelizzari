@@ -44,6 +44,7 @@ public class GameController {
         try {
             jsonGod.loadAllData();
         } catch (IOException e) {
+            e.printStackTrace();
             throw new IllegalStateException("Failed to load game data: " + e.getMessage(), e);
         }
         int playerCount = players.size();

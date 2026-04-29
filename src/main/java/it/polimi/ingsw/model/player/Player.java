@@ -83,6 +83,7 @@ public class Player {
 
     public boolean addCard(Card c) {
         cards.add(c);
+        c.onAddedToPlayer(this);
         return true;
     }
 

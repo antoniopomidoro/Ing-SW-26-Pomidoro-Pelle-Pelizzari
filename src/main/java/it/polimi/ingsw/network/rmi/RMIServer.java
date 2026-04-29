@@ -49,6 +49,7 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
         if (json == null || json.isBlank()) {
             throw new RemoteException("json cannot be null or blank");
         }
+        System.out.println("[NET][IN][SERVER][RMI] " + json);
         RMIClientHandler handler = getOrCreateHandler(callback);
         Optional<LobbyCommand> lobbyCmd = LobbyAnalyzer.parse(json, handler);
         if (lobbyCmd.isPresent()) {

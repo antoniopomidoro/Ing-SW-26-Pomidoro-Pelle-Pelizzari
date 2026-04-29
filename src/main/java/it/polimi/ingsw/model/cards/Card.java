@@ -40,8 +40,8 @@ public abstract class Card{
     protected int minPlayers = 0;
     protected String instanceId = UUID.randomUUID().toString();
 
-    /** Numeric ID populated from JSON, used by the client to map card → PNG image. */
-    protected int cardId;
+    /** Card ID from JSON (e.g. "C1"), used by the client to map card → PNG image. */
+    protected String cardId;
 
     public enum CardCategory {
         CHARACTER,
@@ -94,8 +94,8 @@ public abstract class Card{
         return instanceId;
     }
 
-    /** @return Numeric card ID from JSON, used for client-side image association. */
-    public int getCardId() {
+    /** @return Card ID from JSON, used for client-side image association. */
+    public String getCardId() {
         return cardId;
     }
 
@@ -132,6 +132,17 @@ public abstract class Card{
      * @return True if the discard action was processed successfully.
      */
     public boolean onDiscard(GameState state) {
+        return true;
+    }
+
+    /**
+     * Hook invoked when this card is added to a player's hand.
+     * Default is a no-op; character subclasses override to update player stats.
+     *
+     * @param p the player receiving the card
+     * @return true on success
+     */
+    public boolean onAddedToPlayer(Player p) {
         return true;
     }
     //method that says if the selected card is a building

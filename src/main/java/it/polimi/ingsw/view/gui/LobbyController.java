@@ -66,6 +66,7 @@ public class LobbyController implements UserInterface {
 
     private LobbyAnimator  animator;
     private GUIInputSender inputSender;
+    private java.util.function.Consumer<String> onGameIdReceived;
 
     private LobbyStep currentStep    = LobbyStep.WELCOME;
     private boolean   creatingGame   = false;
@@ -89,8 +90,13 @@ public class LobbyController implements UserInterface {
     }
 
     /** Must be called by JavaFXApp after FXML loading and ClientManager wiring. */
-    public void setActionSender(ActionSender sender) {
+    public void setActionSender(LobbyCommandSender sender) {
         this.inputSender = new GUIInputSender(Objects.requireNonNull(sender, "sender"));
+    }
+
+    /** Called by JavaFXApp so the lobby can propagate the server-assigned game ID to the client. */
+    public void setOnGameIdReceived(java.util.function.Consumer<String> callback) {
+        this.onGameIdReceived = callback;
     }
 
     // ── Logo loading ─────────────────────────────────────────────────────────
@@ -306,6 +312,9 @@ public class LobbyController implements UserInterface {
 
     @Override
     public void onLobbyWaiting(LobbyUpdateDTO dto) {
+        if (dto.getIdGame() != null && onGameIdReceived != null) {
+            onGameIdReceived.accept(dto.getIdGame());
+        }
         Platform.runLater(() -> {
             lobbyIdLabel.setText("Lobby: " + dto.getIdGame()
                     + "  (" + dto.getCurrentPlayers() + "/" + dto.getRequiredPlayers() + ")");
@@ -338,14 +347,29 @@ public class LobbyController implements UserInterface {
 
     @Override
     public void onLobbyRejoin(LobbyUpdateDTO dto) {
+        if (dto.getIdGame() != null && onGameIdReceived != null) {
+            onGameIdReceived.accept(dto.getIdGame());
+        }
         Platform.runLater(() -> lobbyIdLabel.setText("Rejoin: " + dto.getIdGame()));
     }
 
     @Override
     public void onGameStarting(LobbyUpdateDTO dto) {
-        // TODO: load game scene
-        Platform.runLater(() -> { });
+        Platform.runLater(() -> {
+            if (onGameStartingCallback != null) onGameStartingCallback.run();
+        });
     }
+
+    /**
+     * Wired by {@link JavaFXApp} so the lobby can trigger the scene transition.
+     *
+     * @param callback called on the JavaFX thread when game-starting arrives
+     */
+    public void setOnGameStartingCallback(Runnable callback) {
+        this.onGameStartingCallback = callback;
+    }
+
+    private Runnable onGameStartingCallback;
 
     @Override public boolean update(GameEventDTO state)            { return false; }
     @Override public boolean setUp(GameEventDTO state)             { return false; }
@@ -353,4 +377,198 @@ public class LobbyController implements UserInterface {
     @Override public void onPlayerTurnStarted(GameEventDTO dto)    { }
     @Override public void onPlayerDisconnected(GameEventDTO dto)   { }
     @Override public void onGameEnded(GameEventDTO dto)            { }
+
+    private static final String PREVIEW_GAME_ID = "PREVIEW-0001";
+    private static final String PREVIEW_NICKNAME = "PreviewPlayer";
+    private static final int PREVIEW_NUM_PLAYERS = 4;
+    private static final double PREVIEW_LOGO_DEFAULT_TRANSLATE_Y = -60;
+    private static final double PREVIEW_LOGO_TOP_TRANSLATE_Y = -250;
+    private static final double PREVIEW_LOGO_TOP_SCALE = 0.60;
+    private static final double PREVIEW_WELCOME_TOTEMS_DEFAULT_TRANSLATE_Y = 230;
+    private static final double PREVIEW_WELCOME_TOTEMS_TOP_TRANSLATE_Y = -180;
+    private static final double PREVIEW_TOTEM_SELECTION_TRANSLATE_Y = 60;
+
+    private void applyPreviewWelcome() {
+        resetPreviewLayout();
+        currentStep = LobbyStep.WELCOME;
+        creatingGame = false;
+        pendingGameId = PREVIEW_GAME_ID;
+        pendingNickname = PREVIEW_NICKNAME;
+        pendingNumPlayers = PREVIEW_NUM_PLAYERS;
+        selectedTotem = null;
+        totemConfirmed = false;
+
+        lobbyIdLabel.setVisible(false);
+        startButton.setVisible(true);
+        welcomeTotems.setVisible(true);
+        welcomeTotems.setScaleX(1.0);
+        welcomeTotems.setScaleY(1.0);
+        welcomeTotems.setTranslateY(PREVIEW_WELCOME_TOTEMS_DEFAULT_TRANSLATE_Y);
+        logo.setScaleX(1.0);
+        logo.setScaleY(1.0);
+        logo.setTranslateY(PREVIEW_LOGO_DEFAULT_TRANSLATE_Y);
+    }
+
+    private void applyPreviewChoice() {
+        resetPreviewLayout();
+        currentStep = LobbyStep.CHOICE;
+        startButton.setVisible(false);
+        welcomeTotems.setVisible(true);
+        welcomeTotems.setScaleX(PREVIEW_LOGO_TOP_SCALE);
+        welcomeTotems.setScaleY(PREVIEW_LOGO_TOP_SCALE);
+        welcomeTotems.setTranslateY(PREVIEW_WELCOME_TOTEMS_TOP_TRANSLATE_Y);
+        logo.setScaleX(PREVIEW_LOGO_TOP_SCALE);
+        logo.setScaleY(PREVIEW_LOGO_TOP_SCALE);
+        logo.setTranslateY(PREVIEW_LOGO_TOP_TRANSLATE_Y);
+
+        formArea.setVisible(true);
+        promptLabel.setText("What do you want to do?");
+        choiceButtons.setVisible(true);
+    }
+
+    private void applyPreviewFormGameId() {
+        applyPreviewChoice();
+        currentStep = LobbyStep.FORM_GAME_ID;
+        showFormStep("Game ID:");
+        inputField.setText(PREVIEW_GAME_ID);
+    }
+
+    private void applyPreviewFormNickname(boolean creatingGame) {
+        this.creatingGame = creatingGame;
+        applyPreviewChoice();
+        currentStep = LobbyStep.FORM_NICKNAME;
+        showFormStep("Your nickname:");
+        inputField.setText(PREVIEW_NICKNAME);
+    }
+
+    private void applyPreviewFormNumPlayers() {
+        applyPreviewChoice();
+        currentStep = LobbyStep.FORM_NUM_PLAYERS;
+        showFormStep("Number of players (2–5):");
+        inputField.setText(String.valueOf(PREVIEW_NUM_PLAYERS));
+    }
+
+    private void applyPreviewTotemSelection(TotemSelectionDTO dto, boolean creatingGame) {
+        resetPreviewLayout();
+        this.creatingGame = creatingGame;
+        currentStep = LobbyStep.TOTEM_SELECTION;
+        pendingGameId = PREVIEW_GAME_ID;
+        pendingNickname = PREVIEW_NICKNAME;
+        pendingNumPlayers = PREVIEW_NUM_PLAYERS;
+        selectedTotem = null;
+        totemConfirmed = false;
+
+        logo.setScaleX(PREVIEW_LOGO_TOP_SCALE);
+        logo.setScaleY(PREVIEW_LOGO_TOP_SCALE);
+        logo.setTranslateY(PREVIEW_LOGO_TOP_TRANSLATE_Y);
+        welcomeTotems.setVisible(false);
+
+        lobbyIdLabel.setText("Lobby: " + PREVIEW_GAME_ID + "  (1/" + PREVIEW_NUM_PLAYERS + ")");
+        lobbyIdLabel.setVisible(true);
+
+        resetAllTotemsAvailable();
+        applyTotemAvailability(Objects.requireNonNull(dto, "dto"));
+
+        totemSelection.setVisible(true);
+        totemSelection.setTranslateY(PREVIEW_TOTEM_SELECTION_TRANSLATE_Y);
+        totemSelection.setScaleX(1.0);
+        totemSelection.setScaleY(1.0);
+        totemConfirmButton.setVisible(true);
+        totemConfirmButton.setDisable(true);
+    }
+
+    private void applyPreviewWaiting(String nickname) {
+        resetPreviewLayout();
+        currentStep = LobbyStep.TOTEM_SELECTION;
+        totemConfirmed = true;
+        pendingNickname = Objects.requireNonNull(nickname, "nickname");
+
+        logo.setScaleX(PREVIEW_LOGO_TOP_SCALE);
+        logo.setScaleY(PREVIEW_LOGO_TOP_SCALE);
+        logo.setTranslateY(PREVIEW_LOGO_TOP_TRANSLATE_Y);
+        welcomeTotems.setVisible(false);
+
+        playerNameLabel.setText(pendingNickname);
+        playerNameLabel.setVisible(true);
+        animator.startWaitingAnimation(waitingLabel);
+    }
+
+    private void resetPreviewLayout() {
+        setFormWaiting(false);
+        animator.stopWaitingAnimation(waitingLabel);
+        animator.hideError();
+
+        formArea.setOpacity(1);
+        welcomeTotems.setOpacity(1);
+        totemSelection.setOpacity(1);
+        errorLabel.setOpacity(1);
+
+        formArea.setVisible(false);
+        choiceButtons.setVisible(false);
+        inputField.setVisible(false);
+        confirmButton.setVisible(false);
+        errorLabel.setVisible(false);
+        totemSelection.setVisible(false);
+        totemConfirmButton.setVisible(false);
+        playerNameLabel.setVisible(false);
+        waitingLabel.setVisible(false);
+        lobbyIdLabel.setVisible(false);
+        startButton.setVisible(false);
+    }
+    /**
+     * Shows the WELCOME preview state without contacting the server.
+     */
+    public void previewShowWelcome() {
+        Platform.runLater(this::applyPreviewWelcome);
+    }
+
+    /**
+     * Shows the CHOICE preview state without contacting the server.
+     */
+    public void previewShowChoice() {
+        Platform.runLater(this::applyPreviewChoice);
+    }
+
+    /**
+     * Shows the JOIN form step (game id) in preview mode.
+     */
+    public void previewShowFormGameId() {
+        Platform.runLater(this::applyPreviewFormGameId);
+    }
+
+    /**
+     * Shows the nickname form step in preview mode.
+     *
+     * @param creatingGame {@code true} for CREATE flow, {@code false} for JOIN flow
+     */
+    public void previewShowFormNickname(boolean creatingGame) {
+        Platform.runLater(() -> applyPreviewFormNickname(creatingGame));
+    }
+
+    /**
+     * Shows the number-of-players form step in preview mode.
+     */
+    public void previewShowFormNumPlayers() {
+        Platform.runLater(this::applyPreviewFormNumPlayers);
+    }
+
+    /**
+     * Shows the totem selection state in preview mode.
+     *
+     * @param dto           totem availability snapshot to display
+     * @param creatingGame  {@code true} for CREATE flow, {@code false} for JOIN flow
+     */
+    public void previewShowTotemSelection(TotemSelectionDTO dto, boolean creatingGame) {
+        Platform.runLater(() -> applyPreviewTotemSelection(dto, creatingGame));
+    }
+
+    /**
+     * Shows the waiting state in preview mode.
+     *
+     * @param nickname player nickname to display
+     */
+    public void previewShowWaiting(String nickname) {
+        Platform.runLater(() -> applyPreviewWaiting(nickname));
+    }
+
 }

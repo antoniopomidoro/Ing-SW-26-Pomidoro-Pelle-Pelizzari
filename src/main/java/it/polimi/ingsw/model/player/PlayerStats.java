@@ -128,6 +128,10 @@ public class PlayerStats {
         return uniqueTools.size();
     }
 
+    public Set<Tool> getOwnedTools() {
+        return Collections.unmodifiableSet(uniqueTools);
+    }
+
     public int getExtraUpperPick() {
         return extraUpperPick;
     }

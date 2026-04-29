@@ -56,6 +56,9 @@ public class DTOQueue implements Runnable {
         this.visitor = visitor;
     }
 
+    /** Returns the currently active visitor. */
+    public DTOVisitor getVisitor() { return visitor; }
+
     public void stop() {
         going = false;
     }

@@ -55,7 +55,7 @@ public class GameEvent {
         PLAYER_TURN_STARTED(true),
         /** End turn: cards discarded, tiles freed, counter incremented. */
         END_TURN_COMPLETED(true),
-
+        START_TURN_STARTED(true),
         STARTING_END_GAME(true),
         /** End game: final scores calculated. */
         END_GAME_COMPLETED(true);

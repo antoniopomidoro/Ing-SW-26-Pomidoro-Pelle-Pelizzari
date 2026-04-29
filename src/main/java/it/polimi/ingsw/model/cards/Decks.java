@@ -75,6 +75,23 @@ public class Decks {
     }
 
 
+    /**
+     * Returns the top card of the deck for the given age without removing it.
+     *
+     * @param a the age whose deck to peek
+     * @return the top card, or empty if the deck is empty
+     */
+    public Optional<Card> peekCard(Age a) {
+        List<Card> deck = cards.get(a);
+        if (deck == null) return Optional.empty();
+        if (!deck.isEmpty()) return Optional.of(deck.getLast());
+        if (a.hasNext() && a.getNext().getValue() == a.getValue()) {
+            List<Card> overflow = cards.get(a.getNext());
+            if (overflow != null && !overflow.isEmpty()) return Optional.of(overflow.getLast());
+        }
+        return Optional.empty();
+    }
+
     public Optional<Card> popCard(Age a) {
         List<Card> deck = cards.get(a);
         if (deck == null) return Optional.empty();
@@ -104,6 +121,24 @@ public class Decks {
         }
         this.cards.get(c.getAge()).add(c);
         return true;
+    }
+
+    /**
+     * Returns the number of cards remaining in the deck for the given age,
+     * including any overflow from the next age with the same numeric value.
+     *
+     * @param a the age to query
+     * @return remaining card count (0 if none or age is null)
+     */
+    public int remainingCards(Age a) {
+        if (a == null || cards == null) return 0;
+        List<Card> deck = cards.get(a);
+        int count = deck == null ? 0 : deck.size();
+        if (a.hasNext() && a.getNext().getValue() == a.getValue()) {
+            List<Card> overflow = cards.get(a.getNext());
+            if (overflow != null) count += overflow.size();
+        }
+        return count;
     }
 
     public boolean addBuilding(Building b) {

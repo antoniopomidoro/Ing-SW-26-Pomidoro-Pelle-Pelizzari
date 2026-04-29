@@ -235,6 +235,12 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
                 break;
             }
         }
+        for (Card c : board.getTopCards()){
+            if(c.isBuyable()){
+                canBuy = true;
+                break;
+            }
+        }
         return !board.getTopCards().isEmpty() || canBuy;
     }
     private boolean canPickBottom (GameState context){
@@ -243,6 +249,12 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         boolean canBuy = false;
         for(Building b : board.getBottomBuildings()){
             if(activePlayer.canBuy(b)){
+                canBuy = true;
+                break;
+            }
+        }
+        for (Card c : board.getBottomCards()){
+            if(c.isBuyable()){
                 canBuy = true;
                 break;
             }

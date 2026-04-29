@@ -68,7 +68,7 @@ public class StartTurnPhase implements GamePhaseBehavior {
         // Trigger START_TURN buildings
         context.publishTrigger(TriggerKey.START_TURN);
         context.raiseEvent(new GameEvent(
-                GameEvent.Type.START_TURN_COMPLETED,
+                GameEvent.Type.START_TURN_STARTED,
                 null
         ));
         return true;
@@ -98,8 +98,9 @@ public class StartTurnPhase implements GamePhaseBehavior {
             throw new IllegalMoveException("Tile already occupied");
         }
         targetTile.occupy(player);
-        context.raiseEvent(new GameEvent(GameEvent.Type.TILE_OCCUPIED, player));
+        // Advance index BEFORE raiseEvent so the DTO snapshot reflects the next active player.
         boolean hasNextPlayer = context.nextPlayerInTurnOrderTile();
+        context.raiseEvent(new GameEvent(GameEvent.Type.TILE_OCCUPIED, player));
         if (!hasNextPlayer) {
             context.updateTurnOrder();
             this.nextPhase(context);
@@ -112,7 +113,10 @@ public class StartTurnPhase implements GamePhaseBehavior {
      */
     @Override
     public boolean nextPhase(GameState context){
-
+        context.raiseEvent(new GameEvent(
+                GameEvent.Type.START_TURN_COMPLETED,
+                null
+        ));
             context.setPhase(new TurnPhase());
             return true;
     }

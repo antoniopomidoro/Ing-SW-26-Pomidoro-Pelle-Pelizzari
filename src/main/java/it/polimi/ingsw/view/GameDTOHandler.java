@@ -40,6 +40,8 @@ public class GameDTOHandler implements DTOVisitor {
 
     private final UserInterface ui;
 
+    private GameEventDTO lastEvent;
+
     private final EnumMap<GameEvent.Type, Consumer<GameEventDTO>> gameDispatch =
             new EnumMap<>(GameEvent.Type.class);
 
@@ -69,6 +71,7 @@ public class GameDTOHandler implements DTOVisitor {
         gameDispatch.put(GameEvent.Type.TURN_COMPLETED,       updateDisplay);
         gameDispatch.put(GameEvent.Type.END_TURN_COMPLETED,   updateDisplay);
         gameDispatch.put(GameEvent.Type.START_TURN_COMPLETED, updateDisplay);
+        gameDispatch.put(GameEvent.Type.START_TURN_STARTED,  updateDisplay);
         gameDispatch.put(GameEvent.Type.EVENT_CARD_TRIGGERED, updateDisplay);
         gameDispatch.put(GameEvent.Type.BUILDING_ACTIVATED,   updateDisplay);
         gameDispatch.put(GameEvent.Type.STARTING_END_GAME,    updateDisplay);
@@ -83,9 +86,13 @@ public class GameDTOHandler implements DTOVisitor {
         gameDispatch.put(GameEvent.Type.END_GAME_COMPLETED,   ui::onGameEnded);
     }
 
+    /** Returns the last {@link GameEventDTO} received by this handler, or {@code null} if none. */
+    public GameEventDTO getLastEvent() { return lastEvent; }
+
     @Override
     public void visit(GameEventDTO dto) {
         if (dto.getEventType() == null) return;
+        lastEvent = dto;
         Consumer<GameEventDTO> handler = gameDispatch.get(dto.getEventType());
         if (handler != null) {
             handler.accept(dto);
