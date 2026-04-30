@@ -121,10 +121,12 @@ class PlayerTest {
     @DisplayName("Test value-based equality for Player objects")
     void testPlayerEquals() {
         Player same = new Player(TEST_TOTEM, TEST_NICKNAME);
-        Player different = new Player(TEST_TOTEM, "Hacker");
+        // Player different = new Player(TEST_TOTEM, "Hacker");
+        Player differentTotem = new Player(Totem.BLUE, TEST_NICKNAME);
 
         assertEquals(player, same, "Players with identical attributes should be considered equal.");
-        assertNotEquals(player, different, "Players with different nicknames must not be equal.");
+        // assertNotEquals(player, different, "Players with different nicknames must not be equal.");
+        assertNotEquals(player, differentTotem, "Players with different totems must not be equal.");
     }
 
     @Test

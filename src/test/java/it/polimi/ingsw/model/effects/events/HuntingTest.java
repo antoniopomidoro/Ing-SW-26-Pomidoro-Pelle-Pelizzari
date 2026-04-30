@@ -61,7 +61,9 @@ class HuntingTest {
         Board board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
 
         state = new GameState(players, config, board, decks,"testId");
-        state.setOrderTileOrder(players);}
+        state.setOrderTileOrder(players);
+        player.addFood(5);
+    }
 
     private void setPrivateField(Object object, String fieldName, Object value) throws Exception {
         Field field = object.getClass().getDeclaredField(fieldName);

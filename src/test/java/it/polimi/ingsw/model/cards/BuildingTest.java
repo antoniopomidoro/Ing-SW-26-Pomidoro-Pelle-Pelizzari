@@ -28,6 +28,11 @@ public class BuildingTest {
         private DummyContextualEffect() {
             super();
         }
+
+        @Override
+        public boolean executeEffect(Player p, GameState state) {
+            return true;
+        }
     }
 
     private Building building = new Building(Age.AGE_1, "id", 1, 1, new DummyContextualEffect(), TriggerKey.START_TURN);
@@ -114,7 +119,7 @@ public class BuildingTest {
         boolean ret = building.onAddedToPlayer(null);
         assertFalse(ret);
     }
-/*
+
     @DisplayName("Adds one building to a deck")
     @Test
     public void addToDeckCorrect() {
@@ -126,7 +131,7 @@ public class BuildingTest {
         assertTrue(ret);
         assertEquals(1, deck.getBuildings(building.getAge()).size());
     }
-*/
+
     @DisplayName("Adds one building to a deck with null age")
     @Test
     public void addToDeckNullAge() {

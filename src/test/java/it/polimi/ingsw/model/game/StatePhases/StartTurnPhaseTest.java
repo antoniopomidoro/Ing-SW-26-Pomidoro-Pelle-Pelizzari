@@ -55,6 +55,7 @@ class StartTurnPhaseTest {
     void testStartTurnPhaseExecuteBonus() throws Exception {
         injectField(context, "turn", 2);
         Player p1 = context.getPlayers().get(0);
+        // injectField(p1, "food", 0);
         p1.getStats().setTotemPlacementBonus(2);
         StartTurnPhase startTurnPhase = new StartTurnPhase();
         // 2. Action

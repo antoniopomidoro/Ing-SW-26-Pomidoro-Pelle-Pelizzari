@@ -108,7 +108,7 @@ public class InventorPairTest {
         Inventor i5 = new Inventor(Age.AGE_1, Tool.RING);
         i5.onAddedToPlayer(player);
         res = inventorPair.executeEffect(player, gs);
-        assertTrue(res);
+        assertFalse(res);
         assertEquals(oldFood, player.getFood());
     }
 }

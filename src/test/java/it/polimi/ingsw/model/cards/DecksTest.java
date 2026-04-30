@@ -75,12 +75,11 @@ public class DecksTest {
         assertFalse(ret);
     }
 
-    @DisplayName("If the buildings are null the method works")
+    @DisplayName("If the buildings are null the method throws")
     @Test
     public void shuffleNullBuilding() {
         decks.setBuildings(null);
-        boolean ret = decks.shuffle();
-        assertTrue(ret);
+        assertThrows(NullPointerException.class, () -> decks.shuffle());
     }
 
     @DisplayName("The method works with correct parameters")

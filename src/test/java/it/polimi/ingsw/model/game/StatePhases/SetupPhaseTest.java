@@ -124,7 +124,7 @@ class SetupPhaseTest {
     void testAddTopBuildingsStateVerification() throws Exception {
         //  Synchronize Physical Environment
         int playerCount = context.getPlayers().size();
-        int ageValue = context.getAge().getValue();
+        // int ageValue = context.getAge().getValue();
         assertEquals(2, playerCount, "Physical Check: Current game must be 2-player.");
 
         // We inject 2 to ensure Decks has enough supply for any potential matrix value
@@ -134,7 +134,7 @@ class SetupPhaseTest {
         injectBuildingToDecksInternal(decks, Age.AGE_1, b1);
         injectBuildingToDecksInternal(decks, Age.AGE_1, b2);
 
-        int expectedFromConfig = config.getBuildingsCount(playerCount, ageValue);
+        int expectedFromConfig = config.getBuildingsCount(playerCount, context.getAge());
 
         SetupPhase setupPhase = new SetupPhase();
         setupPhase.execute(context);

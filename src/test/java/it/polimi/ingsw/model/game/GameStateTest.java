@@ -312,10 +312,10 @@ public class GameStateTest {
      */
 
     @Test
-    @DisplayName("Should return false or throw exception when calling action without an active phase")
+    @DisplayName("Should throw exception when calling action without an active phase")
     void testActionFailureWithNullPhase() {
         // 1. Arrange: Force a null phase state
-        gameState.setPhase(new SetupPhase());
+        gameState.setPhase(null);
         assertThrows(IllegalMoveException.class, () -> {
             gameState.occupyOfferTrailTile(0, playerA);
         }, "The default interface implementation must throw an exception.");
