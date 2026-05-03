@@ -1,0 +1,270 @@
+@startuml
+package "model" {
+
+    interface GamePhaseBehavior {
+        + execute(GameState, GameEvent): void
+    }
+
+    interface GameStateObserver {
+        + onGameEvent(GameEvent): void
+    }
+
+    class GameState {
+        - currentPhase: GamePhaseBehavior
+        - observers: List<GameStateObserver>
+        + setPhase(GamePhaseBehavior): void
+        + handleEvent(GameEvent): void
+    }
+
+    class GameEvent {
+        + String eventType
+        + Map params
+    }
+
+    class TurnPhase implements GamePhaseBehavior
+    class SetupPhase implements GamePhaseBehavior
+    class StartTurnPhase implements GamePhaseBehavior
+    class PlayerTurnPhase implements GamePhaseBehavior
+    class EndTurnPhase implements GamePhaseBehavior
+    class ChangeAgePhase implements GamePhaseBehavior
+    class EndGamePhase implements GamePhaseBehavior
+
+ class Player {
+        - id: int
+        - stats: PlayerStats
+        + getStats(): PlayerStats
+    }
+    
+    class PlayerStats {
+        - builderPp: int
+        - characterCounts: Map<CharacterEnum, Integer>
+        + setBuilderPp(int): void
+    }
+
+    interface ContextualEffect  {
+        + executeEffect(Player p, GameState state): boolean
+    }
+
+    interface EventEffect {
+        + executeEvent(Player p, GameState state): boolean
+    }
+
+    
+
+            
+Card -- Player
+ContextualEffect ..> Player
+ContextualEffect ..> GameState
+EventEffect..>GameState
+Player *-- PlayerStats
+
+    TurnPhase ..> GameEvent
+    SetupPhase ..> GameEvent
+    StartTurnPhase ..> GameEvent
+    ChangeAgePhase ..> GameEvent
+    EndTurnPhase ..> GameEvent
+    PlayerTurnPhase ..> GameEvent
+    EndGamePhase ..> GameEvent
+
+    GameState "1" o-- "1" GamePhaseBehavior : "current phase"
+
+    GameStateObserver ..> GameEvent : "notified by"
+
+    GameState "1" o-- "*" GameStateObserver : "notifies"
+
+}
+package "controller" {
+
+    class GameController {
+        - state: GameState
+        - config: GameConfig
+        + GameController(config: GameConfig)
+        + handlePlayerAction(event: GameEvent): void
+        - setupObserver(): void
+    }
+
+    class GameConfig {
+        + int maxPlayers
+        + int turnTimeout
+        + Map<String, Object> rules
+    }
+
+    class JsonFactory {
+        + {static} loadConfig(path: String): GameConfig
+        + {static} toJson(obj: Object): String
+    }
+
+    exception IllegalMoveException {
+        + String errorCode
+        + IllegalMoveException(message: String)
+    }
+}
+
+GameController "1" *-- "1" GameState : "manages"
+
+JsonFactory ..> GameConfig : "instantiates"
+
+GameController ..> IllegalMoveException : "catches"
+
+GameController ..> GameStateObserver : "registers"
+
+model.GameState..> controller.GameConfig
+
+package "network" {
+
+    class ServerManager {
+        - controllers: Map<Integer, GameController>
+        - activeViews: List<VirtualView>
+        + createGame(gameId: int): void
+        + getController(gameId: int): GameController
+    }
+    
+    abstract class VirtualView {
+        + onGameEvent(event: GameEvent): void
+    }
+    class JacksonConfig{}
+    class GameStatePersistence{}
+    class NUDEqueue{}
+    class NUDEPinger{}
+    class PendingGame{}
+
+    package "network.socket" {
+        class SocketServer {
+            - port: int
+            + acceptConnections(): void
+        }
+        class SocketClientHandler extends network.VirtualView {
+            - socket: Socket
+            - out: ObjectOutputStream
+            + onGameEvent(event: GameEvent): void
+        }
+    }
+  package "network.lobby"  {
+     class LobbyQueue{
+     - queue: LinkedBlockingQueue<LobbyCommand>
+     - serverManager: ServerManager
+     + add(LobbyCommand command): void
+     + run(): void
+     queue.take().execute(serverManager)
+     }
+     interface LobbyCommand{
+      +execute(ServerManager serverManager): void
+      }
+     class CreateGameCommand{}
+     class EnterLobbyCommand{}
+     class SelectTotemCommand{}
+   }
+
+    package "network.rmi" {
+        class RMIServer {
+            - registry: Registry
+            + bindService(): void
+        }
+        class RMIClientHandler extends network.VirtualView {
+            - remoteObject: IRemoteClient
+            + onGameEvent(event: GameEvent): void
+        }
+        interface ServerRMIInterface{}
+    }
+}
+
+    ServerManager "1" o-- "*" controller.GameController : "manages"
+    
+    VirtualView "1" o-- "1" controller.GameController
+    
+    ServerManager "1" o-- "*" VirtualView : "<view registy>"
+
+    VirtualView.|>model.GameStateObserver:"implements"
+
+    VirtualView ..>network.dto.GameStateDTO
+    VirtualView ..>network.dto.GameEventDTO
+    VirtualView ..>network.dto.LobbyUpdateDTO
+    SocketServer --> SocketClientHandler
+    RMIServer --> RMIClientHandler
+
+    network.socket.SocketClientHandler..>JacksonConfig
+    network.rmi.RMIClientHandler..>JacksonConfig
+    network.ServerManager..>network.GameStatePersistence
+    network.GameStatePersistence..>JacksonConfig
+    ServerManager o-- NUDEPinger
+    ServerManager o-- NUDEqueue
+    ServerManager o-- PendingGame
+    LobbyQueue o-- LobbyCommand
+    LobbyCommand..>ServerManager
+    class network.lobby.EnterLobbyCommand implements network.lobby.LobbyCommand
+    class network.lobby.SelectTotemCommand implements network.lobby.LobbyCommand
+    class network.lobby.CreateGameCommand implements network.lobby.LobbyCommand
+
+package "view" {
+
+    class DTOQueue <<Runnable>> {
+        - queue: LinkedBlockingQueue<DTO>
+        + run(): void
+    }
+
+    interface ConnectionProtocol {
+        + send(message: String): void
+        + isConnected(): boolean
+    }
+
+    class ClientManager {
+        - dtoQueue: DTOQueue
+        - connection: ConnectionProtocol
+        - userInterface: CLIinterface
+        + setVisitor(visitor: Visitor): void
+    }
+
+    class SocketClient implements ConnectionProtocol {
+        - dtoQueue: DTOQueue
+        - host: String
+        + send(message: String): void
+    }
+
+    class RMIclient implements ConnectionProtocol {
+        - dtoQueue: DTOQueue
+        - serverIP: String
+        + send(message: String): void
+    }
+
+    class CLIinterface <<Runnable>> {
+        - user: ClientManager
+        - going: boolean
+        + run(): void
+    }
+
+    class CLIinputSender <<Runnable>> {
+        - user: ClientManager
+        - cli: CLIinterface
+        - handlers: Map<String, Consumer<String[]>>
+        + run(): void
+    }
+    class GameDTOHandler{}
+    class LobbyDTOHandler{}
+    class NUDERRevengeAnal{}
+}
+
+ClientManager "1" o-- "1" DTOQueue
+SocketClient "1" o-- "1" DTOQueue
+RMIclient "1" o-- "1" DTOQueue
+
+ClientManager "1" o-- "1" ConnectionProtocol : "uses"
+
+ClientManager "1" o-- "1" CLIinterface
+CLIinterface "1" o-- "1" ClientManager
+
+CLIinputSender "1" o-- "1" ClientManager
+CLIinputSender "1" o-- "1" CLIinterface
+
+CLIinterface ..> CLIinputSender
+
+ClientManager --> GameDTOHandler
+ClientManager --> LobbyDTOHandler
+
+SocketClient ..> NUDERRevengeAnal
+view.RMIClient ..> NUDERRevengeAnal
+
+view.SocketClient ..> network.socket.SocketServer
+network.socket.SocketServer..>view.SocketClient
+
+
+@enduml
