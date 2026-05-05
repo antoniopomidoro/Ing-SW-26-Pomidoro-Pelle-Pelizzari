@@ -4,6 +4,8 @@ import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.view.gui.JavaFXApp;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Objects;
