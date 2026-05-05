@@ -40,10 +40,6 @@ public class RMIclient implements ConnectionProtocol, ClientRMIInterface {
      * @throws NotBoundException if the server is not registered under the expected name
      */
     public void connect() throws RemoteException, NotBoundException {
-        UnicastRemoteObject.exportObject(this, 0);
-        Registry registry = LocateRegistry.getRegistry(serverIP, RMI_PORT);
-        this.serverStub = (ServerRMIInterface) registry.lookup(RMI_BIND_NAME);
-        going = true;
         String hostIp;
         try {
             hostIp = InetAddress.getLocalHost().getHostAddress();
@@ -51,6 +47,11 @@ public class RMIclient implements ConnectionProtocol, ClientRMIInterface {
             System.err.println("[Client] Cannot resolve local host, falling back to 127.0.0.1: " + e.getMessage());
             hostIp = "127.0.0.1";
         }
+        UnicastRemoteObject.exportObject(this, 0);
+        Registry registry = LocateRegistry.getRegistry(serverIP, RMI_PORT);
+        this.serverStub = (ServerRMIInterface) registry.lookup(RMI_BIND_NAME);
+        going = true;
+
         startKeepAlive();
     }
 
