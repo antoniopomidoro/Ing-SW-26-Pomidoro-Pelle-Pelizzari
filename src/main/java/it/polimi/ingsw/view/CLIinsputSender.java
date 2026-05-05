@@ -48,12 +48,12 @@ public class CLIinsputSender implements Runnable {
                 try {
                     handler.accept(elements);
                 } catch (NumberFormatException e) {
-                    System.out.println("Argomento non valido (atteso numero): " + e.getMessage());
+                    System.out.println("invalid argument " + e.getMessage());
                 } catch (IllegalArgumentException e) {
-                    System.out.println("Valore non valido: " + e.getMessage());
+                    System.out.println("invalid value: " + e.getMessage());
                 }
             } else {
-                System.out.println("Comando non valido: '" + elements[0] + "'. Scrivi 'help' per la lista.");
+                System.out.println("invalid command: '" + elements[0] + "'. write 'help' for list.");
             }
         }
     }
@@ -65,14 +65,14 @@ public class CLIinsputSender implements Runnable {
         System.out.println("    create <numGiocatori> <totem> <nickname>");
         System.out.println("    enter <gameId> <nickname>");
         System.out.println("    selecttotem <gameId> <totem>");
-        System.out.println("  PARTITA:");
+        System.out.println("  GAME:");
         System.out.println("    topcard <i>  bottomcard <i>  topbuild <i>  bottombuild <i>  tile <i>");
         System.out.println("  Totems: " + Arrays.toString(Totem.values()));
         System.out.println("╚══════════════════════════════════════════════════════╝");
     }
 
     private void lobbyCreate(String[] args) {
-        if (args.length < 4) { System.out.println("Uso: create <numGiocatori> <totem> <nickname>"); return; }
+        if (args.length < 4) { System.out.println("Usage: create <numGiocatori> <totem> <nickname>"); return; }
         int numPlayers = Integer.parseInt(args[1]);
         Totem totem = Totem.valueOf(args[2].toUpperCase());
         String nick = args[3];
@@ -80,18 +80,18 @@ public class CLIinsputSender implements Runnable {
     }
 
     private void lobbyEnter(String[] args) {
-        if (args.length < 3) { System.out.println("Uso: enter <gameId> <nickname>"); return; }
+        if (args.length < 3) { System.out.println("Usage: enter <gameId> <nickname>"); return; }
         String gameId = args[1];
         String nick = args[2];
         actionSender.sendJoinGame(gameId, nick);
     }
 
     private void lobbySelectTotem(String[] args) {
-        if (args.length < 3) { System.out.println("Uso: selecttotem <gameId> <totem>"); return; }
+        if (args.length < 3) { System.out.println("Usage: selecttotem <gameId> <totem>"); return; }
         String gameId = args[1];
         Totem totem = Totem.valueOf(args[2].toUpperCase());
         String nick = user.getNickname();
-        if (nick == null) { System.out.println("Prima esegui 'create' o 'enter' con un nickname."); return; }
+        if (nick == null) { System.out.println("create or enter in a lobby first"); return; }
         user.setId(gameId);
         actionSender.sendSelectTotem(totem);
     }
@@ -152,7 +152,7 @@ public class CLIinsputSender implements Runnable {
 
     private GameStateDTO getSnapshotForAction() {
         if (cli.getState() == null || cli.getState().getSnapshot() == null || cli.getState().getSnapshot().getBoard() == null) {
-            System.out.println("Stato partita non disponibile. Attendi un aggiornamento dal server.");
+            System.out.println("state is not avaiable wait for server response.");
             return null;
         }
         if (user.getNickname() == null || user.getId() == null || user.getPlayerTotem() == null) {
@@ -162,7 +162,7 @@ public class CLIinsputSender implements Runnable {
         GameStateDTO snapshot = cli.getState().getSnapshot();
         Totem activePlayer = snapshot.getActivePlayer();
         if (activePlayer != null && !activePlayer.equals(user.getPlayerTotem())) {
-            System.out.println("Non e il tuo turno. Giocatore attivo: " + activePlayer + ".");
+            System.out.println("not your turn, active player: " + activePlayer + ".");
             return null;
         }
         return snapshot;
@@ -170,7 +170,7 @@ public class CLIinsputSender implements Runnable {
 
     private boolean isValidIndex(int index, int size, String commandName) {
         if (index < 0 || index >= size) {
-            System.out.println("Indice non valido per " + commandName + ": " + index + " (range 0-" + (size - 1) + ")");
+            System.out.println("invalid index  " + commandName + ": " + index + " (range 0-" + (size - 1) + ")");
             return false;
         }
         return true;
