@@ -3,6 +3,8 @@ package it.polimi.ingsw.view;
 import it.polimi.ingsw.network.rmi.ClientRMIInterface;
 import it.polimi.ingsw.network.rmi.ServerRMIInterface;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -42,6 +44,13 @@ public class RMIclient implements ConnectionProtocol, ClientRMIInterface {
         Registry registry = LocateRegistry.getRegistry(serverIP, RMI_PORT);
         this.serverStub = (ServerRMIInterface) registry.lookup(RMI_BIND_NAME);
         going = true;
+        String hostIp;
+        try {
+            hostIp = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            System.err.println("[Client] Cannot resolve local host, falling back to 127.0.0.1: " + e.getMessage());
+            hostIp = "127.0.0.1";
+        }
         startKeepAlive();
     }
 

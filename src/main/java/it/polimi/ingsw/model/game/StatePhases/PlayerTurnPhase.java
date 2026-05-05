@@ -212,8 +212,14 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
     private void triggerOnCardPick(Player player, GameState context) {
         if (player == null || context == null) return;
         List<Building> triggered = player.getBuildingsByTrigger(TriggerKey.ON_CARD_PICK);
+        boolean anyActivated = false;
         for (Building b : triggered) {
-            b.triggerBuildingEffect(player, context);
+            if (b.triggerBuildingEffect(player, context)) {
+                anyActivated = true;
+            }
+        }
+        if (anyActivated) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.BUILDING_ACTIVATED, null));
         }
     }
 
