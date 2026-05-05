@@ -129,12 +129,10 @@ class SetupPhaseTest {
 
         // We inject 2 to ensure Decks has enough supply for any potential matrix value
         Decks decks = context.getDeck();
-        Building b1 = createMockBuilding(Age.AGE_1);
-        Building b2 = createMockBuilding(Age.AGE_1);
-        injectBuildingToDecksInternal(decks, Age.AGE_1, b1);
-        injectBuildingToDecksInternal(decks, Age.AGE_1, b2);
-
         int expectedFromConfig = config.getBuildingsCount(playerCount, context.getAge());
+        for (int i = 0; i < expectedFromConfig; i++) {
+            injectBuildingToDecksInternal(decks, Age.AGE_1, createMockBuilding(Age.AGE_1));
+        }
 
         SetupPhase setupPhase = new SetupPhase();
         setupPhase.execute(context);
