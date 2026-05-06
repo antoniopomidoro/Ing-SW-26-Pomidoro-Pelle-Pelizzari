@@ -309,7 +309,7 @@ public class CLIinterface implements UserInterface, Runnable {
     private void printPrompt() {
         System.out.println(DIM + "──────────────────────────────────────────────────────────────────" + RESET);
         System.out.println(BOLD + "Commands:" + RESET);
-        System.out.println("  topcard <i> | bottomcard <i> | topbuild <i> | bottombuild <i> | tile <i>");
+        System.out.println("  topcard <i> | bottomcard <i> | topbuild <i> | bottombuild <i> | tile <i> \n digit help for all commands and example");
         System.out.print(BOLD + "> " + RESET);
     }
 
@@ -346,15 +346,7 @@ public class CLIinterface implements UserInterface, Runnable {
         }
     }
 
-    private void printLobby(LobbyUpdateDTO lobby) {
-        // Obsolete, keeping for compatibility if strictly needed, but replaced by printCombinedLobby
-    }
-
-    private void printTotemSelection(TotemSelectionDTO sel) {
-        // Obsolete, replaced by printCombinedLobby
-    }
-
-    // ============================================================
+      // ============================================================
     //                    UserInterface
     // ============================================================
 
