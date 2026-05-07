@@ -17,6 +17,7 @@ public class CLIinsputSender implements Runnable {
     private final CLIinterface cli;
     private final ActionSender actionSender;
     private final Map<String, Consumer<String[]>> handlers = new LinkedHashMap<>();
+    private String gameid;
 
     public CLIinsputSender(ClientManager user, CLIinterface cli) {
         this.user = user;
@@ -68,6 +69,12 @@ public class CLIinsputSender implements Runnable {
         System.out.println("  GAME:");
         System.out.println("    topcard <i>  bottomcard <i>  topbuild <i>  bottombuild <i>  tile <i>");
         System.out.println("  Totems: " + Arrays.toString(Totem.values()));
+
+        System.out.println("EXAMPLE: \n create 2 red fabrizio (create a 2 player lobby with red totem and nick fabrizio)\n" +
+                "enter 123456 cugola (enter in the 123456 lobby with nickname cugola, when you enter in a lobby you don't have a totem\n" +
+        "selecttotem red (after joining select the totem) \n" +
+                "<card function> 3 (select the card of the selected line)\n" +
+                "same with tile");
         System.out.println("╚══════════════════════════════════════════════════════╝");
     }
 
@@ -81,18 +88,17 @@ public class CLIinsputSender implements Runnable {
 
     private void lobbyEnter(String[] args) {
         if (args.length < 3) { System.out.println("Usage: enter <gameId> <nickname>"); return; }
-        String gameId = args[1];
+        gameid = args[1];
         String nick = args[2];
-        actionSender.sendJoinGame(gameId, nick);
+        actionSender.sendJoinGame(gameid, nick);
     }
 
     private void lobbySelectTotem(String[] args) {
-        if (args.length < 3) { System.out.println("Usage: selecttotem <gameId> <totem>"); return; }
-        String gameId = args[1];
-        Totem totem = Totem.valueOf(args[2].toUpperCase());
+        if (args.length < 2) { System.out.println("Usage: selecttotem  <totem>"); return; }
+        Totem totem = Totem.valueOf(args[1].toUpperCase());
         String nick = user.getNickname();
         if (nick == null) { System.out.println("create or enter in a lobby first"); return; }
-        user.setId(gameId);
+        user.setId(gameid);
         actionSender.sendSelectTotem(totem);
     }
 

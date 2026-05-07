@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.TriggerKey;
 import it.polimi.ingsw.model.player.Totem;
+import it.polimi.ingsw.view.visitorDTO.DTOVisitor;
 
 /**
  * Serializable event payload sent to clients.

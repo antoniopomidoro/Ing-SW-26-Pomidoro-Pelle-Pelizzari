@@ -3,6 +3,7 @@ package it.polimi.ingsw.network.dto;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.polimi.ingsw.network.LobbyState;
+import it.polimi.ingsw.view.visitorDTO.DTOVisitor;
 
 public class LobbyUpdateDTO implements DTO {
     private LobbyState lobbyState;
