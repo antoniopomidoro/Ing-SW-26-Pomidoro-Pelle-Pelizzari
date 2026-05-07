@@ -87,7 +87,7 @@ public class RMIclient implements ConnectionProtocol, ClientRMIInterface {
     @Override
     public void receiveEvent(String event) throws RemoteException {
         System.out.println("[NET][IN][CLIENT][RMI] " + event);
-        NUDERevengeAnal.action(event).ifPresent(dtoQueue::push);
+        NUDEanalyzerClient.action(event).ifPresent(dtoQueue::push);
     }
 
     @Override

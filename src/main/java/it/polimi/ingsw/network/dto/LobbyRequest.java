@@ -2,8 +2,7 @@ package it.polimi.ingsw.network.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import it.polimi.ingsw.model.player.Totem;
-
-import java.io.Serializable;
+import it.polimi.ingsw.view.visitorDTO.DTOVisitor;
 
 /**
  * Serializable lobby request sent by clients.

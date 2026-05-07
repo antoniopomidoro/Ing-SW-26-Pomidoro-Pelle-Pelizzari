@@ -2,6 +2,7 @@ package it.polimi.ingsw.network.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.view.visitorDTO.DTOVisitor;
 
 import java.util.Objects;
 

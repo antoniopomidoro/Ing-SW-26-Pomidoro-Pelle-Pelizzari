@@ -1,4 +1,9 @@
-package it.polimi.ingsw.network.dto;
+package it.polimi.ingsw.view.visitorDTO;
+
+import it.polimi.ingsw.network.dto.ErrorDTO;
+import it.polimi.ingsw.network.dto.GameEventDTO;
+import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
+import it.polimi.ingsw.network.dto.TotemSelectionDTO;
 
 /**
  * Visitor interface for polymorphic DTO dispatch.
@@ -18,4 +23,6 @@ public interface DTOVisitor {
     void visit(LobbyUpdateDTO dto);
     void visit(TotemSelectionDTO dto);
     void visit(ErrorDTO dto);
+    String type();
+    GameEventDTO getLastEvent();
 }

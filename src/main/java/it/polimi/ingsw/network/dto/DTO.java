@@ -2,8 +2,7 @@ package it.polimi.ingsw.network.dto;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import it.polimi.ingsw.network.dto.ErrorDTO;
-import it.polimi.ingsw.network.dto.TotemSelectionDTO;
+import it.polimi.ingsw.view.visitorDTO.DTOVisitor;
 
 @JsonTypeInfo(
 		use = JsonTypeInfo.Id.NAME,

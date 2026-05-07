@@ -1,7 +1,7 @@
 package it.polimi.ingsw.view;
 
 import it.polimi.ingsw.network.dto.DTO;
-import it.polimi.ingsw.network.dto.DTOVisitor;
+import it.polimi.ingsw.view.visitorDTO.DTOVisitor;
 
 import java.util.concurrent.LinkedBlockingQueue;
 

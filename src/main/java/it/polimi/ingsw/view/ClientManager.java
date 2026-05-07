@@ -3,9 +3,9 @@ package it.polimi.ingsw.view;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.view.gui.JavaFXApp;
+import it.polimi.ingsw.view.visitorDTO.GameDTOHandler;
+import it.polimi.ingsw.view.visitorDTO.LobbyDTOHandler;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Objects;
@@ -49,9 +49,11 @@ public class ClientManager {
     // ── Wiring helpers ────────────────────────────────────────────────────────
 
     private static DTOQueue buildQueue(UserInterface ui) {
-        GameDTOHandler  gameHandler  = new GameDTOHandler(ui);
+        GameDTOHandler gameHandler  = new GameDTOHandler(ui);
         LobbyDTOHandler lobbyHandler = new LobbyDTOHandler(ui);
         DTOQueue queue = new DTOQueue(lobbyHandler);
+        //the lambda set up a new visitor for DTOqueue that activates only when ONGAMESTARTING lobbyDTO arrives
+        //when lobbyDTO arrives lobbyDTOhandler change the visitor of DTOqueue to gameDTOhandler and all the next DTO will be handled by gameDTOhandler
         lobbyHandler.setOnGameStart(() -> queue.setVisitor(gameHandler));
         new Thread(queue, "dto-consumer").start();
         return queue;
@@ -72,7 +74,7 @@ public class ClientManager {
         return rmi;
     }
 
-    // ── Entry point ───────────────────────────────────────────────────────────
+
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
@@ -127,13 +129,13 @@ public class ClientManager {
      * @param gameUi the game-phase UserInterface (e.g. GameViewController)
      */
     public void redirectGameEventsTo(UserInterface gameUi) {
-        GameEventDTO lastEvent = null;
-        if (dtoQueue.getVisitor() instanceof GameDTOHandler old) {
-            lastEvent = old.getLastEvent();
-        }
-        dtoQueue.setVisitor(new GameDTOHandler(Objects.requireNonNull(gameUi, "gameUi")));
+        GameEventDTO lastEvent = dtoQueue.getVisitor().getLastEvent();
+        dtoQueue.setVisitor(new GameDTOHandler(gameUi));
+
         if (lastEvent != null) {
             gameUi.setUp(lastEvent);
         }
+
+
     }
 }
