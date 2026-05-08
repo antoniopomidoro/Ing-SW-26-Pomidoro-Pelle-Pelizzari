@@ -1,11 +1,11 @@
-package it.polimi.ingsw.view;
+package it.polimi.ingsw.view.visitorDTO;
 
 import it.polimi.ingsw.network.LobbyState;
-import it.polimi.ingsw.network.dto.DTOVisitor;
 import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
 import it.polimi.ingsw.network.dto.TotemSelectionDTO;
+import it.polimi.ingsw.view.UserInterface;
 
 import java.util.EnumMap;
 import java.util.function.Consumer;
@@ -91,5 +91,10 @@ public class LobbyDTOHandler implements DTOVisitor {
     public void visit(ErrorDTO dto) {
         Consumer<ErrorDTO> handler = errorDispatch.get(dto.getErrorCode());
         if (handler != null) handler.accept(dto);
+    }
+
+    @Override
+    public GameEventDTO getLastEvent(){
+        return null;
     }
 }

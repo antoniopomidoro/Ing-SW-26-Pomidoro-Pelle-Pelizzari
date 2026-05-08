@@ -4,18 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import it.polimi.ingsw.network.JacksonConfig;
 import it.polimi.ingsw.network.dto.DTO;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HexFormat;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class NUDERevengeAnal {
+public class NUDEanalyzerClient {
 
 
-    private NUDERevengeAnal() {
+    private NUDEanalyzerClient() {
         throw new IllegalStateException("Utility class");
     }
 

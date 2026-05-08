@@ -68,10 +68,13 @@ public class SocketClient implements ConnectionProtocol, Runnable {
             try {
                 String line = reader.readLine();
                 if (line == null || line.isEmpty()) continue;
-                lastPing = clock.instant();
-                if (!line.equalsIgnoreCase("ping")) {
+
+                if (line.equalsIgnoreCase("ping")) {
+                    lastPing = clock.instant();
+
+                }else{
                     System.out.println("[NET][IN][CLIENT][SOCKET] " + line);
-                    NUDERevengeAnal.action(line).ifPresent(dtoQueue::push);
+                    NUDEanalyzerClient.action(line).ifPresent(dtoQueue::push);
                 }
             } catch (IOException e) {
                 System.err.println("ERRORE DI CONNESSIONE");

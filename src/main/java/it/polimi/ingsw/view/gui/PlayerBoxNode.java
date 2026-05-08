@@ -16,7 +16,6 @@ import java.util.Objects;
 /**
  * HBox node rendered for each opponent in the ring around the board.
  * Layout: [totem image | nickname + status row] — horizontal, totem height = 3× font size.
- * Built at runtime; positioned by {@link GameViewController#initOpponentRing}.
  */
 public class PlayerBoxNode extends HBox {
 

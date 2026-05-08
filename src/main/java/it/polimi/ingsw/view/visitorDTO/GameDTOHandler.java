@@ -1,11 +1,11 @@
-package it.polimi.ingsw.view;
+package it.polimi.ingsw.view.visitorDTO;
 
 import it.polimi.ingsw.model.game.GameEvent;
-import it.polimi.ingsw.network.dto.DTOVisitor;
 import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
 import it.polimi.ingsw.network.dto.TotemSelectionDTO;
+import it.polimi.ingsw.view.UserInterface;
 
 import java.util.EnumMap;
 import java.util.function.Consumer;
@@ -87,6 +87,7 @@ public class GameDTOHandler implements DTOVisitor {
     }
 
     /** Returns the last {@link GameEventDTO} received by this handler, or {@code null} if none. */
+    @Override
     public GameEventDTO getLastEvent() { return lastEvent; }
 
     @Override
@@ -112,4 +113,6 @@ public class GameDTOHandler implements DTOVisitor {
     /** ErrorDTOs from the lobby are not expected during the game phase — ignore silently. */
     @Override
     public void visit(ErrorDTO dto) {}
+
+
 }
