@@ -4,7 +4,7 @@ import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.LobbyState;
 import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
 import it.polimi.ingsw.network.dto.TotemSelectionDTO;
-import it.polimi.ingsw.view.gui.LobbyCommandSender;
+import it.polimi.ingsw.view.gui.ActionSenders.LobbyCommandSender;
 import it.polimi.ingsw.view.gui.LobbyController;
 
 import java.util.EnumMap;

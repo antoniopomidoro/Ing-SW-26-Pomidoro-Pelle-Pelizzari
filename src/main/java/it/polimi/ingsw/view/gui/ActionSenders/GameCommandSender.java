@@ -1,4 +1,4 @@
-package it.polimi.ingsw.view.gui;
+package it.polimi.ingsw.view.gui.ActionSenders;
 
 /**
  * Abstraction for sending game-phase actions from the GUI.

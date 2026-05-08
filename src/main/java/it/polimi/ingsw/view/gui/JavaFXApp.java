@@ -2,6 +2,7 @@ package it.polimi.ingsw.view.gui;
 
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.view.ClientManager;
+import it.polimi.ingsw.view.gui.ActionSenders.ActionSender;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -30,7 +31,7 @@ public class JavaFXApp extends Application {
     private double        screenW;
     private double        screenH;
     private ClientManager clientManager;
-    private ActionSender  actionSender;
+    private ActionSender actionSender;
 
     @Override
     public void start(Stage stage) throws Exception {

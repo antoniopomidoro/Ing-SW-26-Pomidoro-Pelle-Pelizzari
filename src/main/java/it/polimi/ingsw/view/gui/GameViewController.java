@@ -13,6 +13,8 @@ import it.polimi.ingsw.network.dto.GameStateDTO.PlayerDTO;
 import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
 import it.polimi.ingsw.network.dto.TotemSelectionDTO;
 import it.polimi.ingsw.view.UserInterface;
+import it.polimi.ingsw.view.gui.ActionSenders.GUIGameSender;
+import it.polimi.ingsw.view.gui.ActionSenders.GameCommandSender;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;

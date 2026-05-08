@@ -2,7 +2,7 @@ package it.polimi.ingsw.view;
 
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.GameStateDTO;
-import it.polimi.ingsw.view.gui.ActionSender;
+import it.polimi.ingsw.view.gui.ActionSenders.ActionSender;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;

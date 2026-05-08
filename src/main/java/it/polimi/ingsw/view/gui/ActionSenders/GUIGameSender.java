@@ -1,4 +1,4 @@
-package it.polimi.ingsw.view.gui;
+package it.polimi.ingsw.view.gui.ActionSenders;
 
 import java.util.Objects;
 
