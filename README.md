@@ -16,7 +16,6 @@ The project consists of the implementation of the board game **Mesos**, develope
 | Antonio Pomidoro | [@antoniopomidoro](https://github.com/antoniopomidoro) |
 | Alessandro Pelle | [@alepelle1608](https://github.com/alepelle1608) |
 | Davide Pelizzari | [@LastPelikz22](https://github.com/LastPelikz22) |
-| Guilin Wang | [@Guilin-Wang](https://github.com/Guilin-Wang) |
 
 ---
 
@@ -24,6 +23,6 @@ The project consists of the implementation of the board game **Mesos**, develope
 
 * **Language:** Java
 * **Build Automation:** Maven
-* **User Interface:** JavaFX / Swing (to be specified)
+* **User Interface:** JavaFX
 * **Network:** Socket / RMI
 * **Testing:** JUnit
