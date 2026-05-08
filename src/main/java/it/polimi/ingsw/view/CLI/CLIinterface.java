@@ -1,4 +1,4 @@
-package it.polimi.ingsw.view;
+package it.polimi.ingsw.view.CLI;
 
 import it.polimi.ingsw.model.board.Tile;
 import it.polimi.ingsw.model.cards.Building;
@@ -9,6 +9,8 @@ import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.network.dto.GameStateDTO;
 import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
 import it.polimi.ingsw.network.dto.TotemSelectionDTO;
+import it.polimi.ingsw.view.ClientManager;
+import it.polimi.ingsw.view.UserInterface;
 
 import java.util.List;
 import java.util.Map;

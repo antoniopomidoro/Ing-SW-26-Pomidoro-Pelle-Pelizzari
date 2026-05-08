@@ -1,7 +1,10 @@
-package it.polimi.ingsw.view;
+package it.polimi.ingsw.view.CLI;
 
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.GameStateDTO;
+import it.polimi.ingsw.view.ActionType;
+import it.polimi.ingsw.view.ClientManager;
+import it.polimi.ingsw.view.NUDESender;
 import it.polimi.ingsw.view.gui.ActionSenders.ActionSender;
 
 import java.util.Arrays;

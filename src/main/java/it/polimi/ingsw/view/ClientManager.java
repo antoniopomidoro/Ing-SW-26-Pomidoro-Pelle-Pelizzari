@@ -2,6 +2,7 @@ package it.polimi.ingsw.view;
 
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.GameEventDTO;
+import it.polimi.ingsw.view.CLI.CLIinterface;
 import it.polimi.ingsw.view.gui.JavaFXApp;
 import it.polimi.ingsw.view.visitorDTO.GameDTOHandler;
 import it.polimi.ingsw.view.visitorDTO.LobbyDTOHandler;
