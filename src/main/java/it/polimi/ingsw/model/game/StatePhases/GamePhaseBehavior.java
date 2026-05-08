@@ -3,6 +3,8 @@ package it.polimi.ingsw.model.game.StatePhases;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.Player;
 
+import java.io.Serializable;
+
 /**
  * Represents the behavior of a specific game phase within the State design pattern.
  * <p>
@@ -15,13 +17,7 @@ import it.polimi.ingsw.model.player.Player;
  * must override the methods corresponding to the actions allowed in that phase.
  * This ensures that an action invoked in an incorrect phase results in a clear error.
  */
-public interface GamePhaseBehavior {
-
-    /**
-     * Exports the internal phase data using the Visitor pattern.
-     * By default, it does nothing since most phases are stateless.
-     */
-    default void exportData(PhaseDataExporter exporter) {}
+public interface GamePhaseBehavior extends Serializable {
 
     /**
      * Executes the primary logic associated with this game phase.

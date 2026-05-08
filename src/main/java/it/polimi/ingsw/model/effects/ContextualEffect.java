@@ -11,6 +11,8 @@ import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
+import java.io.Serializable;
+
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
@@ -29,7 +31,7 @@ import it.polimi.ingsw.model.player.*;
         @JsonSubTypes.Type(value = CardSet.class, name = "CARD_SET"),
         @JsonSubTypes.Type(value = TotemPlacementBonus.class, name = "TOTEM_PLACEMENT_BONUS")
 })
-public interface ContextualEffect {
+public interface ContextualEffect extends Serializable {
     default boolean executeEffect(Player p, GameState state){
         return false;
     }

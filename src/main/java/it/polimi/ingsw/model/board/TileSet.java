@@ -10,6 +10,7 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
 /**
  * Represents a collection of game tiles.
  */
-public class TileSet {
+public class TileSet implements Serializable {
     private List<Tile> tiles;
 
     /** Default constructor for Jackson deserialization. */

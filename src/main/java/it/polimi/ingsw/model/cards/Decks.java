@@ -1,11 +1,12 @@
 package it.polimi.ingsw.model.cards;
+import java.io.Serializable;
 import java.util.*;
 import it.polimi.ingsw.model.cards.Card;
 import it.polimi.ingsw.model.cards.Building;
 import it.polimi.ingsw.model.game.Age;
 
 
-public class Decks {
+public class Decks implements Serializable {
     private  Map<Age,List<Building>> buildings;
     private  Map<Age,List<Card>> cards;
     /** Default constructor for Jackson deserialization. */

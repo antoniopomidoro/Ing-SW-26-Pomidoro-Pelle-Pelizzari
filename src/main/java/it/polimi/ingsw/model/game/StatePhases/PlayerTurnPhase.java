@@ -49,14 +49,6 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         this.bottomPicks = bottomPicks;
     }
 
-    // --- Data Exporter for SavePhaseDTO ---
-    @Override
-    public void exportData(PhaseDataExporter exporter) {
-        if (exporter != null) {
-            exporter.exportPlayerTurnData(activePlayer, activeTile, upperPicks, bottomPicks);
-        }
-    }
-
     public Player getActivePlayer() { return activePlayer; }
     public Tile getActiveTile() { return activeTile; }
     public int getUpperPicks() { return upperPicks; }

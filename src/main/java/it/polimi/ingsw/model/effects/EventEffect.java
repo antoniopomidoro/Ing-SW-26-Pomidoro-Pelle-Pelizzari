@@ -6,6 +6,8 @@ import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
+import java.io.Serializable;
+
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
@@ -17,7 +19,7 @@ import it.polimi.ingsw.model.player.*;
         @JsonSubTypes.Type(value = ShamanicRitual.class, name = "SHAMANIC_RITUAL"),
         @JsonSubTypes.Type(value = CavePaintings.class, name = "CAVE_PAINTINGS")
 })
-public interface EventEffect {
+public interface EventEffect extends Serializable {
 
     /**
      * Core event logic — each concrete effect implements only this.

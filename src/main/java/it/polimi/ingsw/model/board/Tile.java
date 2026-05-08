@@ -10,12 +10,14 @@ import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
+import java.io.Serializable;
+
 
 /**
  * Represents a tile on the game board.
  * Instances of this class are intended to be created from JSON data.
  */
-public class Tile {
+public class Tile implements Serializable {
 
     private TileId tileId;
     @JsonProperty("occupied")

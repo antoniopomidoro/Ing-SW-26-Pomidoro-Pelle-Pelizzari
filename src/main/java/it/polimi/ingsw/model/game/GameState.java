@@ -6,6 +6,8 @@ import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.StatePhases.GamePhaseBehavior;
 import it.polimi.ingsw.model.game.StatePhases.SetupPhase;
 import it.polimi.ingsw.model.player.Player;
+
+import java.io.Serializable;
 import java.util.*;
 import java.util.List;
 import it.polimi.ingsw.model.cards.Building;
@@ -15,7 +17,7 @@ import it.polimi.ingsw.model.cards.Building;
  * It manages the lifecycle of Players, Board, and Deck, and delegates
  * phase-specific logic to {@link GamePhaseBehavior} implementations.
  */
-public class GameState {
+public class GameState implements Serializable {
     // --- Core game fields ---
     private GameConfig config;
     private Age age;
@@ -35,7 +37,7 @@ public class GameState {
     private int currentPlayerOrderIndex = 0;
     private int extraIndex = 0;
 
-    /** Default constructor for Jackson deserialization. */
+    /** Default constructor. */
     public GameState() {
         this.players = new ArrayList<>();
         this.turnOrder = new ArrayList<>();
@@ -71,6 +73,11 @@ public class GameState {
      */
     public void restorePhase(GamePhaseBehavior phase) {
         this.currentPhase = phase;
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        this.observers = new ArrayList<>();
     }
 
     // ==========================================

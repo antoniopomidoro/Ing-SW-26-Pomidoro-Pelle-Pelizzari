@@ -10,9 +10,10 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
 
+import java.io.Serializable;
 import java.util.*;
 
-public class PlayerStats {
+public class PlayerStats implements Serializable {
     private Map<CharacterEnum, Integer> characterCounts = new EnumMap<>(CharacterEnum.class);
     private int buildingDiscount;
     private int ritualLossMultiplier = 1;

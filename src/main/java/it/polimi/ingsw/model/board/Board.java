@@ -10,12 +10,13 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class Board {
+public class Board implements Serializable {
     private OrderTile orderTile;
     private TileSet tiles;
     private List<Card> topCards;

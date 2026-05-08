@@ -3,6 +3,7 @@ package it.polimi.ingsw.controller;
 import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.player.Player;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ import java.util.List;
  *   <li>{@code startingFood} – list of starting food per player position (1st through 5th)</li>
  * </ul>
  */
-public class GameConfig {
+public class GameConfig implements Serializable {
 
     private int gameMaxPlayers;
     private int gameMinPlayers;

@@ -31,7 +31,7 @@ public class ServerManager {
     private static final String INVALID_INPUT_ENTER = "Invalid input for lobby entry";
     private static final String INVALID_INPUT_SELECT = "Invalid input for totem selection";
     private static final String INVALID_INPUT_CREATION = "Invalid input for creation";
-    private static final String GAME_SAVE_EXTENSION = ".json";
+    private static final String GAME_SAVE_EXTENSION = ".ser";
 
     private final Map<String, PendingGame> pendingGames = new ConcurrentHashMap<>();
     private final Map<String, GameController> activeGames = new ConcurrentHashMap<>();

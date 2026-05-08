@@ -12,11 +12,12 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
 
+import java.io.Serializable;
 import java.util.*;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Player {
+public class Player implements Serializable {
     private Totem id;
     private String nickname;
     private List<Card> cards;

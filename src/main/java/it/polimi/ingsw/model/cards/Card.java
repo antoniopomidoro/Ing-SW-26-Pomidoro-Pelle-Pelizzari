@@ -11,6 +11,7 @@ import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
+import java.io.Serializable;
 import java.util.*;
 
 
@@ -35,7 +36,7 @@ import java.util.*;
         @JsonSubTypes.Type(value = Event.class, name = "EVENT"),
         @JsonSubTypes.Type(value = Building.class, name = "BUILDING")
 })
-public abstract class Card{
+public abstract class Card implements Serializable {
     protected Age age;
     protected int minPlayers = 0;
     protected String instanceId = UUID.randomUUID().toString();
