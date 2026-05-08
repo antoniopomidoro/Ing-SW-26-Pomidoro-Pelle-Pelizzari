@@ -23,6 +23,6 @@ public interface DTOVisitor {
     void visit(LobbyUpdateDTO dto);
     void visit(TotemSelectionDTO dto);
     void visit(ErrorDTO dto);
-    String type();
+
     GameEventDTO getLastEvent();
 }

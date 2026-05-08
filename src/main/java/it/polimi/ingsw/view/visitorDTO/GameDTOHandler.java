@@ -114,8 +114,5 @@ public class GameDTOHandler implements DTOVisitor {
     @Override
     public void visit(ErrorDTO dto) {}
 
-    @Override
-    public String type(){
-        return "Game";
-    }
+
 }

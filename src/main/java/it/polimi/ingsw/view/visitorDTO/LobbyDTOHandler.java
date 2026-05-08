@@ -94,11 +94,6 @@ public class LobbyDTOHandler implements DTOVisitor {
     }
 
     @Override
-    public String type(){
-        return "Lobby";
-    }
-
-    @Override
     public GameEventDTO getLastEvent(){
         return null;
     }
