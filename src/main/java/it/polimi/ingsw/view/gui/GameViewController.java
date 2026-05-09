@@ -20,6 +20,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -887,11 +888,36 @@ public class GameViewController implements UserInterface {
         return p.getCharacterCounts().values().stream().mapToInt(Integer::intValue).sum();
     }
 
+    // End game screen
+    private void showEndGameOverlay(GameStateDTO state) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    Objects.requireNonNull(getClass().getResource("/fxml/EndGameScreen.fxml")));
+            StackPane overlay = loader.load();
+            EndGameController endController = loader.getController();
+
+            endController.initData(state);
+
+
+            overlay.prefWidthProperty().bind(root.widthProperty());
+            overlay.prefHeightProperty().bind(root.heightProperty());
+            root.getChildren().add(overlay);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to load EndGameScreen.fxml", ex);
+        }
+    }
+
     // ── Internal event dispatch ────────────────────────────────────────────────
 
     private boolean handleGameEvent(GameEventDTO dto) {
         lastEventType = dto.getEventType();
-        Platform.runLater(() -> stateProperty.set(dto.getSnapshot()));
+        Platform.runLater(() -> {
+            stateProperty.set(dto.getSnapshot());
+
+            if (dto.getEventType() == GameEvent.Type.END_GAME_COMPLETED) {
+                showEndGameOverlay(dto.getSnapshot());
+            }
+        });
         return true;
     }
 }

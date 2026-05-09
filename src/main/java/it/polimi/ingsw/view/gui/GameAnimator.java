@@ -1,13 +1,7 @@
 package it.polimi.ingsw.view.gui;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.ParallelTransition;
-import javafx.animation.RotateTransition;
-import javafx.animation.SequentialTransition;
-import javafx.animation.Timeline;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
+import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
@@ -158,5 +152,28 @@ public class GameAnimator {
         });
 
         flipOut.play();
+    }
+
+    public void animateEndGame(Node content, Runnable onDone) {
+        content.setOpacity(0);
+        content.setScaleX(0.8);
+        content.setScaleY(0.8);
+
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(600), content);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1);
+
+        ScaleTransition scaleUp = new ScaleTransition(Duration.millis(600), content);
+        scaleUp.setFromX(0.8);
+        scaleUp.setFromY(0.8);
+        scaleUp.setToX(1.0);
+        scaleUp.setToY(1.0);
+
+        ParallelTransition parallelTransition = new ParallelTransition(fadeIn, scaleUp);
+
+        if (onDone != null) {
+            parallelTransition.setOnFinished(e -> onDone.run());
+        }
+        parallelTransition.play();
     }
 }

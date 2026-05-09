@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="root"
+           fx:controller="it.polimi.ingsw.view.gui.EndGameController"
+           prefWidth="1280" prefHeight="720"
+           style="-fx-background-color: rgba(10, 7, 3, 0.82);">
+
+    <!-- Central card -->
+    <VBox alignment="CENTER"
+          spacing="24"
+          maxWidth="480"
+          maxHeight="380"
+          StackPane.alignment="CENTER"
+          style="
+            -fx-background-color: rgba(20, 14, 6, 0.95);
+            -fx-background-radius: 12;
+            -fx-border-color: #c8a84b;
+            -fx-border-radius: 12;
+            -fx-border-width: 1.5;
+            -fx-padding: 48 40 40 40;
+            -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.85), 32, 0.5, 0, 4);
+            -fx-font-family: 'Georgia', serif;">
+
+        <!-- Title -->
+        <Label text="END OF GAME"
+               style="
+                -fx-font-family: 'Georgia', serif;
+                -fx-font-size: 13px;
+                -fx-font-weight: bold;
+                -fx-text-fill: #c8a84b;
+                -fx-letter-spacing: 4px;"/>
+
+        <!-- Separator line -->
+        <HBox prefHeight="1" maxWidth="300"
+              style="-fx-background-color: rgba(200, 168, 75, 0.35);"/>
+
+        <!-- Winner -->
+        <Label fx:id="winnerLabel"
+               text="—"
+               wrapText="true"
+               style="
+                -fx-font-family: 'Georgia', serif;
+                -fx-font-size: 26px;
+                -fx-font-weight: bold;
+                -fx-text-fill: #f0e6c8;
+                -fx-alignment: center;
+                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 6, 0.5, 0, 2);"/>
+
+        <!-- Score list -->
+        <VBox fx:id="scoresBox"
+              alignment="CENTER"
+              spacing="8"
+              style="-fx-padding: 8 0 0 0;"/>
+
+        <!-- Spacer -->
+        <HBox prefHeight="8"/>
+
+        <!-- Buttons -->
+        <VBox alignment="CENTER" spacing="12">
+            <Button text="Back to menu"
+                    onAction="#onBackToMenu"
+                    prefWidth="220" prefHeight="42"
+                    styleClass="confirm-button"/>
+            <Button text="Exit"
+                    onAction="#onExit"
+                    prefWidth="220" prefHeight="42"
+                    style="
+                        -fx-background-color: transparent;
+                        -fx-border-color: rgba(200, 168, 75, 0.4);
+                        -fx-border-width: 1;
+                        -fx-border-radius: 4;
+                        -fx-background-radius: 4;
+                        -fx-text-fill: #c8a84b;
+                        -fx-font-family: 'Georgia', serif;
+                        -fx-font-size: 14px;
+                        -fx-cursor: hand;"/>
+        </VBox>
+
+    </VBox>
+</StackPane>
