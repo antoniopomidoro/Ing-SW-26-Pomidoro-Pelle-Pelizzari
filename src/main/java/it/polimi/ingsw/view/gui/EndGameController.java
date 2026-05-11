@@ -3,6 +3,7 @@ package it.polimi.ingsw.view.gui;
 import it.polimi.ingsw.App;
 import it.polimi.ingsw.network.dto.GameStateDTO;
 import it.polimi.ingsw.view.ClientManager;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
@@ -18,6 +19,10 @@ public class EndGameController {
 
     private final GameAnimator animator = new GameAnimator();
     private Runnable menu;
+
+    public void setMenu(Runnable callback) {
+        this.menu = callback;
+    }
 
     public void setWinner(String winner) {
         winnerLabel.setText("The winner is: " + winner + "!");
@@ -36,12 +41,12 @@ public class EndGameController {
 
     @FXML
     private void onBackToMenu() {
-        // TODO: implement back to menu
+        if (menu != null) menu.run();
     }
 
     @FXML
     private void onExit() {
-        exit(0);
+        Platform.exit();
     }
 
     public void endGame(Runnable onDone) {

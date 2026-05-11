@@ -118,6 +118,7 @@ public class GameViewController implements UserInterface {
 
     private Totem localTotem;
     private GUIGameSender gameSender;
+    private Runnable menu;
 
     private final ObjectProperty<GameStateDTO> stateProperty = new SimpleObjectProperty<>();
     private final GameAnimator animator = new GameAnimator();
@@ -178,6 +179,15 @@ public class GameViewController implements UserInterface {
      */
     public void setLocalPlayer(Totem totem) {
         this.localTotem = Objects.requireNonNull(totem, "totem");
+    }
+
+    /**
+     * Must be called by {@link JavaFXApp} at the end of a game, when a player requests to get back to the menu.
+     *
+     * @param callback the callback to be executed when the player clicks the menu button.
+     */
+    public void setMenu(Runnable callback) {
+        this.menu = callback;
     }
 
     /**
@@ -897,7 +907,7 @@ public class GameViewController implements UserInterface {
             EndGameController endController = loader.getController();
 
             endController.initData(state);
-
+            endController.setMenu(menu);
 
             overlay.prefWidthProperty().bind(root.widthProperty());
             overlay.prefHeightProperty().bind(root.heightProperty());
