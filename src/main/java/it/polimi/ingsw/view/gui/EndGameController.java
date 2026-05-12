@@ -48,8 +48,4 @@ public class EndGameController {
     private void onExit() {
         Platform.exit();
     }
-
-    public void endGame(Runnable onDone) {
-        animator.animateEndGame(root.getChildren().get(0), onDone);
-    }
 }
