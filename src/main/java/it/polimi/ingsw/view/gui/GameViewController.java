@@ -912,6 +912,7 @@ public class GameViewController implements UserInterface {
             overlay.prefWidthProperty().bind(root.widthProperty());
             overlay.prefHeightProperty().bind(root.heightProperty());
             root.getChildren().add(overlay);
+            animator.animateEndGame(overlay, null);
         } catch (Exception ex) {
             throw new RuntimeException("Failed to load EndGameScreen.fxml", ex);
         }
