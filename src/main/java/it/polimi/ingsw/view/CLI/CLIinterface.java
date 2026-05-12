@@ -14,7 +14,7 @@ import it.polimi.ingsw.view.UserInterface;
 
 import java.util.List;
 import java.util.Map;
-
+//handles game updates
 public class CLIinterface implements UserInterface, Runnable {
 
     // --- ANSI helpers (no library needed) ---
@@ -34,11 +34,12 @@ public class CLIinterface implements UserInterface, Runnable {
     private LobbyUpdateDTO currentLobby;
     private TotemSelectionDTO currentTotems;
     private it.polimi.ingsw.model.player.Totem currentActivePlayer;
-
+  private Thread inputSender;
     public CLIinterface(ClientManager user) {
         this.user = user;
         this.going = true;
-        new Thread(new CLIinsputSender(user, this), "CLI-input").start();
+         inputSender = new Thread(new CLIinsputSender(user, this), "CLI-input");
+         inputSender.start();
         new Thread(this, "CLI-renderer").start();
     }
 
@@ -57,6 +58,9 @@ public class CLIinterface implements UserInterface, Runnable {
             } else if (state.getEventType() == it.polimi.ingsw.model.game.GameEvent.Type.END_TURN_COMPLETED
                     || state.getEventType() == it.polimi.ingsw.model.game.GameEvent.Type.TURN_COMPLETED) {
                 this.currentActivePlayer = null;
+            }else if(state.getEventType() == GameEvent.Type.END_GAME_COMPLETED){
+
+
             }
         }
         notifyAll();
@@ -423,10 +427,11 @@ public class CLIinterface implements UserInterface, Runnable {
         showError(dto);
     }
 
-    public boolean stop() {
+    public void stop() {
         going = false;
+        inputSender.interrupt();
         synchronized (this) { notifyAll(); }
-        return true;
+
     }
 
     public GameEventDTO getState() {
@@ -485,4 +490,5 @@ public class CLIinterface implements UserInterface, Runnable {
         while (res.size() < maxLines) res.add("");
         return res;
     }
+
 }

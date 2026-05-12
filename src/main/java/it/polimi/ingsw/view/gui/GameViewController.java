@@ -23,6 +23,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
@@ -31,11 +32,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -114,6 +111,8 @@ public class GameViewController implements UserInterface {
     @FXML private Button     opponentMenuButton;
     @FXML private VBox       opponentMenuBox;
 
+    @FXML private Pane       TotemLayer;
+
     // ── State ──────────────────────────────────────────────────────────────────
 
     private Totem localTotem;
@@ -128,6 +127,7 @@ public class GameViewController implements UserInterface {
             new EnumMap<>(GameEvent.Type.class);
 
     private final EnumMap<Totem, PlayerBoxNode> playerBoxes = new EnumMap<>(Totem.class);
+    private final EnumMap<Totem, ImageView> totemViews = new EnumMap<>(Totem.class);
 
     private ImageView selectedCardView = null;
 
@@ -227,6 +227,10 @@ public class GameViewController implements UserInterface {
         opponentMenuBox.setManaged(show);
     }
 
+    private void onPlayerSelectedTile(Totem player, Node tile){
+
+
+    }
     // ── Binding registration ───────────────────────────────────────────────────
 
     private void registerStaticBindings() {
@@ -340,6 +344,55 @@ public class GameViewController implements UserInterface {
                 (i, b) -> gameSender.onPickBottomBuilding(i, b.getInstanceId()));
 
         refreshOrderTile(state);
+       // syncTotems(state);  uncomment this for totem visualisation but now dosen't work properly
+    }
+
+    private void syncTotems(GameStateDTO state) {
+        if (state.getPlayers() == null || state.getOrderTileOrder() == null || state.getBoard() == null || TotemLayer == null) return;
+
+        for (PlayerDTO p : state.getPlayers()) {
+            Totem t = p.getTotem();
+            if (!totemViews.containsKey(t)) {
+                ImageView iv = makeImageView(42, 30, totemPath(t)); // swapped width and height
+                iv.setRotate(-90); // or 90
+                TotemLayer.getChildren().add(iv);
+                totemViews.put(t, iv);
+            }
+        }
+
+        EnumMap<Totem, Node> destinazioni = new EnumMap<>(Totem.class);
+        List<Tile> tiles = state.getBoard().getTiles();
+        for (int i = 0; i < tiles.size(); i++) {
+            Tile tile = tiles.get(i);
+            if (tile.isOccupied() && tile.getOccupier() != null) {
+                Totem occupante = tile.getOccupier().getId();
+                if (i < tilesetBox.getChildren().size()) {
+                    destinazioni.put(occupante, tilesetBox.getChildren().get(i));
+                }
+            }
+        }
+
+        List<Totem> orderList = state.getOrderTileOrder();
+        int attesaIndex = 0;
+
+        for (Totem t : orderList) {
+            ImageView totemImg = totemViews.get(t);
+            if (totemImg == null) continue;
+            totemImg.toFront();
+
+            if (destinazioni.containsKey(t)) {
+                // Posiziona il totem centrato sul Tile
+                double centroX = (TILE_W - 42) / 2.0;
+                double centroY = (TILE_H - 30) / 2.0;
+                animator.animateTotemMovementWithOffset(totemImg, destinazioni.get(t), TotemLayer, centroX, centroY);
+            } else {
+                // Plancia Order: allineiamolo più a sinistra (-20) e più in basso (+30 come partenza)
+                double marginY = 30.0 + (attesaIndex * 18.0);
+                double centerX = ((TILE_W - 42) / 2.0) - 20.0;
+                animator.animateTotemMovementWithOffset(totemImg, orderTileView, TotemLayer, centerX, marginY);
+                attesaIndex++;
+            }
+        }
     }
 
     private void refreshLocalHand(GameStateDTO state) {
@@ -930,4 +983,7 @@ public class GameViewController implements UserInterface {
         });
         return true;
     }
-}
+@Override
+    public void stop(){};
+    }
+

@@ -45,6 +45,11 @@
 
     </VBox>
 
+    <!-- layer for totem animations -->
+    <Pane fx:id="TotemLayer" mouseTransparent="true"
+          AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+
     <!-- ── Local hand (bottom-centre) ── -->
     <HBox fx:id="localHandBox" alignment="CENTER" spacing="8" styleClass="card-container" AnchorPane.bottomAnchor="16" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" />
 

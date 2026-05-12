@@ -1,8 +1,10 @@
 package it.polimi.ingsw.view.gui;
 
 import javafx.animation.*;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
 
@@ -175,5 +177,39 @@ public class GameAnimator {
             parallelTransition.setOnFinished(e -> onDone.run());
         }
         parallelTransition.play();
+    }
+
+    /*public void animateTotemMovement(ImageView totem, Node Strating, Node target, Pane TotemLayer){
+        if(!TotemLayer.getChildren().contains(totem)){
+            TotemLayer.getChildren().add(totem);
+        }
+        Point2D startpoint = Strating.localToScene(0,0);
+        Point2D endpoint = Strating.localToScene(0,0);
+
+        totem.setTranslateX(startpoint.getX());
+        totem.setTranslateY(startpoint.getY());
+
+        TranslateTransition slide = new TranslateTransition(Duration.seconds(1.5), totem);
+        slide.setToX(endpoint.getX());
+        slide.setToY(endpoint.getY());
+
+    }*/ //failed test
+
+    public void animateTotemMovementWithOffset(ImageView totem, Node targetNode, Pane animationLayer, double offsetX, double offsetY) {
+        if (!animationLayer.getChildren().contains(totem)) {
+            animationLayer.getChildren().add(totem);
+        }
+        Point2D targetGlobal = targetNode.localToScene(0, 0);
+        Point2D targetLocal = animationLayer.sceneToLocal(targetGlobal);
+
+        double targetX = targetLocal.getX() + offsetX;
+        double targetY = targetLocal.getY() + offsetY;
+
+        if (Math.abs(totem.getTranslateX() - targetX) > 1 || Math.abs(totem.getTranslateY() - targetY) > 1) {
+            TranslateTransition t = new TranslateTransition(Duration.seconds(0.7), totem);
+            t.setToX(targetX);
+            t.setToY(targetY);
+            t.play();
+        }
     }
 }

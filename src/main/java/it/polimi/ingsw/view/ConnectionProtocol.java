@@ -4,6 +4,7 @@ public interface ConnectionProtocol {
 
     public boolean send(String message);
     public Boolean isConnected();
+    public void stop();
 
 
 

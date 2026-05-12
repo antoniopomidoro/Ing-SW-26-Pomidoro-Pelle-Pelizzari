@@ -91,4 +91,10 @@ public class SocketClient implements ConnectionProtocol, Runnable {
     public Boolean isConnected() {
         return !lastPing.plusSeconds(CONNECTION_TIMEOUT_SECONDS).isBefore(clock.instant());
     }
+
+    @Override
+    public void stop() {
+        going = false;
+        Thread.currentThread().interrupt();
+    }
 }

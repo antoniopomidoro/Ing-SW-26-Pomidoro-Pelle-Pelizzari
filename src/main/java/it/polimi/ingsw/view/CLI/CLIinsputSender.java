@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
+//handles lobby and inputs by the user
 public class CLIinsputSender implements Runnable {
     private boolean going;
     private final ClientManager user;

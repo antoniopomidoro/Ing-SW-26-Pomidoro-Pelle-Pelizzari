@@ -572,5 +572,6 @@ public class LobbyController implements UserInterface {
     public void previewShowWaiting(String nickname) {
         Platform.runLater(() -> applyPreviewWaiting(nickname));
     }
-
+    @Override
+    public void stop(){};
 }

@@ -139,4 +139,11 @@ public class ClientManager {
 
 
     }
+
+    public void stop(){
+        getConnection().stop();
+        getUser().stop();
+        Thread.currentThread().interrupt();
+
+    }
 }
