@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.board.Tile;
 import it.polimi.ingsw.model.cards.Building;
 import it.polimi.ingsw.model.cards.Card;
 import it.polimi.ingsw.model.game.GameEvent;
+import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.network.dto.GameStateDTO;
@@ -315,7 +316,7 @@ public class CLIinterface implements UserInterface, Runnable {
     private void printPrompt() {
         System.out.println(DIM + "──────────────────────────────────────────────────────────────────" + RESET);
         System.out.println(BOLD + "Commands:" + RESET);
-        System.out.println("  topcard <i> | bottomcard <i> | topbuild <i> | bottombuild <i> | tile <i> \n digit help for all commands and example");
+        System.out.println("  topcard <i> | bottomcard <i> | topbuild <i> | bottombuild <i> | tile <i> | view <t> \n digit help for all commands and example");
         System.out.print(BOLD + "> " + RESET);
     }
 
@@ -491,4 +492,26 @@ public class CLIinterface implements UserInterface, Runnable {
         return res;
     }
 
+    public void viewPlayerHand(Totem totem, GameStateDTO snapshot) {
+        if (totem == null) return;
+        if (snapshot == null) return;
+        snapshot.getPlayers().stream()
+                .filter(p -> totem.equals(p.getTotem()))
+                .findFirst()
+                .ifPresentOrElse(self -> {
+                    if (totem != snapshot.getActivePlayer()) {
+                        System.out.println(BOLD + CYAN + "▼ " + self.getNickname() + "'s HAND" + RESET);
+                        System.out.println("  Cards:");
+                        printCardsRow(self.getCards());
+                        System.out.println("  Buildings:");
+                        printBuildingsRow(self.getBuildings());
+                        System.out.println();
+                    } else {
+                        System.out.println(RED + totem + " totem is your totem!");
+                    }
+                }, () -> {
+                    System.out.println(RED + totem + "totem is not used in this game!");
+                });
+        printPrompt();
+    }
 }
