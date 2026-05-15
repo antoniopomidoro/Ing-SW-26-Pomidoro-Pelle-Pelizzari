@@ -383,7 +383,8 @@ public class CLIinterface implements UserInterface, Runnable {
     @Override
     public synchronized void onGameEnded(GameEventDTO dto) {
         update(dto);
-        System.out.println(BOLD + CYAN + "  ★ GAME ENDED ★" + RESET);
+            new Thread(new CLIEnder(this, user, dto), "CLI-ender").start();
+
     }
 
     @Override
