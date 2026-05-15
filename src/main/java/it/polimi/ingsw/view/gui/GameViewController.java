@@ -362,8 +362,8 @@ public class GameViewController implements UserInterface {
         
         Point2D targetGlobal = comp.localToScene(0, 0);
         
-        // Se le coordinate sono (0,0) significa che il nodo non è ancora stato posizionato dal layout engine.
-        // In questo caso forziamo il layout del pannello radice.
+        // at starting coordinates are 0 0 on object creation
+        // so i put totems in their startin position
         if (targetGlobal.getX() == 0 && targetGlobal.getY() == 0 && comp.getScene() != null) {
             comp.getScene().getRoot().applyCss();
             comp.getScene().getRoot().layout();
@@ -407,7 +407,7 @@ public class GameViewController implements UserInterface {
                 }
             }
         } else {
-            // Fuori dal round attivo (es. EndTurnPhase), puliamo la cache per forzare il rientro sullo starting tile
+            // at endturn clear cache to put totems on starting tile
             cachedTotemDestinations.clear();
         }
 
@@ -426,7 +426,7 @@ public class GameViewController implements UserInterface {
 
             if (destinazioni.containsKey(t)) {
                 double centroX = 24.0;
-                double centroY = 26.0; // 46-20 per centrare il rettangolo
+                double centroY = 26.0; // to be calibrated
                 endPoint = getComponentLocalCoordinates(destinazioni.get(t), TotemLayer, centroX, centroY);
             } else if (cachedTotemDestinations.containsKey(t)) {
                 double centroX = 24.0;
@@ -450,7 +450,7 @@ public class GameViewController implements UserInterface {
 
     private Point2D getOrderTileOffset(int numPlayers, int slotIndex) {
 
-        // Dimezzata la distanza e alzato leggermente
+        // da abbassare leggermente tutto(ancora)
         if (numPlayers <= 2) {
             if (slotIndex == 0) return new Point2D(24, 5);
             if (slotIndex == 1) return new Point2D(24, 27);
