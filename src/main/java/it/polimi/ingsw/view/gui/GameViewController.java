@@ -22,6 +22,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -128,6 +129,7 @@ public class GameViewController implements UserInterface {
 
     private final EnumMap<Totem, PlayerBoxNode> playerBoxes = new EnumMap<>(Totem.class);
     private final EnumMap<Totem, ImageView> totemViews = new EnumMap<>(Totem.class);
+    private final EnumMap<Totem, Integer> cachedTotemDestinations = new EnumMap<>(Totem.class);
 
     private ImageView selectedCardView = null;
 
@@ -272,9 +274,13 @@ public class GameViewController implements UserInterface {
 
         // Cards: deck-deal animation fires when the board is refilled (turn > 1).
         animationMap.put(GameEvent.Type.START_TURN_STARTED, (old, next) -> {
+            cachedTotemDestinations.clear();
             if (next != null && next.getTurn() > 1) {
                 animateDeckDealToBox(deckView, topCardsBox);
             }
+        });
+        animationMap.put(GameEvent.Type.END_TURN_COMPLETED, (old, next) -> {
+            cachedTotemDestinations.clear();
         });
         // Buildings + deck: both animate on age change (new era's cards and buildings revealed).
         animationMap.put(GameEvent.Type.AGE_CHANGED, (old, next) -> {
@@ -344,7 +350,31 @@ public class GameViewController implements UserInterface {
                 (i, b) -> gameSender.onPickBottomBuilding(i, b.getInstanceId()));
 
         refreshOrderTile(state);
-       // syncTotems(state);  uncomment this for totem visualisation but now dosen't work properly
+        Platform.runLater(() -> syncTotems(state));
+    }
+
+    private Point2D getComponentLocalCoordinates(Node comp, Pane layer, double offsetX, double offsetY) {
+        if (comp.getParent() != null) {
+            comp.getParent().applyCss();
+            comp.getParent().layout();
+        }
+        comp.applyCss();
+        
+        Point2D targetGlobal = comp.localToScene(0, 0);
+        
+        // Se le coordinate sono (0,0) significa che il nodo non è ancora stato posizionato dal layout engine.
+        // In questo caso forziamo il layout del pannello radice.
+        if (targetGlobal.getX() == 0 && targetGlobal.getY() == 0 && comp.getScene() != null) {
+            comp.getScene().getRoot().applyCss();
+            comp.getScene().getRoot().layout();
+            targetGlobal = comp.localToScene(0, 0);
+        }
+        
+        Point2D targetLocal = layer.sceneToLocal(targetGlobal);
+        if (targetLocal == null) {
+            return new Point2D(offsetX, offsetY);
+        }
+        return new Point2D(targetLocal.getX() + offsetX, targetLocal.getY() + offsetY);
     }
 
     private void syncTotems(GameStateDTO state) {
@@ -361,38 +391,86 @@ public class GameViewController implements UserInterface {
         }
 
         EnumMap<Totem, Node> destinazioni = new EnumMap<>(Totem.class);
-        List<Tile> tiles = state.getBoard().getTiles();
-        for (int i = 0; i < tiles.size(); i++) {
-            Tile tile = tiles.get(i);
-            if (tile.isOccupied() && tile.getOccupier() != null) {
-                Totem occupante = tile.getOccupier().getId();
-                if (i < tilesetBox.getChildren().size()) {
-                    destinazioni.put(occupante, tilesetBox.getChildren().get(i));
+        String phase = state.getCurrentPhaseName();
+
+        if ("StartTurnPhase".equals(phase) || "PlayerTurnPhase".equals(phase)) {
+            List<Tile> tiles = state.getBoard().getTiles();
+            for (int i = 0; i < tiles.size(); i++) {
+                Tile tile = tiles.get(i);
+                if (tile.isOccupied() && tile.getOccupier() != null) {
+                    Totem occupante = tile.getOccupier().getId();
+                    if (i < tilesetBox.getChildren().size()) {
+                        Node destNode = tilesetBox.getChildren().get(i);
+                        destinazioni.put(occupante, destNode);
+                        cachedTotemDestinations.put(occupante, i);
+                    }
                 }
             }
+        } else {
+            // Fuori dal round attivo (es. EndTurnPhase), puliamo la cache per forzare il rientro sullo starting tile
+            cachedTotemDestinations.clear();
         }
 
         List<Totem> orderList = state.getOrderTileOrder();
-        int attesaIndex = 0;
+        int numPlayers = state.getPlayers().size();
 
-        for (Totem t : orderList) {
+        for (int i = 0; i < orderList.size(); i++) {
+            Totem t = orderList.get(i);
             ImageView totemImg = totemViews.get(t);
             if (totemImg == null) continue;
             totemImg.toFront();
 
+            double startX = totemImg.getTranslateX();
+            double startY = totemImg.getTranslateY();
+            Point2D endPoint;
+
             if (destinazioni.containsKey(t)) {
-                // Posiziona il totem centrato sul Tile
-                double centroX = (TILE_W - 42) / 2.0;
-                double centroY = (TILE_H - 30) / 2.0;
-                animator.animateTotemMovementWithOffset(totemImg, destinazioni.get(t), TotemLayer, centroX, centroY);
+                double centroX = 24.0;
+                double centroY = 26.0; // 46-20 per centrare il rettangolo
+                endPoint = getComponentLocalCoordinates(destinazioni.get(t), TotemLayer, centroX, centroY);
+            } else if (cachedTotemDestinations.containsKey(t)) {
+                double centroX = 24.0;
+                double centroY = 26.0;
+                int tileIdx = cachedTotemDestinations.get(t);
+                if (tileIdx < tilesetBox.getChildren().size()) {
+                    Node activeNode = tilesetBox.getChildren().get(tileIdx);
+                    endPoint = getComponentLocalCoordinates(activeNode, TotemLayer, centroX, centroY);
+                } else {
+                    Point2D orderOffset = getOrderTileOffset(numPlayers, i);
+                    endPoint = getComponentLocalCoordinates(orderTileView, TotemLayer, orderOffset.getX(), orderOffset.getY());
+                }
             } else {
-                // Plancia Order: allineiamolo più a sinistra (-20) e più in basso (+30 come partenza)
-                double marginY = 30.0 + (attesaIndex * 18.0);
-                double centerX = ((TILE_W - 42) / 2.0) - 20.0;
-                animator.animateTotemMovementWithOffset(totemImg, orderTileView, TotemLayer, centerX, marginY);
-                attesaIndex++;
+                Point2D orderOffset = getOrderTileOffset(numPlayers, i);
+                endPoint = getComponentLocalCoordinates(orderTileView, TotemLayer, orderOffset.getX(), orderOffset.getY());
             }
+            
+            animator.animateTotemMovement(totemImg, TotemLayer, startX, startY, endPoint.getX(), endPoint.getY());
         }
+    }
+
+    private Point2D getOrderTileOffset(int numPlayers, int slotIndex) {
+
+        // Dimezzata la distanza e alzato leggermente
+        if (numPlayers <= 2) {
+            if (slotIndex == 0) return new Point2D(24, 5);
+            if (slotIndex == 1) return new Point2D(24, 27);
+        } else if (numPlayers == 3) {
+            if (slotIndex == 0) return new Point2D(24, 0);
+            if (slotIndex == 1) return new Point2D(24, 18);
+            if (slotIndex == 2) return new Point2D(24, 37);
+        } else if (numPlayers == 4) {
+            if (slotIndex == 0) return new Point2D(24, -5);
+            if (slotIndex == 1) return new Point2D(24, 11);
+            if (slotIndex == 2) return new Point2D(24, 28);
+            if (slotIndex == 3) return new Point2D(24, 44);
+        } else if (numPlayers >= 5) {
+            if (slotIndex == 0) return new Point2D(24, -10);
+            if (slotIndex == 1) return new Point2D(24, 4);
+            if (slotIndex == 2) return new Point2D(24, 18);
+            if (slotIndex == 3) return new Point2D(24, 32);
+            if (slotIndex == 4) return new Point2D(24, 46);
+        }
+        return new Point2D(24, 0 + slotIndex * 15);
     }
 
     private void refreshLocalHand(GameStateDTO state) {
@@ -987,4 +1065,3 @@ public class GameViewController implements UserInterface {
 @Override
     public void stop(){};
     }
-
