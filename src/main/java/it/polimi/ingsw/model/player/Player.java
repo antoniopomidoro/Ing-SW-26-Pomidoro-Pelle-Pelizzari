@@ -65,6 +65,10 @@ public class Player implements Serializable {
         return food;
     }
 
+    public void setFood(int food) {
+        this.food = food;
+    }
+
     public int getPP() {
         return pp;
     }
@@ -73,6 +77,9 @@ public class Player implements Serializable {
         return cards;
     }
 
+    protected Totem getID() {
+        return id;
+    }
 
 
 
