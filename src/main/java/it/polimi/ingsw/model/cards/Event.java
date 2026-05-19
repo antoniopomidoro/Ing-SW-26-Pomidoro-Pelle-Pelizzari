@@ -13,7 +13,6 @@ import java.util.List;
  * Instances of this class are intended to be created from JSON data.
  */
 public class Event extends Card {
-    private String id;
     private EventEffect effect;
     private TriggerKey triggerKey;
     private int resolutionPriority;
@@ -26,9 +25,9 @@ public class Event extends Card {
         super();
     }
 
-    public Event(Age age, String id, EventEffect effect, TriggerKey triggerKey, int resolutionPriority){
+    public Event(Age age, String cardId, EventEffect effect, TriggerKey triggerKey, int resolutionPriority){
         this.age = age;
-        this.id = id;
+        this.cardId = cardId;
         this.effect = effect;
         this.triggerKey = triggerKey;
         this.resolutionPriority = resolutionPriority;
@@ -46,12 +45,9 @@ public class Event extends Card {
         return resolutionPriority;
     }
 
-    /**
-     * Gets the ID of the event.
-     * @return The event ID.
-     */
-    public String getId() {
-        return id;
+    @Override
+    public java.util.Optional<it.polimi.ingsw.model.game.TriggerKey> getTriggerKey() {
+        return java.util.Optional.ofNullable(triggerKey);
     }
 
     /**

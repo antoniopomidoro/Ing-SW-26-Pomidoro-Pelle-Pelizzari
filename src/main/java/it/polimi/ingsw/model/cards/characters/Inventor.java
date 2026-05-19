@@ -22,15 +22,18 @@ public class Inventor extends Character {
      */
     public Inventor() {
         super();
+        setId(CharacterEnum.INVENTOR);
     }
     public Inventor(Age age, Tool tool){
         this.age = age;
         this.tool = tool;
+        setId(CharacterEnum.INVENTOR);
     }
 
     /* protected constructor for test purposes */
     protected Inventor(Tool tool) {
         this.tool = tool;
+        setId(CharacterEnum.INVENTOR);
     }
 
     /**
@@ -46,7 +49,7 @@ public class Inventor extends Character {
         if (p == null) {
             return false;
         }
-        return p.getStats().incrementCharacter(CharacterEnum.INVENTOR)
+        return p.getStats().incrementCharacter(getId())
                 && p.getStats().incrementTool(tool);
     }
     @Override

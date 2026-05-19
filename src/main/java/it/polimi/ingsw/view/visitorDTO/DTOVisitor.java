@@ -2,6 +2,7 @@ package it.polimi.ingsw.view.visitorDTO;
 
 import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
+import it.polimi.ingsw.network.dto.GameStateDTO;
 import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
 import it.polimi.ingsw.network.dto.TotemSelectionDTO;
 
@@ -25,4 +26,7 @@ public interface DTOVisitor {
     void visit(ErrorDTO dto);
 
     GameEventDTO getLastEvent();
+
+    /** Returns the last game-state snapshot received outside of a GameEventDTO (e.g. from a REJOIN lobby DTO). */
+    default GameStateDTO getLastSnapshot() { return null; }
 }

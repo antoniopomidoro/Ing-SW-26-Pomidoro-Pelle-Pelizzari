@@ -24,16 +24,19 @@ public class Shaman extends Character {
      */
     public Shaman() {
         super();
+        setId(CharacterEnum.SHAMAN);
     }
 
     public Shaman(Age age, int stars){
         this.age = age;
         this.stars= stars;
+        setId(CharacterEnum.SHAMAN);
     }
 
     /* protected constructor for test purposes */
     protected Shaman(int stars) {
         this.stars = stars;
+        setId(CharacterEnum.SHAMAN);
     }
 
     /**
@@ -49,7 +52,7 @@ public class Shaman extends Character {
         if (p == null) {
             return false;
         }
-        return p.getStats().incrementCharacter(CharacterEnum.SHAMAN)
+        return p.getStats().incrementCharacter(getId())
                 && p.getStats().addStars(stars);
     }
 

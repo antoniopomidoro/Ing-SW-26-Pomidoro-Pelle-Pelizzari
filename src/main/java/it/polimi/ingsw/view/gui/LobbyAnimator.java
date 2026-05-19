@@ -74,6 +74,37 @@ public class LobbyAnimator {
     }
 
     /**
+     * CHOICE → WELCOME: reverse of {@link #animateWelcomeToChoice}. Slides the logo and
+     * totem strip back to the welcome layout and fades the form out.
+     *
+     * @param onFinished called on the JavaFX thread when the welcome layout is restored
+     */
+    public void animateChoiceToWelcome(Runnable onFinished) {
+        TranslateTransition slide = new TranslateTransition(SLIDE, logo);
+        slide.setToY(-60);
+        ScaleTransition scale = new ScaleTransition(SLIDE, logo);
+        scale.setToX(1.0);
+        scale.setToY(1.0);
+
+        TranslateTransition totSlide = new TranslateTransition(SLIDE, welcomeTotems);
+        totSlide.setToY(230);
+        ScaleTransition totScale = new ScaleTransition(SLIDE, welcomeTotems);
+        totScale.setToX(1.0);
+        totScale.setToY(1.0);
+
+        FadeTransition formFade = fadeOut(formArea, () -> {
+            formArea.setVisible(false);
+            if (onFinished != null) onFinished.run();
+        });
+
+        new ParallelTransition(
+                new ParallelTransition(slide, scale),
+                new ParallelTransition(totSlide, totScale),
+                formFade
+        ).play();
+    }
+
+    /**
      * Fades out the form area then fades in the totem selection panel.
      *
      * @param onFinished called when totem selection is fully visible; may be null

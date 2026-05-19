@@ -24,16 +24,19 @@ public class Gatherer extends Character {
      */
     public Gatherer() {
         super();
+        setId(CharacterEnum.GATHERER);
     }
 
     public Gatherer(Age age, int sustDisc){
         this.sustDisc = sustDisc;
         this.age = age;
+        setId(CharacterEnum.GATHERER);
     }
 
     /* protected setter for testing purposes */
     protected void setSustDisc(int sustDisc) {
         this.sustDisc = sustDisc;
+        setId(CharacterEnum.GATHERER);
     }
 
     @Override
@@ -41,7 +44,7 @@ public class Gatherer extends Character {
         if (p == null) {
             return false;
         }
-        return p.getStats().incrementCharacter(CharacterEnum.GATHERER)
+        return p.getStats().incrementCharacter(getId())
                 && p.getStats().addSustainmentDiscount(sustDisc);
     }
 

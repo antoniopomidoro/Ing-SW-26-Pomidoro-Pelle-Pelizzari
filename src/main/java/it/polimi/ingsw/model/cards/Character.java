@@ -47,8 +47,18 @@ public abstract class Character extends Card {
      * Gets the type (ID) of the character.
      * @return The character type.
      */
+    @Override
     public CharacterEnum getId() {
         return id;
+    }
+
+    /**
+     * Test-only setter. Production instances populate {@code id} via Jackson
+     * deserialization; non-Jackson constructors must call this so {@link #getId()}
+     * returns the correct value at runtime.
+     */
+    protected void setId(CharacterEnum id) {
+        this.id = id;
     }
 
     /**

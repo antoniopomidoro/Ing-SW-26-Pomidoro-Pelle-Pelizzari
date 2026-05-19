@@ -24,18 +24,20 @@ public class Builder extends Character {
      * The constructor is empty as instances of this class will be populated using JSON deserialization.
      */
     public Builder() {
-
+        setId(CharacterEnum.BUILDER);
     }
     public Builder(Age age, int pp , int discount){
         this.age = age;
         this.discount =discount;
         this.pp=pp;
+        setId(CharacterEnum.BUILDER);
     }
 
     /* Protected constructor for test purposes */
     protected Builder(int discount, int pp) {
         this.discount = discount;
         this.pp = pp;
+        setId(CharacterEnum.BUILDER);
     }
 
     /**
@@ -59,7 +61,7 @@ public class Builder extends Character {
         if (p == null) {
             return false;
         }
-        return p.getStats().incrementCharacter(CharacterEnum.BUILDER)
+        return p.getStats().incrementCharacter(getId())
                 && p.getStats().addBuilderPp(pp)
                 && p.getStats().addBuildingDiscount(discount);
     }

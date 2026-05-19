@@ -23,10 +23,12 @@ public class Artist extends Character {
      */
     public Artist() {
         super();
+        setId(CharacterEnum.ARTIST);
     }
 
     public Artist(Age age){
         this.age = age;
+        setId(CharacterEnum.ARTIST);
     }
 
 
@@ -35,7 +37,7 @@ public class Artist extends Character {
         if (p == null) {
             return false;
         }
-        return p.getStats().incrementCharacter(CharacterEnum.ARTIST);
+        return p.getStats().incrementCharacter(getId());
     }
 
     @Override

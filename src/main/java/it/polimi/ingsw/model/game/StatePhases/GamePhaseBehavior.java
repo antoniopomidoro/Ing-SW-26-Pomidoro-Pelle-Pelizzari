@@ -140,6 +140,26 @@ public interface GamePhaseBehavior extends Serializable {
      * @return {@code true} if the transition was successful, {@code false} otherwise.
      * @throws IllegalMoveException if this action is not applicable to the current phase.
      */
+    /**
+     * Remaining upper-row picks for the active player in the current phase.
+     * Phases that do not allow picks return 0 (default).
+     *
+     * @return number of remaining upper picks
+     */
+    default int getRemainingUpperPicks() {
+        return 0;
+    }
+
+    /**
+     * Remaining bottom-row picks for the active player in the current phase.
+     * Phases that do not allow picks return 0 (default).
+     *
+     * @return number of remaining bottom picks
+     */
+    default int getRemainingBottomPicks() {
+        return 0;
+    }
+
     default boolean nextAge(GameState context) {
         if (context != null) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, null));

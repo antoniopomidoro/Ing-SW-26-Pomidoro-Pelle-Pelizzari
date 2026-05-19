@@ -12,6 +12,7 @@ import it.polimi.ingsw.model.player.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 /**
@@ -20,7 +21,6 @@ import java.util.Map;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
 public class Building extends Card {
-    private String id;
     private int foodCost;
     private int pp;
     private ContextualEffect effect;
@@ -34,23 +34,14 @@ public class Building extends Card {
         super();
     }
 
-    public Building(Age age, String id, int foodCost, int pp, ContextualEffect effect, TriggerKey triggerKey){
+    public Building(Age age, String cardId, int foodCost, int pp, ContextualEffect effect, TriggerKey triggerKey){
         this.age = age;
-        this.id = id;
+        this.cardId = cardId;
         this.foodCost = foodCost;
         this.pp = pp;
         this.effect = effect;
         this.triggerKey = triggerKey;
 
-    }
-
-    /**
-     * Gets the ID of the building.
-     *
-     * @return The building ID.
-     */
-    public String getId() {
-        return id;
     }
 
     /**
@@ -89,8 +80,9 @@ public class Building extends Card {
      *
      * @return The trigger key.
      */
-    public TriggerKey getTriggerKey() {
-        return triggerKey;
+    @Override
+    public Optional<TriggerKey> getTriggerKey() {
+        return Optional.ofNullable(triggerKey);
     }
 
     /**

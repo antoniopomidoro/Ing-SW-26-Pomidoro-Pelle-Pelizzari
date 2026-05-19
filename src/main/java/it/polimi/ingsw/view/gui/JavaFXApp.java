@@ -1,5 +1,6 @@
 package it.polimi.ingsw.view.gui;
 
+import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.view.ClientManager;
 import javafx.application.Application;
@@ -31,6 +32,7 @@ public class JavaFXApp extends Application {
     private double        screenH;
     private ClientManager clientManager;
     private ActionSender  actionSender;
+    private AudioManager  audioManager;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -49,7 +51,9 @@ public class JavaFXApp extends Application {
 
         clientManager = new ClientManager(lobbyController, useSocket, serverIp);
         actionSender = new ActionSender(clientManager);
+        audioManager = new AudioManager();
         lobbyController.setActionSender(actionSender);
+        lobbyController.setAudioManager(audioManager);
         lobbyController.setOnGameIdReceived(clientManager::setId);
         lobbyController.setOnGameStartingCallback(() -> transitionToSplash());
 
@@ -83,6 +87,7 @@ public class JavaFXApp extends Application {
             scene.setRoot(splashRoot);
             addCss(scene, "/css/game.css");
 
+            audioManager.transitionToAge(Age.AGE_1);
             splash.startSplash(() -> transitionToGame());
         } catch (Exception ex) {
             throw new RuntimeException("Failed to load SplashScreen.fxml", ex);
@@ -100,6 +105,7 @@ public class JavaFXApp extends Application {
             Totem totem = clientManager.getPlayerTotem();
             if (totem != null) gameController.setLocalPlayer(totem);
             gameController.setGameSender(actionSender);
+            gameController.setAudioManager(audioManager);
             clientManager.redirectGameEventsTo(gameController);
 
             Scene scene = primaryStage.getScene();
@@ -107,6 +113,11 @@ public class JavaFXApp extends Application {
         } catch (Exception ex) {
             throw new RuntimeException("Failed to load GameScreen.fxml", ex);
         }
+    }
+
+    @Override
+    public void stop() {
+        if (audioManager != null) audioManager.stopAll();
     }
 
     private void addCss(Scene scene, String path) {

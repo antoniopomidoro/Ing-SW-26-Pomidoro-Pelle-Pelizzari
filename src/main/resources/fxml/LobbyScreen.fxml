@@ -64,6 +64,8 @@
         </HBox>
         <Button fx:id="confirmButton" text="Confirm" styleClass="confirm-button"
                 onAction="#onConfirm" visible="false"/>
+        <Button fx:id="backButton" text="◀ Back" styleClass="confirm-button"
+                onAction="#onBackClicked" visible="false" managed="false"/>
         <Label fx:id="errorLabel" visible="false" styleClass="error-label"/>
     </VBox>
 

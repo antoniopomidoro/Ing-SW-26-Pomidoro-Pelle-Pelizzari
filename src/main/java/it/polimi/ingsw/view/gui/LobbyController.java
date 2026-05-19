@@ -56,6 +56,7 @@ public class LobbyController implements UserInterface {
     @FXML private TextField inputField;
     @FXML private HBox      choiceButtons;
     @FXML private Button    confirmButton;
+    @FXML private Button    backButton;
     @FXML private Label     errorLabel;
     @FXML private HBox      totemSelection;
     @FXML private Button    totemConfirmButton;
@@ -65,6 +66,7 @@ public class LobbyController implements UserInterface {
     // ── State ────────────────────────────────────────────────────────────────
 
     private LobbyAnimator  animator;
+    private AudioManager   audioManager;
     private GUIInputSender inputSender;
     private java.util.function.Consumer<String> onGameIdReceived;
 
@@ -79,6 +81,8 @@ public class LobbyController implements UserInterface {
     private final EnumMap<Totem, ImageView> totemImages      = new EnumMap<>(Totem.class);
     private final EnumMap<Totem, Label>     totemOwnerLabels = new EnumMap<>(Totem.class);
 
+    private final EnumMap<LobbyStep, Runnable> backDispatch = new EnumMap<>(LobbyStep.class);
+
     // ── Initialisation ───────────────────────────────────────────────────────
 
     @FXML
@@ -87,11 +91,71 @@ public class LobbyController implements UserInterface {
         animator = new LobbyAnimator(logo, welcomeTotems, formArea, totemSelection, errorLabel);
         buildTotemSelectionNodes();
         inputField.setOnAction(e -> onConfirm());
+        initBackDispatch();
+    }
+
+    private void initBackDispatch() {
+        backDispatch.put(LobbyStep.CHOICE, () -> {
+            backButton.setDisable(true);
+            choiceButtons.setVisible(false);
+            currentStep = LobbyStep.WELCOME;
+            animator.animateChoiceToWelcome(() -> {
+                startButton.setVisible(true);
+                backButton.setDisable(false);
+                updateBackVisibility();
+            });
+        });
+        backDispatch.put(LobbyStep.FORM_GAME_ID, () -> {
+            inputField.setVisible(false);
+            confirmButton.setVisible(false);
+            promptLabel.setText("What do you want to do?");
+            choiceButtons.setVisible(true);
+            currentStep = LobbyStep.CHOICE;
+        });
+        backDispatch.put(LobbyStep.FORM_NICKNAME, () -> {
+            if (creatingGame) {
+                inputField.setVisible(false);
+                confirmButton.setVisible(false);
+                promptLabel.setText("What do you want to do?");
+                choiceButtons.setVisible(true);
+                currentStep = LobbyStep.CHOICE;
+            } else {
+                showFormStep("Game ID:");
+                inputField.setText(pendingGameId == null ? "" : pendingGameId);
+                currentStep = LobbyStep.FORM_GAME_ID;
+            }
+        });
+        backDispatch.put(LobbyStep.FORM_NUM_PLAYERS, () -> {
+            showFormStep("Your nickname:");
+            inputField.setText(pendingNickname == null ? "" : pendingNickname);
+            currentStep = LobbyStep.FORM_NICKNAME;
+        });
+    }
+
+    @FXML
+    private void onBackClicked() {
+        Runnable r = backDispatch.get(currentStep);
+        if (r != null) r.run();
+        updateBackVisibility();
+    }
+
+    private void updateBackVisibility() {
+        boolean show = currentStep == LobbyStep.CHOICE
+                || currentStep == LobbyStep.FORM_GAME_ID
+                || currentStep == LobbyStep.FORM_NICKNAME
+                || currentStep == LobbyStep.FORM_NUM_PLAYERS;
+        backButton.setVisible(show);
+        backButton.setManaged(show);
     }
 
     /** Must be called by JavaFXApp after FXML loading and ClientManager wiring. */
     public void setActionSender(LobbyCommandSender sender) {
         this.inputSender = new GUIInputSender(Objects.requireNonNull(sender, "sender"));
+    }
+
+    public void setAudioManager(AudioManager audioManager) {
+        this.audioManager = Objects.requireNonNull(audioManager);
+        audioManager.playLobbyMusic();
     }
 
     /** Called by JavaFXApp so the lobby can propagate the server-assigned game ID to the client. */
@@ -121,6 +185,7 @@ public class LobbyController implements UserInterface {
         animator.animateWelcomeToChoice(() -> {
             promptLabel.setText("What do you want to do?");
             choiceButtons.setVisible(true);
+            updateBackVisibility();
         });
     }
 
@@ -129,6 +194,7 @@ public class LobbyController implements UserInterface {
         creatingGame = true;
         showFormStep("Your nickname:");
         currentStep = LobbyStep.FORM_NICKNAME;
+        updateBackVisibility();
     }
 
     @FXML
@@ -136,6 +202,7 @@ public class LobbyController implements UserInterface {
         creatingGame = false;
         showFormStep("Game ID:");
         currentStep = LobbyStep.FORM_GAME_ID;
+        updateBackVisibility();
     }
 
     @FXML
@@ -162,6 +229,7 @@ public class LobbyController implements UserInterface {
             // CREATE: nickname collected → ask for player count
             showFormStep("Number of players (2–5):");
             currentStep = LobbyStep.FORM_NUM_PLAYERS;
+            updateBackVisibility();
         } else {
             // JOIN: nickname collected → send join, wait for server totem selection
             setFormWaiting(true);
@@ -186,6 +254,7 @@ public class LobbyController implements UserInterface {
         animator.hideError();
         // Show local totem selection — all totems available since this is a new game
         currentStep = LobbyStep.TOTEM_SELECTION;
+        updateBackVisibility();
         resetAllTotemsAvailable();
         animator.animateToTotemSelection(this::showTotemConfirmButton);
     }
@@ -199,6 +268,7 @@ public class LobbyController implements UserInterface {
         animator.hideError();
         showFormStep("Your nickname:");
         currentStep = LobbyStep.FORM_NICKNAME;
+        updateBackVisibility();
     }
 
     // ── Totem selection ──────────────────────────────────────────────────────
@@ -350,7 +420,10 @@ public class LobbyController implements UserInterface {
         if (dto.getIdGame() != null && onGameIdReceived != null) {
             onGameIdReceived.accept(dto.getIdGame());
         }
-        Platform.runLater(() -> lobbyIdLabel.setText("Rejoin: " + dto.getIdGame()));
+        Platform.runLater(() -> {
+            lobbyIdLabel.setText("Rejoin: " + dto.getIdGame());
+            if (onGameStartingCallback != null) onGameStartingCallback.run();
+        });
     }
 
     @Override

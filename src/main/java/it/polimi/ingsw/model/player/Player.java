@@ -165,7 +165,7 @@ public class Player implements Serializable {
     public List<Building> getBuildingsByTrigger(TriggerKey key) {
         List<Building> result = new ArrayList<>();
         for (Building b : buildings) {
-            if (b.getTriggerKey() == key) {
+            if (b.getTriggerKey().filter(k -> k == key).isPresent()) {
                 result.add(b);
             }
         }

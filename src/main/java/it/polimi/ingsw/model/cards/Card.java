@@ -11,6 +11,8 @@ import it.polimi.ingsw.model.effects.events.*;
 import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
+import it.polimi.ingsw.model.game.TriggerKey;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -126,6 +128,16 @@ public abstract class Card implements Serializable {
     }
 
     /**
+     * Trigger key associated with this card, if any.
+     * Event and Building cards override this to return their key.
+     *
+     * @return an Optional containing the TriggerKey, or empty if not applicable
+     */
+    public Optional<TriggerKey> getTriggerKey() {
+        return Optional.empty();
+    }
+
+    /**
      * Handles the logic when a card is discarded.
      * By default, it simply returns true. Subclasses can override this to implement specific behavior (e.g., Events).
      *
@@ -155,6 +167,16 @@ public abstract class Card implements Serializable {
     }
     public boolean isBuyable() {
         return true;
+    }
+
+    /**
+     * Polymorphic accessor for the character type. Returns {@code null} for
+     * non-character cards; {@link Character} overrides to return its enum id.
+     * Callers that need null-safety should use
+     * {@code Comparator.nullsLast(Comparator.naturalOrder())}.
+     */
+    public CharacterEnum getId() {
+        return null;
     }
 
     public String toString() {return "";}

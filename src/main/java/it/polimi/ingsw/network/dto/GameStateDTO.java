@@ -11,6 +11,7 @@ import it.polimi.ingsw.model.cards.characters.CharacterEnum;
 import it.polimi.ingsw.model.cards.characters.Tool;
 import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.game.GameState;
+import it.polimi.ingsw.model.game.StatePhases.GamePhaseBehavior;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.PlayerStats;
 import it.polimi.ingsw.model.player.Totem;
@@ -42,6 +43,8 @@ public class GameStateDTO {
     private final List<Totem> orderTileOrder;
     private final Totem activePlayer;
     private final int deckSize;
+    private final int remainingUpperPicks;
+    private final int remainingBottomPicks;
 
     @JsonCreator
     public GameStateDTO(
@@ -56,7 +59,9 @@ public class GameStateDTO {
             @JsonProperty("turnOrder") List<Totem> turnOrder,
             @JsonProperty("orderTileOrder") List<Totem> orderTileOrder,
             @JsonProperty("activePlayer") Totem activePlayer,
-            @JsonProperty("deckSize") int deckSize
+            @JsonProperty("deckSize") int deckSize,
+            @JsonProperty("remainingUpperPicks") int remainingUpperPicks,
+            @JsonProperty("remainingBottomPicks") int remainingBottomPicks
     ) {
         this.gameId = gameId;
         this.age = age;
@@ -70,6 +75,8 @@ public class GameStateDTO {
         this.orderTileOrder = orderTileOrder == null ? List.of() : orderTileOrder;
         this.activePlayer = activePlayer;
         this.deckSize = deckSize;
+        this.remainingUpperPicks = remainingUpperPicks;
+        this.remainingBottomPicks = remainingBottomPicks;
     }
 
     /**
@@ -80,7 +87,7 @@ public class GameStateDTO {
      */
     public static GameStateDTO from(GameState state) {
         if (state == null) {
-            return new GameStateDTO(null, null, 0, 0, 0, null, List.of(), null, List.of(), List.of(), null, 0);
+            return new GameStateDTO(null, null, 0, 0, 0, null, List.of(), null, List.of(), List.of(), null, 0, 0, 0);
         }
 
         String phaseName = state.getCurrentPhase() != null
@@ -123,6 +130,10 @@ public class GameStateDTO {
                 ? state.getDeck().remainingCards(state.getAge())
                 : 0;
 
+        GamePhaseBehavior phase = state.getCurrentPhase();
+        int remainingUpperPicks = phase != null ? phase.getRemainingUpperPicks() : 0;
+        int remainingBottomPicks = phase != null ? phase.getRemainingBottomPicks() : 0;
+
         return new GameStateDTO(
                 state.getGameId(),
                 state.getAge(),
@@ -135,7 +146,9 @@ public class GameStateDTO {
                 turnOrder,
                 orderTileOrder,
                 activePlayer,
-                deckSize
+                deckSize,
+                remainingUpperPicks,
+                remainingBottomPicks
         );
     }
 
@@ -197,6 +210,26 @@ public class GameStateDTO {
      */
     public int getDeckSize() {
         return deckSize;
+    }
+
+    /**
+     * Remaining upper-row picks for the active player in the current PlayerTurnPhase.
+     * Zero in any other phase.
+     *
+     * @return remaining upper picks
+     */
+    public int getRemainingUpperPicks() {
+        return remainingUpperPicks;
+    }
+
+    /**
+     * Remaining bottom-row picks for the active player in the current PlayerTurnPhase.
+     * Zero in any other phase.
+     *
+     * @return remaining bottom picks
+     */
+    public int getRemainingBottomPicks() {
+        return remainingBottomPicks;
     }
 
     /**

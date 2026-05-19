@@ -18,16 +18,19 @@ public class Hunter extends Character {
      */
     public Hunter() {
         super();
+        setId(CharacterEnum.HUNTER);
     }
 
     public Hunter(Age age, boolean hasFood){
         this.age = age;
         this.hasFood = hasFood;
+        setId(CharacterEnum.HUNTER);
     }
 
     /* protected constructor for test purposes */
     protected Hunter(boolean hasFood) {
         this.hasFood = hasFood;
+        setId(CharacterEnum.HUNTER);
     }
 
     @Override
@@ -35,10 +38,10 @@ public class Hunter extends Character {
         if (p == null) {
             return false;
         }
-        if (!p.getStats().incrementCharacter(CharacterEnum.HUNTER)) {
+        if (!p.getStats().incrementCharacter(getId())) {
             return false;
         }
-        int food = p.getStats().getCharacterCount(CharacterEnum.HUNTER)*(hasFood ? 1 : 0);
+        int food = p.getStats().getCharacterCount(getId())*(hasFood ? 1 : 0);
         return p.addFood(food);
     }
 

@@ -3,6 +3,7 @@ package it.polimi.ingsw.view.visitorDTO;
 import it.polimi.ingsw.network.LobbyState;
 import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
+import it.polimi.ingsw.network.dto.GameStateDTO;
 import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
 import it.polimi.ingsw.network.dto.TotemSelectionDTO;
 import it.polimi.ingsw.view.UserInterface;
@@ -35,9 +36,8 @@ public class LobbyDTOHandler implements DTOVisitor {
 
     private final UserInterface ui;
 
-    // Set by ClientManager after construction to avoid a circular reference
-    // (DTOQueue needs LobbyDTOHandler, and LobbyDTOHandler needs DTOQueue).
     private Runnable onGameStart;
+    private GameStateDTO lastSnapshot;
 
     // EnumMap is faster than HashMap for enum keys and makes the routing table explicit.
     private final EnumMap<LobbyState, Consumer<LobbyUpdateDTO>> lobbyDispatch =
@@ -50,9 +50,9 @@ public class LobbyDTOHandler implements DTOVisitor {
         this.ui = ui;
 
         lobbyDispatch.put(LobbyState.WAITING,       ui::onLobbyWaiting);
-        lobbyDispatch.put(LobbyState.REJOIN,         dto -> {
+        lobbyDispatch.put(LobbyState.REJOIN, dto -> {
+            lastSnapshot = dto.getSnapshot();
             ui.onLobbyRejoin(dto);
-            // Rejoin enters an already running game: switch visitor immediately.
             if (onGameStart != null) onGameStart.run();
         });
         lobbyDispatch.put(LobbyState.STARTING_GAME,  dto -> {
@@ -94,7 +94,8 @@ public class LobbyDTOHandler implements DTOVisitor {
     }
 
     @Override
-    public GameEventDTO getLastEvent(){
-        return null;
-    }
+    public GameEventDTO getLastEvent() { return null; }
+
+    @Override
+    public GameStateDTO getLastSnapshot() { return lastSnapshot; }
 }

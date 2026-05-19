@@ -5,6 +5,7 @@ import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.cards.Building;
 import it.polimi.ingsw.model.cards.Card;
 import it.polimi.ingsw.model.game.GameEvent;
+import it.polimi.ingsw.model.game.TriggerKey;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
@@ -25,6 +26,7 @@ import javafx.scene.control.Label;
 
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -34,17 +36,21 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.Node;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.transform.Scale;
 import javafx.scene.text.Font;
 import javafx.stage.Popup;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 /**
  * Controller for GameScreen.fxml.
@@ -64,10 +70,27 @@ public class GameViewController implements UserInterface {
     private static final double TILE_W      = CARD_W;
     private static final double TILE_H      = CARD_H;
 
-    private static final double BOARD_RAISE = 40.0;
+    private static final double REF_W          = 1280.0;
+    private static final double REF_H          = 720.0;
+    /** Spazio riservato all'HUD: topAnchor 12 + icone 36 + padding HBox + margine. */
+    private static final double HUD_CLEARANCE  = 64.0;
+    /** Spazio riservato alla mano locale: bottomAnchor 16 + CARD_H 135 + margine 16. */
+    private static final double HAND_CLEARANCE = 167.0;
+
     private static final double BOX_H       = 64.0;
     private static final double BOX_GAP     = 12.0;
     private static final double BOX_MARGIN  = 16.0;
+
+    /** Material green: selectable highlight. Anything not selectable gets no glow. */
+    private static final Color  HIGHLIGHT_COLOR = Color.web("#3DDC84");
+    private static final double GLOW_RADIUS     = 18.0;
+    private static final double GLOW_SPREAD     = 0.25;
+    /** Corner arc diameter for card/tile clip. Visible rounding without ovalising the silhouette. */
+    private static final double CLIP_ARC = 24.0;
+
+    /** Sorts cards by character type (CharacterEnum declaration order); non-character cards sink to the end. */
+    private static final Comparator<Card> BY_CHARACTER_ID =
+            Comparator.comparing(Card::getId, Comparator.nullsLast(Comparator.naturalOrder()));
 
     // Phase name constants are defined near refreshBoard()
 
@@ -82,6 +105,7 @@ public class GameViewController implements UserInterface {
     // ── FXML nodes ─────────────────────────────────────────────────────────────
 
     @FXML private AnchorPane root;
+    @FXML private AnchorPane contentPane;
     @FXML private AnchorPane ringPane;
     @FXML private VBox       boardArea;
     @FXML private ImageView  bgBase;
@@ -103,6 +127,7 @@ public class GameViewController implements UserInterface {
     @FXML private Label      charCountLabel;
     @FXML private Label      buildingDiscountLabel;
     @FXML private Label      starsLabel;
+    @FXML private Label      sustainmentDiscountLabel;
     @FXML private Label      hunterLabel;
     @FXML private Label      inventorLabel;
     @FXML private Label      painterLabel;
@@ -115,47 +140,77 @@ public class GameViewController implements UserInterface {
 
     private Totem localTotem;
     private GUIGameSender gameSender;
+    private AudioManager audioManager;
 
     private final ObjectProperty<GameStateDTO> stateProperty = new SimpleObjectProperty<>();
     private final GameAnimator animator = new GameAnimator();
     private GameEvent.Type lastEventType;
+    private TriggerKey lastTriggeredBy;
 
     private final EnumMap<GameEvent.Type, BiConsumer<GameStateDTO, GameStateDTO>> animationMap =
             new EnumMap<>(GameEvent.Type.class);
 
     private final EnumMap<Totem, PlayerBoxNode> playerBoxes = new EnumMap<>(Totem.class);
 
-    private ImageView selectedCardView = null;
+    private StackPane selectedCardView = null;
 
     // ── Initialisation ─────────────────────────────────────────────────────────
 
     @FXML
     public void initialize() {
-        // Wrap boardArea in a StackPane that auto-centres it.
-        // This avoids AnchorPane vs binding conflicts on layoutX/Y.
-        // Limit maxWidth so StackPane doesn't stretch it to full screen width.
+        // Wrap boardArea in a StackPane che la centra orizzontalmente e verticalmente
+        // nello spazio disponibile (escluso HUD in alto e mano locale in basso).
         boardArea.setMaxWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
-        root.getChildren().remove(boardArea);
+        contentPane.getChildren().remove(boardArea);
         StackPane boardWrapper = new StackPane(boardArea);
         boardWrapper.setAlignment(Pos.CENTER);
         boardWrapper.setPickOnBounds(false);
-        boardWrapper.setTranslateY(-BOARD_RAISE);
-        AnchorPane.setTopAnchor(boardWrapper, 0.0);
-        AnchorPane.setBottomAnchor(boardWrapper, 0.0);
-        AnchorPane.setLeftAnchor(boardWrapper, 0.0);
-        AnchorPane.setRightAnchor(boardWrapper, 0.0);
-        // Insert before ringPane so opponent boxes (in ringPane) render on top.
-        // ringPane must be non-pick-on-bounds so transparent areas don't swallow tile clicks.
+        AnchorPane.setTopAnchor(boardWrapper,    HUD_CLEARANCE);
+        AnchorPane.setBottomAnchor(boardWrapper, HAND_CLEARANCE);
+        AnchorPane.setLeftAnchor(boardWrapper,   0.0);
+        AnchorPane.setRightAnchor(boardWrapper,  0.0);
+        // Inserire prima di ringPane (index 0) — ringPane resta sopra per i click avversari.
         ringPane.setPickOnBounds(false);
-        root.getChildren().add(3, boardWrapper);
+        contentPane.getChildren().add(0, boardWrapper);
 
-        // Background: bind fitWidth/fitHeight so the image scales to fill.
+        // Scale uniforme su contentPane: tutto il contenuto scala con la finestra.
+        // Il pivot è in (0,0); applyUiScale centra contentPane tramite translate.
+        Scale uiScale = new Scale(1.0, 1.0, 0.0, 0.0);
+        contentPane.getTransforms().add(uiScale);
+        root.widthProperty().addListener((obs, ov, nv)  -> applyUiScale(uiScale));
+        root.heightProperty().addListener((obs, ov, nv) -> applyUiScale(uiScale));
+
+        // Background: cover behavior — maintain ratio, fill entire window, center, clip overflow.
         root.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene == null) return;
+            Rectangle clip = new Rectangle();
+            clip.widthProperty().bind(root.widthProperty());
+            clip.heightProperty().bind(root.heightProperty());
+            root.setClip(clip);
             for (ImageView bg : List.of(bgBase, bgDrawings, bgFire)) {
-                bg.fitWidthProperty().bind(root.widthProperty());
-                bg.fitHeightProperty().bind(root.heightProperty());
+                Image img = bg.getImage();
+                AnchorPane.clearConstraints(bg);
+                bg.setPreserveRatio(false);
+                bg.fitWidthProperty().bind(Bindings.createDoubleBinding(() -> {
+                    double cw = root.getWidth(), ch = root.getHeight();
+                    double iw = img.getWidth(),  ih = img.getHeight();
+                    if (iw == 0 || ih == 0) return cw;
+                    return iw * Math.max(cw / iw, ch / ih);
+                }, root.widthProperty(), root.heightProperty(), img.widthProperty(), img.heightProperty()));
+                bg.fitHeightProperty().bind(Bindings.createDoubleBinding(() -> {
+                    double cw = root.getWidth(), ch = root.getHeight();
+                    double iw = img.getWidth(),  ih = img.getHeight();
+                    if (iw == 0 || ih == 0) return ch;
+                    return ih * Math.max(cw / iw, ch / ih);
+                }, root.widthProperty(), root.heightProperty(), img.widthProperty(), img.heightProperty()));
+                bg.translateXProperty().bind(Bindings.createDoubleBinding(() ->
+                    (root.getWidth()  - bg.getFitWidth())  / 2.0,
+                    root.widthProperty(), bg.fitWidthProperty()));
+                bg.translateYProperty().bind(Bindings.createDoubleBinding(() ->
+                    (root.getHeight() - bg.getFitHeight()) / 2.0,
+                    root.heightProperty(), bg.fitHeightProperty()));
             }
+            bgDrawings.setBlendMode(BlendMode.MULTIPLY);
         });
 
         applySquircleClip(deckView,            CARD_W, CARD_H);
@@ -166,6 +221,21 @@ public class GameViewController implements UserInterface {
         registerRefreshListeners();
         registerAnimationListeners();
         setupInventionPopup();
+    }
+
+    /**
+     * Calcola il fattore di scala uniforme (letterbox) e centra contentPane nel root.
+     * Pivot del Scale è in (0,0); il translate compensa la differenza tra root e contentPane scalato.
+     */
+    private void applyUiScale(Scale scale) {
+        double rw = root.getWidth();
+        double rh = root.getHeight();
+        if (rw <= 0 || rh <= 0) return;
+        double s = Math.min(rw / REF_W, rh / REF_H);
+        scale.setX(s);
+        scale.setY(s);
+        contentPane.setTranslateX((rw - REF_W * s) / 2.0);
+        contentPane.setTranslateY((rh - REF_H * s) / 2.0);
     }
 
     /**
@@ -186,7 +256,9 @@ public class GameViewController implements UserInterface {
         this.gameSender = new GUIGameSender(Objects.requireNonNull(sender, "sender"));
     }
 
-
+    public void setAudioManager(AudioManager audioManager) {
+        this.audioManager = Objects.requireNonNull(audioManager);
+    }
 
     // ── UserInterface ─────────────────────────────────────────────────────────
 
@@ -227,6 +299,8 @@ public class GameViewController implements UserInterface {
                 () -> localStat(p -> String.valueOf(p.getBuildingDiscount())), stateProperty));
         starsLabel.textProperty().bind(Bindings.createStringBinding(
                 () -> localStat(p -> String.valueOf(p.getStars())), stateProperty));
+        sustainmentDiscountLabel.textProperty().bind(Bindings.createStringBinding(
+                () -> localStat(p -> String.valueOf(p.getSustainmentDiscount())), stateProperty));
         hunterLabel.textProperty().bind(Bindings.createStringBinding(
                 () -> localStat(p -> String.valueOf(charCount(p, "HUNTER"))), stateProperty));
         inventorLabel.textProperty().bind(Bindings.createStringBinding(
@@ -261,9 +335,39 @@ public class GameViewController implements UserInterface {
         });
         // Buildings + deck: both animate on age change (new era's cards and buildings revealed).
         animationMap.put(GameEvent.Type.AGE_CHANGED, (old, next) -> {
+            if (audioManager != null && next != null && next.getAge() != null) {
+                audioManager.onAgeChanged(next.getAge());
+            }
             animateDeckDealToBox(deckView, topCardsBox);
             animateDeckDealToBox(coveredBuildingView, topBuildingsBox);
         });
+
+        // Event card: modal reveal overlay when an event card effect resolves.
+        animationMap.put(GameEvent.Type.EVENT_CARD_TRIGGERED, (old, next) -> {
+            Card triggered = findTriggeredEventCard(next, lastTriggeredBy);
+            if (triggered == null) return;
+            String path = frontImagePath(triggered);
+            InputStream s = getClass().getResourceAsStream(path);
+            if (s == null) return;
+            animator.animateEventCardReveal(contentPane, new Image(s));
+        });
+    }
+
+    private Card findTriggeredEventCard(GameStateDTO state, TriggerKey key) {
+        if (state.getBoard() == null || key == null) return null;
+        List<Card> bottom = state.getBoard().getBottomCards();
+        if (bottom != null) {
+            for (Card c : bottom) {
+                if (c.getTriggerKey().filter(k -> k == key).isPresent()) return c;
+            }
+        }
+        List<Card> top = state.getBoard().getTopCards();
+        if (top != null) {
+            for (Card c : top) {
+                if (c.getTriggerKey().filter(k -> k == key).isPresent()) return c;
+            }
+        }
+        return null;
     }
 
     // ── Board refresh ──────────────────────────────────────────────────────────
@@ -274,31 +378,24 @@ public class GameViewController implements UserInterface {
     private void refreshBoard(GameStateDTO state) {
         if (state.getBoard() == null) return;
 
+        // Children of the HBoxes are about to be rebuilt — any reference held
+        // by selectedCardView is stale and would point to a detached node.
+        selectedCardView = null;
+
         String phase = state.getCurrentPhaseName();
         boolean isTurnPhase = PHASE_TURN.equals(phase);
         boolean isPlayerTurn = PHASE_PLAYER_TURN.equals(phase);
 
         Totem effectiveActive = state.getActivePlayer();
-        System.out.println("[View] phase=" + phase + " activePlayer=" + effectiveActive
-                + " localTotem=" + localTotem
-                + " orderTileOrder=" + state.getOrderTileOrder());
         boolean isMyTurn = localTotem != null && localTotem == effectiveActive;
 
         // ── Tiles: pickable during StartTurnPhase for the active player ──
         refreshTileset(state, isMyTurn && isTurnPhase);
 
         // ── Cards/buildings: pickable during PlayerTurnPhase ──
-        // Determine remaining picks from the player's current tile
-        int upperPicks = 0, bottomPicks = 0;
-        if (isMyTurn && isPlayerTurn) {
-            int tileIdx = state.getCurrentTileIndex() - 1;
-            List<Tile> tiles = state.getBoard().getTiles();
-            if (tiles != null && tileIdx >= 0 && tileIdx < tiles.size()) {
-                Tile activeTile = tiles.get(tileIdx);
-                upperPicks = activeTile.getUpperPicks();
-                bottomPicks = activeTile.getBottomPicks();
-            }
-        }
+        // Remaining picks come from PlayerTurnPhase via the DTO (decrement aware).
+        int upperPicks = isMyTurn && isPlayerTurn ? state.getRemainingUpperPicks()  : 0;
+        int bottomPicks = isMyTurn && isPlayerTurn ? state.getRemainingBottomPicks() : 0;
 
         // For buildings, determine if local player can afford them
         int localFood = 0;
@@ -332,9 +429,15 @@ public class GameViewController implements UserInterface {
     private void refreshLocalHand(GameStateDTO state) {
         localHandBox.getChildren().clear();
         findLocalPlayer(state).ifPresent(p -> {
-            if (p.getCards() == null) return;
-            for (Card c : p.getCards()) {
-                localHandBox.getChildren().add(buildCardView(c, false, null));
+            if (p.getCards() != null) {
+                p.getCards().stream()
+                        .sorted(BY_CHARACTER_ID)
+                        .forEach(c -> localHandBox.getChildren().add(buildCardView(c, false, null)));
+            }
+            if (p.getBuildings() != null) {
+                for (Building b : p.getBuildings()) {
+                    localHandBox.getChildren().add(buildBuildingView(b, false, null));
+                }
             }
         });
     }
@@ -370,8 +473,6 @@ public class GameViewController implements UserInterface {
         if (state.getBoard() == null || state.getBoard().getTiles() == null) return;
 
         List<Tile> tiles = state.getBoard().getTiles();
-        System.out.println("[Tileset] pickable=" + pickable + " tiles=" + tiles.size()
-                + " gameSender=" + (gameSender != null ? "OK" : "NULL"));
         for (int i = 0; i < tiles.size(); i++) {
             Tile tile = tiles.get(i);
             ImageView iv = new ImageView();
@@ -383,32 +484,17 @@ public class GameViewController implements UserInterface {
             String tileId = tile.getId() != null ? tile.getId().name() : "";
             setImage(iv, "/images/tiles/" + tileId + ".png");
 
-            boolean highlighted = pickable && !tile.isOccupied();
-            System.out.println("[Tileset]   tile[" + i + "] id=" + tileId
-                    + " occupied=" + tile.isOccupied() + " highlighted=" + highlighted);
-
             // Wrap in StackPane so the DropShadow effect renders outside the clipped ImageView.
             StackPane wrapper = new StackPane(iv);
+            wrapper.setMinSize(TILE_W, TILE_H);
             wrapper.setMaxSize(TILE_W, TILE_H);
 
-            if (highlighted) {
-                DropShadow glow = new DropShadow();
-                glow.setColor(Color.web("#44ffaa"));
-                glow.setRadius(16);
-                glow.setSpread(0.8);
-                wrapper.setEffect(glow);
+            boolean selectable = pickable && !tile.isOccupied();
+            if (selectable) {
+                wrapper.setEffect(makeSelectableGlow());
                 wrapper.setCursor(Cursor.HAND);
                 int finalI = i;
-                wrapper.setOnMouseClicked(e -> {
-                    System.out.println("[Tileset] clicked tile[" + finalI + "] → sendPickTile");
-                    gameSender.onPickTile(finalI);
-                });
-            } else if (tile.isOccupied()) {
-                DropShadow occupied = new DropShadow();
-                occupied.setColor(Color.web("#f0c040"));
-                occupied.setRadius(14);
-                occupied.setSpread(0.7);
-                wrapper.setEffect(occupied);
+                wrapper.setOnMouseClicked(e -> gameSender.onPickTile(finalI));
             }
 
             tilesetBox.getChildren().add(wrapper);
@@ -451,33 +537,34 @@ public class GameViewController implements UserInterface {
             playerBoxes.put(t, box);
         }
 
-        // Position at right side of screen, vertically centred with board
-        AnchorPane.setTopAnchor(column, 200.0);
+        // Posizionamento temporaneo dentro ringPane (coordinate di riferimento 1280×720).
+        AnchorPane.setTopAnchor(column, HUD_CLEARANCE);
         AnchorPane.setRightAnchor(column, 30.0);
-        root.getChildren().add(column);
+        ringPane.getChildren().add(column);
 
         System.out.println("[OpponentRing] Added column with " + column.getChildren().size()
-                + " children to root (total root children: " + root.getChildren().size() + ")");
+                + " children to ringPane");
 
-        // After layout, reposition to align with board
+        // Dopo il layout, riposiziona in coordinate di riferimento allineato alla board.
         Platform.runLater(() -> {
-            if (root.getScene() == null) return;
-            double sceneW = root.getScene().getWidth();
             double boardW = boardArea.getWidth() > 0
                     ? boardArea.getWidth() : boardArea.getPrefWidth();
-            double boardRight = (sceneW + boardW) / 2;
-            double desiredX = boardRight + BOX_MARGIN;
-            // Remove right anchor and use left anchor instead for precise placement
+            double boardRight = (REF_W + boardW) / 2.0;
+            double desiredX   = boardRight + BOX_MARGIN;
+
+            // Centro verticale dello spazio occupabile dalla board in coordinate di riferimento
+            double boardCenterY = HUD_CLEARANCE + (REF_H - HUD_CLEARANCE - HAND_CLEARANCE) / 2.0;
+
+            column.applyCss();
+            column.layout();
+            double colH = column.getHeight();
+
             AnchorPane.setRightAnchor(column, null);
             AnchorPane.setLeftAnchor(column, desiredX);
-            AnchorPane.setTopAnchor(column, null);
-            double sceneH = root.getScene().getHeight();
-            double boardCenterY = sceneH / 2 - BOARD_RAISE;
-            double colH = column.getHeight();
-            AnchorPane.setTopAnchor(column, boardCenterY - colH / 2);
-            System.out.println("[OpponentRing] Repositioned: desiredX=" + desiredX
-                    + " topAnchor=" + (boardCenterY - colH / 2)
-                    + " colH=" + colH + " sceneW=" + sceneW + " boardW=" + boardW);
+            AnchorPane.setTopAnchor(column,  boardCenterY - colH / 2.0);
+            System.out.println("[OpponentRing] Repositioned ref-coords: desiredX=" + desiredX
+                    + " topAnchor=" + (boardCenterY - colH / 2.0)
+                    + " colH=" + colH + " boardW=" + boardW);
         });
     }
 
@@ -536,116 +623,98 @@ public class GameViewController implements UserInterface {
 
     // ── Card / building node builders ──────────────────────────────────────────
 
-    @FunctionalInterface
-    private interface CardPickAction {
-        void pick(int index, Card card);
-    }
-
-    @FunctionalInterface
-    private interface BuildingPickAction {
-        void pick(int index, Building building);
-    }
-
     private void populateCardHBox(HBox box, List<Card> cards,
-                                  boolean pickable, CardPickAction pickFn) {
+                                  boolean pickable, BiConsumer<Integer, Card> pickFn) {
         box.getChildren().clear();
         if (cards == null) return;
         for (int i = 0; i < cards.size(); i++) {
             Card c = cards.get(i);
             int idx = i;
-            Runnable pickAction = pickable ? () -> pickFn.pick(idx, c) : null;
+            Runnable pickAction = pickable ? () -> pickFn.accept(idx, c) : null;
             box.getChildren().add(buildCardView(c, pickable, pickAction));
         }
     }
 
     private void populateBuildingHBox(HBox box, List<Building> buildings,
                                       boolean pickable, int food, int discount,
-                                      BuildingPickAction pickFn) {
+                                      BiConsumer<Integer, Building> pickFn) {
         box.getChildren().clear();
         if (buildings == null) return;
         for (int i = 0; i < buildings.size(); i++) {
             Building b = buildings.get(i);
             int idx = i;
             boolean canBuy = pickable && food >= Math.max(0, b.getFoodCost() - discount);
-            Runnable pickAction = canBuy ? () -> pickFn.pick(idx, b) : null;
+            Runnable pickAction = canBuy ? () -> pickFn.accept(idx, b) : null;
             box.getChildren().add(buildBuildingView(b, canBuy, pickAction));
         }
     }
 
-    private ImageView buildCardView(Card card, boolean buyable, Runnable pickAction) {
-        ImageView iv = makeImageView(CARD_W, CARD_H, frontImagePath(card));
-        if (buyable && card.isBuyable()) attachBuyableGlow(iv);
-        iv.setOnMouseClicked(e -> {
-            if (e.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
-                showDetailPopup(iv, card.toString());
-            } else if (pickAction != null) {
-                handleCardLeftClick(iv, pickAction);
-            }
-        });
-        if (pickAction != null) iv.setCursor(Cursor.HAND);
-        return iv;
+    private StackPane buildCardView(Card card, boolean buyable, Runnable pickAction) {
+        return buildCardLikeView(frontImagePath(card), card.toString(), buyable, pickAction);
     }
 
-    private ImageView buildBuildingView(Building building, boolean buyable, Runnable pickAction) {
-        ImageView iv = makeImageView(CARD_W, CARD_H, frontImagePath(building));
-        if (buyable) attachBuyableGlow(iv);
-        iv.setOnMouseClicked(e -> {
+    private StackPane buildBuildingView(Building building, boolean buyable, Runnable pickAction) {
+        return buildCardLikeView(frontImagePath(building), building.toString(), buyable, pickAction);
+    }
+
+    /**
+     * Wraps an image in a StackPane so the selectable glow renders outside the
+     * inner ImageView's squircle clip (effects are clipped along with content).
+     */
+    private StackPane buildCardLikeView(String imagePath, String detailText,
+                                        boolean selectable, Runnable pickAction) {
+        ImageView iv = makeImageView(CARD_W, CARD_H, imagePath);
+        StackPane wrapper = new StackPane(iv);
+        wrapper.setMinSize(CARD_W, CARD_H);
+        wrapper.setMaxSize(CARD_W, CARD_H);
+
+        if (selectable) {
+            wrapper.setEffect(makeSelectableGlow());
+            wrapper.setCursor(Cursor.HAND);
+        }
+        wrapper.setOnMouseClicked(e -> {
             if (e.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
-                showDetailPopup(iv, building.toString());
+                showDetailPopup(iv, detailText);
             } else if (pickAction != null) {
-                handleCardLeftClick(iv, pickAction);
+                handleCardLeftClick(wrapper, pickAction);
             }
         });
-        if (pickAction != null) iv.setCursor(Cursor.HAND);
-        return iv;
+        return wrapper;
     }
 
     // ── Card left-click / Pick badge ───────────────────────────────────────────
 
-    private void handleCardLeftClick(ImageView iv, Runnable pickAction) {
-        if (selectedCardView == iv) {
-            deselectCard(iv);
+    private void handleCardLeftClick(StackPane wrapper, Runnable pickAction) {
+        if (selectedCardView == wrapper) {
+            deselectCard(wrapper);
             return;
         }
         if (selectedCardView != null) deselectCard(selectedCardView);
-        selectedCardView = iv;
-        iv.setTranslateY(-15);
-        attachPickBadge(iv, pickAction);
+        selectedCardView = wrapper;
+        wrapper.setTranslateY(-15);
+        attachPickBadge(wrapper, pickAction);
     }
 
-    private void deselectCard(ImageView iv) {
-        iv.setTranslateY(0);
-        removePickBadge(iv);
-        if (selectedCardView == iv) selectedCardView = null;
+    private void deselectCard(StackPane wrapper) {
+        wrapper.setTranslateY(0);
+        removePickBadge(wrapper);
+        if (selectedCardView == wrapper) selectedCardView = null;
     }
 
-    private void attachPickBadge(ImageView iv, Runnable pickAction) {
-        if (!(iv.getParent() instanceof HBox parent)) return;
-        int idx = parent.getChildren().indexOf(iv);
-        if (idx < 0) return;
-
+    private void attachPickBadge(StackPane wrapper, Runnable pickAction) {
+        // Reuse the same wrapper used as the card view — no HBox swap needed.
         Button badge = new Button("Pick");
         badge.getStyleClass().add("pick-badge");
         badge.setOnAction(e -> {
-            deselectCard(iv);
+            deselectCard(wrapper);
             pickAction.run();
         });
-
-        // Create the wrapper EMPTY first, then set it in the HBox (which removes iv from HBox),
-        // then add iv to the wrapper — avoids removing iv from HBox before set() is called,
-        // which would shrink the list and make idx invalid.
-        StackPane wrapper = new StackPane();
         StackPane.setAlignment(badge, Pos.BOTTOM_CENTER);
-        parent.getChildren().set(idx, wrapper);
-        wrapper.getChildren().addAll(iv, badge);
+        wrapper.getChildren().add(badge);
     }
 
-    private void removePickBadge(ImageView iv) {
-        if (iv.getParent() instanceof StackPane wrapper &&
-                wrapper.getParent() instanceof HBox parent) {
-            int idx = parent.getChildren().indexOf(wrapper);
-            if (idx >= 0) parent.getChildren().set(idx, iv);
-        }
+    private void removePickBadge(StackPane wrapper) {
+        wrapper.getChildren().removeIf(n -> n instanceof Button);
     }
 
     // ── Detail popup ───────────────────────────────────────────────────────────
@@ -685,8 +754,13 @@ public class GameViewController implements UserInterface {
         HBox hand = new HBox(6);
         hand.setAlignment(Pos.CENTER);
         if (p.getCards() != null) {
-            for (Card c : p.getCards()) {
-                hand.getChildren().add(makeImageView(CARD_W, CARD_H, frontImagePath(c)));
+            p.getCards().stream()
+                    .sorted(BY_CHARACTER_ID)
+                    .forEach(c -> hand.getChildren().add(makeImageView(CARD_W, CARD_H, frontImagePath(c))));
+        }
+        if (p.getBuildings() != null) {
+            for (Building b : p.getBuildings()) {
+                hand.getChildren().add(makeImageView(CARD_W, CARD_H, frontImagePath(b)));
             }
         }
 
@@ -760,42 +834,38 @@ public class GameViewController implements UserInterface {
         inventionIconsView.setOnMouseExited(e -> popup.hide());
     }
 
-    // ── Buyable glow ──────────────────────────────────────────────────────────
+    // ── Selectable glow ───────────────────────────────────────────────────────
 
-    private void attachBuyableGlow(ImageView iv) {
+    /**
+     * Static green glow used to mark anything currently selectable.
+     * No animated pulse — pulses leak Timelines on every refresh.
+     */
+    private static DropShadow makeSelectableGlow() {
         DropShadow glow = new DropShadow();
-        glow.setColor(Color.web("#ffe066"));
-        glow.setRadius(14);
-        glow.setSpread(0.6);
-
-        javafx.animation.Timeline pulse = new javafx.animation.Timeline(
-                new javafx.animation.KeyFrame(javafx.util.Duration.ZERO,
-                        new javafx.animation.KeyValue(glow.radiusProperty(), 8.0)),
-                new javafx.animation.KeyFrame(javafx.util.Duration.millis(700),
-                        new javafx.animation.KeyValue(glow.radiusProperty(), 18.0)),
-                new javafx.animation.KeyFrame(javafx.util.Duration.millis(1400),
-                        new javafx.animation.KeyValue(glow.radiusProperty(), 8.0))
-        );
-        pulse.setCycleCount(javafx.animation.Timeline.INDEFINITE);
-        pulse.play();
-        iv.setEffect(glow);
-        iv.setUserData(pulse);
+        glow.setColor(HIGHLIGHT_COLOR);
+        glow.setRadius(GLOW_RADIUS);
+        glow.setSpread(GLOW_SPREAD);
+        return glow;
     }
 
     // ── Animation helpers ──────────────────────────────────────────────────────
 
     private void animateDeckDealToBox(ImageView source, HBox targetBox) {
         if (targetBox.getChildren().isEmpty()) return;
-        var last = targetBox.getChildren().getLast();
-        if (last instanceof ImageView target) animator.animateDeckDeal(source, target);
+        Node last = targetBox.getChildren().getLast();
+        animator.animateDeckDeal(source, last);
     }
 
     // ── Image helpers ──────────────────────────────────────────────────────────
 
+    /**
+     * Rounded-rectangle clip with {@link #CLIP_ARC} arc diameter.
+     * Straight sides + softly rounded corners — no oval silhouette.
+     */
     private static void applySquircleClip(ImageView iv, double w, double h) {
         Rectangle clip = new Rectangle(w, h);
-        clip.setArcWidth(12);
-        clip.setArcHeight(12);
+        clip.setArcWidth(CLIP_ARC);
+        clip.setArcHeight(CLIP_ARC);
         iv.setClip(clip);
     }
 
@@ -829,12 +899,9 @@ public class GameViewController implements UserInterface {
 
     // ── Stat helpers ───────────────────────────────────────────────────────────
 
-    @FunctionalInterface
-    private interface PlayerStatFn { String apply(PlayerDTO p); }
-
-    private String localStat(PlayerStatFn fn) {
+    private String localStat(Function<PlayerDTO, String> fn) {
         if (stateProperty.get() == null || localTotem == null) return "—";
-        return findLocalPlayer(stateProperty.get()).map(fn::apply).orElse("—");
+        return findLocalPlayer(stateProperty.get()).map(fn).orElse("—");
     }
 
     private java.util.Optional<PlayerDTO> findLocalPlayer(GameStateDTO state) {
@@ -888,8 +955,13 @@ public class GameViewController implements UserInterface {
     // ── Internal event dispatch ────────────────────────────────────────────────
 
     private boolean handleGameEvent(GameEventDTO dto) {
-        lastEventType = dto.getEventType();
-        Platform.runLater(() -> stateProperty.set(dto.getSnapshot()));
+        GameEvent.Type eventType = dto.getEventType();
+        TriggerKey triggeredBy = dto.getTriggeredBy();
+        Platform.runLater(() -> {
+            lastEventType = eventType;
+            lastTriggeredBy = triggeredBy;
+            stateProperty.set(dto.getSnapshot());
+        });
         return true;
     }
 }

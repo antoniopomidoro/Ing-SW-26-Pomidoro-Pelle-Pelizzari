@@ -111,7 +111,7 @@ class PlayerTest {
 
         List<Building> startList = player.getBuildingsByTrigger(TriggerKey.START_TURN);
         assertEquals(1, startList.size(), "Result size must match the number of relevant triggers.");
-        assertEquals("B1", startList.get(0).getId(), "The filtered building must match the requested trigger type.");
+        assertEquals("B1", startList.get(0).getCardId(), "The filtered building must match the requested trigger type.");
     }
     /**
      * Test Intent: Validates structural equality between Player instances.
@@ -178,7 +178,7 @@ class PlayerTest {
 
         // Assert: Verify internal list size and building presence
         assertEquals(1, player.getBuildings().size(), "Player should own exactly one building.");
-        assertEquals("B", player.getBuildings().get(0).getId(), "The owned building ID should match.");
+        assertEquals("B", player.getBuildings().get(0).getCardId(), "The owned building ID should match.");
     }
 
     /**

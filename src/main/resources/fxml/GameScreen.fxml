@@ -17,91 +17,101 @@
         <image><Image backgroundLoading="false" url="@../images/box_art_fire.png" /></image>
     </ImageView>
 
-    <!-- ── Opponent ring pane (full-screen, populated at runtime) ── -->
-    <AnchorPane fx:id="ringPane" mouseTransparent="false" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" />
+    <!-- ── Content pane: risoluzione di riferimento 1280x720, scalata uniformemente da GameViewController ── -->
+    <AnchorPane fx:id="contentPane" prefWidth="1280" prefHeight="720" pickOnBounds="false">
 
-    <!-- ── Central board area (position tunable in Scene Builder) ── -->
-    <VBox fx:id="boardArea" alignment="CENTER" layoutX="300" layoutY="110" prefWidth="960" spacing="10">
+        <!-- ── Opponent ring pane (full content-pane size, populated at runtime) ── -->
+        <AnchorPane fx:id="ringPane" mouseTransparent="false" pickOnBounds="false" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" />
 
-        <!-- Top row: topCards + topBuildings — uniform spacing so buildings feel like one continuous row -->
-        <HBox alignment="CENTER" spacing="6">
-            <HBox fx:id="topCardsBox" alignment="CENTER" spacing="6" styleClass="card-container" />
-            <HBox fx:id="topBuildingsBox" alignment="CENTER" spacing="6" styleClass="card-container" />
+        <!-- ── Central board area (removed from here and re-added as boardWrapper in initialize()) ── -->
+        <VBox fx:id="boardArea" alignment="CENTER" layoutX="300" layoutY="110" prefWidth="960" spacing="10">
+
+            <!-- Top row: topCards + topBuildings — uniform spacing so buildings feel like one continuous row -->
+            <HBox alignment="CENTER" spacing="6">
+                <HBox fx:id="topCardsBox" alignment="CENTER" spacing="6" styleClass="card-container" />
+                <HBox fx:id="topBuildingsBox" alignment="CENTER" spacing="6" styleClass="card-container" />
+            </HBox>
+
+            <!-- Middle row: deck | orderTile | tileset | coveredBuilding -->
+            <HBox alignment="CENTER" spacing="12">
+                <ImageView fx:id="deckView" fitHeight="135" fitWidth="90" preserveRatio="true" />
+                <ImageView fx:id="orderTileView" fitHeight="135" fitWidth="90" preserveRatio="true" />
+                <HBox fx:id="tilesetBox" alignment="CENTER" spacing="6" />
+                <ImageView fx:id="coveredBuildingView" fitHeight="135" fitWidth="90" preserveRatio="true" />
+            </HBox>
+
+            <!-- Bottom row: bottomCards + bottomBuildings — same uniform spacing -->
+            <HBox alignment="CENTER" spacing="6">
+                <HBox fx:id="bottomCardsBox" alignment="CENTER" spacing="6" styleClass="card-container" />
+                <HBox fx:id="bottomBuildingsBox" alignment="CENTER" spacing="6" styleClass="card-container" />
+            </HBox>
+
+        </VBox>
+
+        <!-- ── Local hand (bottom-centre) ── -->
+        <HBox fx:id="localHandBox" alignment="CENTER" spacing="8" styleClass="card-container" AnchorPane.bottomAnchor="16" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" />
+
+        <!-- ── HUD stats panel (top-left) ── -->
+        <HBox fx:id="hudPanel" alignment="CENTER_LEFT" spacing="12" styleClass="hud-panel" AnchorPane.leftAnchor="12" AnchorPane.topAnchor="12">
+
+            <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
+                <image><Image url="@../icons/icon_prestige.png" /></image>
+            </ImageView>
+            <Label fx:id="ppLabel" styleClass="stat-label" text="—" />
+
+            <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
+                <image><Image url="@../icons/icon_food.png" /></image>
+            </ImageView>
+            <Label fx:id="foodLabel" styleClass="stat-label" text="—" />
+
+            <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
+                <image><Image url="@../icons/icon_characters_count.png" /></image>
+            </ImageView>
+            <Label fx:id="charCountLabel" styleClass="stat-label" text="—" />
+
+            <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
+                <image><Image url="@../icons/icon_building_discount.png" /></image>
+            </ImageView>
+            <Label fx:id="buildingDiscountLabel" styleClass="stat-label" text="—" />
+
+            <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
+                <image><Image url="@../icons/icon_star.png" /></image>
+            </ImageView>
+            <Label fx:id="starsLabel" styleClass="stat-label" text="—" />
+
+            <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
+                <image><Image url="@../icons/icon_farmer_discount.png" /></image>
+            </ImageView>
+            <Label fx:id="sustainmentDiscountLabel" styleClass="stat-label" text="—" />
+
+            <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
+                <image><Image url="@../icons/icon_hunter.png" /></image>
+            </ImageView>
+            <Label fx:id="hunterLabel" styleClass="stat-label" text="—" />
+
+            <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
+                <image><Image url="@../icons/icon_inventor.png" /></image>
+            </ImageView>
+            <Label fx:id="inventorLabel" styleClass="stat-label" text="—" />
+
+            <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
+                <image><Image url="@../icons/icon_painter.png" /></image>
+            </ImageView>
+            <Label fx:id="painterLabel" styleClass="stat-label" text="—" />
+
+            <!-- Invention popup trigger -->
+            <ImageView fx:id="inventionIconsView" fitHeight="36" fitWidth="36" preserveRatio="true" style="-fx-cursor: hand;">
+                <image><Image url="@../icons/icon_inventor_icons.png" /></image>
+            </ImageView>
+
         </HBox>
 
-        <!-- Middle row: deck | orderTile | tileset | coveredBuilding -->
-        <HBox alignment="CENTER" spacing="12">
-            <ImageView fx:id="deckView" fitHeight="135" fitWidth="90" preserveRatio="true" />
-            <ImageView fx:id="orderTileView" fitHeight="135" fitWidth="90" preserveRatio="true" />
-            <HBox fx:id="tilesetBox" alignment="CENTER" spacing="6" />
-            <ImageView fx:id="coveredBuildingView" fitHeight="135" fitWidth="90" preserveRatio="true" />
-        </HBox>
+        <!-- ── Opponent menu button (top-right) ── -->
+        <Button fx:id="opponentMenuButton" onAction="#onOpponentMenuClicked" prefHeight="36.0" prefWidth="84.0" styleClass="confirm-button" text="▼ Players" AnchorPane.rightAnchor="12" AnchorPane.topAnchor="12" />
 
-        <!-- Bottom row: bottomCards + bottomBuildings — same uniform spacing -->
-        <HBox alignment="CENTER" spacing="6">
-            <HBox fx:id="bottomCardsBox" alignment="CENTER" spacing="6" styleClass="card-container" />
-            <HBox fx:id="bottomBuildingsBox" alignment="CENTER" spacing="6" styleClass="card-container" />
-        </HBox>
+        <!-- ── Opponent menu dropdown (hidden by default, shown on button click) ── -->
+        <VBox fx:id="opponentMenuBox" managed="false" styleClass="opponent-menu" visible="false" AnchorPane.rightAnchor="12" AnchorPane.topAnchor="50" />
 
-    </VBox>
-
-    <!-- ── Local hand (bottom-centre) ── -->
-    <HBox fx:id="localHandBox" alignment="CENTER" spacing="8" styleClass="card-container" AnchorPane.bottomAnchor="16" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" />
-
-    <!-- ── HUD stats panel (top-left) ── -->
-    <HBox fx:id="hudPanel" alignment="CENTER_LEFT" spacing="12" styleClass="hud-panel" AnchorPane.leftAnchor="12" AnchorPane.topAnchor="12">
-
-        <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
-            <image><Image url="@../icons/icon_prestige.png" /></image>
-        </ImageView>
-        <Label fx:id="ppLabel" styleClass="stat-label" text="—" />
-
-        <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
-            <image><Image url="@../icons/icon_food.png" /></image>
-        </ImageView>
-        <Label fx:id="foodLabel" styleClass="stat-label" text="—" />
-
-        <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
-            <image><Image url="@../icons/icon_characters_count.png" /></image>
-        </ImageView>
-        <Label fx:id="charCountLabel" styleClass="stat-label" text="—" />
-
-        <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
-            <image><Image url="@../icons/icon_building_discount.png" /></image>
-        </ImageView>
-        <Label fx:id="buildingDiscountLabel" styleClass="stat-label" text="—" />
-
-        <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
-            <image><Image url="@../icons/icon_star.png" /></image>
-        </ImageView>
-        <Label fx:id="starsLabel" styleClass="stat-label" text="—" />
-
-        <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
-            <image><Image url="@../icons/icon_hunter.png" /></image>
-        </ImageView>
-        <Label fx:id="hunterLabel" styleClass="stat-label" text="—" />
-
-        <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
-            <image><Image url="@../icons/icon_inventor.png" /></image>
-        </ImageView>
-        <Label fx:id="inventorLabel" styleClass="stat-label" text="—" />
-
-        <ImageView fitHeight="36" fitWidth="36" preserveRatio="true">
-            <image><Image url="@../icons/icon_painter.png" /></image>
-        </ImageView>
-        <Label fx:id="painterLabel" styleClass="stat-label" text="—" />
-
-        <!-- Invention popup trigger -->
-        <ImageView fx:id="inventionIconsView" fitHeight="36" fitWidth="36" preserveRatio="true" style="-fx-cursor: hand;">
-            <image><Image url="@../icons/icon_inventor_icons.png" /></image>
-        </ImageView>
-
-    </HBox>
-
-    <!-- ── Opponent menu button (top-right) ── -->
-    <Button fx:id="opponentMenuButton" onAction="#onOpponentMenuClicked" prefHeight="36.0" prefWidth="84.0" styleClass="confirm-button" text="▼ Players" AnchorPane.rightAnchor="12" AnchorPane.topAnchor="12" />
-
-    <!-- ── Opponent menu dropdown (hidden by default, shown on button click) ── -->
-    <VBox fx:id="opponentMenuBox" managed="false" styleClass="opponent-menu" visible="false" AnchorPane.rightAnchor="12" AnchorPane.topAnchor="50" />
+    </AnchorPane>
 
 </AnchorPane>

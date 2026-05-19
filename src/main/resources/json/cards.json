@@ -15,10 +15,10 @@
   {"cardType":"BUILDER","characterType":"BUILDER","age":"AGE_1","id":"BUILDER","minPlayers":5,"discount":2,"pp":1,"cardId":"C12"},
   {"cardType":"BUILDER","characterType":"BUILDER","age":"AGE_1","id":"BUILDER","minPlayers":2,"discount":2,"pp":0,"cardId":"C13"},
 
-  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_1","id":"GATHERER","minPlayers":2,"sustDisc":1,"cardId":"C14"},
-  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_1","id":"GATHERER","minPlayers":2,"sustDisc":1,"cardId":"C15"},
-  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_1","id":"GATHERER","minPlayers":3,"sustDisc":1,"cardId":"C16"},
-  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_1","id":"GATHERER","minPlayers":5,"sustDisc":1,"cardId":"C17"},
+  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_1","id":"GATHERER","minPlayers":2,"sustDisc":3,"cardId":"C14"},
+  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_1","id":"GATHERER","minPlayers":2,"sustDisc":3,"cardId":"C15"},
+  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_1","id":"GATHERER","minPlayers":3,"sustDisc":3,"cardId":"C16"},
+  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_1","id":"GATHERER","minPlayers":5,"sustDisc":3,"cardId":"C17"},
 
   {"cardType":"INVENTOR","characterType":"INVENTOR","age":"AGE_1","id":"INVENTOR","minPlayers":2,"tool":"BREAD","cardId":"C18"},
   {"cardType":"INVENTOR","characterType":"INVENTOR","age":"AGE_1","id":"INVENTOR","minPlayers":2,"tool":"STONE","cardId":"C19"},
@@ -49,10 +49,10 @@
   {"cardType":"BUILDER","characterType":"BUILDER","age":"AGE_2","id":"BUILDER","minPlayers":2,"discount":2,"pp":3,"cardId":"C40"},
   {"cardType":"BUILDER","characterType":"BUILDER","age":"AGE_2","id":"BUILDER","minPlayers":2,"discount":2,"pp":1,"cardId":"C41"},
 
-  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_2","id":"GATHERER","minPlayers":2,"sustDisc":1,"cardId":"C42"},
-  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_2","id":"GATHERER","minPlayers":3,"sustDisc":1,"cardId":"C43"},
-  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_2","id":"GATHERER","minPlayers":4,"sustDisc":1,"cardId":"C44"},
-  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_2","id":"GATHERER","minPlayers":5,"sustDisc":1,"cardId":"C45"},
+  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_2","id":"GATHERER","minPlayers":2,"sustDisc":3,"cardId":"C42"},
+  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_2","id":"GATHERER","minPlayers":3,"sustDisc":3,"cardId":"C43"},
+  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_2","id":"GATHERER","minPlayers":4,"sustDisc":3,"cardId":"C44"},
+  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_2","id":"GATHERER","minPlayers":5,"sustDisc":3,"cardId":"C45"},
 
   {"cardType":"INVENTOR","characterType":"INVENTOR","age":"AGE_2","id":"INVENTOR","minPlayers":2,"tool":"BOWL","cardId":"C46"},
   {"cardType":"INVENTOR","characterType":"INVENTOR","age":"AGE_2","id":"INVENTOR","minPlayers":2,"tool":"DOLL","cardId":"C47"},
@@ -84,9 +84,9 @@
   {"cardType":"BUILDER","characterType":"BUILDER","age":"AGE_3","id":"BUILDER","minPlayers":2,"discount":2,"pp":3,"cardId":"C69"},
   {"cardType":"BUILDER","characterType":"BUILDER","age":"AGE_3","id":"BUILDER","minPlayers":2,"discount":2,"pp":2,"cardId":"C70"},
 
-  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_3","id":"GATHERER","minPlayers":2,"sustDisc":1,"cardId":"C71"},
-  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_3","id":"GATHERER","minPlayers":4,"sustDisc":1,"cardId":"C72"},
-  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_3","id":"GATHERER","minPlayers":5,"sustDisc":1,"cardId":"C73"},
+  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_3","id":"GATHERER","minPlayers":2,"sustDisc":3,"cardId":"C71"},
+  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_3","id":"GATHERER","minPlayers":4,"sustDisc":3,"cardId":"C72"},
+  {"cardType":"GATHERER","characterType":"GATHERER","age":"AGE_3","id":"GATHERER","minPlayers":5,"sustDisc":3,"cardId":"C73"},
 
   {"cardType":"INVENTOR","characterType":"INVENTOR","age":"AGE_3","id":"INVENTOR","minPlayers":2,"tool":"BREAD","cardId":"C74"},
   {"cardType":"INVENTOR","characterType":"INVENTOR","age":"AGE_3","id":"INVENTOR","minPlayers":2,"tool":"HOOK","cardId":"C75"},
@@ -101,19 +101,19 @@
   {"cardType":"HUNTER","characterType":"HUNTER","age":"AGE_3","id":"HUNTER","minPlayers":2,"hasFood":false,"cardId":"C83"},
   {"cardType":"HUNTER","characterType":"HUNTER","age":"AGE_3","id":"HUNTER","minPlayers":2,"hasFood":false,"cardId":"C84"},
 
-  {"cardType":"EVENT","age":"AGE_1","id":"SUSTENANCE_A1",      "triggerKey":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"},"cardId":"E1"},
-  {"cardType":"EVENT","age":"AGE_1","id":"HUNTING_A1",          "triggerKey":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"},"cardId":"E2"},
-  {"cardType":"EVENT","age":"AGE_1","id":"CAVE_PAINTINGS_A1",   "triggerKey":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"},"cardId":"E3"},
-  {"cardType":"EVENT","age":"AGE_1","id":"SHAMANIC_RITUAL_A1",  "triggerKey":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":5,"ppLoss":3},"cardId":"E4"},
+  {"cardType":"EVENT","age":"AGE_1","triggerKey":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"},"cardId":"E1"},
+  {"cardType":"EVENT","age":"AGE_1","triggerKey":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"},"cardId":"E2"},
+  {"cardType":"EVENT","age":"AGE_1","triggerKey":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"},"cardId":"E3"},
+  {"cardType":"EVENT","age":"AGE_1","triggerKey":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":5,"ppLoss":3},"cardId":"E4"},
 
-  {"cardType":"EVENT","age":"AGE_2","id":"SUSTENANCE_A2",      "triggerKey":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"},"cardId":"E5"},
-  {"cardType":"EVENT","age":"AGE_2","id":"HUNTING_A2",          "triggerKey":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"},"cardId":"E6"},
-  {"cardType":"EVENT","age":"AGE_2","id":"CAVE_PAINTINGS_A2",   "triggerKey":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"},"cardId":"E7"},
-  {"cardType":"EVENT","age":"AGE_2","id":"SHAMANIC_RITUAL_A2",  "triggerKey":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":10,"ppLoss":5},"cardId":"E8"},
+  {"cardType":"EVENT","age":"AGE_2","triggerKey":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"},"cardId":"E5"},
+  {"cardType":"EVENT","age":"AGE_2","triggerKey":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"},"cardId":"E6"},
+  {"cardType":"EVENT","age":"AGE_2","triggerKey":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"},"cardId":"E7"},
+  {"cardType":"EVENT","age":"AGE_2","triggerKey":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":10,"ppLoss":5},"cardId":"E8"},
 
-  {"cardType":"EVENT","age":"AGE_3","id":"HUNTING_A3",          "triggerKey":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"},"cardId":"E9"},
-  {"cardType":"EVENT","age":"AGE_3","id":"CAVE_PAINTINGS_A3",   "triggerKey":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"},"cardId":"E10"},
+  {"cardType":"EVENT","age":"AGE_3","triggerKey":"HUNTER_EVENT","resolutionPriority":0,"effect":{"effectType":"HUNTING"},"cardId":"E9"},
+  {"cardType":"EVENT","age":"AGE_3","triggerKey":"PAINTING_EVENT","resolutionPriority":0,"effect":{"effectType":"CAVE_PAINTINGS"},"cardId":"E10"},
 
-  {"cardType":"EVENT","age":"AGE_3_FINAL","id":"FINAL_SHAMANIC_RITUAL","triggerKey":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":15,"ppLoss":7},"cardId":"E11"},
-  {"cardType":"EVENT","age":"AGE_3_FINAL","id":"FINAL_SUSTENANCE",     "triggerKey":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"},"cardId":"E12"}
+  {"cardType":"EVENT","age":"AGE_3_FINAL","triggerKey":"SHAMAN_EVENT","resolutionPriority":0,"effect":{"effectType":"SHAMANIC_RITUAL","ppGain":15,"ppLoss":7},"cardId":"E11"},
+  {"cardType":"EVENT","age":"AGE_3_FINAL","triggerKey":"SUSTAINMENT_EVENT","resolutionPriority":1,"effect":{"effectType":"SUSTENANCE"},"cardId":"E12"}
 ]

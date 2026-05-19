@@ -54,6 +54,9 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
     public int getUpperPicks() { return upperPicks; }
     public int getBottomPicks() { return bottomPicks; }
 
+    @Override public int getRemainingUpperPicks() { return upperPicks; }
+    @Override public int getRemainingBottomPicks() { return bottomPicks; }
+
     /**
      * Applies the food bonus of the active tile and immediately checks
      * for a possible phase transition.
@@ -239,7 +242,7 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
                 break;
             }
         }
-        return !board.getTopCards().isEmpty() || canBuy;
+        return canBuy;
     }
     private boolean canPickBottom (GameState context){
         if (this.bottomPicks <= 0) return false;
@@ -257,7 +260,7 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
                 break;
             }
         }
-        return !board.getBottomCards().isEmpty() || canBuy;
+        return canBuy;
     }
 
     }
