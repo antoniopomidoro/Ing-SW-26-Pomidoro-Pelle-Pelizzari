@@ -1,18 +1,21 @@
-package it.polimi.ingsw.view;
+package it.polimi.ingsw.view.CLI;
 
 import it.polimi.ingsw.model.board.Tile;
 import it.polimi.ingsw.model.cards.Building;
 import it.polimi.ingsw.model.cards.Card;
 import it.polimi.ingsw.model.game.GameEvent;
+import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.network.dto.GameStateDTO;
 import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
 import it.polimi.ingsw.network.dto.TotemSelectionDTO;
+import it.polimi.ingsw.view.ClientManager;
+import it.polimi.ingsw.view.UserInterface;
 
 import java.util.List;
 import java.util.Map;
-
+//handles game updates
 public class CLIinterface implements UserInterface, Runnable {
 
     // --- ANSI helpers (no library needed) ---
@@ -32,11 +35,12 @@ public class CLIinterface implements UserInterface, Runnable {
     private LobbyUpdateDTO currentLobby;
     private TotemSelectionDTO currentTotems;
     private it.polimi.ingsw.model.player.Totem currentActivePlayer;
-
+  private Thread inputSender;
     public CLIinterface(ClientManager user) {
         this.user = user;
         this.going = true;
-        new Thread(new CLIinsputSender(user, this), "CLI-input").start();
+         inputSender = new Thread(new CLIinsputSender(user, this), "CLI-input");
+         inputSender.start();
         new Thread(this, "CLI-renderer").start();
     }
 
@@ -55,6 +59,9 @@ public class CLIinterface implements UserInterface, Runnable {
             } else if (state.getEventType() == it.polimi.ingsw.model.game.GameEvent.Type.END_TURN_COMPLETED
                     || state.getEventType() == it.polimi.ingsw.model.game.GameEvent.Type.TURN_COMPLETED) {
                 this.currentActivePlayer = null;
+            }else if(state.getEventType() == GameEvent.Type.END_GAME_COMPLETED){
+
+
             }
         }
         notifyAll();
@@ -309,7 +316,7 @@ public class CLIinterface implements UserInterface, Runnable {
     private void printPrompt() {
         System.out.println(DIM + "──────────────────────────────────────────────────────────────────" + RESET);
         System.out.println(BOLD + "Commands:" + RESET);
-        System.out.println("  topcard <i> | bottomcard <i> | topbuild <i> | bottombuild <i> | tile <i> \n digit help for all commands and example");
+        System.out.println("  topcard <i> | bottomcard <i> | topbuild <i> | bottombuild <i> | tile <i> | view <t> \n digit help for all commands and example");
         System.out.print(BOLD + "> " + RESET);
     }
 
@@ -376,7 +383,8 @@ public class CLIinterface implements UserInterface, Runnable {
     @Override
     public synchronized void onGameEnded(GameEventDTO dto) {
         update(dto);
-        System.out.println(BOLD + CYAN + "  ★ GAME ENDED ★" + RESET);
+            new Thread(new CLIEnder(this, user, dto), "CLI-ender").start();
+
     }
 
     @Override
@@ -421,10 +429,11 @@ public class CLIinterface implements UserInterface, Runnable {
         showError(dto);
     }
 
-    public boolean stop() {
+    public void stop() {
         going = false;
+        inputSender.interrupt();
         synchronized (this) { notifyAll(); }
-        return true;
+
     }
 
     public GameEventDTO getState() {
@@ -482,5 +491,28 @@ public class CLIinterface implements UserInterface, Runnable {
         }
         while (res.size() < maxLines) res.add("");
         return res;
+    }
+
+    public void viewPlayerHand(Totem totem, GameStateDTO snapshot) {
+        if (totem == null) return;
+        if (snapshot == null) return;
+        snapshot.getPlayers().stream()
+                .filter(p -> totem.equals(p.getTotem()))
+                .findFirst()
+                .ifPresentOrElse(self -> {
+                    if (totem != snapshot.getActivePlayer()) {
+                        System.out.println(BOLD + CYAN + "▼ " + self.getNickname() + "'s HAND" + RESET);
+                        System.out.println("  Cards:");
+                        printCardsRow(self.getCards());
+                        System.out.println("  Buildings:");
+                        printBuildingsRow(self.getBuildings());
+                        System.out.println();
+                    } else {
+                        System.out.println(RED + totem + " totem is your totem!");
+                    }
+                }, () -> {
+                    System.out.println(RED + totem + "totem is not used in this game!");
+                });
+        printPrompt();
     }
 }

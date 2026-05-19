@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.network.dto.GameStateDTO;
+import it.polimi.ingsw.view.CLI.CLIinterface;
 import it.polimi.ingsw.view.gui.JavaFXApp;
 import it.polimi.ingsw.view.visitorDTO.GameDTOHandler;
 import it.polimi.ingsw.view.visitorDTO.LobbyDTOHandler;
@@ -140,5 +141,14 @@ public class ClientManager {
         } else if (rejoinSnapshot != null) {
             gameUi.setUp(new GameEventDTO(GameEvent.Type.BOARD_UPDATE, null, rejoinSnapshot, null));
         }
+
+
+    }
+
+    public void stop(){
+        getConnection().stop();
+        getUser().stop();
+        Thread.currentThread().interrupt();
+
     }
 }

@@ -1,0 +1,5 @@
+-2 interfaces that contains respectively lobby and game commands, both implemented by ActionSender class that create jsons(using NUDESender)
+ and send the commands to the server
+
+-GUIGameSender and InputSender are 2 classes that contains the Actionsender and send respectively the game and lobby commands
+

@@ -6,6 +6,8 @@ import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
 import it.polimi.ingsw.network.dto.TotemSelectionDTO;
 import it.polimi.ingsw.view.UserInterface;
+import it.polimi.ingsw.view.gui.ActionSenders.GUIInputSender;
+import it.polimi.ingsw.view.gui.ActionSenders.LobbyCommandSender;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -643,5 +645,6 @@ public class LobbyController implements UserInterface {
     public void previewShowWaiting(String nickname) {
         Platform.runLater(() -> applyPreviewWaiting(nickname));
     }
-
+    @Override
+    public void stop(){};
 }

@@ -98,4 +98,10 @@ public class RMIclient implements ConnectionProtocol, ClientRMIInterface {
     public Boolean isConnected() {
         return going;
     }
+
+    public void stop(){
+
+        going = false;
+        Thread.currentThread().interrupt();
+    }
 }

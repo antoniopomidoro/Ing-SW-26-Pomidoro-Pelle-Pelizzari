@@ -17,6 +17,15 @@ public class SustainmentBoost implements ContextualEffect {
     @JsonProperty("gain")
     private int gain;
 
+    // Setters for testing purposes
+    public void setType(CharacterEnum type) {
+        this.type = type;
+    }
+
+    public void setGain(int gain) {
+        this.gain = gain;
+    }
+
     protected CharacterEnum getType() {
         return type;
     }

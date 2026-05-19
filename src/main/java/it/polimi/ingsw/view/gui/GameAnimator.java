@@ -13,6 +13,9 @@ import javafx.application.Platform;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
+import javafx.animation.*;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
@@ -21,6 +24,7 @@ import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.layout.Pane;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
 
@@ -259,5 +263,44 @@ public class GameAnimator {
 
             new SequentialTransition(flipOut, reveal).play();
         });
+    }
+
+    public void animateEndGame(Node content, Runnable onDone) {
+        content.setOpacity(0);
+        content.setScaleX(0.8);
+        content.setScaleY(0.8);
+
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(600), content);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1);
+
+        ScaleTransition scaleUp = new ScaleTransition(Duration.millis(600), content);
+        scaleUp.setFromX(0.8);
+        scaleUp.setFromY(0.8);
+        scaleUp.setToX(1.0);
+        scaleUp.setToY(1.0);
+
+        ParallelTransition parallelTransition = new ParallelTransition(fadeIn, scaleUp);
+
+        if (onDone != null) {
+            parallelTransition.setOnFinished(e -> onDone.run());
+        }
+        parallelTransition.play();
+    }
+
+    public void animateTotemMovement(ImageView totem, Pane animationLayer, double startX, double startY, double endX, double endY) {
+        if (!animationLayer.getChildren().contains(totem)) {
+            animationLayer.getChildren().add(totem);
+        }
+
+        totem.setTranslateX(startX);
+        totem.setTranslateY(startY);
+
+        if (Math.abs(startX - endX) > 1 || Math.abs(startY - endY) > 1) {
+            TranslateTransition t = new TranslateTransition(Duration.seconds(0.7), totem);
+            t.setToX(endX);
+            t.setToY(endY);
+            t.play();
+        }
     }
 }

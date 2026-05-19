@@ -24,4 +24,5 @@ public interface UserInterface {
     // --- other ---
     void onTotemSelection(TotemSelectionDTO dto);
     void onLobbyError(ErrorDTO dto);
+    void stop();
 }

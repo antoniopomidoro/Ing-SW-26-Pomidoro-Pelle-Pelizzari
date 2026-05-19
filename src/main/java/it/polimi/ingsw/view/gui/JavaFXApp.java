@@ -3,6 +3,7 @@ package it.polimi.ingsw.view.gui;
 import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.view.ClientManager;
+import it.polimi.ingsw.view.gui.ActionSenders.ActionSender;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -106,12 +107,45 @@ public class JavaFXApp extends Application {
             if (totem != null) gameController.setLocalPlayer(totem);
             gameController.setGameSender(actionSender);
             gameController.setAudioManager(audioManager);
+            gameController.setMenu(() -> transitionToLobby());
             clientManager.redirectGameEventsTo(gameController);
 
             Scene scene = primaryStage.getScene();
             scene.setRoot(gameRoot);
         } catch (Exception ex) {
             throw new RuntimeException("Failed to load GameScreen.fxml", ex);
+        }
+    }
+
+    /** Phase 4: it's possible to return to main menu after a game ends. Called on the JavaFX thread. */
+    private void transitionToLobby() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    Objects.requireNonNull(getClass().getResource("/fxml/LobbyScreen.fxml")));
+            StackPane lobbyRoot = loader.load();
+            LobbyController lobbyController = loader.getController();
+
+            clientManager = new ClientManager(lobbyController, useSocket, serverIp);
+            actionSender = new ActionSender(clientManager);
+            lobbyController.setActionSender(actionSender);
+            lobbyController.setOnGameIdReceived(clientManager::setId);
+            lobbyController.setOnGameStartingCallback(() -> transitionToSplash());
+
+            Scene scene = primaryStage.getScene();
+            scene.getStylesheets().clear();
+            addCss(scene, "/css/lobby.css");
+
+            lobbyRoot.prefWidthProperty().bind(scene.widthProperty());
+            lobbyRoot.prefHeightProperty().bind(scene.heightProperty());
+            ImageView background = (ImageView) lobbyRoot.lookup("#background");
+            if (background != null) {
+                background.fitWidthProperty().bind(scene.widthProperty());
+                background.fitHeightProperty().bind(scene.heightProperty());
+            }
+
+            scene.setRoot(lobbyRoot);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to load LobbyScreen.fxml", ex);
         }
     }
 

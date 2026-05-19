@@ -14,13 +14,18 @@ import it.polimi.ingsw.network.dto.GameStateDTO.PlayerDTO;
 import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
 import it.polimi.ingsw.network.dto.TotemSelectionDTO;
 import it.polimi.ingsw.view.UserInterface;
+import it.polimi.ingsw.view.gui.ActionSenders.GUIGameSender;
+import it.polimi.ingsw.view.gui.ActionSenders.GameCommandSender;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
@@ -30,11 +35,7 @@ import javafx.scene.effect.BlendMode;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.Node;
 import javafx.scene.shape.Circle;
@@ -136,11 +137,14 @@ public class GameViewController implements UserInterface {
     @FXML private Button     opponentMenuButton;
     @FXML private VBox       opponentMenuBox;
 
+    @FXML private Pane       TotemLayer;
+
     // ── State ──────────────────────────────────────────────────────────────────
 
     private Totem localTotem;
     private GUIGameSender gameSender;
     private AudioManager audioManager;
+    private Runnable menu;
 
     private final ObjectProperty<GameStateDTO> stateProperty = new SimpleObjectProperty<>();
     private final GameAnimator animator = new GameAnimator();
@@ -151,6 +155,8 @@ public class GameViewController implements UserInterface {
             new EnumMap<>(GameEvent.Type.class);
 
     private final EnumMap<Totem, PlayerBoxNode> playerBoxes = new EnumMap<>(Totem.class);
+    private final EnumMap<Totem, ImageView> totemViews = new EnumMap<>(Totem.class);
+    private final EnumMap<Totem, Integer> cachedTotemDestinations = new EnumMap<>(Totem.class);
 
     private StackPane selectedCardView = null;
 
@@ -248,6 +254,15 @@ public class GameViewController implements UserInterface {
     }
 
     /**
+     * Must be called by {@link JavaFXApp} at the end of a game, when a player requests to get back to the menu.
+     *
+     * @param callback the callback to be executed when the player clicks the menu button.
+     */
+    public void setMenu(Runnable callback) {
+        this.menu = callback;
+    }
+
+    /**
      * Must be called by {@link JavaFXApp} right after FXML loading.
      *
      * @param sender the game command sender (ActionSender)
@@ -286,6 +301,10 @@ public class GameViewController implements UserInterface {
         opponentMenuBox.setManaged(show);
     }
 
+    private void onPlayerSelectedTile(Totem player, Node tile){
+
+
+    }
     // ── Binding registration ───────────────────────────────────────────────────
 
     private void registerStaticBindings() {
@@ -329,9 +348,13 @@ public class GameViewController implements UserInterface {
 
         // Cards: deck-deal animation fires when the board is refilled (turn > 1).
         animationMap.put(GameEvent.Type.START_TURN_STARTED, (old, next) -> {
+            cachedTotemDestinations.clear();
             if (next != null && next.getTurn() > 1) {
                 animateDeckDealToBox(deckView, topCardsBox);
             }
+        });
+        animationMap.put(GameEvent.Type.END_TURN_COMPLETED, (old, next) -> {
+            cachedTotemDestinations.clear();
         });
         // Buildings + deck: both animate on age change (new era's cards and buildings revealed).
         animationMap.put(GameEvent.Type.AGE_CHANGED, (old, next) -> {
@@ -424,6 +447,127 @@ public class GameViewController implements UserInterface {
                 (i, b) -> gameSender.onPickBottomBuilding(i, b.getInstanceId()));
 
         refreshOrderTile(state);
+        Platform.runLater(() -> syncTotems(state));
+    }
+
+    private Point2D getComponentLocalCoordinates(Node comp, Pane layer, double offsetX, double offsetY) {
+        if (comp.getParent() != null) {
+            comp.getParent().applyCss();
+            comp.getParent().layout();
+        }
+        comp.applyCss();
+
+        Point2D targetGlobal = comp.localToScene(0, 0);
+
+        // at starting coordinates are 0 0 on object creation
+        // so i put totems in their startin position
+        if (targetGlobal.getX() == 0 && targetGlobal.getY() == 0 && comp.getScene() != null) {
+            comp.getScene().getRoot().applyCss();
+            comp.getScene().getRoot().layout();
+            targetGlobal = comp.localToScene(0, 0);
+        }
+
+        Point2D targetLocal = layer.sceneToLocal(targetGlobal);
+        if (targetLocal == null) {
+            return new Point2D(offsetX, offsetY);
+        }
+        return new Point2D(targetLocal.getX() + offsetX, targetLocal.getY() + offsetY);
+    }
+
+    private void syncTotems(GameStateDTO state) {
+        if (state.getPlayers() == null || state.getOrderTileOrder() == null || state.getBoard() == null || TotemLayer == null) return;
+
+        for (PlayerDTO p : state.getPlayers()) {
+            Totem t = p.getTotem();
+            if (!totemViews.containsKey(t)) {
+                ImageView iv = makeImageView(42, 30, totemPath(t)); // swapped width and height
+                iv.setRotate(-90); // or 90
+                TotemLayer.getChildren().add(iv);
+                totemViews.put(t, iv);
+            }
+        }
+
+        EnumMap<Totem, Node> destinazioni = new EnumMap<>(Totem.class);
+        String phase = state.getCurrentPhaseName();
+
+        if ("StartTurnPhase".equals(phase) || "PlayerTurnPhase".equals(phase)) {
+            List<Tile> tiles = state.getBoard().getTiles();
+            for (int i = 0; i < tiles.size(); i++) {
+                Tile tile = tiles.get(i);
+                if (tile.isOccupied() && tile.getOccupier() != null) {
+                    Totem occupante = tile.getOccupier().getId();
+                    if (i < tilesetBox.getChildren().size()) {
+                        Node destNode = tilesetBox.getChildren().get(i);
+                        destinazioni.put(occupante, destNode);
+                        cachedTotemDestinations.put(occupante, i);
+                    }
+                }
+            }
+        } else {
+            // at endturn clear cache to put totems on starting tile
+            cachedTotemDestinations.clear();
+        }
+
+        List<Totem> orderList = state.getOrderTileOrder();
+        int numPlayers = state.getPlayers().size();
+
+        for (int i = 0; i < orderList.size(); i++) {
+            Totem t = orderList.get(i);
+            ImageView totemImg = totemViews.get(t);
+            if (totemImg == null) continue;
+            totemImg.toFront();
+
+            double startX = totemImg.getTranslateX();
+            double startY = totemImg.getTranslateY();
+            Point2D endPoint;
+
+            if (destinazioni.containsKey(t)) {
+                double centroX = 24.0;
+                double centroY = 26.0; // to be calibrated
+                endPoint = getComponentLocalCoordinates(destinazioni.get(t), TotemLayer, centroX, centroY);
+            } else if (cachedTotemDestinations.containsKey(t)) {
+                double centroX = 24.0;
+                double centroY = 26.0;
+                int tileIdx = cachedTotemDestinations.get(t);
+                if (tileIdx < tilesetBox.getChildren().size()) {
+                    Node activeNode = tilesetBox.getChildren().get(tileIdx);
+                    endPoint = getComponentLocalCoordinates(activeNode, TotemLayer, centroX, centroY);
+                } else {
+                    Point2D orderOffset = getOrderTileOffset(numPlayers, i);
+                    endPoint = getComponentLocalCoordinates(orderTileView, TotemLayer, orderOffset.getX(), orderOffset.getY());
+                }
+            } else {
+                Point2D orderOffset = getOrderTileOffset(numPlayers, i);
+                endPoint = getComponentLocalCoordinates(orderTileView, TotemLayer, orderOffset.getX(), orderOffset.getY());
+            }
+
+            animator.animateTotemMovement(totemImg, TotemLayer, startX, startY, endPoint.getX(), endPoint.getY());
+        }
+    }
+
+    private Point2D getOrderTileOffset(int numPlayers, int slotIndex) {
+
+        // da abbassare leggermente tutto(ancora)
+        if (numPlayers <= 2) {
+            if (slotIndex == 0) return new Point2D(24, 5);
+            if (slotIndex == 1) return new Point2D(24, 27);
+        } else if (numPlayers == 3) {
+            if (slotIndex == 0) return new Point2D(24, 0);
+            if (slotIndex == 1) return new Point2D(24, 18);
+            if (slotIndex == 2) return new Point2D(24, 37);
+        } else if (numPlayers == 4) {
+            if (slotIndex == 0) return new Point2D(24, -5);
+            if (slotIndex == 1) return new Point2D(24, 11);
+            if (slotIndex == 2) return new Point2D(24, 28);
+            if (slotIndex == 3) return new Point2D(24, 44);
+        } else if (numPlayers >= 5) {
+            if (slotIndex == 0) return new Point2D(24, -10);
+            if (slotIndex == 1) return new Point2D(24, 4);
+            if (slotIndex == 2) return new Point2D(24, 18);
+            if (slotIndex == 3) return new Point2D(24, 32);
+            if (slotIndex == 4) return new Point2D(24, 46);
+        }
+        return new Point2D(24, 0 + slotIndex * 15);
     }
 
     private void refreshLocalHand(GameStateDTO state) {
@@ -952,6 +1096,26 @@ public class GameViewController implements UserInterface {
         return p.getCharacterCounts().values().stream().mapToInt(Integer::intValue).sum();
     }
 
+    // End game screen
+    private void showEndGameOverlay(GameStateDTO state) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    Objects.requireNonNull(getClass().getResource("/fxml/EndGameScreen.fxml")));
+            StackPane overlay = loader.load();
+            EndGameController endController = loader.getController();
+
+            endController.initData(state);
+            endController.setMenu(menu);
+
+            overlay.prefWidthProperty().bind(root.widthProperty());
+            overlay.prefHeightProperty().bind(root.heightProperty());
+            root.getChildren().add(overlay);
+            animator.animateEndGame(overlay, null);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to load EndGameScreen.fxml", ex);
+        }
+    }
+
     // ── Internal event dispatch ────────────────────────────────────────────────
 
     private boolean handleGameEvent(GameEventDTO dto) {
@@ -962,6 +1126,16 @@ public class GameViewController implements UserInterface {
             lastTriggeredBy = triggeredBy;
             stateProperty.set(dto.getSnapshot());
         });
+        lastEventType = dto.getEventType();
+        Platform.runLater(() -> {
+            stateProperty.set(dto.getSnapshot());
+
+            if (dto.getEventType() == GameEvent.Type.END_GAME_COMPLETED) {
+                showEndGameOverlay(dto.getSnapshot());
+            }
+        });
         return true;
     }
-}
+@Override
+    public void stop(){};
+    }

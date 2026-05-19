@@ -1,4 +1,4 @@
-package it.polimi.ingsw.view.gui;
+package it.polimi.ingsw.view.gui.ActionSenders;
 
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.view.ActionType;

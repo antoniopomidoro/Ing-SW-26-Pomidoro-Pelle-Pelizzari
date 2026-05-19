@@ -1,8 +1,11 @@
-package it.polimi.ingsw.view;
+package it.polimi.ingsw.view.CLI;
 
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.GameStateDTO;
-import it.polimi.ingsw.view.gui.ActionSender;
+import it.polimi.ingsw.view.ActionType;
+import it.polimi.ingsw.view.ClientManager;
+import it.polimi.ingsw.view.NUDESender;
+import it.polimi.ingsw.view.gui.ActionSenders.ActionSender;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -11,6 +14,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
+//handles lobby and inputs by the user
 public class CLIinsputSender implements Runnable {
     private boolean going;
     private final ClientManager user;
@@ -31,6 +35,7 @@ public class CLIinsputSender implements Runnable {
         handlers.put("bottomcard",  args -> pickBottomCard(Integer.parseInt(args[1])));
         handlers.put("topbuild",    args -> pickTopBuilding(Integer.parseInt(args[1])));
         handlers.put("bottombuild", args -> pickBottomBuilding(Integer.parseInt(args[1])));
+        handlers.put("view",        args -> cli.viewPlayerHand(Totem.valueOf(args[1].toUpperCase()), getSnapshotForAction()));
         handlers.put("tile",        args -> pickTile(Integer.parseInt(args[1])));
         handlers.put("help",        args -> printHelp());
     }
@@ -61,21 +66,23 @@ public class CLIinsputSender implements Runnable {
 
     private void printHelp() {
         System.out.println();
-        System.out.println("╔══════════════════ MESOS - COMANDI ══════════════════╗");
+        System.out.println("╔═════════════════════════════════════════════════════════ MESOS - COMMANDS ═════════════════════════════════════════════════════════╗");
         System.out.println("  LOBBY:");
-        System.out.println("    create <numGiocatori> <totem> <nickname>");
-        System.out.println("    enter <gameId> <nickname>");
-        System.out.println("    selecttotem <gameId> <totem>");
+        System.out.println("\t- create <playersNumber> <totem> <nickname>");
+        System.out.println("\t- enter <gameId> <nickname>");
+        System.out.println("\t- selecttotem <gameId> <totem>");
         System.out.println("  GAME:");
-        System.out.println("    topcard <i>  bottomcard <i>  topbuild <i>  bottombuild <i>  tile <i>");
-        System.out.println("  Totems: " + Arrays.toString(Totem.values()));
+        System.out.println("\t- topcard <index>\n" + "\t- bottomcard <index>\n" + "\t- topbuild <index>\n" + "\tbottombuild <index>\n" + "\ttile <index>");
+        System.out.println("\tTotems: " + Arrays.toString(Totem.values()));
 
-        System.out.println("EXAMPLE: \n create 2 red fabrizio (create a 2 player lobby with red totem and nick fabrizio)\n" +
-                "enter 123456 cugola (enter in the 123456 lobby with nickname cugola, when you enter in a lobby you don't have a totem\n" +
-        "selecttotem red (after joining select the totem) \n" +
-                "<card function> 3 (select the card of the selected line)\n" +
-                "same with tile");
-        System.out.println("╚══════════════════════════════════════════════════════╝");
+        System.out.println("  EXAMPLES:\n" +
+                "\t> create 2 red Fabrizio (create a 2 player lobby with red totem and nick Fabrizio).\n" +
+                "\t> enter 123456 Cugola (enter in the 123456 lobby with nickname Cugola, when you enter in a lobby you don't have a totem yet).\n" +
+                "\t> selecttotem red (after joining select the totem) \n" +
+                "\t> <card function> 3 (select the card of the selected line)\n" +
+                "\t> tile 1 (place your totem on the selected tile)\n" +
+                "\t> view yellow (view the hand of the yellow player)\n");
+        System.out.println("╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝");
     }
 
     private void lobbyCreate(String[] args) {
