@@ -1125,17 +1125,13 @@ public class GameViewController implements UserInterface {
             lastEventType = eventType;
             lastTriggeredBy = triggeredBy;
             stateProperty.set(dto.getSnapshot());
-        });
-        lastEventType = dto.getEventType();
-        Platform.runLater(() -> {
-            stateProperty.set(dto.getSnapshot());
-
-            if (dto.getEventType() == GameEvent.Type.END_GAME_COMPLETED) {
+            if (eventType == GameEvent.Type.END_GAME_COMPLETED) {
                 showEndGameOverlay(dto.getSnapshot());
             }
         });
         return true;
     }
-@Override
-    public void stop(){};
+
+    @Override
+    public void stop() {}
     }
