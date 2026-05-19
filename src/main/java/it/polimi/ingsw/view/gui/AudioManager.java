@@ -40,6 +40,7 @@ public class AudioManager {
 
     public void playLobbyMusic() {
         MediaPlayer player = createPlayer(LOBBY);
+        if (player == null) return;
         player.setCycleCount(MediaPlayer.INDEFINITE);
         player.setVolume(1.0);
         player.play();
@@ -49,19 +50,26 @@ public class AudioManager {
     public void transitionToAge(Age age) {
         String path = Objects.requireNonNull(AGE_TRACKS.get(age), "No track for age: " + age);
         MediaPlayer next = createPlayer(path);
-        next.setCycleCount(MediaPlayer.INDEFINITE);
-        next.setVolume(1.0);
-        next.play();
 
         MediaPlayer prev = backgroundPlayer;
         backgroundPlayer = next;
 
-        if (prev == null) {
+        if (next != null) {
+            next.setCycleCount(MediaPlayer.INDEFINITE);
             next.setVolume(1.0);
+            next.play();
+        }
+
+        if (prev == null) {
             return;
         }
 
         double startVol = prev.getVolume();
+        if (next == null) {
+            prev.stop();
+            prev.dispose();
+            return;
+        }
         Timeline fade = new Timeline(
                 new KeyFrame(Duration.seconds(CROSSFADE_SECS),
                         new KeyValue(prev.volumeProperty(), 0.0),
@@ -73,7 +81,9 @@ public class AudioManager {
             prev.dispose();
         });
         fade.play();
-        backgroundPlayer.setVolume(startVol);
+        if (backgroundPlayer != null) {
+            backgroundPlayer.setVolume(startVol);
+        }
     }
 
     public void onAgeChanged(Age newAge) {
@@ -82,11 +92,13 @@ public class AudioManager {
             sfxPlayer.dispose();
         }
         MediaPlayer sfx = createPlayer(SFX_CHANGE);
-        sfx.setOnEndOfMedia(() -> {
-            sfx.stop();
-            sfx.dispose();
-        });
-        sfx.play();
+        if (sfx != null) {
+            sfx.setOnEndOfMedia(() -> {
+                sfx.stop();
+                sfx.dispose();
+            });
+            sfx.play();
+        }
         sfxPlayer = sfx;
 
         transitionToAge(newAge);
@@ -109,6 +121,11 @@ public class AudioManager {
         URL url = Objects.requireNonNull(
                 getClass().getResource(resourcePath),
                 resourcePath + " not found in classpath");
-        return new MediaPlayer(new Media(url.toExternalForm()));
+        try {
+            return new MediaPlayer(new Media(url.toExternalForm()));
+        } catch (Exception e) {
+            System.err.println("codec audio mancante");
+            return null;
+        }
     }
 }

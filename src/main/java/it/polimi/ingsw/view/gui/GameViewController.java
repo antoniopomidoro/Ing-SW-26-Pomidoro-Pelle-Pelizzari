@@ -460,7 +460,7 @@ public class GameViewController implements UserInterface {
         Point2D targetGlobal = comp.localToScene(0, 0);
 
         // at starting coordinates are 0 0 on object creation
-        // so i put totems in their startin position
+        // so i put totems in their starting position
         if (targetGlobal.getX() == 0 && targetGlobal.getY() == 0 && comp.getScene() != null) {
             comp.getScene().getRoot().applyCss();
             comp.getScene().getRoot().layout();
@@ -481,7 +481,7 @@ public class GameViewController implements UserInterface {
             Totem t = p.getTotem();
             if (!totemViews.containsKey(t)) {
                 ImageView iv = makeImageView(42, 30, totemPath(t)); // swapped width and height
-                iv.setRotate(-90); // or 90
+               // iv.setRotate(-90); rotate only for front images not implemented anymore
                 TotemLayer.getChildren().add(iv);
                 totemViews.put(t, iv);
             }
@@ -547,10 +547,13 @@ public class GameViewController implements UserInterface {
 
     private Point2D getOrderTileOffset(int numPlayers, int slotIndex) {
 
-        // da abbassare leggermente tutto(ancora)
+
+
+
+                // da abbassare leggermente tutto(ancora)
         if (numPlayers <= 2) {
-            if (slotIndex == 0) return new Point2D(24, 5);
-            if (slotIndex == 1) return new Point2D(24, 27);
+            if (slotIndex == 0) return new Point2D(24, -5);
+            if (slotIndex == 1) return new Point2D(24, 7);
         } else if (numPlayers == 3) {
             if (slotIndex == 0) return new Point2D(24, 0);
             if (slotIndex == 1) return new Point2D(24, 18);
@@ -1059,11 +1062,11 @@ public class GameViewController implements UserInterface {
 
     private static String totemPath(Totem t) {
         return switch (t) {
-            case RED    -> "/images/totem_front_red.png";
-            case WHITE  -> "/images/totem_front_white.png";
-            case BLACK  -> "/images/totem_front_purple.png";
-            case YELLOW -> "/images/totem_front_yellow.png";
-            case BLUE   -> "/images/totem_front_cyan.png";
+            case RED    -> "/images/totems/totem_red.png";
+            case WHITE  -> "/images/totems/totem_white.png";
+            case BLACK  -> "/images/totems/totem_purple.png";
+            case YELLOW -> "/images/totems/totem_yellow.png";
+            case BLUE   -> "/images/totems/totem_cyan.png";
         };
     }
 
