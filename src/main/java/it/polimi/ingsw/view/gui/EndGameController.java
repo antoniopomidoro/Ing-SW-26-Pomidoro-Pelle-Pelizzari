@@ -6,6 +6,7 @@ import it.polimi.ingsw.view.ClientManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 
 import java.util.Comparator;
@@ -14,10 +15,10 @@ import static java.lang.System.exit;
 
 public class EndGameController {
 
-    @FXML private StackPane root;
+    @FXML private AnchorPane root;
     @FXML private Label winnerLabel;
+    @FXML private Label scores;
 
-    private final GameAnimator animator = new GameAnimator();
     private Runnable menu;
 
     public void setMenu(Runnable callback) {
@@ -36,6 +37,9 @@ public class EndGameController {
         state.getPlayers().stream()
                 .max(Comparator.comparingInt(p -> p.getPp()))
                 .ifPresent(p -> setWinner(p.getNickname()));
+        state.getPlayers().stream()
+                .sorted(Comparator.comparingInt(GameStateDTO.PlayerDTO::getPp).reversed())
+                .forEach(p -> scores.setText(scores.getText() + p.getNickname() + ": " + p.getPp() + "\n"));
     }
 
 

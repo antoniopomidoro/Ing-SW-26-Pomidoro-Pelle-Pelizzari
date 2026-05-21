@@ -37,7 +37,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.Node;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
@@ -1100,20 +1099,24 @@ public class GameViewController implements UserInterface {
     }
 
     // End game screen
-    private void showEndGameOverlay(GameStateDTO state) {
+    private void showEndGameScreen(GameStateDTO state) {
         try {
             FXMLLoader loader = new FXMLLoader(
                     Objects.requireNonNull(getClass().getResource("/fxml/EndGameScreen.fxml")));
-            StackPane overlay = loader.load();
+            AnchorPane endScreen = loader.load();
             EndGameController endController = loader.getController();
 
             endController.initData(state);
             endController.setMenu(menu);
 
-            overlay.prefWidthProperty().bind(root.widthProperty());
-            overlay.prefHeightProperty().bind(root.heightProperty());
-            root.getChildren().add(overlay);
-            animator.animateEndGame(overlay, null);
+            endScreen.prefWidthProperty().bind(root.widthProperty());
+            endScreen.prefHeightProperty().bind(root.heightProperty());
+            AnchorPane.setTopAnchor(endScreen, 0.0);
+            AnchorPane.setBottomAnchor(endScreen, 0.0);
+            AnchorPane.setLeftAnchor(endScreen, 0.0);
+            AnchorPane.setRightAnchor(endScreen, 0.0);
+            root.getChildren().add(endScreen);
+            animator.animateEndGame(endScreen, null);
         } catch (Exception ex) {
             throw new RuntimeException("Failed to load EndGameScreen.fxml", ex);
         }
@@ -1129,7 +1132,7 @@ public class GameViewController implements UserInterface {
             lastTriggeredBy = triggeredBy;
             stateProperty.set(dto.getSnapshot());
             if (eventType == GameEvent.Type.END_GAME_COMPLETED) {
-                showEndGameOverlay(dto.getSnapshot());
+                showEndGameScreen(dto.getSnapshot());
             }
         });
         return true;
