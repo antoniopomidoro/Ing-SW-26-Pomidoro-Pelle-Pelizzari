@@ -41,6 +41,7 @@ public class GameEvent {
         EVENT_CARD_TRIGGERED(true),
         /** At least one building effect was activated by a trigger. */
         BUILDING_ACTIVATED(false),
+        PLAYER_RECONNECTED(true),
 
         // --- PHASE TRANSITIONS ---
         /** Setup completed: initial board and food ready. */

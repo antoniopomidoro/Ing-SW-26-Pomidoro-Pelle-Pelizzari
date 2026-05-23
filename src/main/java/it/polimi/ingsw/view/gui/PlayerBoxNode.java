@@ -19,7 +19,8 @@ import java.util.Objects;
  */
 public class PlayerBoxNode extends HBox {
 
-    private static final double NAME_SIZE = 16.0;
+    private static final double NAME_SIZE   = 16.0;
+    private static final int    NAME_MAX_LEN = 10;
     private static final double TOTEM_H   = NAME_SIZE * 3;               // 48
     private static final double TOTEM_W   = TOTEM_H * (48.0 / 64.0);    // 36 (original ratio)
 
@@ -53,7 +54,7 @@ public class PlayerBoxNode extends HBox {
         statusDot = new Circle(5);
         statusDot.getStyleClass().add(player.isConnected() ? "online-dot" : "offline-dot");
 
-        nicknameLabel = new Label(player.getNickname());
+        nicknameLabel = new Label(truncateName(player.getNickname()));
         nicknameLabel.setStyle(
                 "-fx-text-fill: #e8d9b0; -fx-font-size: " + (int) NAME_SIZE + "px; -fx-font-weight: 600;");
 
@@ -104,6 +105,12 @@ public class PlayerBoxNode extends HBox {
     }
 
     // ── private helpers ───────────────────────────────────────────────────────
+
+    /** Clips a nickname to the first {@value #NAME_MAX_LEN} characters. */
+    private static String truncateName(String name) {
+        if (name == null) return "";
+        return name.length() > NAME_MAX_LEN ? name.substring(0, NAME_MAX_LEN) : name;
+    }
 
     private ImageView buildTotemImage(Totem t) {
         String path = TOTEM_PATH.get(t);

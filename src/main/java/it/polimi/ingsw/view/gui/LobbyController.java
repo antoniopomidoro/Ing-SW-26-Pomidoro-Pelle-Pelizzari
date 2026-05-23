@@ -3,6 +3,7 @@ package it.polimi.ingsw.view.gui;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
+import it.polimi.ingsw.network.dto.GameStateDTO;
 import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
 import it.polimi.ingsw.network.dto.TotemSelectionDTO;
 import it.polimi.ingsw.view.UserInterface;
@@ -22,6 +23,7 @@ import javafx.scene.layout.VBox;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * JavaFX controller for LobbyScreen.fxml. Implements UserInterface so that incoming network DTOs
@@ -70,7 +72,8 @@ public class LobbyController implements UserInterface {
     private LobbyAnimator  animator;
     private AudioManager   audioManager;
     private GUIInputSender inputSender;
-    private java.util.function.Consumer<String> onGameIdReceived;
+    private Consumer<String> onGameIdReceived;
+    private Consumer<Totem> onTotemResolved;
 
     private LobbyStep currentStep    = LobbyStep.WELCOME;
     private boolean   creatingGame   = false;
@@ -161,7 +164,7 @@ public class LobbyController implements UserInterface {
     }
 
     /** Called by JavaFXApp so the lobby can propagate the server-assigned game ID to the client. */
-    public void setOnGameIdReceived(java.util.function.Consumer<String> callback) {
+    public void setOnGameIdReceived(Consumer<String> callback) {
         this.onGameIdReceived = callback;
     }
 
@@ -422,10 +425,21 @@ public class LobbyController implements UserInterface {
         if (dto.getIdGame() != null && onGameIdReceived != null) {
             onGameIdReceived.accept(dto.getIdGame());
         }
+        if (dto.getSnapshot() != null && pendingNickname != null && onTotemResolved != null) {
+            dto.getSnapshot().getPlayers().stream()
+                    .filter(p -> pendingNickname.equalsIgnoreCase(p.getNickname()))
+                    .findFirst()
+                    .map(GameStateDTO.PlayerDTO::getTotem)
+                    .ifPresent(onTotemResolved);
+        }
         Platform.runLater(() -> {
             lobbyIdLabel.setText("Rejoin: " + dto.getIdGame());
             if (onGameStartingCallback != null) onGameStartingCallback.run();
         });
+    }
+
+    public void setOnTotemResolved(Consumer<Totem> callback) {
+        this.onTotemResolved = callback;
     }
 
     @Override

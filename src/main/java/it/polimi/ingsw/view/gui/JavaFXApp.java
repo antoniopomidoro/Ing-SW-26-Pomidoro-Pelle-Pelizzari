@@ -56,6 +56,7 @@ public class JavaFXApp extends Application {
         lobbyController.setActionSender(actionSender);
         lobbyController.setAudioManager(audioManager);
         lobbyController.setOnGameIdReceived(clientManager::setId);
+        lobbyController.setOnTotemResolved(clientManager::setPlayerTotem);
         lobbyController.setOnGameStartingCallback(() -> transitionToSplash());
 
         Scene scene = new Scene(root, screenW, screenH);
@@ -129,6 +130,7 @@ public class JavaFXApp extends Application {
             actionSender = new ActionSender(clientManager);
             lobbyController.setActionSender(actionSender);
             lobbyController.setOnGameIdReceived(clientManager::setId);
+            lobbyController.setOnTotemResolved(clientManager::setPlayerTotem);
             lobbyController.setOnGameStartingCallback(() -> transitionToSplash());
 
             Scene scene = primaryStage.getScene();

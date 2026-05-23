@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.board.Tile;
 import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.cards.Building;
 import it.polimi.ingsw.model.cards.Card;
+import it.polimi.ingsw.model.cards.characters.CharacterEnum;
 import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.TriggerKey;
 import it.polimi.ingsw.model.player.Totem;
@@ -47,6 +48,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -479,7 +481,7 @@ public class GameViewController implements UserInterface {
         for (PlayerDTO p : state.getPlayers()) {
             Totem t = p.getTotem();
             if (!totemViews.containsKey(t)) {
-                ImageView iv = makeImageView(42, 30, totemPath(t)); // swapped width and height
+                ImageView iv = makeRawImageView(42, 30, totemPath(t)); // swapped width and height
                // iv.setRotate(-90); rotate only for front images not implemented anymore
                 TotemLayer.getChildren().add(iv);
                 totemViews.put(t, iv);
@@ -576,9 +578,21 @@ public class GameViewController implements UserInterface {
         localHandBox.getChildren().clear();
         findLocalPlayer(state).ifPresent(p -> {
             if (p.getCards() != null) {
-                p.getCards().stream()
-                        .sorted(BY_CHARACTER_ID)
-                        .forEach(c -> localHandBox.getChildren().add(buildCardView(c, false, null)));
+                // Group character cards by type, preserving pick order within each
+                // group so the last element is the most recently picked card.
+                LinkedHashMap<CharacterEnum, List<Card>> byType = new LinkedHashMap<>();
+                for (Card c : p.getCards()) {
+                    CharacterEnum id = c.getId();
+                    if (id == null) {
+                        localHandBox.getChildren().add(buildCardView(c, false, null));
+                    } else {
+                        byType.computeIfAbsent(id, k -> new ArrayList<>()).add(c);
+                    }
+                }
+                byType.entrySet().stream()
+                        .sorted(java.util.Map.Entry.comparingByKey())
+                        .forEach(e -> localHandBox.getChildren()
+                                .add(buildStackedCardView(e.getValue())));
             }
             if (p.getBuildings() != null) {
                 for (Building b : p.getBuildings()) {
@@ -586,6 +600,55 @@ public class GameViewController implements UserInterface {
                 }
             }
         });
+    }
+
+    /**
+     * Builds the hand node for a group of same-type character cards: shows the
+     * last-picked card, a small count badge in the top-left corner, and opens a
+     * popup with every card of that type on left-click.
+     */
+    private StackPane buildStackedCardView(List<Card> group) {
+        Card representative = group.getLast();
+        StackPane wrapper = buildCardLikeView(frontImagePath(representative),
+                representative.toString(), false, null);
+
+        if (group.size() > 1) {
+            Label badge = new Label("x" + group.size());
+            badge.setStyle("-fx-text-fill: black; -fx-font-size: 10px; -fx-font-weight: bold;");
+            StackPane.setAlignment(badge, Pos.TOP_LEFT);
+            StackPane.setMargin(badge, new javafx.geometry.Insets(3, 0, 0, 5));
+            wrapper.getChildren().add(badge);
+        }
+
+        ImageView iv = (ImageView) wrapper.getChildren().getFirst();
+        wrapper.setCursor(Cursor.HAND);
+        wrapper.setOnMouseClicked(e -> {
+            if (e.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
+                showDetailPopup(iv, representative.toString());
+            } else {
+                showCardTypePopup(wrapper, group);
+            }
+        });
+        return wrapper;
+    }
+
+    /** Popup listing every card of a single character type, shown below the anchor. */
+    private void showCardTypePopup(Node anchor, List<Card> group) {
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+
+        HBox cards = new HBox(6);
+        cards.setAlignment(Pos.CENTER);
+        for (Card c : group) {
+            cards.getChildren().add(makeImageView(CARD_W, CARD_H, frontImagePath(c)));
+        }
+
+        VBox content = new VBox(cards);
+        content.getStyleClass().add("detail-popup");
+        popup.getContent().add(content);
+
+        Bounds b = anchor.localToScreen(anchor.getBoundsInLocal());
+        popup.show(anchor, b.getMinX(), b.getMaxY() + 8);
     }
 
     private void refreshOpponentRing(GameStateDTO state) {
@@ -619,16 +682,20 @@ public class GameViewController implements UserInterface {
         if (state.getBoard() == null || state.getBoard().getTiles() == null) return;
 
         List<Tile> tiles = state.getBoard().getTiles();
+        int lastIdx = tiles.size() - 1;
         for (int i = 0; i < tiles.size(); i++) {
             Tile tile = tiles.get(i);
             ImageView iv = new ImageView();
             iv.setFitWidth(TILE_W);
             iv.setFitHeight(TILE_H);
             iv.setPreserveRatio(true);
-            applySquircleClip(iv, TILE_W, TILE_H);
 
             String tileId = tile.getId() != null ? tile.getId().name() : "";
             setImage(iv, "/images/tiles/" + tileId + ".png");
+
+            // Tiles form a single strip: only the first rounds its left corners
+            // and only the last rounds its right corners.
+            applyCornerClip(iv, TILE_W, TILE_H, i == 0, i == lastIdx);
 
             // Wrap in StackPane so the DropShadow effect renders outside the clipped ImageView.
             StackPane wrapper = new StackPane(iv);
@@ -683,35 +750,17 @@ public class GameViewController implements UserInterface {
             playerBoxes.put(t, box);
         }
 
-        // Posizionamento temporaneo dentro ringPane (coordinate di riferimento 1280×720).
-        AnchorPane.setTopAnchor(column, HUD_CLEARANCE);
-        AnchorPane.setRightAnchor(column, 30.0);
-        ringPane.getChildren().add(column);
-
-        System.out.println("[OpponentRing] Added column with " + column.getChildren().size()
-                + " children to ringPane");
-
-        // Dopo il layout, riposiziona in coordinate di riferimento allineato alla board.
-        Platform.runLater(() -> {
-            double boardW = boardArea.getWidth() > 0
-                    ? boardArea.getWidth() : boardArea.getPrefWidth();
-            double boardRight = (REF_W + boardW) / 2.0;
-            double desiredX   = boardRight + BOX_MARGIN;
-
-            // Centro verticale dello spazio occupabile dalla board in coordinate di riferimento
-            double boardCenterY = HUD_CLEARANCE + (REF_H - HUD_CLEARANCE - HAND_CLEARANCE) / 2.0;
-
-            column.applyCss();
-            column.layout();
-            double colH = column.getHeight();
-
-            AnchorPane.setRightAnchor(column, null);
-            AnchorPane.setLeftAnchor(column, desiredX);
-            AnchorPane.setTopAnchor(column,  boardCenterY - colH / 2.0);
-            System.out.println("[OpponentRing] Repositioned ref-coords: desiredX=" + desiredX
-                    + " topAnchor=" + (boardCenterY - colH / 2.0)
-                    + " colH=" + colH + " boardW=" + boardW);
-        });
+        // Holder anchored to the window's right edge (in root, outside the scaled
+        // contentPane) so the player boxes are always flush with the border and
+        // vertically centred — never clipped off-screen.
+        VBox holder = new VBox(column);
+        holder.setAlignment(Pos.CENTER_RIGHT);
+        holder.setPickOnBounds(false);
+        holder.setPadding(new javafx.geometry.Insets(0, BOX_MARGIN, 0, 0));
+        AnchorPane.setTopAnchor(holder,    0.0);
+        AnchorPane.setBottomAnchor(holder, 0.0);
+        AnchorPane.setRightAnchor(holder,  0.0);
+        root.getChildren().add(holder);
     }
 
     // ── Opponent menu ──────────────────────────────────────────────────────────
@@ -726,8 +775,8 @@ public class GameViewController implements UserInterface {
     }
 
     private VBox buildOpponentMenuRow(PlayerDTO p) {
-        ImageView totemImg = makeImageView(24, 32, totemPath(p.getTotem()));
-        Label nickLabel = new Label(p.getNickname());
+        ImageView totemImg = makeRawImageView(24, 32, totemPath(p.getTotem()));
+        Label nickLabel = new Label(truncateName(p.getNickname()));
         nickLabel.getStyleClass().add("opponent-nickname");
         Circle dot = new Circle(5);
         dot.getStyleClass().add(p.isConnected() ? "online-dot" : "offline-dot");
@@ -758,6 +807,12 @@ public class GameViewController implements UserInterface {
         return row;
     }
 
+    /** Clips a nickname to the first 10 characters. */
+    private static String truncateName(String name) {
+        if (name == null) return "";
+        return name.length() > 10 ? name.substring(0, 10) : name;
+    }
+
     private void addStatRow(VBox parent, String iconPath, int value) {
         ImageView icon = makeImageView(20, 20, iconPath);
         Label l = new Label(String.valueOf(value));
@@ -776,8 +831,9 @@ public class GameViewController implements UserInterface {
         for (int i = 0; i < cards.size(); i++) {
             Card c = cards.get(i);
             int idx = i;
-            Runnable pickAction = pickable ? () -> pickFn.accept(idx, c) : null;
-            box.getChildren().add(buildCardView(c, pickable, pickAction));
+            boolean selectable = pickable && c.isBuyable();
+            Runnable pickAction = selectable ? () -> pickFn.accept(idx, c) : null;
+            box.getChildren().add(buildCardView(c, selectable, pickAction));
         }
     }
 
@@ -1005,22 +1061,63 @@ public class GameViewController implements UserInterface {
     // ── Image helpers ──────────────────────────────────────────────────────────
 
     /**
-     * Rounded-rectangle clip with {@link #CLIP_ARC} arc diameter.
-     * Straight sides + softly rounded corners — no oval silhouette.
+     * Rounded-rectangle clip on all four corners. See {@link #applyCornerClip}.
      */
     private static void applySquircleClip(ImageView iv, double w, double h) {
-        Rectangle clip = new Rectangle(w, h);
-        clip.setArcWidth(CLIP_ARC);
-        clip.setArcHeight(CLIP_ARC);
-        iv.setClip(clip);
+        applyCornerClip(iv, w, h, true, true);
+    }
+
+    /**
+     * Clips an {@link ImageView} to a rounded rectangle that matches the image's
+     * actual rendered bounds (accounting for {@code preserveRatio} letterboxing),
+     * rounding only the requested sides.
+     *
+     * <p>Matching the rendered bounds avoids stray pixels at the corners when the
+     * source image aspect ratio differs from the fit box. Side selectivity lets a
+     * row of tiles read as a single strip: only the outer corners are rounded.
+     *
+     * <p>The clip is recomputed whenever the image changes, since the rendered
+     * bounds are only known once an image is loaded.
+     */
+    private static void applyCornerClip(ImageView iv, double w, double h,
+                                        boolean roundLeft, boolean roundRight) {
+        Runnable reclip = () -> {
+            double dw = w, dh = h;
+            Image img = iv.getImage();
+            if (img != null && img.getWidth() > 0 && img.getHeight() > 0) {
+                double scale = Math.min(w / img.getWidth(), h / img.getHeight());
+                dw = img.getWidth() * scale;
+                dh = img.getHeight() * scale;
+            }
+            Rectangle clip = new Rectangle(dw, dh);
+            if (roundLeft || roundRight) {
+                clip.setArcWidth(CLIP_ARC);
+                clip.setArcHeight(CLIP_ARC);
+            }
+            // Push the unwanted rounded corners outside the image bounds so that
+            // side reads as a straight edge.
+            if (roundLeft ^ roundRight) {
+                clip.setWidth(dw + CLIP_ARC);
+                if (roundRight) clip.setX(-CLIP_ARC);
+            }
+            iv.setClip(clip);
+        };
+        reclip.run();
+        iv.imageProperty().addListener((o, ov, nv) -> reclip.run());
     }
 
     private ImageView makeImageView(double w, double h, String path) {
+        ImageView iv = makeRawImageView(w, h, path);
+        applySquircleClip(iv, w, h);
+        return iv;
+    }
+
+    /** Image view with no corner clip — used for totems, which must stay sharp-cornered. */
+    private ImageView makeRawImageView(double w, double h, String path) {
         ImageView iv = new ImageView();
         iv.setFitWidth(w);
         iv.setFitHeight(h);
         iv.setPreserveRatio(true);
-        applySquircleClip(iv, w, h);
         if (path != null) setImage(iv, path);
         return iv;
     }

@@ -100,14 +100,16 @@ public class ServerManager {
                 return;
             }
 
-            state.reintegratePlayer(player);
             viewRegistry.computeIfAbsent(gameId, id -> new ConcurrentHashMap<>()).put(player.getId(), view);
             view.setTotem(player.getId());
             view.setGameController(activeGame);
             view.setGameId(gameId);
             view.setNickname(playerName);
-            state.addObserver(view);
             view.sendLobbyUpdate(LobbyState.REJOIN);
+            if(!activeGame.reconnectPlayer(player, view)){
+                view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.RECONNECTION_FAILED));
+                throw new IllegalStateException("Reconnection failed for player " + playerName + " in game " + gameId);
+            }
             return;
         }
 

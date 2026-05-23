@@ -36,7 +36,7 @@
             <HBox alignment="CENTER" spacing="12">
                 <ImageView fx:id="deckView" fitHeight="135" fitWidth="90" preserveRatio="true" />
                 <ImageView fx:id="orderTileView" fitHeight="135" fitWidth="90" preserveRatio="true" />
-                <HBox fx:id="tilesetBox" alignment="CENTER" spacing="6" />
+                <HBox fx:id="tilesetBox" alignment="CENTER" spacing="0" />
                 <ImageView fx:id="coveredBuildingView" fitHeight="135" fitWidth="90" preserveRatio="true" />
             </HBox>
 
@@ -54,9 +54,6 @@
     <Pane fx:id="TotemLayer" mouseTransparent="true"
           AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
           AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
-
-    <!-- ── Local hand (bottom-centre) ── -->
-    <HBox fx:id="localHandBox" alignment="CENTER" spacing="8" styleClass="card-container" AnchorPane.bottomAnchor="16" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" />
 
         <!-- ── HUD stats panel (top-left) ── -->
         <HBox fx:id="hudPanel" alignment="CENTER_LEFT" spacing="12" styleClass="hud-panel" AnchorPane.leftAnchor="12" AnchorPane.topAnchor="12">
@@ -113,12 +110,12 @@
 
         </HBox>
 
-        <!-- ── Opponent menu button (top-right) ── -->
-        <Button fx:id="opponentMenuButton" onAction="#onOpponentMenuClicked" prefHeight="36.0" prefWidth="84.0" styleClass="confirm-button" text="▼ Players" AnchorPane.rightAnchor="12" AnchorPane.topAnchor="12" />
-
-        <!-- ── Opponent menu dropdown (hidden by default, shown on button click) ── -->
-        <VBox fx:id="opponentMenuBox" managed="false" styleClass="opponent-menu" visible="false" AnchorPane.rightAnchor="12" AnchorPane.topAnchor="50" />
-
     </AnchorPane>
+
+    <!-- ── Opponent menu (top-right) — anchored to the window edge, not the scaled content ── -->
+    <Button fx:id="opponentMenuButton" onAction="#onOpponentMenuClicked" prefHeight="36.0" prefWidth="84.0" styleClass="confirm-button" text="▼ Players" AnchorPane.rightAnchor="12" AnchorPane.topAnchor="12" />
+
+    <!-- ── Opponent menu dropdown (hidden by default, shown on button click) ── -->
+    <VBox fx:id="opponentMenuBox" managed="false" styleClass="opponent-menu" visible="false" AnchorPane.rightAnchor="12" AnchorPane.topAnchor="50" />
 
 </AnchorPane>

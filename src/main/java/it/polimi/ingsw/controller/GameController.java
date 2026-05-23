@@ -8,6 +8,7 @@ import it.polimi.ingsw.model.cards.Building;
 import it.polimi.ingsw.model.cards.Card;
 import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.Age;
+import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.GameState;
 import it.polimi.ingsw.model.game.StatePhases.IllegalMoveException;
 import it.polimi.ingsw.model.game.StatePhases.SetupPhase;
@@ -15,6 +16,7 @@ import it.polimi.ingsw.model.game.StatePhases.TurnPhase;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.SaveObserver;
+import it.polimi.ingsw.network.VirtualView;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -232,7 +234,15 @@ public class GameController {
         if(p.equals(state.getCurrentTurnOrderPlayer())) {
             state.setPhase(new TurnPhase());
         }
+        if(p.equals(state.getCurrentOrderTileOrderPlayer())){
+            state.nextPlayerInTurnOrderTile();
+        }
         return disconnect;
     }
-
+    public boolean reconnectPlayer(Player player, VirtualView view){
+        Boolean reconnect = state.reintegratePlayer(player);
+        state.addObserver(view);
+        state.raiseEvent(new GameEvent(GameEvent.Type.PLAYER_RECONNECTED, player));
+        return reconnect;
+    }
 }

@@ -444,7 +444,7 @@ public class GameState implements Serializable {
     }
     public boolean disconnectPlayer(Player player) {
         if (player == null) return false;
-        if (!orderTileOrder.contains(player)) {
+        if (!players.contains(player)) {
             return false;
         }
         player.setConnected(false);
@@ -459,7 +459,7 @@ public class GameState implements Serializable {
 
     public boolean reintegratePlayer(Player player) {
         if (player == null) return false;
-        if (!orderTileOrder.contains(player)) {
+        if (!players.contains(player)) {
             return false;
         }
         player.setConnected(true);

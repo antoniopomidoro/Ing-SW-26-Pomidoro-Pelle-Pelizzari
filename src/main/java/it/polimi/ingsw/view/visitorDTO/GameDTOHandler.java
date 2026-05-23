@@ -81,9 +81,10 @@ public class GameDTOHandler implements DTOVisitor {
         gameDispatch.put(GameEvent.Type.SETUP_COMPLETED,      ui::setUp);
 
         // --- special events with dedicated UI behaviour ---
-        gameDispatch.put(GameEvent.Type.PLAYER_TURN_STARTED,  ui::onPlayerTurnStarted);
-        gameDispatch.put(GameEvent.Type.PLAYER_DISCONNECTED,  ui::onPlayerDisconnected);
-        gameDispatch.put(GameEvent.Type.END_GAME_COMPLETED,   ui::onGameEnded);
+        gameDispatch.put(GameEvent.Type.PLAYER_TURN_STARTED,   ui::onPlayerTurnStarted);
+        gameDispatch.put(GameEvent.Type.PLAYER_DISCONNECTED,   ui::onPlayerDisconnected);
+        gameDispatch.put(GameEvent.Type.END_GAME_COMPLETED,    ui::onGameEnded);
+        gameDispatch.put(GameEvent.Type.PLAYER_RECONNECTED,    updateDisplay);
     }
 
     /** Returns the last {@link GameEventDTO} received by this handler, or {@code null} if none. */

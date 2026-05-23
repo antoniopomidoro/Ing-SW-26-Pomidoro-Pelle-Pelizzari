@@ -22,7 +22,8 @@ public class ErrorDTO implements DTO {
         NICKNAME_TAKEN,
         NOT_A_PARTICIPANT,
         ALREADY_CONNECTED,
-        GAME_START_FAILED
+        GAME_START_FAILED,
+        RECONNECTION_FAILED
     }
 
     private final ErrorCode errorCode;
