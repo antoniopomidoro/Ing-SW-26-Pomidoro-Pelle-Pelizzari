@@ -4,6 +4,8 @@ import it.polimi.ingsw.model.game.Age;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -35,6 +37,17 @@ public class AudioManager {
         AGE_TRACKS.put(Age.AGE_3_FINAL, AGE3);
     }
 
+    private static final double DEFAULT_VOLUME = 1.0;
+
+    private final DoubleProperty musicVolume = new SimpleDoubleProperty(this, "musicVolume", DEFAULT_VOLUME);
+    private final DoubleProperty sfxVolume   = new SimpleDoubleProperty(this, "sfxVolume",   DEFAULT_VOLUME);
+
+    /** @return mutable music volume property in [0,1], bound to all background music players. */
+    public DoubleProperty musicVolumeProperty() { return musicVolume; }
+
+    /** @return mutable SFX volume property in [0,1], bound to all SFX players. */
+    public DoubleProperty sfxVolumeProperty()   { return sfxVolume; }
+
     private MediaPlayer backgroundPlayer;
     private MediaPlayer sfxPlayer;
 
@@ -42,7 +55,7 @@ public class AudioManager {
         MediaPlayer player = createPlayer(LOBBY);
         if (player == null) return;
         player.setCycleCount(MediaPlayer.INDEFINITE);
-        player.setVolume(1.0);
+        player.volumeProperty().bind(musicVolume);
         player.play();
         backgroundPlayer = player;
     }
@@ -56,34 +69,33 @@ public class AudioManager {
 
         if (next != null) {
             next.setCycleCount(MediaPlayer.INDEFINITE);
-            next.setVolume(1.0);
+            next.volumeProperty().bind(musicVolume);
             next.play();
         }
 
-        if (prev == null) {
-            return;
-        }
+        if (prev == null) return;
 
-        double startVol = prev.getVolume();
         if (next == null) {
             prev.stop();
             prev.dispose();
             return;
         }
+
+        // Unbind both ends so the Timeline can animate them, then re-bind survivor.
+        prev.volumeProperty().unbind();
+        next.volumeProperty().unbind();
         Timeline fade = new Timeline(
                 new KeyFrame(Duration.seconds(CROSSFADE_SECS),
                         new KeyValue(prev.volumeProperty(), 0.0),
-                        new KeyValue(next.volumeProperty(), 1.0)
+                        new KeyValue(next.volumeProperty(), musicVolume.get())
                 )
         );
         fade.setOnFinished(e -> {
             prev.stop();
             prev.dispose();
+            next.volumeProperty().bind(musicVolume);
         });
         fade.play();
-        if (backgroundPlayer != null) {
-            backgroundPlayer.setVolume(startVol);
-        }
     }
 
     public void onAgeChanged(Age newAge) {
@@ -93,6 +105,7 @@ public class AudioManager {
         }
         MediaPlayer sfx = createPlayer(SFX_CHANGE);
         if (sfx != null) {
+            sfx.volumeProperty().bind(sfxVolume);
             sfx.setOnEndOfMedia(() -> {
                 sfx.stop();
                 sfx.dispose();

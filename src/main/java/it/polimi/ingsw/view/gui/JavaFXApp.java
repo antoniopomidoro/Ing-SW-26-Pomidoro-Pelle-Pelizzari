@@ -34,6 +34,8 @@ public class JavaFXApp extends Application {
     private ClientManager clientManager;
     private ActionSender  actionSender;
     private AudioManager  audioManager;
+    private SettingsState settings;
+    private Stage         settingsStage;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -53,6 +55,12 @@ public class JavaFXApp extends Application {
         clientManager = new ClientManager(lobbyController, useSocket, serverIp);
         actionSender = new ActionSender(clientManager);
         audioManager = new AudioManager();
+        settings = new SettingsState();
+        audioManager.musicVolumeProperty().bind(settings.musicVolumeProperty());
+        audioManager.sfxVolumeProperty().bind(settings.sfxVolumeProperty());
+        settings.fullscreenProperty().addListener((obs, ov, nv) -> {
+            if (!ov.equals(nv)) rebuildStage();
+        });
         lobbyController.setActionSender(actionSender);
         lobbyController.setAudioManager(audioManager);
         lobbyController.setOnGameIdReceived(clientManager::setId);
@@ -74,7 +82,99 @@ public class JavaFXApp extends Application {
         primaryStage.setTitle("Mesos");
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
+        primaryStage.setOnCloseRequest(e -> javafx.application.Platform.exit());
+        installEscHandler(scene);
         primaryStage.show();
+    }
+
+    /** Package-private accessor for the shared settings state. */
+    SettingsState getSettings() { return settings; }
+
+    /**
+     * Rebuilds the primary stage with the StageStyle implied by the current
+     * fullscreen setting. JavaFX does not allow changing StageStyle on a live
+     * Stage, so we create a new one, move the scene over, and dispose the old.
+     */
+    private void rebuildStage() {
+        boolean fullscreen = settings.fullscreenProperty().get();
+        Stage oldStage = primaryStage;
+        Scene scene = oldStage.getScene();
+
+        Stage newStage = new Stage();
+        newStage.initStyle(fullscreen ? StageStyle.UNDECORATED : StageStyle.DECORATED);
+        newStage.setTitle("Mesos");
+        newStage.setScene(scene);
+        newStage.setMaximized(true);
+        newStage.setOnCloseRequest(e -> javafx.application.Platform.exit());
+
+        primaryStage = newStage;
+        newStage.show();
+        oldStage.hide();
+
+        // Invalidate the cached settings stage so it's rebuilt with the new owner.
+        if (settingsStage != null) {
+            settingsStage.hide();
+            settingsStage = null;
+        }
+    }
+
+    /**
+     * Lazily builds the settings menu stage and returns it. The stage is owned by
+     * the current primary stage and behaves as a transparent overlay.
+     */
+    private Stage getOrCreateSettingsStage() {
+        if (settingsStage != null) return settingsStage;
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    Objects.requireNonNull(getClass().getResource("/fxml/SettingsMenu.fxml")));
+            javafx.scene.Parent menuRoot = loader.load();
+            SettingsMenuController menuController = loader.getController();
+
+            Stage s = new Stage(StageStyle.TRANSPARENT);
+            s.initOwner(primaryStage);
+            s.initModality(javafx.stage.Modality.NONE);
+            Scene menuScene = new Scene(menuRoot);
+            menuScene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            s.setScene(menuScene);
+
+            menuController.init(settings, s::hide);
+
+            // Close when the menu loses focus (approximates "click outside closes").
+            s.focusedProperty().addListener((obs, ov, nv) -> {
+                if (Boolean.FALSE.equals(nv)) s.hide();
+            });
+
+            // Warm-up show/hide so subsequent open knows its measured size for centering.
+            s.show();
+            s.hide();
+
+            settingsStage = s;
+            return s;
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to load SettingsMenu.fxml", ex);
+        }
+    }
+
+    /** Toggles the settings menu overlay, centering it over the primary stage. */
+    private void toggleSettingsMenu() {
+        Stage s = getOrCreateSettingsStage();
+        if (s.isShowing()) {
+            s.hide();
+        } else {
+            s.setX(primaryStage.getX() + (primaryStage.getWidth()  - s.getWidth())  / 2.0);
+            s.setY(primaryStage.getY() + (primaryStage.getHeight() - s.getHeight()) / 2.0);
+            s.show();
+        }
+    }
+
+    /** Installs the ESC key handler on the given scene to toggle the settings menu. */
+    private void installEscHandler(Scene scene) {
+        scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, e -> {
+            if (e.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                toggleSettingsMenu();
+                e.consume();
+            }
+        });
     }
 
     /** Phase 2: show the splash screen. Called on the JavaFX thread. */

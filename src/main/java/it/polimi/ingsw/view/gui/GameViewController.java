@@ -186,6 +186,13 @@ public class GameViewController implements UserInterface {
         contentPane.getTransforms().add(uiScale);
         root.widthProperty().addListener((obs, ov, nv)  -> applyUiScale(uiScale));
         root.heightProperty().addListener((obs, ov, nv) -> applyUiScale(uiScale));
+        // Force a first apply once the scene is attached AND a layout pulse has run.
+        // I listener da soli sono inaffidabili: se root.width/height non cambia dopo l'attach
+        // (size già uguale a quella della scene), non scattano e il contentPane resta a scala 1.0.
+        root.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene == null) return;
+            javafx.application.Platform.runLater(() -> applyUiScale(uiScale));
+        });
 
         // Background: cover behavior — maintain ratio, fill entire window, center, clip overflow.
         root.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -699,8 +706,7 @@ public class GameViewController implements UserInterface {
 
             // Wrap in StackPane so the DropShadow effect renders outside the clipped ImageView.
             StackPane wrapper = new StackPane(iv);
-            wrapper.setMinSize(TILE_W, TILE_H);
-            wrapper.setMaxSize(TILE_W, TILE_H);
+            // Niente min/max: il wrapper assume la dimensione naturale dell'ImageView così le tile sono attaccate.
 
             boolean selectable = pickable && !tile.isOccupied();
             if (selectable) {
