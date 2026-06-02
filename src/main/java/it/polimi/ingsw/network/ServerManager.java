@@ -153,7 +153,7 @@ public class ServerManager {
         if (view == null) {
             throw new IllegalArgumentException(INVALID_INPUT_CREATION);
         }
-        if (playerName == null || playerName.isBlank() || requestedTotem == null || requiredPlayers <= 1) {
+        if (playerName == null || playerName.isBlank() || requestedTotem == null || requiredPlayers <= 1 || requiredPlayers > 5) {
             view.sendError(new ErrorDTO(ErrorDTO.ErrorCode.INVALID_INPUT));
             return LobbyState.WAITING;
         }

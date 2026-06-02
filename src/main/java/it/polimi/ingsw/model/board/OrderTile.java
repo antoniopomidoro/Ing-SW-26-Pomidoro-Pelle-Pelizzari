@@ -27,6 +27,13 @@ public class OrderTile extends Tile {
         super();
     }
 
+    /* Constructor for testing purposes. */
+
+    public OrderTile(List<Integer> orderBonus, List<Integer> ppPenalty){
+        this.orderBonus = orderBonus;
+        this.ppPenalty = ppPenalty;
+    }
+
     public int getOrderBonus(int index){
         return orderBonus.get(index);
     }

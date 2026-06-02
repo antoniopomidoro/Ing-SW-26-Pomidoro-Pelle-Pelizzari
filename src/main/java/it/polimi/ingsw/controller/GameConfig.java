@@ -35,6 +35,28 @@ public class GameConfig implements Serializable {
     }
 
     /**
+     * Protected constructor for testing purposes.
+     * @param gameMaxPlayers the maximum number of players allowed in the game
+     * @param gameMinPlayers the minimum number of players allowed in the game
+     * @param buildingPerPlayer the number of buildings to draw for each player and age
+     * @param startingFood the amount of food each player starts with
+     * @param bottomExtraCards the number of extra cards to draw from the bottom of the deck
+     * @param topExtraCards the number of extra cards to draw from the top of the deck
+     * @param maxTurns the maximum number of turns in the game
+     * @param artistGain the number of points awarded for completing an artist's work
+     */
+    protected GameConfig(int gameMaxPlayers, int gameMinPlayers, int[][] buildingPerPlayer, List<Integer> startingFood, int bottomExtraCards, int topExtraCards, int maxTurns, int artistGain) {
+        this.gameMaxPlayers = gameMaxPlayers;
+        this.gameMinPlayers = gameMinPlayers;
+        this.buildingPerPlayer = buildingPerPlayer;
+        this.startingFood = startingFood;
+        this.bottomExtraCards = bottomExtraCards;
+        this.topExtraCards = topExtraCards;
+        this.maxTurns = maxTurns;
+        this.artistGain = artistGain;
+    }
+
+    /**
      * Returns the number of buildings to draw for the given player count and age.
      *
      * @param playerCount number of players (2–5)

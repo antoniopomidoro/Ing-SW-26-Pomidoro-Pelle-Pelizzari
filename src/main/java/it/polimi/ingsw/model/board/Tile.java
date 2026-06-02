@@ -44,6 +44,15 @@ public class Tile implements Serializable {
 
     }
 
+    /* Constructor for testing purposes */
+    public Tile(TileId id, int upperPicks, int bottomPicks, int foodBonus, int minPlayers){
+        this.tileId = id;
+        this.upperPicks = upperPicks;
+        this.bottomPicks = bottomPicks;
+        this.foodBonus = foodBonus;
+        this.minPlayers = minPlayers;
+    }
+
     /**
      * Gets the ID of the tile.
      * @return The tile ID.

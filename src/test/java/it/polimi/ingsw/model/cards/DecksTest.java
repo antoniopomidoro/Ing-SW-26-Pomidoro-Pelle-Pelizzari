@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model.cards;
 
+import it.polimi.ingsw.DummyCard;
 import it.polimi.ingsw.model.game.Age;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,17 +13,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DecksTest {
-    private static class DummyCard extends Card {
-        private DummyCard(){
-            super();
-        }
-
-        @Override
-        public CardCategory getCategory() {
-            return null;
-        }
-    }
-
     private Decks decks;
 
     private int deckSize() {

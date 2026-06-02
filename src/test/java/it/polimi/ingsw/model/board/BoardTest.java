@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model.board;
 
+import it.polimi.ingsw.DummyCard;
 import it.polimi.ingsw.controller.GameConfig;
 import it.polimi.ingsw.model.cards.Building;
 import it.polimi.ingsw.model.cards.Card;
@@ -20,16 +21,6 @@ public class BoardTest {
     List<Tile> tiles = new ArrayList<>();
     TileSet ts = new TileSet(tiles);
     Board board = new Board(ot, ts);
-    private static class DummyCard extends Card{
-        public DummyCard(){
-            super();
-        }
-
-        @Override
-        public CardCategory getCategory() {
-            return null;
-        }
-    }
 
     private void generateTopCards(int size) {
         for(int i = 0; i < size ; i++) {

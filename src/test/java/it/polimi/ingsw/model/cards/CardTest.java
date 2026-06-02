@@ -1,5 +1,6 @@
 package it.polimi.ingsw.model.cards;
 
+import it.polimi.ingsw.DummyCard;
 import it.polimi.ingsw.model.game.Age;
 import it.polimi.ingsw.model.game.TriggerKey;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,16 +13,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CardTest {
-    private static class DummyCard extends Card{
-        private DummyCard(){
-            super();
-        }
-
-        @Override
-        public CardCategory getCategory() {
-            return null;
-        }
-    }
     private DummyCard card;
     @BeforeEach
     void setUp(){

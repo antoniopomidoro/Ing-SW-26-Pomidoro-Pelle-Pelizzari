@@ -45,6 +45,14 @@ public class Building extends Card {
     }
 
     /**
+     * Constructor for test purposes.
+     * @param age The age of the building.
+     */
+    public Building(Age age) {
+        this.age = age;
+    }
+
+    /**
      * Triggers the effect of the building.
      *
      * @param p     The player triggering the effect.
