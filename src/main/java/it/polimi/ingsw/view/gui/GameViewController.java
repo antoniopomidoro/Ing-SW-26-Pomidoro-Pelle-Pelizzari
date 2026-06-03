@@ -560,23 +560,23 @@ public class GameViewController implements UserInterface {
 
                 // da abbassare leggermente tutto(ancora)
         if (numPlayers <= 2) {
-            if (slotIndex == 0) return new Point2D(24, -5);
-            if (slotIndex == 1) return new Point2D(24, 7);
+            if (slotIndex == 0) return new Point2D(35, 20);
+            if (slotIndex == 1) return new Point2D(35, 40);
         } else if (numPlayers == 3) {
-            if (slotIndex == 0) return new Point2D(24, 0);
-            if (slotIndex == 1) return new Point2D(24, 18);
-            if (slotIndex == 2) return new Point2D(24, 37);
+            if (slotIndex == 0) return new Point2D(35, 20);
+            if (slotIndex == 1) return new Point2D(35, 40);
+            if (slotIndex == 2) return new Point2D(35, 60);
         } else if (numPlayers == 4) {
-            if (slotIndex == 0) return new Point2D(24, -5);
-            if (slotIndex == 1) return new Point2D(24, 11);
-            if (slotIndex == 2) return new Point2D(24, 28);
-            if (slotIndex == 3) return new Point2D(24, 44);
-        } else if (numPlayers >= 5) {
-            if (slotIndex == 0) return new Point2D(24, -10);
-            if (slotIndex == 1) return new Point2D(24, 4);
-            if (slotIndex == 2) return new Point2D(24, 18);
-            if (slotIndex == 3) return new Point2D(24, 32);
-            if (slotIndex == 4) return new Point2D(24, 46);
+            if (slotIndex == 0) return new Point2D(35, 20);
+            if (slotIndex == 1) return new Point2D(35, 40);
+            if (slotIndex == 2) return new Point2D(35, 60);
+            if (slotIndex == 3) return new Point2D(35, 80);
+        } else if (numPlayers == 5) {
+            if (slotIndex == 0) return new Point2D(35, 20);
+            if (slotIndex == 1) return new Point2D(35, 40);
+            if (slotIndex == 2) return new Point2D(35, 60);
+            if (slotIndex == 3) return new Point2D(35, 80);
+            if (slotIndex == 4) return new Point2D(35, 100);
         }
         return new Point2D(24, 0 + slotIndex * 15);
     }
