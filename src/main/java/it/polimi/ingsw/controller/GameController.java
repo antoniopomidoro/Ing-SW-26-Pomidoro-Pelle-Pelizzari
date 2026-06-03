@@ -235,7 +235,11 @@ public class GameController {
             state.setPhase(new TurnPhase());
         }
         if(p.equals(state.getCurrentOrderTileOrderPlayer())){
-            state.nextPlayerInTurnOrderTile();
+            boolean hasNextPlayer = state.nextPlayerInTurnOrderTile();
+            if (!hasNextPlayer) {
+                state.updateTurnOrder();
+                state.setPhase(new TurnPhase());
+            }
         }
         return disconnect;
     }

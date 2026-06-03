@@ -567,16 +567,16 @@ public class GameViewController implements UserInterface {
             if (slotIndex == 1) return new Point2D(35, 40);
             if (slotIndex == 2) return new Point2D(35, 60);
         } else if (numPlayers == 4) {
-            if (slotIndex == 0) return new Point2D(35, 20);
-            if (slotIndex == 1) return new Point2D(35, 40);
-            if (slotIndex == 2) return new Point2D(35, 60);
-            if (slotIndex == 3) return new Point2D(35, 80);
+            if (slotIndex == 0) return new Point2D(35, 05);
+            if (slotIndex == 1) return new Point2D(35, 27);
+            if (slotIndex == 2) return new Point2D(35, 49);
+            if (slotIndex == 3) return new Point2D(35, 71);
         } else if (numPlayers == 5) {
-            if (slotIndex == 0) return new Point2D(35, 20);
-            if (slotIndex == 1) return new Point2D(35, 40);
-            if (slotIndex == 2) return new Point2D(35, 60);
-            if (slotIndex == 3) return new Point2D(35, 80);
-            if (slotIndex == 4) return new Point2D(35, 100);
+            if (slotIndex == 0) return new Point2D(35, 00);
+            if (slotIndex == 1) return new Point2D(35, 22);
+            if (slotIndex == 2) return new Point2D(35, 44);
+            if (slotIndex == 3) return new Point2D(35, 66);
+            if (slotIndex == 4) return new Point2D(35, 88);
         }
         return new Point2D(24, 0 + slotIndex * 15);
     }
