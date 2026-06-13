@@ -11,7 +11,7 @@ public interface ServerRMIInterface extends Remote {
      * Dispatches a JSON command to the lobby queue or the game command queue,
      * mirroring the dispatch logic used by the Socket transport.
      *
-     * @param json     serialized {@code LobbyRequest} or {@code Executor} payload
+     * @param json     serialized {@code ServerCommand} payload (lobby or game action)
      * @param callback client callback used to send responses back
      * @return {@code true} if the command was accepted
      * @throws RemoteException if the remote call fails

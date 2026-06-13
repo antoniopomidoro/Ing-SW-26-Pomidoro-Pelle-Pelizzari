@@ -30,8 +30,27 @@ import javafx.util.Duration;
 
 /**
  * Owns all JavaFX transitions for the game screen. Contains no state-machine logic.
+ *
+ * <p>Modal animations (event card reveal) are serialised through an internal queue so
+ * that concurrent events never produce overlapping overlays.
  */
 public class GameAnimator {
+
+    // ── Sequential animation queue ────────────────────────────────────────────
+
+    private final java.util.ArrayDeque<Runnable> animQueue = new java.util.ArrayDeque<>();
+    private boolean animRunning = false;
+
+    private void enqueueAnimation(Runnable starter) {
+        animQueue.add(starter);
+        if (!animRunning) nextAnimation();
+    }
+
+    private void nextAnimation() {
+        if (animQueue.isEmpty()) { animRunning = false; return; }
+        animRunning = true;
+        animQueue.poll().run();
+    }
 
     private static final Duration FLIP_HALF      = Duration.millis(350);
     private static final Duration DEAL_SLIDE     = Duration.millis(700);
@@ -150,32 +169,35 @@ public class GameAnimator {
     }
 
     /**
-     * Modal two-phase event card reveal animation.
-     * Phase 1: card scales up from 40% to full size (750 ms, ease-out).
-     * Phase 2: warm radial light spreads from centre, revealing the illustration (1150 ms).
-     * The overlay then holds for 1100 ms and fades out automatically (300 ms).
-     * Must be called on the JavaFX application thread.
+     * Enqueues a modal event-card reveal so concurrent events never overlap.
+     * Animations play sequentially; the next one starts only after the overlay fades out.
      *
      * @param contentPane the 1280×720 reference pane to host the overlay
      * @param cardImage   the event card image to reveal
      */
     public void animateEventCardReveal(AnchorPane contentPane, Image cardImage) {
+        enqueueAnimation(() -> doAnimateEventCardReveal(contentPane, cardImage));
+    }
+
+    private void doAnimateEventCardReveal(AnchorPane contentPane, Image cardImage) {
         Rectangle dimRect = new Rectangle(1280, 720, Color.rgb(0, 0, 0, DIM_OPACITY));
 
         ImageView cardView = new ImageView(cardImage);
         cardView.setFitWidth(OVERLAY_CARD_W);
         cardView.setFitHeight(OVERLAY_CARD_H);
         cardView.setPreserveRatio(true);
-        Rectangle cardClip = new Rectangle(OVERLAY_CARD_W, OVERLAY_CARD_H);
-        cardClip.setArcWidth(24);
-        cardClip.setArcHeight(24);
-        cardView.setClip(cardClip);
 
         Rectangle darkRect = new Rectangle(OVERLAY_CARD_W, OVERLAY_CARD_H, Color.BLACK);
 
         StackPane cardPane = new StackPane(cardView, darkRect);
         cardPane.setMinSize(OVERLAY_CARD_W, OVERLAY_CARD_H);
         cardPane.setMaxSize(OVERLAY_CARD_W, OVERLAY_CARD_H);
+
+        // Clip the whole cardPane so both the image and the dark overlay share the squircle shape.
+        Rectangle paneClip = new Rectangle(OVERLAY_CARD_W, OVERLAY_CARD_H);
+        paneClip.setArcWidth(24);
+        paneClip.setArcHeight(24);
+        cardPane.setClip(paneClip);
 
         StackPane overlayRoot = new StackPane(dimRect, cardPane);
         overlayRoot.setMinSize(1280, 720);
@@ -215,7 +237,10 @@ public class GameAnimator {
 
         FadeTransition fadeOut = new FadeTransition(OVERLAY_FADE, overlayRoot);
         fadeOut.setToValue(0);
-        fadeOut.setOnFinished(e -> contentPane.getChildren().remove(overlayRoot));
+        fadeOut.setOnFinished(e -> {
+            contentPane.getChildren().remove(overlayRoot);
+            nextAnimation();
+        });
 
         new SequentialTransition(scaleUp, revealPause, idle, fadeOut).play();
     }

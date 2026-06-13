@@ -3,17 +3,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import  java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.rmi.RemoteException;
-import it.polimi.ingsw.controller.Actions.Executor;
-import it.polimi.ingsw.controller.GameController;
-import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.controller.NUDEAnalyzer;
+import it.polimi.ingsw.network.ServerCommand;
 import it.polimi.ingsw.network.JacksonConfig;
 import it.polimi.ingsw.network.ServerManager;
 import it.polimi.ingsw.network.VirtualView;
 import it.polimi.ingsw.network.dto.DTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
-import it.polimi.ingsw.network.lobby.LobbyAnalyzer;
-import it.polimi.ingsw.network.lobby.LobbyCommand;
 
 import java.util.Optional;
 import java.time.Clock;
@@ -98,13 +94,19 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
         going = false;
     }
 
-    public Boolean NUDECommand(String json) throws RemoteException {
-        Optional<LobbyCommand> lobbyCmd = LobbyAnalyzer.parse(json, this);
-        if (lobbyCmd.isPresent()) {
-            serverManager.getLobbyQueue().add(lobbyCmd.get());
-        } else {
-            serverManager.getQueue().add(json);
+    /**
+     * Parses one raw client message and routes it onto the proper queue.
+     *
+     * @param json raw JSON line read from the socket
+     * @return {@code true} if the message was recognized and routed
+     */
+    public boolean NUDECommand(String json) {
+        Optional<ServerCommand> command = NUDEAnalyzer.parse(json);
+        if (command.isEmpty()) {
+            System.err.println("[SOCKET] unrecognized message dropped: " + json);
+            return false;
         }
+        command.get().submit(serverManager, this);
         return true;
     }
     public Instant GetLastPing(){

@@ -17,10 +17,11 @@ import it.polimi.ingsw.network.dto.TotemSelectionDTO;
 public abstract class VirtualView implements GameStateObserver {
     private static final String EMPTY_NICKNAME = "";
 
-    protected Totem totem;
-    protected GameController gameController;
-    protected String gameId;
-    protected String nickname;
+    // volatile: scritti dal thread lobby, letti anche dai thread di gioco/transport (ping, log, eventi)
+    protected volatile Totem totem;
+    protected volatile GameController gameController;
+    protected volatile String gameId;
+    protected volatile String nickname;
     /**
      * Assigns the totem associated with this view.
      *

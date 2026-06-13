@@ -1,32 +1,47 @@
 package it.polimi.ingsw.network.lobby;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.network.ServerCommand;
 import it.polimi.ingsw.network.ServerManager;
 import it.polimi.ingsw.network.VirtualView;
 
 import java.util.Objects;
 
 /**
- * Lobby command that registers a player in an existing lobby before totem selection.
+ * Client request that joins an existing lobby (or rejoins an active game).
+ * Deserialized by Jackson from {@code {"action":"ENTER_LOBBY",...}}.
  */
-public class EnterLobbyCommand implements LobbyCommand {
-    private final String gameId;
-    private final String playerName;
-    private final VirtualView view;
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class EnterLobbyCommand implements ServerCommand {
 
-    /**
-     * @param gameId     target lobby identifier
-     * @param playerName player's nickname
-     * @param view       player's virtual view for sending responses
-     */
-    public EnterLobbyCommand(String gameId, String playerName, VirtualView view) {
-        Objects.requireNonNull(view, "view");
-        this.gameId = gameId;
-        this.playerName = playerName;
-        this.view = view;
+    @JsonProperty
+    private String gameId;
+
+    @JsonProperty
+    private String playerName;
+
+    private EnterLobbyCommand() {
+        // Jackson
     }
 
+    /**
+     * Builds the request client-side before serialization.
+     *
+     * @param gameId     target lobby identifier
+     * @param playerName player's nickname
+     */
+    public EnterLobbyCommand(String gameId, String playerName) {
+        this.gameId = gameId;
+        this.playerName = playerName;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void execute(ServerManager serverManager) {
-        serverManager.enterLobby(gameId, playerName, view);
+    public void submit(ServerManager serverManager, VirtualView view) {
+        Objects.requireNonNull(view, "view");
+        serverManager.submitToLobby(() -> serverManager.enterLobby(gameId, playerName, view));
     }
 }

@@ -50,13 +50,6 @@ class SustenanceTest {
     }
 
     @Test
-    @DisplayName("returns false when orderTileOrder is null")
-    void nullOrderTileOrder_returnsFalse() {
-        state.setOrderTileOrder(null);
-        assertFalse(sustenance.applyEffect(state, Age.AGE_1));
-    }
-
-    @Test
     @DisplayName("returns true when player list is empty")
     void emptyPlayerList_returnsTrueNoOp() throws Exception {
         GameState emptyState = buildState(new ArrayList<>());

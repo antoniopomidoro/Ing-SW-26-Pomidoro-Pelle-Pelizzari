@@ -230,6 +230,9 @@ public class GameController {
                 .findFirst()
                 .orElse(null);
         if(p == null) return false;
+        if (!p.isConnected()) {
+            return false; // già disconnesso: i rilevatori (pinger, destroyer, reader) possono accodare duplicati
+        }
         boolean disconnect = state.disconnectPlayer(p);
         if(p.equals(state.getCurrentTurnOrderPlayer())) {
             state.setPhase(new TurnPhase());
@@ -243,6 +246,14 @@ public class GameController {
         }
         return disconnect;
     }
+    /**
+     * Reintegrates a disconnected player and re-registers their view as observer.
+     * Must run on the game's own command queue.
+     *
+     * @param player the returning player
+     * @param view   the player's new virtual view
+     * @return {@code true} if the player was reintegrated
+     */
     public boolean reconnectPlayer(Player player, VirtualView view){
         Boolean reconnect = state.reintegratePlayer(player);
         state.addObserver(view);

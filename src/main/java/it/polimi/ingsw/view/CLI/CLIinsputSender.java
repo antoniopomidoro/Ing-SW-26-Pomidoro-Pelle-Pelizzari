@@ -2,9 +2,7 @@ package it.polimi.ingsw.view.CLI;
 
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.GameStateDTO;
-import it.polimi.ingsw.view.ActionType;
 import it.polimi.ingsw.view.ClientManager;
-import it.polimi.ingsw.view.NUDESender;
 import it.polimi.ingsw.view.gui.ActionSenders.ActionSender;
 
 import java.util.Arrays;
@@ -115,8 +113,7 @@ public class CLIinsputSender implements Runnable {
         List<?> topCards = snapshot.getBoard().getTopCards();
         if (!isValidIndex(index, topCards.size(), "topcard")) return false;
         String cardId = snapshot.getBoard().getTopCards().get(index).getInstanceId();
-        String message = NUDESender.build(ActionType.TOP_CARD, index, user.getNickname(), user.getId(), user.getPlayerTotem(), cardId);
-        if (message != null) user.getConnection().send(message);
+        actionSender.sendPickTopCard(index, cardId);
         return true;
     }
 
@@ -126,8 +123,7 @@ public class CLIinsputSender implements Runnable {
         List<?> bottomCards = snapshot.getBoard().getBottomCards();
         if (!isValidIndex(index, bottomCards.size(), "bottomcard")) return false;
         String cardId = snapshot.getBoard().getBottomCards().get(index).getInstanceId();
-        String message = NUDESender.build(ActionType.BOTTOM_CARD, index, user.getNickname(), user.getId(), user.getPlayerTotem(), cardId);
-        if (message != null) user.getConnection().send(message);
+        actionSender.sendPickBottomCard(index, cardId);
         return true;
     }
 
@@ -137,8 +133,7 @@ public class CLIinsputSender implements Runnable {
         List<?> topBuildings = snapshot.getBoard().getTopBuildings();
         if (!isValidIndex(index, topBuildings.size(), "topbuild")) return false;
         String cardId = snapshot.getBoard().getTopBuildings().get(index).getInstanceId();
-        String message = NUDESender.build(ActionType.TOP_BUILDING, index, user.getNickname(), user.getId(), user.getPlayerTotem(), cardId);
-        if (message != null) user.getConnection().send(message);
+        actionSender.sendPickTopBuilding(index, cardId);
         return true;
     }
 
@@ -148,8 +143,7 @@ public class CLIinsputSender implements Runnable {
         List<?> bottomBuildings = snapshot.getBoard().getBottomBuildings();
         if (!isValidIndex(index, bottomBuildings.size(), "bottombuild")) return false;
         String cardId = snapshot.getBoard().getBottomBuildings().get(index).getInstanceId();
-        String message = NUDESender.build(ActionType.BOTTOM_BUILDING, index, user.getNickname(), user.getId(), user.getPlayerTotem(), cardId);
-        if (message != null) user.getConnection().send(message);
+        actionSender.sendPickBottomBuilding(index, cardId);
         return true;
     }
 
@@ -158,8 +152,7 @@ public class CLIinsputSender implements Runnable {
         if (snapshot == null) return false;
         List<?> tiles = snapshot.getBoard().getTiles();
         if (!isValidIndex(index, tiles.size(), "tile")) return false;
-        String message = NUDESender.build(ActionType.TILE, index, user.getNickname(), user.getId(), user.getPlayerTotem(), null);
-        if (message != null) user.getConnection().send(message);
+        actionSender.sendPickTile(index);
         return true;
     }
 

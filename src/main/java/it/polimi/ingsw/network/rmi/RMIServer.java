@@ -1,8 +1,8 @@
 package it.polimi.ingsw.network.rmi;
 
+import it.polimi.ingsw.controller.NUDEAnalyzer;
+import it.polimi.ingsw.network.ServerCommand;
 import it.polimi.ingsw.network.ServerManager;
-import it.polimi.ingsw.network.lobby.LobbyAnalyzer;
-import it.polimi.ingsw.network.lobby.LobbyCommand;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -51,12 +51,12 @@ public class RMIServer extends UnicastRemoteObject implements ServerRMIInterface
         }
         System.out.println("[NET][IN][SERVER][RMI] " + json);
         RMIClientHandler handler = getOrCreateHandler(callback);
-        Optional<LobbyCommand> lobbyCmd = LobbyAnalyzer.parse(json, handler);
-        if (lobbyCmd.isPresent()) {
-            serverManager.getLobbyQueue().add(lobbyCmd.get());
-        } else {
-            serverManager.getQueue().add(json);
+        Optional<ServerCommand> command = NUDEAnalyzer.parse(json);
+        if (command.isEmpty()) {
+            System.err.println("[RMI] unrecognized message dropped: " + json);
+            return false;
         }
+        command.get().submit(serverManager, handler);
         return true;
     }
 

@@ -1,25 +1,23 @@
 package it.polimi.ingsw.network.socket;
 
-import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.controller.Actions.Executor; // Polymorphic base class for commands
 import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.GameState;
 import it.polimi.ingsw.model.game.TriggerKey;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.LobbyState;
-import it.polimi.ingsw.network.NUDEqueue;
 import it.polimi.ingsw.network.ServerManager;
+import it.polimi.ingsw.network.VirtualView;
 import it.polimi.ingsw.network.dto.*;
-import it.polimi.ingsw.network.lobby.CreateGameCommand;
-import it.polimi.ingsw.network.lobby.LobbyCommand;
-import it.polimi.ingsw.network.lobby.LobbyQueue;
 import it.polimi.ingsw.network.JacksonConfig; // Centralized Jackson configuration
+import it.polimi.ingsw.controller.GameController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,6 +32,9 @@ class SocketClientHandlerTest {
     private ServerManager fakeManager;
     private GameController concreteController;
 
+    private final AtomicReference<Executor> recordedGameCommand = new AtomicReference<>();
+    private final AtomicReference<Runnable> recordedLobbyTask = new AtomicReference<>();
+
     @BeforeEach
     void setUp() {
         // 1. Simulate the physical Socket layer
@@ -47,17 +48,17 @@ class SocketClientHandlerTest {
             }
         };
 
-        // 2. Instantiate a ServerManager stub to intercept internal queue calls
+        // Stub that records routing instead of executing it
         this.fakeManager = new ServerManager() {
-            // NUDEqueue initializes an internal LinkedBlockingQueue for incoming strings
-            private final NUDEqueue nQueue = new NUDEqueue(this);
-            private final LobbyQueue lQueue = new LobbyQueue(this);
+            @Override
+            public void submitToGame(Executor command, VirtualView view) {
+                recordedGameCommand.set(command);
+            }
 
             @Override
-            public NUDEqueue getQueue() { return nQueue; }
-
-            @Override
-            public LobbyQueue getLobbyQueue() { return lQueue; }
+            public void submitToLobby(Runnable task) {
+                recordedLobbyTask.set(task);
+            }
         };
 
         // 3. Initialize the Handler and inject a GameController to prevent NPEs
@@ -130,36 +131,39 @@ class SocketClientHandlerTest {
     }
 
     @Test
-    @DisplayName("Test Inbound: Verify command delivery to NUDEqueue by Analyzer")
-    void testFullInboundFlow () throws Exception {
-        // According to Executor.java annotations, "TILE" is a valid mapped action name
-        String rawJson = "{\"action\":\"TILE\", \"index\":5, \"nick\":\"M\", \"idGame\":\"testId\"}";
+    @DisplayName("Inbound: a game action json is routed to the per-game queue")
+    void testGameCommandRouting() {
+        String rawJson = "{\"action\":\"TILE\", \"index\":5, \"nick\":\"M\", \"idGame\":\"testId\", \"idPlayer\":\"RED\"}";
 
-        // 1. Pre-validation: Ensure the JSON is physically compatible with JacksonConfig
-        assertDoesNotThrow(() -> {
-            JacksonConfig.mapper().readValue(rawJson, Executor.class);
-        }, "JacksonConfig should resolve 'TILE' to ExecTile.class based on @JsonSubTypes");
+        boolean accepted = handler.NUDECommand(rawJson);
 
-        // 2. Execution: Simulate a command arriving from the network
-        handler.NUDECommand(rawJson);
-
-        // 3. Verification: Ensure the command was pushed to the NUDEqueue
-        // If no NPE occurs, the Handler successfully invoked fakeManager.getQueue().add(rawJson)
-        assertNotNull(fakeManager.getQueue(), "ServerManager must hold a valid NUDEqueue instance");
-        //Command successfully delivered to the NUDEqueue pipeline.
+        assertTrue(accepted, "valid game json must be accepted");
+        Executor routed = recordedGameCommand.get();
+        assertNotNull(routed, "command must reach submitToGame");
+        assertEquals("testId", routed.getIdGame());
     }
 
     @Test
-    @DisplayName("Test Lobby Inbound: Corrected JSON for ENTER_LOBBY")
-    void testLobbyCommandDelivery() throws Exception {
-        String lobbyJson = "{\"type\":\"CREATE\", \"playerName\":\"M\", \"gameId\":\"testId\"}";
+    @DisplayName("Inbound: a lobby json is routed to the lobby queue")
+    void testLobbyCommandRouting() {
+        String lobbyJson = "{\"action\":\"CREATE\", \"playerName\":\"M\", \"requiredPlayers\":2, \"requestedTotem\":\"RED\"}";
 
-        handler.NUDECommand(lobbyJson);
+        boolean accepted = handler.NUDECommand(lobbyJson);
 
-        assertNotNull(fakeManager.getLobbyQueue(), "ServerManager must hold a valid LobbyQueue");
+        assertTrue(accepted, "valid lobby json must be accepted");
+        assertNotNull(recordedLobbyTask.get(), "task must reach submitToLobby");
+        assertNull(recordedGameCommand.get(), "lobby json must not be routed as game command");
+    }
 
+    @Test
+    @DisplayName("Inbound: malformed json is rejected without routing")
+    void testMalformedJsonRejected() {
+        boolean accepted = handler.NUDECommand("{\"garbage\": true}");
+
+        assertFalse(accepted);
+        assertNull(recordedGameCommand.get());
+        assertNull(recordedLobbyTask.get());
     }
 }
-
 
 
