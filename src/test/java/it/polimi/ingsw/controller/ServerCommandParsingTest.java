@@ -11,6 +11,7 @@ import it.polimi.ingsw.network.ServerCommand;
 import it.polimi.ingsw.network.lobby.CreateGameCommand;
 import it.polimi.ingsw.network.lobby.EnterLobbyCommand;
 import it.polimi.ingsw.network.lobby.SelectTotemCommand;
+import it.polimi.ingsw.view.NUDEGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -97,36 +98,36 @@ class ServerCommandParsingTest {
         assertInstanceOf(ExecTile.class, NUDEAnalyzer.parse(reserialized).orElseThrow());
     }
 
-    // --- client/server round-trip: NUDESender output must be server-parseable ---
+    // --- client/server round-trip: NUDEGenerator output must be server-parseable ---
 
     @Test
-    @DisplayName("NUDESender lobby builders produce json the server parses to the right command")
+    @DisplayName("NUDEGenerator lobby builders produce json the server parses to the right command")
     void senderLobbyBuildersRoundTrip() {
         assertInstanceOf(CreateGameCommand.class,
-                NUDEAnalyzer.parse(it.polimi.ingsw.view.NUDESender.buildLobbyCreate("M", 2, Totem.RED)).orElseThrow());
+                NUDEAnalyzer.parse(NUDEGenerator.buildLobbyCreate("M", 2, Totem.RED)).orElseThrow());
         assertInstanceOf(EnterLobbyCommand.class,
-                NUDEAnalyzer.parse(it.polimi.ingsw.view.NUDESender.buildLobbyEnter("123456", "M")).orElseThrow());
+                NUDEAnalyzer.parse(NUDEGenerator.buildLobbyEnter("123456", "M")).orElseThrow());
         assertInstanceOf(SelectTotemCommand.class,
-                NUDEAnalyzer.parse(it.polimi.ingsw.view.NUDESender.buildLobbySelectTotem("123456", "M", Totem.RED)).orElseThrow());
+                NUDEAnalyzer.parse(NUDEGenerator.buildLobbySelectTotem("123456", "M", Totem.RED)).orElseThrow());
     }
 
     @Test
-    @DisplayName("Client-built Exec* commands round-trip through NUDESender to the right Executor")
+    @DisplayName("Client-built Exec* commands round-trip through NUDEGenerator to the right Executor")
     void senderGameBuilderRoundTrip() {
-        String json = it.polimi.ingsw.view.NUDESender.toJson(
+        String json = NUDEGenerator.toJson(
                 new ExecTile("123456", Totem.RED, 5));
         Executor exec = assertInstanceOf(ExecTile.class, NUDEAnalyzer.parse(json).orElseThrow());
         assertEquals("123456", exec.getIdGame());
         assertEquals(Totem.RED, exec.getIdPlayer());
 
         assertInstanceOf(ExecTopCard.class, NUDEAnalyzer.parse(
-                it.polimi.ingsw.view.NUDESender.toJson(new ExecTopCard("1", Totem.RED, 0, "c1"))).orElseThrow());
+                NUDEGenerator.toJson(new ExecTopCard("1", Totem.RED, 0, "c1"))).orElseThrow());
         assertInstanceOf(ExecBottomCard.class, NUDEAnalyzer.parse(
-                it.polimi.ingsw.view.NUDESender.toJson(new ExecBottomCard("1", Totem.RED, 0, "c1"))).orElseThrow());
+                NUDEGenerator.toJson(new ExecBottomCard("1", Totem.RED, 0, "c1"))).orElseThrow());
         assertInstanceOf(ExecTopBuilding.class, NUDEAnalyzer.parse(
-                it.polimi.ingsw.view.NUDESender.toJson(new ExecTopBuilding("1", Totem.RED, 0, "b1"))).orElseThrow());
+                NUDEGenerator.toJson(new ExecTopBuilding("1", Totem.RED, 0, "b1"))).orElseThrow());
         assertInstanceOf(ExecBottomBuilding.class, NUDEAnalyzer.parse(
-                it.polimi.ingsw.view.NUDESender.toJson(new ExecBottomBuilding("1", Totem.RED, 0, "b1"))).orElseThrow());
+                NUDEGenerator.toJson(new ExecBottomBuilding("1", Totem.RED, 0, "b1"))).orElseThrow());
     }
 
     @Test
