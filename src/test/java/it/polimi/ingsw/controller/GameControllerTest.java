@@ -195,15 +195,19 @@ public class GameControllerTest {
         assertNotEquals(oldPhase, controller.getGameState().getCurrentPhase());
     }
 
-    @DisplayName("The method works correctly when the player in order disconnects")
+    @DisplayName("The method skips to the next player when the current order-tile player disconnects during occupation")
     @Test
     public void disconnectPlayerActivePlayerTurnOrderTile() {
         Player p2 = controller.getGameState().getPlayers().get(1);
+        // The order-tile cursor is only meaningful while occupation is in progress.
+        controller.getGameState().setPhase(new StartTurnPhase());
         GamePhaseBehavior oldPhase = controller.getGameState().getCurrentPhase();
         boolean res = controller.disconnectPlayer(Totem.RED);
         assertTrue(res);
-        assertInstanceOf(PlayerTurnPhase.class, controller.getGameState().getCurrentPhase());
+        // Another player can still occupy, so the phase stays the same instance...
+        assertInstanceOf(StartTurnPhase.class, controller.getGameState().getCurrentPhase());
         assertEquals(oldPhase, controller.getGameState().getCurrentPhase());
+        // ...and the turn advances to the next connected player in the order tile.
         assertEquals(p2, controller.getGameState().getCurrentOrderTileOrderPlayer());
     }
 

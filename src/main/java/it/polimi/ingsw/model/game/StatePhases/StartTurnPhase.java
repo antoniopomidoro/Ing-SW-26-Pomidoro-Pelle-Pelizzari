@@ -109,6 +109,50 @@ public class StartTurnPhase implements GamePhaseBehavior {
     }
 
     /**
+     * Skips the current occupier's turn when they disconnect during tile
+     * occupation, mirroring the advance logic of
+     * {@link #occupyOfferTrailTile(GameState, int, Player)}.
+     * <p>
+     * Only acts when the leaver is the player currently expected to occupy a tile.
+     * Advances to the next connected player; if the sequence is exhausted, rebuilds
+     * the turn order and transitions to {@link TurnPhase} through {@link #nextPhase}
+     * so the {@code START_TURN_COMPLETED} event is still emitted.
+     *
+     * @param context the game state
+     * @param player  the player who just disconnected
+     * @return {@code true} if the occupation turn was skipped, {@code false} otherwise
+     */
+    @Override
+    public boolean handlePlayerDisconnect(GameState context, Player player) {
+        if (context == null || player == null
+                || !player.equals(context.getCurrentOrderTileOrderPlayer())) {
+            return false;
+        }
+        boolean hasNextPlayer = context.nextPlayerInTurnOrderTile();
+        if (!hasNextPlayer) {
+            context.updateTurnOrder();
+            this.nextPhase(context);
+        }
+        return true;
+    }
+
+    /**
+     * During occupation the active player is the one currently expected to place a
+     * totem, tracked by {@code currentPlayerOrderIndex} in the order-tile order.
+     *
+     * @param context the game state
+     * @return the current order-tile player, or empty if the order is unavailable
+     */
+    @Override
+    public Optional<Player> resolveActivePlayer(GameState context) {
+        if (context == null || context.getOrderTileOrder() == null
+                || context.getOrderTileOrder().isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(context.getCurrentOrderTileOrderPlayer());
+    }
+
+    /**
      * Transition to the TURN phase.
      */
     @Override

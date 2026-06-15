@@ -8,6 +8,7 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.Player;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * PLAYER_TURN phase behavior.
@@ -216,6 +217,40 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         if (anyActivated) {
             context.raiseEvent(new GameEvent(GameEvent.Type.BUILDING_ACTIVATED, null));
         }
+    }
+
+    /**
+     * Skips the active player's turn when they disconnect.
+     * <p>
+     * Only acts when the leaver is the player this phase is bound to; a different
+     * player disconnecting does not affect the current drafter. Returning to
+     * {@link TurnPhase} resumes the tile scan from {@code currentTileIndex}, which
+     * {@link TurnPhase} already advanced past this player's tile before entering
+     * the {@code PlayerTurnPhase}, so their turn is cleanly skipped.
+     *
+     * @param context the game state
+     * @param player  the player who just disconnected
+     * @return {@code true} if the turn was skipped, {@code false} otherwise
+     */
+    @Override
+    public boolean handlePlayerDisconnect(GameState context, Player player) {
+        if (context == null || player == null || !player.equals(activePlayer)) {
+            return false;
+        }
+        context.setPhase(new TurnPhase());
+        return true;
+    }
+
+    /**
+     * The active player is the one bound to this phase — the authoritative answer
+     * for the public snapshot, independent of any turn-order index.
+     *
+     * @param context the game state (unused; the active player is held by this phase)
+     * @return the active player, or empty if unset
+     */
+    @Override
+    public Optional<Player> resolveActivePlayer(GameState context) {
+        return Optional.ofNullable(activePlayer);
     }
 
     /**

@@ -442,13 +442,20 @@ public class GameState implements Serializable {
         }
         return true;
     }
+    /**
+     * Marks a player as disconnected. Does NOT raise {@code PLAYER_DISCONNECTED}:
+     * the controller raises it after the current phase has skipped the player's
+     * turn, so the snapshot carried to clients reflects the post-skip state.
+     *
+     * @param player the player leaving
+     * @return {@code true} if the player belonged to this game and was marked disconnected
+     */
     public boolean disconnectPlayer(Player player) {
         if (player == null) return false;
         if (!players.contains(player)) {
             return false;
         }
         player.setConnected(false);
-        raiseEvent(new GameEvent(GameEvent.Type.PLAYER_DISCONNECTED, player));
         return true;
     }
     public boolean removeObserver(GameStateObserver observer) {

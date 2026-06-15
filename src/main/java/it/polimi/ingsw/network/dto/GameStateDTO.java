@@ -108,23 +108,14 @@ public class GameStateDTO {
                 ? List.of()
                 : state.getOrderTileOrder().stream().map(Player::getId).toList();
 
-        // During StartTurnPhase the active player is the one currently choosing a tile
-        // (tracked by currentPlayerOrderIndex in orderTileOrder), NOT the turnOrder player.
-        Totem activePlayer = null;
-        if ("StartTurnPhase".equals(phaseName)) {
-            if (state.getOrderTileOrder() != null && !state.getOrderTileOrder().isEmpty()) {
-                Player current = state.getCurrentOrderTileOrderPlayer();
-                activePlayer = current != null ? current.getId() : null;
-                System.out.println("[DTO] StartTurnPhase: currentPlayerOrderIndex="
-                        + state.getCurrentPlayerOrderIndex()
-                        + " activePlayer=" + activePlayer
-                        + " orderTileOrder=" + state.getOrderTileOrder().stream()
-                                .map(p -> p.getId().name()).toList());
-            }
-        } else if (state.getTurnOrder() != null && !state.getTurnOrder().isEmpty()) {
-            Player currentPlayer = state.getCurrentTurnOrderPlayer();
-            activePlayer = currentPlayer != null ? currentPlayer.getId() : null;
-        }
+        // Authoritative "whose turn it is": ask the current phase for the player it is
+        // awaiting. Index-based lookups (turnOrder.get(currentPlayerIndex)) break when a
+        // disconnected player occupies an earlier tile, because currentPlayerIndex counts
+        // only connected tiles while turnOrder includes the disconnected occupier — the
+        // snapshot would then highlight the wrong (often offline) player.
+        Totem activePlayer = state.getCurrentPhase() != null
+                ? state.getCurrentPhase().resolveActivePlayer(state).map(Player::getId).orElse(null)
+                : null;
 
         int deckSize = state.getDeck() != null
                 ? state.getDeck().remainingCards(state.getAge())

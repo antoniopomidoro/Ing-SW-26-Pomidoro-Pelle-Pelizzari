@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.Player;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 /**
  * Represents the behavior of a specific game phase within the State design pattern.
@@ -165,5 +166,43 @@ public interface GamePhaseBehavior extends Serializable {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, null));
         }
         throw new IllegalMoveException("Action not allowed in the current phase");
+    }
+
+    /**
+     * Reacts to a player disconnecting while this phase is active.
+     * <p>
+     * The player has already been marked disconnected on the model when this is
+     * called. The default implementation does nothing: most phases have no notion
+     * of a "current" player whose turn must be skipped (they are transient or do
+     * not await a specific player's input). Only the phases that actively wait for
+     * a single player — {@link StartTurnPhase} (tile occupation) and
+     * {@link PlayerTurnPhase} (card/building drafting) — override this to advance
+     * past the player who left. This is a lifecycle hook, not a player action, so
+     * it never throws {@link IllegalMoveException}.
+     *
+     * @param context the {@link GameState} context for the state pattern
+     * @param player  the player who just disconnected
+     * @return {@code true} if this phase advanced as a result, {@code false} otherwise
+     */
+    default boolean handlePlayerDisconnect(GameState context, Player player) {
+        return false;
+    }
+
+    /**
+     * Resolves the player this phase is currently awaiting an action from.
+     * <p>
+     * This is the authoritative source for "whose turn it is" in the public
+     * snapshot, replacing index-based lookups (e.g. {@code turnOrder.get(index)})
+     * that break when a disconnected player occupies an earlier tile: such lookups
+     * count connected and disconnected occupiers inconsistently and end up pointing
+     * at the wrong player. The default returns {@link Optional#empty()} — most
+     * phases are transient or await no specific player. {@link PlayerTurnPhase} and
+     * {@link StartTurnPhase} override this with their own active player.
+     *
+     * @param context the {@link GameState} context for the state pattern
+     * @return the player currently expected to act, or empty if none
+     */
+    default Optional<Player> resolveActivePlayer(GameState context) {
+        return Optional.empty();
     }
 }

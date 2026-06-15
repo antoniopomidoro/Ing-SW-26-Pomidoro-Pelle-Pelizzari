@@ -12,7 +12,6 @@ import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.GameState;
 import it.polimi.ingsw.model.game.StatePhases.IllegalMoveException;
 import it.polimi.ingsw.model.game.StatePhases.SetupPhase;
-import it.polimi.ingsw.model.game.StatePhases.TurnPhase;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.SaveObserver;
@@ -234,15 +233,16 @@ public class GameController {
             return false; // già disconnesso: i rilevatori (pinger, destroyer, reader) possono accodare duplicati
         }
         boolean disconnect = state.disconnectPlayer(p);
-        if(p.equals(state.getCurrentTurnOrderPlayer())) {
-            state.setPhase(new TurnPhase());
-        }
-        if(p.equals(state.getCurrentOrderTileOrderPlayer())){
-            boolean hasNextPlayer = state.nextPlayerInTurnOrderTile();
-            if (!hasNextPlayer) {
-                state.updateTurnOrder();
-                state.setPhase(new TurnPhase());
-            }
+        if (disconnect) {
+            // Phase-aware turn skip: only the phase that is actually awaiting a player
+            // knows whether the leaver was the current one. Delegating to the State
+            // pattern avoids inspecting phase types here and relies on each phase's
+            // own source of truth (the active player), not on stale turn-order indices.
+            state.getCurrentPhase().handlePlayerDisconnect(state, p);
+            // Raise the event AFTER the skip so the snapshot sent to clients reflects
+            // the post-skip state (e.g. the next order-tile player now to act), instead
+            // of still showing the player who just left as the current one.
+            state.raiseEvent(new GameEvent(GameEvent.Type.PLAYER_DISCONNECTED, p));
         }
         return disconnect;
     }

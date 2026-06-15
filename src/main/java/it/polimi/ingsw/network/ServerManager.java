@@ -341,7 +341,7 @@ public class ServerManager {
 
         broadcastTotemSelection(gameId, pending);
 
-        if (!pending.isFull()) {
+        if (!pending.allTotemsSelected()) {
             broadcastWaiting(gameId, pending);
         }
 
