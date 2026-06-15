@@ -1,12 +1,11 @@
 package it.polimi.ingsw;
 
+import it.polimi.ingsw.network.LocalHostResolver;
 import it.polimi.ingsw.network.ServerManager;
 import it.polimi.ingsw.network.rmi.RMIServer;
 import it.polimi.ingsw.network.socket.SocketServer;
 
 import java.net.ConnectException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -18,18 +17,8 @@ public class App {
     private static final String RMI_BIND_NAME = "palle";
 
     public static void main(String[] args) {
-        String hostIp;
-        if (args.length > 0) {
-            hostIp = args[0];
-        } else {
-            try {
-                hostIp = InetAddress.getLocalHost().getHostAddress();
-            } catch (UnknownHostException e) {
-                System.err.println("[Server] Cannot resolve local host, falling back to 127.0.0.1: " + e.getMessage());
-                hostIp = "127.0.0.1";
-            }
-        }
-        System.setProperty("java.rmi.server.hostname", hostIp);
+        String hostIp = args.length > 0 ? args[0] : LocalHostResolver.resolve();
+        System.setProperty(LocalHostResolver.RMI_HOSTNAME_PROPERTY, hostIp);
 
         ServerManager serverManager = new ServerManager();
 
