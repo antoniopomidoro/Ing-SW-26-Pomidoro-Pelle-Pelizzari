@@ -278,11 +278,12 @@ public class GameState implements Serializable {
         }
 
         this.orderTileOrder.clear();
+        // Null entries are skipped so a gap in the order list never causes an NPE.
         generatedOrder.stream()
-                .filter(Player::isConnected)
+                .filter(p -> p != null && p.isConnected())
                 .forEach(this.orderTileOrder::add);
         generatedOrder.stream()
-                .filter(p -> !p.isConnected())
+                .filter(p -> p != null && !p.isConnected())
                 .forEach(this.orderTileOrder::add);
 
         return true;

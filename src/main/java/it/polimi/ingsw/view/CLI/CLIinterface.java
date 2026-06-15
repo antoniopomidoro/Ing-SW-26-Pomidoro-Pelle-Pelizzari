@@ -383,7 +383,7 @@ public class CLIinterface implements UserInterface, Runnable {
     @Override
     public synchronized void onGameEnded(GameEventDTO dto) {
         update(dto);
-            new Thread(new CLIEnder(this, user, dto), "CLI-ender").start();
+            new Thread(new CLIEnder(user, dto), "CLI-ender").start();
 
     }
 

@@ -23,86 +23,55 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Bounds;
-import javafx.geometry.Point2D;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-
-import javafx.scene.Cursor;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.effect.BlendMode;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.transform.Scale;
-import javafx.scene.text.Font;
-import javafx.stage.Popup;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import static it.polimi.ingsw.view.gui.GuiNodeFactory.CARD_H;
+import static it.polimi.ingsw.view.gui.GuiNodeFactory.CARD_W;
+import static it.polimi.ingsw.view.gui.GuiNodeFactory.TILE_H;
+import static it.polimi.ingsw.view.gui.GuiNodeFactory.TILE_W;
+
 /**
- * Controller for GameScreen.fxml.
+ * Controller for GameScreen.fxml — a thin orchestrator over a single
+ * {@code ObjectProperty<GameStateDTO>} that drives the whole UI.
  *
- * <p>Reactive pattern: a single {@code ObjectProperty<GameStateDTO>} drives all UI.
- * Static labels use {@code Bindings.createStringBinding}; card HBoxes use listeners
- * that rebuild children; animations use a separate listener dispatched via an EnumMap.
+ * <p>Responsibilities are delegated to focused collaborators: {@link GuiNodeFactory}
+ * (node/image construction), {@link PopupFactory} (popups), {@link TotemLayerManager}
+ * (board totems), {@link OpponentPanel} (opponent ring + menu) and
+ * {@link ResponsiveLayout} (scaling + background). This controller keeps only the
+ * reactive wiring, the local HUD bindings and the interactive card-selection state.
  *
  * <p>Entry point: {@link #onGameEvent(GameEventDTO)} — called from the network thread.
  */
 public class GameViewController implements UserInterface {
 
-    // ── Constants ─────────────────────────────────────────────────────────────
+    // ── Phase identifiers (match the model phase class simple names) ─────────────
 
-    private static final double CARD_W      = 90;
-    private static final double CARD_H      = 135;
-    private static final double TILE_W      = CARD_W;
-    private static final double TILE_H      = CARD_H;
-
-    private static final double REF_W          = 1280.0;
-    private static final double REF_H          = 720.0;
-    /** Spazio riservato all'HUD: topAnchor 12 + icone 36 + padding HBox + margine. */
-    private static final double HUD_CLEARANCE  = 64.0;
-    /** Spazio riservato alla mano locale: bottomAnchor 16 + CARD_H 135 + margine 16. */
-    private static final double HAND_CLEARANCE = 167.0;
-
-    private static final double BOX_H       = 64.0;
-    private static final double BOX_GAP     = 12.0;
-    private static final double BOX_MARGIN  = 16.0;
-
-    /** Material green: selectable highlight. Anything not selectable gets no glow. */
-    private static final Color  HIGHLIGHT_COLOR = Color.web("#3DDC84");
-    private static final double GLOW_RADIUS     = 18.0;
-    private static final double GLOW_SPREAD     = 0.25;
-    /** Corner arc diameter for card/tile clip. Visible rounding without ovalising the silhouette. */
-    private static final double CLIP_ARC = 24.0;
-
-    /** Sorts cards by character type (CharacterEnum declaration order); non-character cards sink to the end. */
-    private static final Comparator<Card> BY_CHARACTER_ID =
-            Comparator.comparing(Card::getId, Comparator.nullsLast(Comparator.naturalOrder()));
-
-    // Phase name constants are defined near refreshBoard()
-
-    private static final String[] FRONT_DIRS = {
-        "/images/cards/front/",
-        "/images/cards/front/characters/",
-        "/images/cards/front/buildings/",
-        "/images/cards/front/events/",
-        "/images/cards/front/events/finals/",
-    };
+    private static final String PHASE_TURN        = "StartTurnPhase";
+    private static final String PHASE_PLAYER_TURN = "PlayerTurnPhase";
 
     // ── FXML nodes ─────────────────────────────────────────────────────────────
 
@@ -155,101 +124,42 @@ public class GameViewController implements UserInterface {
     private final EnumMap<GameEvent.Type, BiConsumer<GameStateDTO, GameStateDTO>> animationMap =
             new EnumMap<>(GameEvent.Type.class);
 
-    private final EnumMap<Totem, PlayerBoxNode> playerBoxes = new EnumMap<>(Totem.class);
-    private final EnumMap<Totem, ImageView> totemViews = new EnumMap<>(Totem.class);
-    private final EnumMap<Totem, Integer> cachedTotemDestinations = new EnumMap<>(Totem.class);
-
     private StackPane selectedCardView = null;
+    private Button selectedPickBadge = null;
+
+    // ── Collaborators (built in initialize) ──────────────────────────────────────
+
+    private GuiNodeFactory nodes;
+    private PopupFactory popups;
+    private TotemLayerManager totems;
+    private OpponentPanel opponents;
 
     // ── Initialisation ─────────────────────────────────────────────────────────
 
     @FXML
     public void initialize() {
-        // Wrap boardArea in a StackPane che la centra orizzontalmente e verticalmente
-        // nello spazio disponibile (escluso HUD in alto e mano locale in basso).
-        boardArea.setMaxWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
-        contentPane.getChildren().remove(boardArea);
-        StackPane boardWrapper = new StackPane(boardArea);
-        boardWrapper.setAlignment(Pos.CENTER);
-        boardWrapper.setPickOnBounds(false);
-        AnchorPane.setTopAnchor(boardWrapper,    HUD_CLEARANCE);
-        AnchorPane.setBottomAnchor(boardWrapper, HAND_CLEARANCE);
-        AnchorPane.setLeftAnchor(boardWrapper,   0.0);
-        AnchorPane.setRightAnchor(boardWrapper,  0.0);
-        // Inserire prima di ringPane (index 0) — ringPane resta sopra per i click avversari.
-        ringPane.setPickOnBounds(false);
-        contentPane.getChildren().add(0, boardWrapper);
+        new ResponsiveLayout(root, contentPane, boardArea, ringPane, bgBase, bgDrawings, bgFire).install();
 
-        // Scale uniforme su contentPane: tutto il contenuto scala con la finestra.
-        // Il pivot è in (0,0); applyUiScale centra contentPane tramite translate.
-        Scale uiScale = new Scale(1.0, 1.0, 0.0, 0.0);
-        contentPane.getTransforms().add(uiScale);
-        root.widthProperty().addListener((obs, ov, nv)  -> applyUiScale(uiScale));
-        root.heightProperty().addListener((obs, ov, nv) -> applyUiScale(uiScale));
-        // Force a first apply once the scene is attached AND a layout pulse has run.
-        // I listener da soli sono inaffidabili: se root.width/height non cambia dopo l'attach
-        // (size già uguale a quella della scene), non scattano e il contentPane resta a scala 1.0.
-        root.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene == null) return;
-            javafx.application.Platform.runLater(() -> applyUiScale(uiScale));
-        });
+        nodes     = new GuiNodeFactory();
+        popups    = new PopupFactory(nodes);
+        totems    = new TotemLayerManager(TotemLayer, tilesetBox, orderTileView, animator, nodes);
+        opponents = new OpponentPanel(root, opponentMenuBox, nodes, popups,
+                () -> localTotem, stateProperty::get);
 
-        // Background: cover behavior — maintain ratio, fill entire window, center, clip overflow.
-        root.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene == null) return;
-            Rectangle clip = new Rectangle();
-            clip.widthProperty().bind(root.widthProperty());
-            clip.heightProperty().bind(root.heightProperty());
-            root.setClip(clip);
-            for (ImageView bg : List.of(bgBase, bgDrawings, bgFire)) {
-                Image img = bg.getImage();
-                AnchorPane.clearConstraints(bg);
-                bg.setPreserveRatio(false);
-                bg.fitWidthProperty().bind(Bindings.createDoubleBinding(() -> {
-                    double cw = root.getWidth(), ch = root.getHeight();
-                    double iw = img.getWidth(),  ih = img.getHeight();
-                    if (iw == 0 || ih == 0) return cw;
-                    return iw * Math.max(cw / iw, ch / ih);
-                }, root.widthProperty(), root.heightProperty(), img.widthProperty(), img.heightProperty()));
-                bg.fitHeightProperty().bind(Bindings.createDoubleBinding(() -> {
-                    double cw = root.getWidth(), ch = root.getHeight();
-                    double iw = img.getWidth(),  ih = img.getHeight();
-                    if (iw == 0 || ih == 0) return ch;
-                    return ih * Math.max(cw / iw, ch / ih);
-                }, root.widthProperty(), root.heightProperty(), img.widthProperty(), img.heightProperty()));
-                bg.translateXProperty().bind(Bindings.createDoubleBinding(() ->
-                    (root.getWidth()  - bg.getFitWidth())  / 2.0,
-                    root.widthProperty(), bg.fitWidthProperty()));
-                bg.translateYProperty().bind(Bindings.createDoubleBinding(() ->
-                    (root.getHeight() - bg.getFitHeight()) / 2.0,
-                    root.heightProperty(), bg.fitHeightProperty()));
-            }
-            bgDrawings.setBlendMode(BlendMode.MULTIPLY);
-        });
-
-        applySquircleClip(deckView,            CARD_W, CARD_H);
-        applySquircleClip(coveredBuildingView, CARD_W, CARD_H);
-        applySquircleClip(orderTileView,       TILE_W, TILE_H);
+        GuiNodeFactory.applySquircleClip(deckView,            CARD_W, CARD_H);
+        GuiNodeFactory.applySquircleClip(coveredBuildingView, CARD_W, CARD_H);
+        GuiNodeFactory.applySquircleClip(orderTileView,       TILE_W, TILE_H);
 
         registerStaticBindings();
         registerRefreshListeners();
         registerAnimationListeners();
-        setupInventionPopup();
-    }
+        popups.setupInventionPopup(inventionIconsView, this::localOwnedTools);
 
-    /**
-     * Calcola il fattore di scala uniforme (letterbox) e centra contentPane nel root.
-     * Pivot del Scale è in (0,0); il translate compensa la differenza tra root e contentPane scalato.
-     */
-    private void applyUiScale(Scale scale) {
-        double rw = root.getWidth();
-        double rh = root.getHeight();
-        if (rw <= 0 || rh <= 0) return;
-        double s = Math.min(rw / REF_W, rh / REF_H);
-        scale.setX(s);
-        scale.setY(s);
-        contentPane.setTranslateX((rw - REF_W * s) / 2.0);
-        contentPane.setTranslateY((rh - REF_H * s) / 2.0);
+        // Dealt cards must slide ABOVE the tile strip. boardArea (VBox) paints the
+        // tiles row after the top card row, so lift the top row's paint order with
+        // viewOrder (paint-only — it does not affect layout positions).
+        Node topRow = topCardsBox.getParent();
+        if (topRow != null) topRow.setViewOrder(-1);
     }
 
     /**
@@ -309,10 +219,6 @@ public class GameViewController implements UserInterface {
         opponentMenuBox.setManaged(show);
     }
 
-    private void onPlayerSelectedTile(Totem player, Node tile){
-
-
-    }
     // ── Binding registration ───────────────────────────────────────────────────
 
     private void registerStaticBindings() {
@@ -341,9 +247,8 @@ public class GameViewController implements UserInterface {
             if (next == null) return;
             refreshBoard(next);
             refreshLocalHand(next);
-            refreshOpponentRing(next);
+            opponents.refresh(next);
             refreshDeckAndCoveredBuilding(next);
-            refreshOpponentMenu(next);
         });
     }
 
@@ -356,20 +261,17 @@ public class GameViewController implements UserInterface {
 
         // Cards: deck-deal animation fires when the board is refilled (turn > 1).
         animationMap.put(GameEvent.Type.START_TURN_STARTED, (old, next) -> {
-            cachedTotemDestinations.clear();
+            totems.clearCache();
             if (next != null && next.getTurn() > 1) {
                 animateDeckDealToBox(deckView, topCardsBox);
             }
         });
-        animationMap.put(GameEvent.Type.END_TURN_COMPLETED, (old, next) -> {
-            cachedTotemDestinations.clear();
-        });
-        // Buildings + deck: both animate on age change (new era's cards and buildings revealed).
+        animationMap.put(GameEvent.Type.END_TURN_COMPLETED, (old, next) -> totems.clearCache());
+        // Age change: only the buildings animate (the new era's covered stack is revealed).
         animationMap.put(GameEvent.Type.AGE_CHANGED, (old, next) -> {
             if (audioManager != null && next != null && next.getAge() != null) {
                 audioManager.onAgeChanged(next.getAge());
             }
-            animateDeckDealToBox(deckView, topCardsBox);
             animateDeckDealToBox(coveredBuildingView, topBuildingsBox);
         });
 
@@ -377,8 +279,7 @@ public class GameViewController implements UserInterface {
         animationMap.put(GameEvent.Type.EVENT_CARD_TRIGGERED, (old, next) -> {
             Card triggered = findTriggeredEventCard(next, lastTriggeredBy);
             if (triggered == null) return;
-            String path = frontImagePath(triggered);
-            InputStream s = getClass().getResourceAsStream(path);
+            InputStream s = getClass().getResourceAsStream(nodes.frontImagePath(triggered));
             if (s == null) return;
             animator.animateEventCardReveal(contentPane, new Image(s));
         });
@@ -403,15 +304,13 @@ public class GameViewController implements UserInterface {
 
     // ── Board refresh ──────────────────────────────────────────────────────────
 
-    private static final String PHASE_TURN        = "StartTurnPhase";
-    private static final String PHASE_PLAYER_TURN = "PlayerTurnPhase";
-
     private void refreshBoard(GameStateDTO state) {
         if (state.getBoard() == null) return;
 
-        // Children of the HBoxes are about to be rebuilt — any reference held
-        // by selectedCardView is stale and would point to a detached node.
+        // Children of the HBoxes are about to be rebuilt — any reference held by the
+        // selected card / pick badge is stale and would point to a detached node.
         selectedCardView = null;
+        selectedPickBadge = null;
 
         String phase = state.getCurrentPhaseName();
         boolean isTurnPhase = PHASE_TURN.equals(phase);
@@ -425,14 +324,14 @@ public class GameViewController implements UserInterface {
 
         // ── Cards/buildings: pickable during PlayerTurnPhase ──
         // Remaining picks come from PlayerTurnPhase via the DTO (decrement aware).
-        int upperPicks = isMyTurn && isPlayerTurn ? state.getRemainingUpperPicks()  : 0;
+        int upperPicks  = isMyTurn && isPlayerTurn ? state.getRemainingUpperPicks()  : 0;
         int bottomPicks = isMyTurn && isPlayerTurn ? state.getRemainingBottomPicks() : 0;
 
         // For buildings, determine if local player can afford them
         int localFood = 0;
         int localDiscount = 0;
         if (isMyTurn && isPlayerTurn) {
-            var lp = findLocalPlayer(state).orElse(null);
+            PlayerDTO lp = findLocalPlayer(state).orElse(null);
             if (lp != null) {
                 localFood = lp.getFood();
                 localDiscount = lp.getBuildingDiscount();
@@ -455,130 +354,9 @@ public class GameViewController implements UserInterface {
                 (i, b) -> gameSender.onPickBottomBuilding(i, b.getInstanceId()));
 
         refreshOrderTile(state);
-        Platform.runLater(() -> syncTotems(state));
-    }
 
-    private Point2D getComponentLocalCoordinates(Node comp, Pane layer, double offsetX, double offsetY) {
-        if (comp.getParent() != null) {
-            comp.getParent().applyCss();
-            comp.getParent().layout();
-        }
-        comp.applyCss();
-
-        Point2D targetGlobal = comp.localToScene(0, 0);
-
-        // at starting coordinates are 0 0 on object creation
-        // so i put totems in their starting position
-        if (targetGlobal.getX() == 0 && targetGlobal.getY() == 0 && comp.getScene() != null) {
-            comp.getScene().getRoot().applyCss();
-            comp.getScene().getRoot().layout();
-            targetGlobal = comp.localToScene(0, 0);
-        }
-
-        Point2D targetLocal = layer.sceneToLocal(targetGlobal);
-        if (targetLocal == null) {
-            return new Point2D(offsetX, offsetY);
-        }
-        return new Point2D(targetLocal.getX() + offsetX, targetLocal.getY() + offsetY);
-    }
-
-    private void syncTotems(GameStateDTO state) {
-        if (state.getPlayers() == null || state.getOrderTileOrder() == null || state.getBoard() == null || TotemLayer == null) return;
-
-        for (PlayerDTO p : state.getPlayers()) {
-            Totem t = p.getTotem();
-            if (!totemViews.containsKey(t)) {
-                ImageView iv = makeRawImageView(42, 30, totemPath(t)); // swapped width and height
-               // iv.setRotate(-90); rotate only for front images not implemented anymore
-                TotemLayer.getChildren().add(iv);
-                totemViews.put(t, iv);
-            }
-        }
-
-        EnumMap<Totem, Node> destinazioni = new EnumMap<>(Totem.class);
-        String phase = state.getCurrentPhaseName();
-
-        if ("StartTurnPhase".equals(phase) || "PlayerTurnPhase".equals(phase)) {
-            List<Tile> tiles = state.getBoard().getTiles();
-            for (int i = 0; i < tiles.size(); i++) {
-                Tile tile = tiles.get(i);
-                if (tile.isOccupied() && tile.getOccupier() != null) {
-                    Totem occupante = tile.getOccupier().getId();
-                    if (i < tilesetBox.getChildren().size()) {
-                        Node destNode = tilesetBox.getChildren().get(i);
-                        destinazioni.put(occupante, destNode);
-                        cachedTotemDestinations.put(occupante, i);
-                    }
-                }
-            }
-        } else {
-            // at endturn clear cache to put totems on starting tile
-            cachedTotemDestinations.clear();
-        }
-
-        List<Totem> orderList = state.getOrderTileOrder();
-        int numPlayers = state.getPlayers().size();
-
-        for (int i = 0; i < orderList.size(); i++) {
-            Totem t = orderList.get(i);
-            ImageView totemImg = totemViews.get(t);
-            if (totemImg == null) continue;
-            totemImg.toFront();
-
-            double startX = totemImg.getTranslateX();
-            double startY = totemImg.getTranslateY();
-            Point2D endPoint;
-
-            if (destinazioni.containsKey(t)) {
-                double centroX = 24.0;
-                double centroY = 26.0; // to be calibrated
-                endPoint = getComponentLocalCoordinates(destinazioni.get(t), TotemLayer, centroX, centroY);
-            } else if (cachedTotemDestinations.containsKey(t)) {
-                double centroX = 24.0;
-                double centroY = 26.0;
-                int tileIdx = cachedTotemDestinations.get(t);
-                if (tileIdx < tilesetBox.getChildren().size()) {
-                    Node activeNode = tilesetBox.getChildren().get(tileIdx);
-                    endPoint = getComponentLocalCoordinates(activeNode, TotemLayer, centroX, centroY);
-                } else {
-                    Point2D orderOffset = getOrderTileOffset(numPlayers, i);
-                    endPoint = getComponentLocalCoordinates(orderTileView, TotemLayer, orderOffset.getX(), orderOffset.getY());
-                }
-            } else {
-                Point2D orderOffset = getOrderTileOffset(numPlayers, i);
-                endPoint = getComponentLocalCoordinates(orderTileView, TotemLayer, orderOffset.getX(), orderOffset.getY());
-            }
-
-            animator.animateTotemMovement(totemImg, TotemLayer, startX, startY, endPoint.getX(), endPoint.getY());
-        }
-    }
-
-    private Point2D getOrderTileOffset(int numPlayers, int slotIndex) {
-
-
-
-
-                // da abbassare leggermente tutto(ancora)
-        if (numPlayers <= 2) {
-            if (slotIndex == 0) return new Point2D(35, 20);
-            if (slotIndex == 1) return new Point2D(35, 40);
-        } else if (numPlayers == 3) {
-            if (slotIndex == 0) return new Point2D(35, 20);
-            if (slotIndex == 1) return new Point2D(35, 40);
-            if (slotIndex == 2) return new Point2D(35, 60);
-        } else if (numPlayers == 4) {
-            if (slotIndex == 0) return new Point2D(35, 05);
-            if (slotIndex == 1) return new Point2D(35, 27);
-            if (slotIndex == 2) return new Point2D(35, 49);
-            if (slotIndex == 3) return new Point2D(35, 71);
-        } else if (numPlayers == 5) {
-            if (slotIndex == 0) return new Point2D(35, 00);
-            if (slotIndex == 1) return new Point2D(35, 22);
-            if (slotIndex == 2) return new Point2D(35, 44);
-            if (slotIndex == 3) return new Point2D(35, 66);
-            if (slotIndex == 4) return new Point2D(35, 88);
-        }
-        return new Point2D(24, 0 + slotIndex * 15);
+        boolean totemsOnTiles = isTurnPhase || isPlayerTurn;
+        Platform.runLater(() -> totems.sync(state, totemsOnTiles));
     }
 
     private void refreshLocalHand(GameStateDTO state) {
@@ -616,67 +394,43 @@ public class GameViewController implements UserInterface {
      */
     private StackPane buildStackedCardView(List<Card> group) {
         Card representative = group.getLast();
-        StackPane wrapper = buildCardLikeView(frontImagePath(representative),
-                representative.toString(), false, null);
+        StackPane wrapper = nodes.cardWrapper(nodes.frontImagePath(representative), false);
 
         if (group.size() > 1) {
             Label badge = new Label("x" + group.size());
             badge.setStyle("-fx-text-fill: black; -fx-font-size: 10px; -fx-font-weight: bold;");
             StackPane.setAlignment(badge, Pos.TOP_LEFT);
-            StackPane.setMargin(badge, new javafx.geometry.Insets(3, 0, 0, 5));
+            StackPane.setMargin(badge, new Insets(3, 0, 0, 5));
             wrapper.getChildren().add(badge);
         }
 
         ImageView iv = (ImageView) wrapper.getChildren().getFirst();
         wrapper.setCursor(Cursor.HAND);
         wrapper.setOnMouseClicked(e -> {
-            if (e.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
-                showDetailPopup(iv, representative.toString());
+            if (e.getButton() == MouseButton.SECONDARY) {
+                popups.showDetail(iv, representative.toString());
             } else {
-                showCardTypePopup(wrapper, group);
+                popups.showCardType(wrapper, group);
             }
         });
         return wrapper;
     }
 
-    /** Popup listing every card of a single character type, shown below the anchor. */
-    private void showCardTypePopup(Node anchor, List<Card> group) {
-        Popup popup = new Popup();
-        popup.setAutoHide(true);
-
-        HBox cards = new HBox(6);
-        cards.setAlignment(Pos.CENTER);
-        for (Card c : group) {
-            cards.getChildren().add(makeImageView(CARD_W, CARD_H, frontImagePath(c)));
-        }
-
-        VBox content = new VBox(cards);
-        content.getStyleClass().add("detail-popup");
-        popup.getContent().add(content);
-
-        Bounds b = anchor.localToScreen(anchor.getBoundsInLocal());
-        popup.show(anchor, b.getMinX(), b.getMaxY() + 8);
-    }
-
-    private void refreshOpponentRing(GameStateDTO state) {
-        if (playerBoxes.isEmpty()) {
-            initOpponentRing(state);
-        }
-        playerBoxes.values().forEach(box -> box.update(state));
-    }
-
     private void refreshDeckAndCoveredBuilding(GameStateDTO state) {
-        if (state.getDeckSize() > 0 && state.getAge() != null) {
-            int ageVal = state.getAge().getValue();
-            setImage(deckView, "/images/cards/back/Card_BACK_CharacterEvent_Age_" + ageVal + ".png");
+        Age age = state.getAge();
+
+        // Show the deck back for the whole playable era — including its last turn, when
+        // the draw pile is momentarily empty (all its cards are now on the board).
+        // Hide it only outside a playable age (the final phase).
+        if (age != null && age.isAge()) {
+            nodes.setImage(deckView, "/images/cards/back/Card_BACK_CharacterEvent_Age_" + age.getValue() + ".png");
             deckView.setVisible(true);
         } else {
             deckView.setVisible(false);
         }
 
-        Age age = state.getAge();
         if (age != null && age.isAge() && age.hasNext() && age.getNext().isAge()) {
-            setImage(coveredBuildingView, "/images/cards/back/Card_BACK_Building_Age_"
+            nodes.setImage(coveredBuildingView, "/images/cards/back/Card_BACK_Building_Age_"
                     + age.getNext().getValue() + ".png");
             coveredBuildingView.setVisible(true);
         } else {
@@ -698,19 +452,18 @@ public class GameViewController implements UserInterface {
             iv.setPreserveRatio(true);
 
             String tileId = tile.getId() != null ? tile.getId().name() : "";
-            setImage(iv, "/images/tiles/" + tileId + ".png");
+            nodes.setImage(iv, "/images/tiles/" + tileId + ".png");
 
             // Tiles form a single strip: only the first rounds its left corners
             // and only the last rounds its right corners.
-            applyCornerClip(iv, TILE_W, TILE_H, i == 0, i == lastIdx);
+            GuiNodeFactory.applyCornerClip(iv, TILE_W, TILE_H, i == 0, i == lastIdx);
 
             // Wrap in StackPane so the DropShadow effect renders outside the clipped ImageView.
             StackPane wrapper = new StackPane(iv);
-            // Niente min/max: il wrapper assume la dimensione naturale dell'ImageView così le tile sono attaccate.
 
             boolean selectable = pickable && !tile.isOccupied();
             if (selectable) {
-                wrapper.setEffect(makeSelectableGlow());
+                wrapper.setEffect(GuiNodeFactory.makeSelectableGlow());
                 wrapper.setCursor(Cursor.HAND);
                 int finalI = i;
                 wrapper.setOnMouseClicked(e -> gameSender.onPickTile(finalI));
@@ -722,110 +475,7 @@ public class GameViewController implements UserInterface {
 
     private void refreshOrderTile(GameStateDTO state) {
         int n = state.getPlayers() == null ? 2 : state.getPlayers().size();
-        setImage(orderTileView, "/images/order_tiles/" + n + ".png");
-    }
-
-    // ── Opponent ring ──────────────────────────────────────────────────────────
-
-    private void initOpponentRing(GameStateDTO state) {
-        if (state.getOrderTileOrder() == null || localTotem == null) {
-            System.out.println("[OpponentRing] SKIP: orderTileOrder="
-                    + state.getOrderTileOrder() + " localTotem=" + localTotem);
-            return;
-        }
-        List<Totem> opponents = new ArrayList<>(state.getOrderTileOrder());
-        opponents.remove(localTotem);
-        if (opponents.isEmpty()) {
-            System.out.println("[OpponentRing] SKIP: no opponents");
-            return;
-        }
-
-        System.out.println("[OpponentRing] Creating boxes for " + opponents);
-
-        VBox column = new VBox(BOX_GAP);
-        column.setAlignment(Pos.CENTER_LEFT);
-        column.setStyle("-fx-background-color: rgba(0,0,0,0.5); -fx-padding: 8;");
-
-        for (Totem t : opponents) {
-            PlayerDTO p = findPlayer(state, t);
-            if (p == null) continue;
-
-            PlayerBoxNode box = new PlayerBoxNode(p);
-            box.setOnMouseClicked(e -> showOpponentHandPopup(box, t, stateProperty.get()));
-            column.getChildren().add(box);
-            playerBoxes.put(t, box);
-        }
-
-        // Holder anchored to the window's right edge (in root, outside the scaled
-        // contentPane) so the player boxes are always flush with the border and
-        // vertically centred — never clipped off-screen.
-        VBox holder = new VBox(column);
-        holder.setAlignment(Pos.CENTER_RIGHT);
-        holder.setPickOnBounds(false);
-        holder.setPadding(new javafx.geometry.Insets(0, BOX_MARGIN, 0, 0));
-        AnchorPane.setTopAnchor(holder,    0.0);
-        AnchorPane.setBottomAnchor(holder, 0.0);
-        AnchorPane.setRightAnchor(holder,  0.0);
-        root.getChildren().add(holder);
-    }
-
-    // ── Opponent menu ──────────────────────────────────────────────────────────
-
-    private void refreshOpponentMenu(GameStateDTO state) {
-        opponentMenuBox.getChildren().clear();
-        if (state.getPlayers() == null) return;
-        for (PlayerDTO p : state.getPlayers()) {
-            if (p.getTotem() == localTotem) continue;
-            opponentMenuBox.getChildren().add(buildOpponentMenuRow(p));
-        }
-    }
-
-    private VBox buildOpponentMenuRow(PlayerDTO p) {
-        ImageView totemImg = makeRawImageView(24, 32, totemPath(p.getTotem()));
-        Label nickLabel = new Label(truncateName(p.getNickname()));
-        nickLabel.getStyleClass().add("opponent-nickname");
-        Circle dot = new Circle(5);
-        dot.getStyleClass().add(p.isConnected() ? "online-dot" : "offline-dot");
-        ImageView star = makeImageView(14, 14, "/icons/icon_star.png");
-        star.setVisible(stateProperty.get() != null
-                && p.getTotem() == stateProperty.get().getActivePlayer());
-        HBox headerRow = new HBox(6, totemImg, nickLabel, dot, star);
-        headerRow.setAlignment(Pos.CENTER_LEFT);
-
-        VBox stats = new VBox(2);
-        stats.setVisible(false);
-        stats.setManaged(false);
-        addStatRow(stats, "/icons/icon_prestige.png",          p.getPp());
-        addStatRow(stats, "/icons/icon_food.png",               p.getFood());
-        addStatRow(stats, "/icons/icon_star.png",               p.getStars());
-        addStatRow(stats, "/icons/icon_building_discount.png",  p.getBuildingDiscount());
-        addStatRow(stats, "/icons/icon_hunter.png",             charCount(p, "HUNTER"));
-        addStatRow(stats, "/icons/icon_inventor.png",           charCount(p, "INVENTOR"));
-        addStatRow(stats, "/icons/icon_painter.png",            charCount(p, "ARTIST"));
-
-        VBox row = new VBox(4, headerRow, stats);
-        row.getStyleClass().add("opponent-menu-row");
-        row.setOnMouseClicked(e -> {
-            boolean show = !stats.isVisible();
-            stats.setVisible(show);
-            stats.setManaged(show);
-        });
-        return row;
-    }
-
-    /** Clips a nickname to the first 10 characters. */
-    private static String truncateName(String name) {
-        if (name == null) return "";
-        return name.length() > 10 ? name.substring(0, 10) : name;
-    }
-
-    private void addStatRow(VBox parent, String iconPath, int value) {
-        ImageView icon = makeImageView(20, 20, iconPath);
-        Label l = new Label(String.valueOf(value));
-        l.getStyleClass().add("opponent-menu-stat");
-        HBox row = new HBox(8, icon, l);
-        row.setAlignment(Pos.CENTER_LEFT);
-        parent.getChildren().add(row);
+        nodes.setImage(orderTileView, "/images/order_tiles/" + n + ".png");
     }
 
     // ── Card / building node builders ──────────────────────────────────────────
@@ -858,31 +508,24 @@ public class GameViewController implements UserInterface {
     }
 
     private StackPane buildCardView(Card card, boolean buyable, Runnable pickAction) {
-        return buildCardLikeView(frontImagePath(card), card.toString(), buyable, pickAction);
+        return buildClickableCard(nodes.frontImagePath(card), card.toString(), buyable, pickAction);
     }
 
     private StackPane buildBuildingView(Building building, boolean buyable, Runnable pickAction) {
-        return buildCardLikeView(frontImagePath(building), building.toString(), buyable, pickAction);
+        return buildClickableCard(nodes.frontImagePath(building), building.toString(), buyable, pickAction);
     }
 
     /**
-     * Wraps an image in a StackPane so the selectable glow renders outside the
-     * inner ImageView's squircle clip (effects are clipped along with content).
+     * Wraps a card image (via the node factory) and wires its click handling:
+     * right-click opens the detail popup, left-click selects it for picking.
      */
-    private StackPane buildCardLikeView(String imagePath, String detailText,
-                                        boolean selectable, Runnable pickAction) {
-        ImageView iv = makeImageView(CARD_W, CARD_H, imagePath);
-        StackPane wrapper = new StackPane(iv);
-        wrapper.setMinSize(CARD_W, CARD_H);
-        wrapper.setMaxSize(CARD_W, CARD_H);
-
-        if (selectable) {
-            wrapper.setEffect(makeSelectableGlow());
-            wrapper.setCursor(Cursor.HAND);
-        }
+    private StackPane buildClickableCard(String imagePath, String detailText,
+                                         boolean selectable, Runnable pickAction) {
+        StackPane wrapper = nodes.cardWrapper(imagePath, selectable);
+        ImageView iv = (ImageView) wrapper.getChildren().getFirst();
         wrapper.setOnMouseClicked(e -> {
-            if (e.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
-                showDetailPopup(iv, detailText);
+            if (e.getButton() == MouseButton.SECONDARY) {
+                popups.showDetail(iv, detailText);
             } else if (pickAction != null) {
                 handleCardLeftClick(wrapper, pickAction);
             }
@@ -919,231 +562,23 @@ public class GameViewController implements UserInterface {
         });
         StackPane.setAlignment(badge, Pos.BOTTOM_CENTER);
         wrapper.getChildren().add(badge);
+        selectedPickBadge = badge;
     }
 
     private void removePickBadge(StackPane wrapper) {
-        wrapper.getChildren().removeIf(n -> n instanceof Button);
-    }
-
-    // ── Detail popup ───────────────────────────────────────────────────────────
-
-    private void showDetailPopup(ImageView anchor, String stats) {
-        Popup popup = new Popup();
-        popup.setAutoHide(true);
-
-        ImageView large = makeImageView(160, 240, null);
-        // reuse same image from anchor
-        large.setImage(anchor.getImage());
-
-        Label statsLabel = new Label(stats);
-        statsLabel.getStyleClass().add("stat-label");
-        statsLabel.setWrapText(true);
-        statsLabel.setMaxWidth(220);
-
-        VBox content = new VBox(10, large, statsLabel);
-        content.getStyleClass().add("detail-popup");
-        popup.getContent().add(content);
-
-        Bounds b = anchor.localToScreen(anchor.getBoundsInLocal());
-        popup.show(anchor, b.getMaxX() + 8, b.getMinY());
-    }
-
-    // ── Opponent hand popup ────────────────────────────────────────────────────
-
-    private void showOpponentHandPopup(PlayerBoxNode box, Totem totem, GameStateDTO state) {
-        if (state == null) return;
-        Popup popup = new Popup();
-        popup.setAutoHide(true);
-
-        PlayerDTO p = state.getPlayers().stream()
-                .filter(pl -> pl.getTotem() == totem).findFirst().orElse(null);
-        if (p == null) return;
-
-        HBox hand = new HBox(6);
-        hand.setAlignment(Pos.CENTER);
-        if (p.getCards() != null) {
-            p.getCards().stream()
-                    .sorted(BY_CHARACTER_ID)
-                    .forEach(c -> hand.getChildren().add(makeImageView(CARD_W, CARD_H, frontImagePath(c))));
+        // Remove the tracked badge directly — at most one card is selected at a time.
+        if (selectedPickBadge != null) {
+            wrapper.getChildren().remove(selectedPickBadge);
+            selectedPickBadge = null;
         }
-        if (p.getBuildings() != null) {
-            for (Building b : p.getBuildings()) {
-                hand.getChildren().add(makeImageView(CARD_W, CARD_H, frontImagePath(b)));
-            }
-        }
-
-        VBox content = new VBox(8, new Label(p.getNickname()), hand);
-        content.getStyleClass().add("detail-popup");
-        popup.getContent().add(content);
-        popup.show(box, box.getCenterX(), box.getCenterY());
-    }
-
-    // ── Invention popup ────────────────────────────────────────────────────────
-
-    // icon name → Tool enum name (uppercase)
-    private static final String[][] TOOL_ENTRIES = {
-        {"icon_stone",    "STONE"},
-        {"icon_boat",     "BOAT"},
-        {"icon_bowl",     "BOWL"},
-        {"icon_bread",    "BREAD"},
-        {"icon_stick",    "STICK"},
-        {"icon_hook",     "HOOK"},
-        {"icon_ring",     "RING"},
-        {"icon_necklace", "NECKLACE"},
-        {"icon_rope",     "ROPE"},
-        {"icon_doll",     "DOLL"},
-    };
-
-    private static final javafx.scene.effect.ColorAdjust TOOL_GREY = new javafx.scene.effect.ColorAdjust();
-    static { TOOL_GREY.setSaturation(-1.0); }
-
-    private void setupInventionPopup() {
-        Popup popup = new Popup();
-        popup.setAutoHide(true);
-
-        GridPane content = new GridPane();
-        content.setHgap(16);
-        content.setVgap(6);
-        content.getStyleClass().add("detail-popup");
-
-        ImageView[] toolIcons  = new ImageView[TOOL_ENTRIES.length];
-        Label[]     toolLabels = new Label[TOOL_ENTRIES.length];
-
-        for (int i = 0; i < TOOL_ENTRIES.length; i++) {
-            String iconName = TOOL_ENTRIES[i][0];
-            ImageView iv = makeImageView(24, 24, "/icons/inventions/" + iconName + ".png");
-            Label lbl = new Label("0");
-            lbl.getStyleClass().add("stat-label");
-            HBox cell = new HBox(8, iv, lbl);
-            cell.setAlignment(Pos.CENTER_LEFT);
-            content.add(cell, i / 5, i % 5);
-            toolIcons[i]  = iv;
-            toolLabels[i] = lbl;
-        }
-        popup.getContent().add(content);
-
-        inventionIconsView.setOnMouseEntered(e -> {
-            GameStateDTO state = stateProperty.get();
-            java.util.Set<String> owned = state == null ? java.util.Set.of()
-                    : findLocalPlayer(state)
-                        .map(p -> p.getOwnedTools())
-                        .orElse(java.util.Set.of());
-
-            for (int i = 0; i < TOOL_ENTRIES.length; i++) {
-                boolean has = owned.contains(TOOL_ENTRIES[i][1]);
-                toolLabels[i].setText(has ? "1" : "0");
-                toolIcons[i].setEffect(has ? null : TOOL_GREY);
-                toolIcons[i].setOpacity(has ? 1.0 : 0.4);
-            }
-
-            Bounds b = inventionIconsView.localToScreen(inventionIconsView.getBoundsInLocal());
-            popup.show(inventionIconsView, b.getMaxX() + 4, b.getMinY());
-        });
-        inventionIconsView.setOnMouseExited(e -> popup.hide());
-    }
-
-    // ── Selectable glow ───────────────────────────────────────────────────────
-
-    /**
-     * Static green glow used to mark anything currently selectable.
-     * No animated pulse — pulses leak Timelines on every refresh.
-     */
-    private static DropShadow makeSelectableGlow() {
-        DropShadow glow = new DropShadow();
-        glow.setColor(HIGHLIGHT_COLOR);
-        glow.setRadius(GLOW_RADIUS);
-        glow.setSpread(GLOW_SPREAD);
-        return glow;
     }
 
     // ── Animation helpers ──────────────────────────────────────────────────────
 
     private void animateDeckDealToBox(ImageView source, HBox targetBox) {
         if (targetBox.getChildren().isEmpty()) return;
-        Node last = targetBox.getChildren().getLast();
-        animator.animateDeckDeal(source, last);
-    }
-
-    // ── Image helpers ──────────────────────────────────────────────────────────
-
-    /**
-     * Rounded-rectangle clip on all four corners. See {@link #applyCornerClip}.
-     */
-    private static void applySquircleClip(ImageView iv, double w, double h) {
-        applyCornerClip(iv, w, h, true, true);
-    }
-
-    /**
-     * Clips an {@link ImageView} to a rounded rectangle that matches the image's
-     * actual rendered bounds (accounting for {@code preserveRatio} letterboxing),
-     * rounding only the requested sides.
-     *
-     * <p>Matching the rendered bounds avoids stray pixels at the corners when the
-     * source image aspect ratio differs from the fit box. Side selectivity lets a
-     * row of tiles read as a single strip: only the outer corners are rounded.
-     *
-     * <p>The clip is recomputed whenever the image changes, since the rendered
-     * bounds are only known once an image is loaded.
-     */
-    private static void applyCornerClip(ImageView iv, double w, double h,
-                                        boolean roundLeft, boolean roundRight) {
-        Runnable reclip = () -> {
-            double dw = w, dh = h;
-            Image img = iv.getImage();
-            if (img != null && img.getWidth() > 0 && img.getHeight() > 0) {
-                double scale = Math.min(w / img.getWidth(), h / img.getHeight());
-                dw = img.getWidth() * scale;
-                dh = img.getHeight() * scale;
-            }
-            Rectangle clip = new Rectangle(dw, dh);
-            if (roundLeft || roundRight) {
-                clip.setArcWidth(CLIP_ARC);
-                clip.setArcHeight(CLIP_ARC);
-            }
-            // Push the unwanted rounded corners outside the image bounds so that
-            // side reads as a straight edge.
-            if (roundLeft ^ roundRight) {
-                clip.setWidth(dw + CLIP_ARC);
-                if (roundRight) clip.setX(-CLIP_ARC);
-            }
-            iv.setClip(clip);
-        };
-        reclip.run();
-        iv.imageProperty().addListener((o, ov, nv) -> reclip.run());
-    }
-
-    private ImageView makeImageView(double w, double h, String path) {
-        ImageView iv = makeRawImageView(w, h, path);
-        applySquircleClip(iv, w, h);
-        return iv;
-    }
-
-    /** Image view with no corner clip — used for totems, which must stay sharp-cornered. */
-    private ImageView makeRawImageView(double w, double h, String path) {
-        ImageView iv = new ImageView();
-        iv.setFitWidth(w);
-        iv.setFitHeight(h);
-        iv.setPreserveRatio(true);
-        if (path != null) setImage(iv, path);
-        return iv;
-    }
-
-    private void setImage(ImageView iv, String path) {
-        InputStream s = getClass().getResourceAsStream(path);
-        if (s != null) {
-            iv.setImage(new Image(s));
-        } else {
-            System.err.println("[GameView] Missing image: " + path);
-            iv.setImage(placeholder());
-        }
-    }
-
-    private String frontImagePath(Card card) {
-        String name = "Card_FRONT__" + card.getCardId() + ".png";
-        for (String dir : FRONT_DIRS) {
-            if (getClass().getResource(dir + name) != null) return dir + name;
-        }
-        return FRONT_DIRS[0] + name;
+        // Every node in the row is freshly added — animate one deal per card.
+        animator.animateDeckDealMulti(source, new ArrayList<>(targetBox.getChildren()));
     }
 
     // ── Stat helpers ───────────────────────────────────────────────────────────
@@ -1153,44 +588,15 @@ public class GameViewController implements UserInterface {
         return findLocalPlayer(stateProperty.get()).map(fn).orElse("—");
     }
 
-    private java.util.Optional<PlayerDTO> findLocalPlayer(GameStateDTO state) {
+    private Optional<PlayerDTO> findLocalPlayer(GameStateDTO state) {
         return state.getPlayers().stream().filter(p -> p.getTotem() == localTotem).findFirst();
     }
 
-    private PlayerDTO findPlayer(GameStateDTO state, Totem t) {
-        return state.getPlayers().stream()
-                .filter(pl -> pl.getTotem() == t).findFirst().orElse(null);
-    }
-
-    private static String totemPath(Totem t) {
-        return switch (t) {
-            case RED    -> "/images/totems/totem_red.png";
-            case WHITE  -> "/images/totems/totem_white.png";
-            case BLACK  -> "/images/totems/totem_purple.png";
-            case YELLOW -> "/images/totems/totem_yellow.png";
-            case BLUE   -> "/images/totems/totem_cyan.png";
-        };
-    }
-
-    // ── Placeholder image ──────────────────────────────────────────────────────
-
-    private static Image placeholderCache;
-
-    private static Image placeholder() {
-        if (placeholderCache != null) return placeholderCache;
-        int w = 90, h = 135;
-        Canvas c = new Canvas(w, h);
-        var gc = c.getGraphicsContext2D();
-        gc.setFill(Color.rgb(40, 30, 20, 0.85));
-        gc.fillRoundRect(0, 0, w, h, 8, 8);
-        gc.setStroke(Color.rgb(200, 168, 75, 0.5));
-        gc.setLineWidth(1);
-        gc.strokeRoundRect(1, 1, w - 2, h - 2, 8, 8);
-        gc.setFill(Color.rgb(200, 180, 140));
-        gc.setFont(Font.font("Georgia", 14));
-        gc.fillText("?", w / 2.0 - 4, h / 2.0 + 4);
-        placeholderCache = c.snapshot(null, null);
-        return placeholderCache;
+    /** Owned tools of the local player for the invention popup, empty when unavailable. */
+    private Set<String> localOwnedTools() {
+        GameStateDTO state = stateProperty.get();
+        if (state == null) return Set.of();
+        return findLocalPlayer(state).map(p -> p.getOwnedTools()).orElse(Set.of());
     }
 
     private int charCount(PlayerDTO p, String key) {
@@ -1201,7 +607,8 @@ public class GameViewController implements UserInterface {
         return p.getCharacterCounts().values().stream().mapToInt(Integer::intValue).sum();
     }
 
-    // End game screen
+    // ── End game screen ──────────────────────────────────────────────────────────
+
     private void showEndGameScreen(GameStateDTO state) {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -1243,4 +650,4 @@ public class GameViewController implements UserInterface {
 
     @Override
     public void stop() {}
-    }
+}

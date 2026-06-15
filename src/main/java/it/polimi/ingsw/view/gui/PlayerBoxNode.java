@@ -74,10 +74,7 @@ public class PlayerBoxNode extends HBox {
         if (p == null) return;
 
         statusDot.getStyleClass().setAll(p.isConnected() ? "online-dot" : "offline-dot");
-        boolean isStar = totem == dto.getActivePlayer();
-        System.out.println("[PlayerBox] totem=" + totem + " activePlayer=" + dto.getActivePlayer()
-                + " star=" + isStar);
-        starIcon.setVisible(isStar);
+        starIcon.setVisible(totem == dto.getActivePlayer());
     }
 
     /**

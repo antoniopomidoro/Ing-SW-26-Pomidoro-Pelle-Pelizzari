@@ -38,6 +38,9 @@ public class GameAnimator {
 
     // ── Sequential animation queue ────────────────────────────────────────────
 
+    // Every animation (deals and event-card reveals) goes through this queue so only
+    // one plays at a time: avoids the lag of many concurrent transitions and prevents
+    // a deal from stranding the deck edge-on (rotate ≈ 90° → invisible).
     private final java.util.ArrayDeque<Runnable> animQueue = new java.util.ArrayDeque<>();
     private boolean animRunning = false;
 
@@ -52,8 +55,8 @@ public class GameAnimator {
         animQueue.poll().run();
     }
 
-    private static final Duration FLIP_HALF      = Duration.millis(350);
-    private static final Duration DEAL_SLIDE     = Duration.millis(700);
+    private static final Duration FLIP_HALF      = Duration.millis(300);
+    private static final Duration DEAL_SLIDE     = Duration.millis(450);
     private static final Duration CARD_SLIDE     = Duration.millis(350);
     private static final Duration FADE_DURATION  = Duration.millis(280);
     private static final Duration SPLASH_FADE    = Duration.millis(600);
@@ -67,23 +70,34 @@ public class GameAnimator {
     private static final double   DIM_OPACITY       = 0.65;
 
     /**
-     * Flip (rotate on Y-axis) + translate from the deck position to the board target.
+     * Enqueues a single deck-to-board deal: flip the source once and fly the target
+     * out from it. Plays in turn with all other queued animations.
      *
      * @param deck   the deck ImageView to animate from
-     * @param target the board ImageView to populate (shown mid-flip)
+     * @param target the board node to populate (shown mid-flip)
      */
     public void animateDeckDeal(ImageView deck, Node target) {
-        playFlipAndSlide(deck, target, DEAL_SLIDE, null);
+        // Hide until dealt so the card does not show in its slot before its turn.
+        target.setOpacity(0);
+        enqueueAnimation(() -> startSingleDeal(deck, target));
     }
 
     /**
-     * Same as deck deal, used when revealing a covered building stack.
+     * Enqueues one deal per freshly-added card from a single source, so the cards are
+     * dealt one at a time. Used when a whole row is refilled (start of turn) or
+     * revealed (age change).
      *
-     * @param covered the back-face ImageView currently visible
-     * @param target  the board ImageView to reveal
+     * @param source  the deck/covered-stack ImageView to animate from
+     * @param targets the board nodes to populate (each flies out from the source)
      */
-    public void animateBuildingReveal(ImageView covered, Node target) {
-        playFlipAndSlide(covered, target, DEAL_SLIDE, null);
+    public void animateDeckDealMulti(ImageView source, java.util.List<Node> targets) {
+        // Hide every target up-front so none shows in its slot before its turn comes.
+        for (Node target : targets) {
+            target.setOpacity(0);
+        }
+        for (Node target : targets) {
+            enqueueAnimation(() -> startSingleDeal(source, target));
+        }
     }
 
     /**
@@ -247,46 +261,44 @@ public class GameAnimator {
 
     // ── private helpers ───────────────────────────────────────────────────────
 
-    private void playFlipAndSlide(ImageView source, Node target,
-                                  Duration slideDuration, Runnable onDone) {
-        // Defer one frame: when invoked right after a children rebuild the target
-        // has no layout yet, so its scene-bounds would be all zeros.
+    private void startSingleDeal(ImageView source, Node target) {
+        // Defer one frame: when invoked right after a children rebuild the target has
+        // no layout yet, so its scene-bounds would be all zeros.
         Platform.runLater(() -> {
             Bounds srcScene = source.localToScene(source.getBoundsInLocal());
             Bounds tgtScene = target.localToScene(target.getBoundsInLocal());
-            if (srcScene == null || tgtScene == null) return;
+            if (srcScene == null || tgtScene == null) {
+                target.setOpacity(1); // never leave a card hidden
+                nextAnimation();      // never stall the queue
+                return;
+            }
 
             double dx = srcScene.getMinX() - tgtScene.getMinX();
             double dy = srcScene.getMinY() - tgtScene.getMinY();
 
-            // Source flips to 90°, slides target with flip-in, then source flips back —
-            // no instantaneous snap.
-            source.setRotationAxis(Rotate.Y_AXIS);
+            // The deck (source) stays put and visible; the card flips in and slides
+            // out from the deck position to its slot.
+            target.setOpacity(1);
             target.setRotationAxis(Rotate.Y_AXIS);
             target.setRotate(90);
-
-            RotateTransition flipOut = new RotateTransition(FLIP_HALF, source);
-            flipOut.setFromAngle(0);
-            flipOut.setToAngle(90);
-
-            RotateTransition flipBack = new RotateTransition(FLIP_HALF, source);
-            flipBack.setFromAngle(90);
-            flipBack.setToAngle(0);
 
             RotateTransition flipIn = new RotateTransition(FLIP_HALF, target);
             flipIn.setFromAngle(90);
             flipIn.setToAngle(0);
 
-            TranslateTransition slide = new TranslateTransition(slideDuration, target);
+            TranslateTransition slide = new TranslateTransition(DEAL_SLIDE, target);
             slide.setFromX(dx);
             slide.setFromY(dy);
             slide.setToX(0);
             slide.setToY(0);
 
-            ParallelTransition reveal = new ParallelTransition(flipIn, slide, flipBack);
-            if (onDone != null) reveal.setOnFinished(e -> onDone.run());
-
-            new SequentialTransition(flipOut, reveal).play();
+            ParallelTransition deal = new ParallelTransition(flipIn, slide);
+            deal.setOnFinished(e -> {
+                target.setRotate(0);
+                target.setOpacity(1);
+                nextAnimation();
+            });
+            deal.play();
         });
     }
 
