@@ -184,6 +184,10 @@ public class PendingGame {
         return Collections.unmodifiableMap(takenTotems);
     }
 
+    public boolean allTotemsSelected(){
+        return joinedPlayers.size() == requiredPlayers;
+    }
+
     private void validatePlayerName(String playerName) {
         if (playerName == null || playerName.isBlank()) {
             throw new IllegalArgumentException(INVALID_NICKNAME_MESSAGE);

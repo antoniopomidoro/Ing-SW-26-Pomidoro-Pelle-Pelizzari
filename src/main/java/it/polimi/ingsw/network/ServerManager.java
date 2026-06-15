@@ -345,7 +345,7 @@ public class ServerManager {
             broadcastWaiting(gameId, pending);
         }
 
-        if (pending.isFull()) {
+        if (pending.allTotemsSelected()) {
             List<Player> players = pending.getJoinedPlayers();
             try {
                 GameController controller = new GameController(players, gameId);
