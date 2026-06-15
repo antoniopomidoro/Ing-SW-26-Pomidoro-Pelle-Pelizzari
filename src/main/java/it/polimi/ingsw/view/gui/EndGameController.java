@@ -34,12 +34,28 @@ public class EndGameController {
     }
 
     public  void initData(GameStateDTO state) {
-        state.getPlayers().stream()
-                .max(Comparator.comparingInt(p -> p.getPp()))
-                .ifPresent(p -> setWinner(p.getNickname()));
-        state.getPlayers().stream()
-                .sorted(Comparator.comparingInt(GameStateDTO.PlayerDTO::getPp).reversed())
-                .forEach(p -> scores.setText(scores.getText() + p.getNickname() + ": " + p.getPp() + "\n"));
+        int playerCount = state.getPlayers().size();
+        int onlinePlayers = 0;
+        String onName = "";
+        for(int i = 0; i < playerCount; i++) {
+            if(state.getPlayers().get(i).isConnected()) {
+                onlinePlayers++;
+            } else {
+                onName = state.getPlayers().get(i).getNickname();
+            }
+        }
+
+        if(onlinePlayers > 1) {
+            state.getPlayers().stream()
+                    .max(Comparator.comparingInt(p -> p.getPp()))
+                    .ifPresent(p -> setWinner(p.getNickname()));
+            state.getPlayers().stream()
+                    .sorted(Comparator.comparingInt(GameStateDTO.PlayerDTO::getPp).reversed())
+                    .forEach(p -> scores.setText(scores.getText() + p.getNickname() + ": " + p.getPp() + "\n"));
+        } else if(onlinePlayers == 1) {
+            setWinner(onName);
+            scores.setText("All other players abandoned the game.");
+        }
     }
 
 
