@@ -44,7 +44,6 @@ public class EndGameController {
                 onName = state.getPlayers().get(i).getNickname();
             }
         }
-
         if(onlinePlayers > 1) {
             state.getPlayers().stream()
                     .max(Comparator.comparingInt(p -> p.getPp()))
