@@ -7,7 +7,7 @@ import it.polimi.ingsw.controller.Actions.ExecTopBuilding;
 import it.polimi.ingsw.controller.Actions.ExecTopCard;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.view.ClientManager;
-import it.polimi.ingsw.view.NUDESender;
+import it.polimi.ingsw.view.NUDEGenerator;
 
 import java.util.Objects;
 
@@ -30,7 +30,7 @@ public class ActionSender implements LobbyCommandSender, GameCommandSender {
     public void sendCreateGame(String nickname, int numPlayers, Totem totem) {
         client.setNickname(nickname);
         client.setPlayerTotem(totem);
-        String json = NUDESender.buildLobbyCreate(nickname, numPlayers, totem);
+        String json = NUDEGenerator.buildLobbyCreate(nickname, numPlayers, totem);
         if (json != null) client.getConnection().send(json);
     }
 
@@ -45,7 +45,7 @@ public class ActionSender implements LobbyCommandSender, GameCommandSender {
         client.setNickname(nickname);
         client.setId(gameId);
         client.setPlayerTotem(null);
-        String json = NUDESender.buildLobbyEnter(gameId, nickname);
+        String json = NUDEGenerator.buildLobbyEnter(gameId, nickname);
         if (json != null) client.getConnection().send(json);
     }
 
@@ -57,7 +57,7 @@ public class ActionSender implements LobbyCommandSender, GameCommandSender {
     @Override
     public void sendSelectTotem(Totem totem) {
         client.setPlayerTotem(totem);
-        String json = NUDESender.buildLobbySelectTotem(client.getId(), client.getNickname(), totem);
+        String json = NUDEGenerator.buildLobbySelectTotem(client.getId(), client.getNickname(), totem);
         if (json != null) client.getConnection().send(json);
     }
 
@@ -65,27 +65,27 @@ public class ActionSender implements LobbyCommandSender, GameCommandSender {
 
     @Override
     public void sendPickTopCard(int index, String cardInstanceId) {
-        send(NUDESender.toJson(new ExecTopCard(client.getId(), client.getPlayerTotem(), index, cardInstanceId)));
+        send(NUDEGenerator.toJson(new ExecTopCard(client.getId(), client.getPlayerTotem(), index, cardInstanceId)));
     }
 
     @Override
     public void sendPickBottomCard(int index, String cardInstanceId) {
-        send(NUDESender.toJson(new ExecBottomCard(client.getId(), client.getPlayerTotem(), index, cardInstanceId)));
+        send(NUDEGenerator.toJson(new ExecBottomCard(client.getId(), client.getPlayerTotem(), index, cardInstanceId)));
     }
 
     @Override
     public void sendPickTopBuilding(int index, String cardInstanceId) {
-        send(NUDESender.toJson(new ExecTopBuilding(client.getId(), client.getPlayerTotem(), index, cardInstanceId)));
+        send(NUDEGenerator.toJson(new ExecTopBuilding(client.getId(), client.getPlayerTotem(), index, cardInstanceId)));
     }
 
     @Override
     public void sendPickBottomBuilding(int index, String cardInstanceId) {
-        send(NUDESender.toJson(new ExecBottomBuilding(client.getId(), client.getPlayerTotem(), index, cardInstanceId)));
+        send(NUDEGenerator.toJson(new ExecBottomBuilding(client.getId(), client.getPlayerTotem(), index, cardInstanceId)));
     }
 
     @Override
     public void sendPickTile(int index) {
-        send(NUDESender.toJson(new ExecTile(client.getId(), client.getPlayerTotem(), index)));
+        send(NUDEGenerator.toJson(new ExecTile(client.getId(), client.getPlayerTotem(), index)));
     }
 
     private void send(String json) {

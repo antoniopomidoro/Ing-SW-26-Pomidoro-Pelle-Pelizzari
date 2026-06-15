@@ -9,7 +9,7 @@ import it.polimi.ingsw.network.lobby.CreateGameCommand;
 import it.polimi.ingsw.network.lobby.EnterLobbyCommand;
 import it.polimi.ingsw.network.lobby.SelectTotemCommand;
 
-public class NUDESender {
+public class NUDEGenerator {
 
 
         private static final ObjectMapper mapper = new ObjectMapper();
