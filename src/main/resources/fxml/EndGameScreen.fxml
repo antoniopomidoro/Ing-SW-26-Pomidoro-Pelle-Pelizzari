@@ -16,13 +16,13 @@
 
     <!-- ── Background layers (anchored to fill entire screen) ── -->
     <ImageView fx:id="bgBase" mouseTransparent="true" preserveRatio="false" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-        <image><Image backgroundLoading="false" url="@../images/box_art_background.png" /></image>
+        <image><Image backgroundLoading="true" url="@../images/box_art_background.png" /></image>
     </ImageView>
     <ImageView fx:id="bgDrawings" mouseTransparent="true" preserveRatio="false" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-        <image><Image backgroundLoading="false" url="@../images/box_art_drawings.png" /></image>
+        <image><Image backgroundLoading="true" url="@../images/box_art_drawings.png" /></image>
     </ImageView>
     <ImageView fx:id="bgFire" mouseTransparent="true" preserveRatio="false" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-        <image><Image backgroundLoading="false" url="@../images/box_art_fire.png" /></image>
+        <image><Image backgroundLoading="true" url="@../images/box_art_fire.png" /></image>
     </ImageView>
 
     <!-- StackPane that fills the screen and centers the card -->
