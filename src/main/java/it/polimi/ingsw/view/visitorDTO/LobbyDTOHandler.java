@@ -1,6 +1,7 @@
 package it.polimi.ingsw.view.visitorDTO;
 
 import it.polimi.ingsw.network.LobbyState;
+import it.polimi.ingsw.network.dto.CountdownDTO;
 import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.network.dto.GameStateDTO;
@@ -92,6 +93,10 @@ public class LobbyDTOHandler implements DTOVisitor {
         Consumer<ErrorDTO> handler = errorDispatch.get(dto.getErrorCode());
         if (handler != null) handler.accept(dto);
     }
+
+    /** CountdownDTOs are not expected during the lobby phase — ignore silently. */
+    @Override
+    public void visit(CountdownDTO dto) {}
 
     @Override
     public GameEventDTO getLastEvent() { return null; }

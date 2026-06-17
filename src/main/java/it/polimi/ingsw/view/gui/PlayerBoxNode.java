@@ -21,6 +21,8 @@ public class PlayerBoxNode extends HBox {
 
     private static final double NAME_SIZE   = 16.0;
     private static final int    NAME_MAX_LEN = 10;
+    private static final String STAR_CHAR  = "★";
+    private static final double STAR_SIZE  = 14.0;
     private static final double TOTEM_H   = NAME_SIZE * 3;               // 48
     private static final double TOTEM_W   = TOTEM_H * (48.0 / 64.0);    // 36 (original ratio)
 
@@ -36,7 +38,7 @@ public class PlayerBoxNode extends HBox {
     private final Totem totem;
     private final Label nicknameLabel;
     private final Circle statusDot;
-    private final ImageView starIcon;
+    private final Label starLabel;
 
     public PlayerBoxNode(PlayerDTO player) {
         Objects.requireNonNull(player, "player");
@@ -48,8 +50,8 @@ public class PlayerBoxNode extends HBox {
 
         ImageView totemImg = buildTotemImage(totem);
 
-        starIcon = buildStarIcon();
-        starIcon.setVisible(false);
+        starLabel = buildStarLabel();
+        starLabel.setVisible(false);
 
         statusDot = new Circle(5);
         statusDot.getStyleClass().add(player.isConnected() ? "online-dot" : "offline-dot");
@@ -58,7 +60,7 @@ public class PlayerBoxNode extends HBox {
         nicknameLabel.setStyle(
                 "-fx-text-fill: #e8d9b0; -fx-font-size: " + (int) NAME_SIZE + "px; -fx-font-weight: 600;");
 
-        getChildren().addAll(starIcon, statusDot, nicknameLabel, totemImg);
+        getChildren().addAll(starLabel, statusDot, nicknameLabel, totemImg);
     }
 
     /**
@@ -74,7 +76,7 @@ public class PlayerBoxNode extends HBox {
         if (p == null) return;
 
         statusDot.getStyleClass().setAll(p.isConnected() ? "online-dot" : "offline-dot");
-        starIcon.setVisible(totem == dto.getActivePlayer());
+        starLabel.setVisible(totem == dto.getActivePlayer());
     }
 
     /**
@@ -122,13 +124,9 @@ public class PlayerBoxNode extends HBox {
         return iv;
     }
 
-    private ImageView buildStarIcon() {
-        ImageView iv = new ImageView();
-        iv.setFitWidth(14);
-        iv.setFitHeight(14);
-        iv.setPreserveRatio(true);
-        var stream = getClass().getResourceAsStream("/icons/icon_star.png");
-        if (stream != null) iv.setImage(new Image(stream, 14, 14, true, true));
-        return iv;
+    private Label buildStarLabel() {
+        Label star = new Label(STAR_CHAR);
+        star.setStyle("-fx-text-fill: #ffd700; -fx-font-size: " + (int) STAR_SIZE + "px;");
+        return star;
     }
 }

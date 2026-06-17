@@ -4,6 +4,7 @@ import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.GameStateObserver;
 import it.polimi.ingsw.model.player.Totem;
+import it.polimi.ingsw.network.dto.CountdownDTO;
 import it.polimi.ingsw.network.dto.DTO;
 import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
@@ -75,6 +76,17 @@ public abstract class VirtualView implements GameStateObserver {
 
         sendToClient(dto);
     }
+
+    /**
+     * Sends the abandonment countdown duration to this view's client. Emitted by
+     * ServerManager to the single surviving player when the countdown starts.
+     *
+     * @param seconds seconds remaining before the auto-win triggers
+     */
+    public void sendCountdown(long seconds) {
+        sendToClient(new CountdownDTO(seconds));
+    }
+
     /**
      * Sends a lobby progress update to the client.
      *

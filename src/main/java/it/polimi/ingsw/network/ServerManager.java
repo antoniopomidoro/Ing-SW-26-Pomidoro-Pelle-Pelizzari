@@ -26,6 +26,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Coordinates lobby creation, player rejoin, and the lifecycle of active games.
@@ -52,11 +55,34 @@ public class ServerManager {
     private final ExecutorService lobbyExecutor =
             Executors.newSingleThreadExecutor(Thread.ofVirtual().name("lobby").factory());
 
+    /** Seconds the lone surviving player waits before winning by abandonment. */
+    private static final long RECONNECTION_TIMEOUT_SECONDS = 30;
+    private final ScheduledExecutorService countdownScheduler =
+            Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().name("countdown").factory());
+
+    private final NUDEPinger pinger = new NUDEPinger(this);
+    private final Thread pingerThread = new Thread(pinger, "Pinger");
+
     public ServerManager() {
-        NUDEPinger pinger = new NUDEPinger(this);
-        Thread pingerThread = new Thread(pinger, "Pinger");
         pingerThread.start();
         loadSavedGames();
+    }
+
+    /**
+     * Releases every resource owned by the manager: stops the heartbeat pinger,
+     * shuts down the lobby and countdown executors, and drains each active game's
+     * command queue. Save files are deliberately left untouched so the games can
+     * be restored on the next start. Idempotent on the executors.
+     */
+    public void shutdown() {
+        pinger.stop();
+        pingerThread.interrupt();
+        activeGames.values().forEach(session -> {
+            cancelCountdown(session);
+            session.close();
+        });
+        countdownScheduler.shutdown();
+        lobbyExecutor.shutdown();
     }
 
     /**
@@ -146,6 +172,7 @@ public class ServerManager {
         if (session == null) {
             return;
         }
+        cancelCountdown(session);
         session.close();
         try {
             GameStatePersistence.delete(gameId);
@@ -166,10 +193,111 @@ public class ServerManager {
      */
     private void registerEndGameCleanup(GameController controller, String gameId) {
         controller.getGameState().addObserver(event -> {
-            if (event != null && event.getType() == GameEvent.Type.END_GAME_COMPLETED) {
+            if (event != null && (event.getType() == GameEvent.Type.END_GAME_COMPLETED
+                    || event.getType() == GameEvent.Type.EXCEPTIONAL_WIN)) {
                 closeGame(gameId);
             }
         });
+    }
+
+    /**
+     * Registers the abandonment-countdown machinery for a game. The observer
+     * re-evaluates the timer on every connection change (disconnect/reconnect),
+     * always on the game's own queue. A freshly started game is {@code warm}; a
+     * game loaded from a save is {@code cold} until it reaches ≥2 connected.
+     *
+     * @param controller the game controller
+     * @param gameId     game identifier
+     */
+    private void registerCountdown(GameController controller, String gameId) {
+        controller.getGameState().addObserver(event -> {
+            if (event == null) {
+                return;
+            }
+            if (event.getType() == GameEvent.Type.PLAYER_DISCONNECTED
+                    || event.getType() == GameEvent.Type.PLAYER_RECONNECTED) {
+                reevaluateCountdown(controller, gameId);
+            }
+        });
+    }
+
+    /**
+     * Recomputes whether the abandonment timer should be armed. Runs on the game
+     * queue (invoked from the connection-change observer).
+     */
+    private void reevaluateCountdown(GameController controller, String gameId) {
+        GameSession session = activeGames.get(gameId);
+        if (session == null) {
+            return;
+        }
+        GameSession.GameLiveness live = session.liveness();
+        List<Player> connected = controller.getGameState().getPlayers().stream()
+                .filter(Player::isConnected)
+                .toList();
+        int count = connected.size();
+        if (count >= 2) {
+            live.warm = true;
+            cancelCountdown(session);
+        } else if (count == 1 && live.warm) {
+            startCountdown(controller, gameId, connected.get(0));
+        }
+        // count == 1 && cold: loaded game still repopulating → no timer
+        // count == 0: leave any running countdown ticking; game stays alive
+    }
+
+    /**
+     * Arms a fresh countdown for the lone survivor: notifies their client and
+     * schedules the expiry. Cancels any previous timer first.
+     */
+    private void startCountdown(GameController controller, String gameId, Player survivor) {
+        GameSession session = activeGames.get(gameId);
+        if (session == null) {
+            return;
+        }
+        GameSession.GameLiveness live = session.liveness();
+        cancelCountdown(session);
+        notifyCountdown(gameId, survivor);
+        live.countdown = countdownScheduler.schedule(
+                () -> session.trySubmit(() -> onCountdownExpired(controller, gameId)),
+                RECONNECTION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+    }
+
+    /** Sends the countdown duration to the surviving player's view, if still registered. */
+    private void notifyCountdown(String gameId, Player survivor) {
+        Map<Totem, VirtualView> registry = viewRegistry.get(gameId);
+        if (registry == null) {
+            return;
+        }
+        VirtualView view = registry.get(survivor.getId());
+        if (view != null) {
+            view.sendCountdown(RECONNECTION_TIMEOUT_SECONDS);
+        }
+    }
+
+    /**
+     * Runs on the game queue when the countdown expires. Re-checks the connected
+     * set: a single survivor wins by abandonment; nobody connected closes the game;
+     * a resumed game (≥2) is a no-op.
+     */
+    private void onCountdownExpired(GameController controller, String gameId) {
+        List<Player> connected = controller.getGameState().getPlayers().stream()
+                .filter(Player::isConnected)
+                .toList();
+        if (connected.size() == 1) {
+            controller.declareExceptionalWin(connected.get(0));
+        } else if (connected.isEmpty()) {
+            closeGame(gameId);
+        }
+    }
+
+    /** Cancels and clears the active countdown for a session, if any. Idempotent. */
+    private void cancelCountdown(GameSession session) {
+        GameSession.GameLiveness live = session.liveness();
+        ScheduledFuture<?> future = live.countdown;
+        if (future != null) {
+            future.cancel(false);
+            live.countdown = null;
+        }
     }
 
     /**
@@ -363,8 +491,9 @@ public class ServerManager {
 
                 controller.start();
 
-                activeGames.put(gameId, GameSession.create(controller, gameId));
+                activeGames.put(gameId, GameSession.create(controller, gameId, true));
                 registerEndGameCleanup(controller, gameId);
+                registerCountdown(controller, gameId);
                 pendingGames.remove(gameId);
                 pendingViews.remove(gameId);
             } catch (IllegalStateException e) {
@@ -582,8 +711,9 @@ public class ServerManager {
                 GameState restoredState = GameStatePersistence.load(gameId);
 
                 GameController restoredController = new GameController(restoredState);
-                activeGames.put(gameId, GameSession.create(restoredController, gameId));
+                activeGames.put(gameId, GameSession.create(restoredController, gameId, false));
                 registerEndGameCleanup(restoredController, gameId);
+                registerCountdown(restoredController, gameId);
                 viewRegistry.putIfAbsent(gameId, new ConcurrentHashMap<>());
                 loaded++;
                 loadedGameIds.add(gameId);

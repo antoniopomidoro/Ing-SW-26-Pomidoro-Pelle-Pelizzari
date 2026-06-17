@@ -27,6 +27,8 @@ public class GameEvent {
         OCCUPIED_TILE(false),
         INVALID_ID(false),
         INVALID_CARD(false),
+        /** A move was attempted while fewer than the minimum players are connected. */
+        INSUFFICIENT_PLAYERS(false),
 
         // --- VALID ACTIONS ---
         SUCCESSFUL_ACTION(true),
@@ -59,7 +61,9 @@ public class GameEvent {
         START_TURN_STARTED(true),
         STARTING_END_GAME(true),
         /** End game: final scores calculated. */
-        END_GAME_COMPLETED(true);
+        END_GAME_COMPLETED(true),
+        /** A player won by exceptional/technical means (abandonment or easter egg). */
+        EXCEPTIONAL_WIN(true);
 
         private final boolean requiresSave;
 

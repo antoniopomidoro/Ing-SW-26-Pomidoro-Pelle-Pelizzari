@@ -6,6 +6,7 @@ import it.polimi.ingsw.model.cards.Building;
 import it.polimi.ingsw.model.cards.Card;
 import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.Age;
+import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.GameState;
 import it.polimi.ingsw.model.game.StatePhases.*;
 import it.polimi.ingsw.model.player.Player;
@@ -239,5 +240,43 @@ public class GameControllerTest {
         boolean res = controller.reconnectPlayer(p1, view);
         assertTrue(res);
         assertTrue(p1.isConnected());
+    }
+
+    /* Tests for declareExceptionalWin() */
+    @DisplayName("declareExceptionalWin raises EXCEPTIONAL_WIN for the given winner")
+    @Test
+    public void declareExceptionalWinRaisesEvent() {
+        Player winner = controller.getGameState().getPlayers().get(0);
+        List<GameEvent.Type> seen = new ArrayList<>();
+        controller.getGameState().addObserver(e -> seen.add(e.getType()));
+        controller.declareExceptionalWin(winner);
+        assertTrue(seen.contains(GameEvent.Type.EXCEPTIONAL_WIN));
+    }
+
+    @DisplayName("declareExceptionalWin throws NullPointerException on a null winner")
+    @Test
+    public void declareExceptionalWinNullWinner() {
+        assertThrows(NullPointerException.class, () -> controller.declareExceptionalWin(null));
+    }
+
+    /* Tests for the "at least 2 connected players" move guard */
+    @DisplayName("A move is rejected (and INSUFFICIENT_PLAYERS is raised) when fewer than 2 players are connected")
+    @Test
+    public void moveRejectedWhenAlone() {
+        List<Player> players = controller.getGameState().getPlayers();
+        for (int i = 1; i < players.size(); i++) {
+            controller.disconnectPlayer(players.get(i).getId());
+        }
+        Player lone = players.get(0);
+        assertTrue(lone.isConnected());
+
+        List<GameEvent.Type> seen = new ArrayList<>();
+        controller.getGameState().addObserver(e -> seen.add(e.getType()));
+
+        boolean res = controller.pickTopCard(1, lone,
+                controller.getGameState().getBoard().getTopCards().get(1).getInstanceId());
+
+        assertFalse(res);
+        assertTrue(seen.contains(GameEvent.Type.INSUFFICIENT_PLAYERS));
     }
 }

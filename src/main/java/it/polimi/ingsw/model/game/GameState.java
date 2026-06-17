@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.board.Board;
 import it.polimi.ingsw.model.board.Tile;
 import it.polimi.ingsw.model.cards.Decks;
 import it.polimi.ingsw.model.game.StatePhases.GamePhaseBehavior;
+import it.polimi.ingsw.model.game.StatePhases.IllegalMoveException;
 import it.polimi.ingsw.model.game.StatePhases.SetupPhase;
 import it.polimi.ingsw.model.player.Player;
 
@@ -350,6 +351,28 @@ public class GameState implements Serializable {
         return currentPhase != null;
     }
 
+    /** Minimum number of connected players required for a move to be legal. */
+    private static final int MIN_PLAYERS_TO_PLAY = 2;
+
+    /**
+     * Ensures the game has enough connected players to allow a move: a single
+     * connected player cannot play alone. When violated, raises
+     * {@link GameEvent.Type#INSUFFICIENT_PLAYERS} and throws, so the controller
+     * rejects the move (returns {@code false}).
+     *
+     * @param culprit the player attempting the move
+     * @throws IllegalMoveException if fewer than {@value #MIN_PLAYERS_TO_PLAY}
+     *                              players are connected
+     */
+    private void requireEnoughConnectedPlayers(Player culprit) {
+        long connected = players.stream().filter(Player::isConnected).count();
+        if (connected < MIN_PLAYERS_TO_PLAY) {
+            raiseEvent(new GameEvent(GameEvent.Type.INSUFFICIENT_PLAYERS, culprit));
+            throw new IllegalMoveException(
+                    "At least " + MIN_PLAYERS_TO_PLAY + " connected players are required to play.");
+        }
+    }
+
     /**
      * Delegates the top card picking action to the current phase.
      * @param index the position of the card.
@@ -358,6 +381,7 @@ public class GameState implements Serializable {
      * @return true if successful, false otherwise.
      */
     public boolean pickTopCard(int index, Player player, String cardInstanceId) {
+        requireEnoughConnectedPlayers(player);
         if (!hasCurrentPhase()) return false;
         return currentPhase.pickTopCard(this, index, player, cardInstanceId);
     }
@@ -370,6 +394,7 @@ public class GameState implements Serializable {
      * @return true if successful, false otherwise.
      */
     public boolean pickBottomCard(int index, Player player, String cardInstanceId) {
+        requireEnoughConnectedPlayers(player);
         if (!hasCurrentPhase()) return false;
         return currentPhase.pickBottomCard(this, index, player, cardInstanceId);
 
@@ -383,6 +408,7 @@ public class GameState implements Serializable {
      * @return true if successful, false otherwise.
      */
     public boolean pickTopBuilding(int index, Player player, String cardInstanceId) {
+        requireEnoughConnectedPlayers(player);
         if (!hasCurrentPhase()) return false;
         return currentPhase.pickTopBuilding(this, index, player, cardInstanceId);
     }
@@ -395,6 +421,7 @@ public class GameState implements Serializable {
      * @return true if successful, false otherwise.
      */
     public boolean pickBottomBuilding(int index, Player player, String cardInstanceId) {
+        requireEnoughConnectedPlayers(player);
         if (!hasCurrentPhase()) return false;
         return currentPhase.pickBottomBuilding(this, index, player, cardInstanceId);
     }
@@ -406,6 +433,7 @@ public class GameState implements Serializable {
      * @return true if successful, false otherwise.
      */
     public boolean occupyOfferTrailTile(int index, Player player) {
+        requireEnoughConnectedPlayers(player);
         if (!hasCurrentPhase()) return false;
         return currentPhase.occupyOfferTrailTile(this, index, player);
     }

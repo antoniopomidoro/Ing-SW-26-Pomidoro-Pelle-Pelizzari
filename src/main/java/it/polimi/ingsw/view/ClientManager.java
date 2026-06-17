@@ -78,14 +78,14 @@ public class ClientManager {
     // ── Accessors ─────────────────────────────────────────────────────────────
 
     public ConnectionProtocol getConnection() { return connection; }
-    public UserInterface       getUser()       { return userInterface; }
-    public String              getId()         { return id; }
-    public Totem               getPlayerTotem(){ return playerTotem; }
-    public String              getNickname()   { return nickname; }
+    public UserInterface getUser() { return userInterface; }
+    public String getId() { return id; }
+    public Totem getPlayerTotem(){ return playerTotem; }
+    public String getNickname() { return nickname; }
 
-    public void setNickname(String nickname)  { this.nickname    = nickname; }
-    public void setId(String id)              { this.id          = id; }
-    public void setPlayerTotem(Totem totem)   { this.playerTotem = totem; }
+    public void setNickname(String nickname) { this.nickname = nickname; }
+    public void setId(String id) { this.id = id; }
+    public void setPlayerTotem(Totem totem) { this.playerTotem = totem; }
 
     /**
      * Swaps the active DTO visitor so that all subsequent game events are routed to

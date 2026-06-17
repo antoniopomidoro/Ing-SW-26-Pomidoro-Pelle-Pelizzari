@@ -35,6 +35,8 @@ public class OpponentPanel {
     private static final double BOX_GAP    = 12.0;
     private static final double BOX_MARGIN = 16.0;
     private static final int    NAME_MAX_LEN = 10;
+    private static final String STAR_CHAR  = "★";
+    private static final double STAR_SIZE  = 14.0;
 
     /** Sorts cards by character type (declaration order); non-character cards sink to the end. */
     private static final Comparator<Card> BY_CHARACTER_ID =
@@ -169,7 +171,8 @@ public class OpponentPanel {
         nickLabel.getStyleClass().add("opponent-nickname");
         Circle dot = new Circle(5);
         dot.getStyleClass().add(p.isConnected() ? "online-dot" : "offline-dot");
-        ImageView star = nodes.makeImageView(14, 14, "/icons/icon_star.png");
+        Label star = new Label(STAR_CHAR);
+        star.setStyle("-fx-text-fill: #ffd700; -fx-font-size: " + (int) STAR_SIZE + "px;");
         star.setVisible(p.getTotem() == snapshot.getActivePlayer());
         HBox headerRow = new HBox(6, totemImg, nickLabel, dot, star);
         headerRow.setAlignment(Pos.CENTER_LEFT);

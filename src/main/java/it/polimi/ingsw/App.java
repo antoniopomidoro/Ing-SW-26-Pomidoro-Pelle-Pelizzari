@@ -35,6 +35,7 @@ public class App {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("[Server] Shutting down...");
             finalSocketServer.stop();
+            serverManager.shutdown();
             try {
                 Registry registry = LocateRegistry.getRegistry(RMI_PORT);
                 registry.unbind(RMI_BIND_NAME);

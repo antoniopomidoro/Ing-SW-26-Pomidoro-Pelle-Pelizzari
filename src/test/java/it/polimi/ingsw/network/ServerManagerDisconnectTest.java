@@ -2,6 +2,7 @@ package it.polimi.ingsw.network;
 
 import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.player.Totem;
+import it.polimi.ingsw.network.dto.CountdownDTO;
 import it.polimi.ingsw.network.dto.DTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +20,7 @@ class ServerManagerDisconnectTest {
     private static final class RecordingView extends VirtualView {
         record Delivery(GameEvent.Type type, String threadName) {}
         final List<Delivery> deliveries = new CopyOnWriteArrayList<>();
+        final List<DTO> sent = new CopyOnWriteArrayList<>();
 
         @Override
         public void onGameEvent(GameEvent event) {
@@ -28,11 +30,15 @@ class ServerManagerDisconnectTest {
             // niente super: il test non deve serializzare snapshot
         }
 
-        @Override protected void sendToClient(DTO dto) { /* no-op */ }
+        @Override protected void sendToClient(DTO dto) { sent.add(dto); }
         @Override protected void ping() { /* no-op */ }
 
         long countOf(GameEvent.Type type) {
             return deliveries.stream().filter(d -> d.type() == type).count();
+        }
+
+        long countdownsReceived() {
+            return sent.stream().filter(d -> d instanceof CountdownDTO).count();
         }
     }
 
@@ -82,6 +88,28 @@ class ServerManagerDisconnectTest {
         sleepQuietly(300); // lascia drenare le code
         assertEquals(1, host.countOf(GameEvent.Type.PLAYER_DISCONNECTED),
                 "a duplicate disconnect must not raise a second event");
+    }
+
+    @Test
+    @DisplayName("disconnecting down to a single survivor sends a countdown to the survivor")
+    void countdownSentToLoneSurvivor() {
+        ServerManager sm = new ServerManager();
+        RecordingView host = new RecordingView();
+        RecordingView guest = new RecordingView();
+
+        sm.createGame("host", 2, Totem.RED, host);
+        gameId = host.getGameId();
+        assertNotNull(gameId, "createGame must assign the gameId to the host view");
+
+        sm.enterLobby(gameId, "guest", guest);
+        sm.selectTotem(gameId, "guest", Totem.BLUE, guest);
+
+        await(() -> sm.getGame(gameId).isPresent(), "game must become active");
+
+        // guest leaves: host is the lone survivor of a freshly started (warm) game
+        sm.disconnectPlayer(guest);
+        await(() -> host.countdownsReceived() >= 1,
+                "the lone survivor must receive a countdown");
     }
 
     private static void await(BooleanSupplier condition, String description) {

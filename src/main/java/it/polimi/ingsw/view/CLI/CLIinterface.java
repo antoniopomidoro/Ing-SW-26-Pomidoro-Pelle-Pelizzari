@@ -388,6 +388,15 @@ public class CLIinterface implements UserInterface, Runnable {
     }
 
     @Override
+    public synchronized void onExceptionalWin(GameEventDTO dto) {
+        update(dto);
+        System.out.println();
+        System.out.println(BOLD + GREEN + "  ★ VICTORY! All other players abandoned the game. ★" + RESET);
+        System.out.println();
+        new Thread(new CLIEnder(user, dto), "CLI-ender").start();
+    }
+
+    @Override
     public synchronized void onLobbyWaiting(LobbyUpdateDTO dto) {
         if (dto.getIdGame() != null) user.setId(dto.getIdGame());
         updateLobby(dto);

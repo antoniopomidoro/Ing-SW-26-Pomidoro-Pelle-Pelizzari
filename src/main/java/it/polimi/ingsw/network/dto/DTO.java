@@ -13,7 +13,8 @@ import it.polimi.ingsw.view.visitorDTO.DTOVisitor;
 		@JsonSubTypes.Type(value = GameEventDTO.class, name = "GAME_EVENT"),
 		@JsonSubTypes.Type(value = LobbyUpdateDTO.class, name = "LOBBY_UPDATE"),
 		@JsonSubTypes.Type(value = TotemSelectionDTO.class, name = "TOTEM_SELECTION"),
-		@JsonSubTypes.Type(value = ErrorDTO.class, name = "ERROR")
+		@JsonSubTypes.Type(value = ErrorDTO.class, name = "ERROR"),
+		@JsonSubTypes.Type(value = CountdownDTO.class, name = "COUNTDOWN")
 })
 public interface DTO {
     void accept(DTOVisitor visitor);

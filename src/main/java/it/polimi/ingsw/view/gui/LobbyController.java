@@ -466,6 +466,7 @@ public class LobbyController implements UserInterface {
     @Override public void onPlayerTurnStarted(GameEventDTO dto)    { }
     @Override public void onPlayerDisconnected(GameEventDTO dto)   { }
     @Override public void onGameEnded(GameEventDTO dto)            { }
+    @Override public void onExceptionalWin(GameEventDTO dto)       { }
 
     private static final String PREVIEW_GAME_ID = "PREVIEW-0001";
     private static final String PREVIEW_NICKNAME = "PreviewPlayer";

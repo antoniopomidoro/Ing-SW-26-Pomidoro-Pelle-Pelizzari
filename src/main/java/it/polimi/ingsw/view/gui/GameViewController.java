@@ -203,11 +203,10 @@ public class GameViewController implements UserInterface {
         handleGameEvent(dto);
         Platform.runLater(() -> showEndGameScreen(dto.getSnapshot()));
     }
-    /* TODO: */
-//    @Override public void ...(GameEventDTO dto)                   {
-//        handleGameEvent(dto);
-//        Platform.runLater(() -> showEarlyWinScreen(dto.getSnapshot()));
-//    }
+    @Override public void onExceptionalWin(GameEventDTO dto)      {
+        handleGameEvent(dto);
+        Platform.runLater(() -> showEarlyWinScreen(dto.getSnapshot()));
+    }
     @Override public void onGameError(GameEventDTO dto)           { /* TODO: toast */ }
     @Override public void onLobbyWaiting(LobbyUpdateDTO dto)      { }
     @Override public void onLobbyRejoin(LobbyUpdateDTO dto)       { }

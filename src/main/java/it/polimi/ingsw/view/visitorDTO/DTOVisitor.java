@@ -1,5 +1,6 @@
 package it.polimi.ingsw.view.visitorDTO;
 
+import it.polimi.ingsw.network.dto.CountdownDTO;
 import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.network.dto.GameStateDTO;
@@ -24,6 +25,7 @@ public interface DTOVisitor {
     void visit(LobbyUpdateDTO dto);
     void visit(TotemSelectionDTO dto);
     void visit(ErrorDTO dto);
+    void visit(CountdownDTO dto);
 
     GameEventDTO getLastEvent();
 

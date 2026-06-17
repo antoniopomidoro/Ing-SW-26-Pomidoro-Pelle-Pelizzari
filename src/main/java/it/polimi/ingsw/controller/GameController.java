@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -245,6 +246,20 @@ public class GameController {
             state.raiseEvent(new GameEvent(GameEvent.Type.PLAYER_DISCONNECTED, p));
         }
         return disconnect;
+    }
+
+    /**
+     * Declares an immediate, technical victory for the given player (e.g. all other
+     * players abandoned the game, or the Cugola easter egg). Raises
+     * {@link GameEvent.Type#EXCEPTIONAL_WIN}; no score recomputation is performed.
+     * Must run on the game's command queue.
+     *
+     * @param winner the winning player
+     * @throws NullPointerException if {@code winner} is null
+     */
+    public void declareExceptionalWin(Player winner) {
+        Objects.requireNonNull(winner, "winner");
+        state.raiseEvent(new GameEvent(GameEvent.Type.EXCEPTIONAL_WIN, winner));
     }
     /**
      * Reintegrates a disconnected player and re-registers their view as observer.

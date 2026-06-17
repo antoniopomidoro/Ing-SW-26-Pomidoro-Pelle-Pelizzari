@@ -15,6 +15,7 @@ public interface UserInterface {
     void onPlayerTurnStarted(GameEventDTO dto);
     void onPlayerDisconnected(GameEventDTO dto);
     void onGameEnded(GameEventDTO dto);
+    void onExceptionalWin(GameEventDTO dto);
 
     // --- lobby events ---
     void onLobbyWaiting(LobbyUpdateDTO dto);

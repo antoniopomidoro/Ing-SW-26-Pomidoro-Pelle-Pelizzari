@@ -1,6 +1,7 @@
 package it.polimi.ingsw.view.visitorDTO;
 
 import it.polimi.ingsw.model.game.GameEvent;
+import it.polimi.ingsw.network.dto.CountdownDTO;
 import it.polimi.ingsw.network.dto.ErrorDTO;
 import it.polimi.ingsw.network.dto.GameEventDTO;
 import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
@@ -57,6 +58,7 @@ public class GameDTOHandler implements DTOVisitor {
         gameDispatch.put(GameEvent.Type.INVALID_ACTION,      ui::onGameError);
         gameDispatch.put(GameEvent.Type.OCCUPIED_TILE,       ui::onGameError);
         gameDispatch.put(GameEvent.Type.INVALID_ID,          ui::onGameError);
+        gameDispatch.put(GameEvent.Type.INSUFFICIENT_PLAYERS, ui::onGameError);
 
         // --- generic state-changing events: re-render the board from snapshot ---
         Consumer<GameEventDTO> updateDisplay = ui::update;
@@ -71,7 +73,7 @@ public class GameDTOHandler implements DTOVisitor {
         gameDispatch.put(GameEvent.Type.TURN_COMPLETED,       updateDisplay);
         gameDispatch.put(GameEvent.Type.END_TURN_COMPLETED,   updateDisplay);
         gameDispatch.put(GameEvent.Type.START_TURN_COMPLETED, updateDisplay);
-        gameDispatch.put(GameEvent.Type.START_TURN_STARTED,  updateDisplay);
+        gameDispatch.put(GameEvent.Type.START_TURN_STARTED,   updateDisplay);
         gameDispatch.put(GameEvent.Type.EVENT_CARD_TRIGGERED, updateDisplay);
         gameDispatch.put(GameEvent.Type.BUILDING_ACTIVATED,   updateDisplay);
         gameDispatch.put(GameEvent.Type.STARTING_END_GAME,    updateDisplay);
@@ -84,6 +86,7 @@ public class GameDTOHandler implements DTOVisitor {
         gameDispatch.put(GameEvent.Type.PLAYER_TURN_STARTED,   ui::onPlayerTurnStarted);
         gameDispatch.put(GameEvent.Type.PLAYER_DISCONNECTED,   ui::onPlayerDisconnected);
         gameDispatch.put(GameEvent.Type.END_GAME_COMPLETED,    ui::onGameEnded);
+        gameDispatch.put(GameEvent.Type.EXCEPTIONAL_WIN,       ui::onExceptionalWin);
         gameDispatch.put(GameEvent.Type.PLAYER_RECONNECTED,    updateDisplay);
     }
 
@@ -110,6 +113,16 @@ public class GameDTOHandler implements DTOVisitor {
     /** TotemSelectionDTOs are not expected during the game phase — ignore silently. */
     @Override
     public void visit(TotemSelectionDTO dto) {}
+
+    /**
+     * Abandonment countdown: only the lone surviving player receives this. The
+     * dedicated UI presentation (visible timer) is wired by the view layer; here
+     * we only ensure the payload is not lost.
+     */
+    @Override
+    public void visit(CountdownDTO dto) {
+        LOGGER.info(() -> "[GameDTOHandler] countdown started: " + dto.getSeconds() + "s");
+    }
 
     /** ErrorDTOs from the lobby are not expected during the game phase — ignore silently. */
     @Override

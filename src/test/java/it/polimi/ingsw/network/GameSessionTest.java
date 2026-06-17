@@ -17,12 +17,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameSessionTest {
 
     @Test
-    @DisplayName("Constructor rejects null controller and null queue")
+    @DisplayName("Constructor rejects null controller, queue and liveness")
     void constructorRejectsNulls() {
         ExecutorService queue = Executors.newSingleThreadExecutor();
         GameController controller = new GameController(new GameState());
-        assertThrows(NullPointerException.class, () -> new GameSession(null, queue));
-        assertThrows(NullPointerException.class, () -> new GameSession(controller, null));
+        GameSession.GameLiveness liveness = new GameSession.GameLiveness(true);
+        assertThrows(NullPointerException.class, () -> new GameSession(null, queue, liveness));
+        assertThrows(NullPointerException.class, () -> new GameSession(controller, null, liveness));
+        assertThrows(NullPointerException.class, () -> new GameSession(controller, queue, null));
         queue.shutdown();
     }
 
@@ -30,7 +32,7 @@ class GameSessionTest {
     @DisplayName("create() builds a session whose queue runs tasks sequentially in order")
     void createRunsTasksSequentially() throws InterruptedException {
         GameController controller = new GameController(new GameState());
-        GameSession session = GameSession.create(controller, "123456");
+        GameSession session = GameSession.create(controller, "123456", true);
 
         List<Integer> order = new CopyOnWriteArrayList<>();
         session.commandQueue().submit(() -> order.add(1));
@@ -48,7 +50,7 @@ class GameSessionTest {
     @DisplayName("trySubmit accepts tasks while open and rejects them after close()")
     void trySubmitRejectsAfterClose() throws InterruptedException {
         GameController controller = new GameController(new GameState());
-        GameSession session = GameSession.create(controller, "654321");
+        GameSession session = GameSession.create(controller, "654321", true);
 
         List<Integer> ran = new CopyOnWriteArrayList<>();
         assertTrue(session.trySubmit(() -> ran.add(1)), "open session must accept tasks");
@@ -65,7 +67,7 @@ class GameSessionTest {
     @DisplayName("close() lets already-queued tasks complete (shutdown, not shutdownNow)")
     void closeDrainsPendingTasks() throws InterruptedException {
         GameController controller = new GameController(new GameState());
-        GameSession session = GameSession.create(controller, "654322");
+        GameSession session = GameSession.create(controller, "654322", true);
 
         CountDownLatch firstStarted = new CountDownLatch(1);
         CountDownLatch release = new CountDownLatch(1);
