@@ -19,9 +19,9 @@ public class SetupPhase implements GamePhaseBehavior {
         Collections.shuffle(context.getOrderTileOrder());
         Board board = context.getBoard();
         Decks deck = context.getDeck();
-        // 1. Assign starting food based on initial order
-        for (int i = 0; i < context.getPlayers().size(); i++) {
-            Player p = context.getPlayers().get(i);
+        // 1. Assign starting food based on turn order
+        for (int i = 0; i < context.getOrderTileOrder().size(); i++) {
+            Player p = context.getOrderTileOrder().get(i);
             int startingFood = config.getStartingFood().get(i);
             p.addFood(startingFood);
         }
