@@ -65,6 +65,7 @@ public class LobbyDTOHandler implements DTOVisitor {
         for (ErrorDTO.ErrorCode code : ErrorDTO.ErrorCode.values()) {
             errorDispatch.put(code, ui::onLobbyError);
         }
+        errorDispatch.put(ErrorDTO.ErrorCode.TOTEM_NOT_AVAILABLE, ui::onTotemUnavailable);
     }
 
     /** Called by ClientManager to wire up the GameDTOHandler swap. */
