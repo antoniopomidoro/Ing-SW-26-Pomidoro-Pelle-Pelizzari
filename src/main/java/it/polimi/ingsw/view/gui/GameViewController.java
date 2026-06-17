@@ -199,7 +199,15 @@ public class GameViewController implements UserInterface {
     @Override public boolean update(GameEventDTO dto)             { return handleGameEvent(dto); }
     @Override public void onPlayerTurnStarted(GameEventDTO dto)   { handleGameEvent(dto); }
     @Override public void onPlayerDisconnected(GameEventDTO dto)  { handleGameEvent(dto); }
-    @Override public void onGameEnded(GameEventDTO dto)           { handleGameEvent(dto); }
+    @Override public void onGameEnded(GameEventDTO dto)           {
+        handleGameEvent(dto);
+        Platform.runLater(() -> showEndGameScreen(dto.getSnapshot()));
+    }
+    /* TODO: */
+//    @Override public void ...(GameEventDTO dto)                   {
+//        handleGameEvent(dto);
+//        Platform.runLater(() -> showEarlyWinScreen(dto.getSnapshot()));
+//    }
     @Override public void onGameError(GameEventDTO dto)           { /* TODO: toast */ }
     @Override public void onLobbyWaiting(LobbyUpdateDTO dto)      { }
     @Override public void onLobbyRejoin(LobbyUpdateDTO dto)       { }
@@ -632,6 +640,29 @@ public class GameViewController implements UserInterface {
         }
     }
 
+    private void showEarlyWinScreen(GameStateDTO state) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    Objects.requireNonNull(getClass().getResource("/fxml/EndGameScreen.fxml")));
+            AnchorPane endScreen = loader.load();
+            EndGameController earlyWinController = loader.getController();
+
+            earlyWinController.initEarlyWin(state);
+            earlyWinController.setMenu(menu);
+
+            endScreen.prefWidthProperty().bind(root.widthProperty());
+            endScreen.prefHeightProperty().bind(root.heightProperty());
+            AnchorPane.setTopAnchor(endScreen, 0.0);
+            AnchorPane.setBottomAnchor(endScreen, 0.0);
+            AnchorPane.setLeftAnchor(endScreen, 0.0);
+            AnchorPane.setRightAnchor(endScreen, 0.0);
+            root.getChildren().add(endScreen);
+            animator.animateEndGame(endScreen, null);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to load EndGameScreen.fxml (early win)", ex);
+        }
+    }
+
     // ── Internal event dispatch ────────────────────────────────────────────────
 
     private boolean handleGameEvent(GameEventDTO dto) {
@@ -641,9 +672,6 @@ public class GameViewController implements UserInterface {
             lastEventType = eventType;
             lastTriggeredBy = triggeredBy;
             stateProperty.set(dto.getSnapshot());
-            if (eventType == GameEvent.Type.END_GAME_COMPLETED) {
-                showEndGameScreen(dto.getSnapshot());
-            }
         });
         return true;
     }

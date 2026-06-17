@@ -34,27 +34,22 @@ public class EndGameController {
     }
 
     public  void initData(GameStateDTO state) {
-        int playerCount = state.getPlayers().size();
-        int onlinePlayers = 0;
-        String onName = "";
-        for(int i = 0; i < playerCount; i++) {
-            if(state.getPlayers().get(i).isConnected()) {
-                onlinePlayers++;
-            } else {
-                onName = state.getPlayers().get(i).getNickname();
-            }
-        }
-        if(onlinePlayers > 1) {
-            state.getPlayers().stream()
-                    .max(Comparator.comparingInt(p -> p.getPp()))
-                    .ifPresent(p -> setWinner(p.getNickname()));
-            state.getPlayers().stream()
-                    .sorted(Comparator.comparingInt(GameStateDTO.PlayerDTO::getPp).reversed())
-                    .forEach(p -> scores.setText(scores.getText() + p.getNickname() + ": " + p.getPp() + "\n"));
-        } else if(onlinePlayers == 1) {
-            setWinner(onName);
-            scores.setText("All other players abandoned the game.");
-        }
+        state.getPlayers().stream()
+                .max(Comparator.comparingInt(p -> p.getPp()))
+                .ifPresent(p -> setWinner(p.getNickname()));
+        state.getPlayers().stream()
+                .sorted(Comparator.comparingInt(GameStateDTO.PlayerDTO::getPp).reversed())
+                .forEach(p -> scores.setText(scores.getText() + p.getNickname() + ": " + p.getPp() + "\n"));
+    }
+
+    public void initEarlyWin(GameStateDTO state) {
+        String lastConnected = state.getPlayers().stream()
+                .filter(GameStateDTO.PlayerDTO::isConnected)
+                .map(GameStateDTO.PlayerDTO::getNickname)
+                .findFirst()
+                .orElse("?");
+        winnerLabel.setText("You win, " + lastConnected + "!");
+        scores.setText("All other players abandoned the game.");
     }
 
 
@@ -66,5 +61,6 @@ public class EndGameController {
     @FXML
     private void onExit() {
         Platform.exit();
+        exit(0);
     }
 }
