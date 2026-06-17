@@ -421,6 +421,20 @@ public class LobbyController implements UserInterface {
     }
 
     @Override
+    public void onTotemUnavailable(ErrorDTO dto) {
+        Platform.runLater(() -> {
+            totemConfirmed = false;
+            selectedTotem  = null;
+            animator.stopWaitingAnimation(waitingLabel);
+            waitingLabel.setVisible(false);
+            playerNameLabel.setVisible(false);
+            currentStep = LobbyStep.TOTEM_SELECTION;
+            showTotemConfirmButton();
+            animator.shake(totemConfirmButton, "Totem already chosen, pick another one.");
+        });
+    }
+
+    @Override
     public void onLobbyRejoin(LobbyUpdateDTO dto) {
         if (dto.getIdGame() != null && onGameIdReceived != null) {
             onGameIdReceived.accept(dto.getIdGame());
