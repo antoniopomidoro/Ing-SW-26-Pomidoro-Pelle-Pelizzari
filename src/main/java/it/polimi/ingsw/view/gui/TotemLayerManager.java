@@ -24,10 +24,10 @@ import java.util.Objects;
  */
 public class TotemLayerManager {
 
-    private static final double TOTEM_W = 42;
-    private static final double TOTEM_H = 30; // width/height swapped on purpose (sprite is rotated)
-    private static final double TILE_CENTER_X = 24.0;
-    private static final double TILE_CENTER_Y = 26.0;
+    private static final double TOTEM_W = 50;
+    private static final double TOTEM_H = 38; // width/height swapped on purpose (sprite is rotated)
+    private static final double TILE_CENTER_X = 33.0;
+    private static final double TILE_CENTER_Y = 12.0;
 
     private final Pane totemLayer;
     private final HBox tilesetBox;
