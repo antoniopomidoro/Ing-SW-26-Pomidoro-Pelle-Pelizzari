@@ -50,7 +50,6 @@ public class EndTurnPhase implements GamePhaseBehavior {
         }
 
         // Re-place characters in order tile
-        // context.setOrderTileOrder(context.getTurnOrder());
         List<Player> nextOrder = new ArrayList<>(context.getTurnOrder());
         for (Player p : context.getPlayers()) {
             if (!nextOrder.contains(p)) {
