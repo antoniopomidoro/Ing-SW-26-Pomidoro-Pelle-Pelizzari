@@ -1,9 +1,6 @@
 package it.polimi.ingsw.view;
 
-import it.polimi.ingsw.network.dto.ErrorDTO;
-import it.polimi.ingsw.network.dto.GameEventDTO;
-import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
-import it.polimi.ingsw.network.dto.TotemSelectionDTO;
+import it.polimi.ingsw.network.dto.*;
 
 public interface UserInterface {
 
@@ -16,6 +13,7 @@ public interface UserInterface {
     void onPlayerDisconnected(GameEventDTO dto);
     void onGameEnded(GameEventDTO dto);
     void onExceptionalWin(GameEventDTO dto);
+    default void onCountdown(CountdownDTO dto) {}
 
     // --- lobby events ---
     void onLobbyWaiting(LobbyUpdateDTO dto);

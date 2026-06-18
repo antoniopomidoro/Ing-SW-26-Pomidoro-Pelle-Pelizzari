@@ -121,12 +121,12 @@ public class GameDTOHandler implements DTOVisitor {
      */
     @Override
     public void visit(CountdownDTO dto) {
+        ui.onCountdown(dto);
         LOGGER.info(() -> "[GameDTOHandler] countdown started: " + dto.getSeconds() + "s");
     }
 
     /** ErrorDTOs from the lobby are not expected during the game phase — ignore silently. */
     @Override
     public void visit(ErrorDTO dto) {}
-
 
 }
