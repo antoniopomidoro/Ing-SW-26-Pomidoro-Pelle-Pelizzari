@@ -1,0 +1,85 @@
+@startuml disconnect-countdown-reconnect
+title Disconnessione, countdown di abbandono e riconnessione
+
+skinparam responseMessageBelowArrow true
+
+actor "Client (down)" as CD
+actor "Client superstite" as CS
+participant "NUDEPinger" as PG
+participant "VirtualView\n(disconnesso)" as VVD
+participant "ServerManager" as SM
+participant "GameSession\n(coda partita)" as GS
+participant "GameController" as GC
+participant "Model\n(GameState)" as MD #DDEEDD
+participant "countdownScheduler" as SCH
+
+== Rilevamento disconnessione ==
+PG -> VVD : ping() (ogni 5s)
+VVD -->x CD : IOException / RemoteException
+VVD -> SM : disconnectPlayer(view)
+activate SM
+SM -> SM : rawClients.remove(view)\nsubmitToLobby(doDisconnect)
+note over SM : doDisconnect sul thread lobby
+
+alt CASO A: in pendingViews (nessun totem)
+    SM -> SM : rimuove da pendingViews\npending.removePending + cleanup
+else CASO B: totem confermato, partita non avviata
+    SM -> SM : rimuove da viewRegistry\npending.removePlayer + broadcast totem
+else CASO C: partita attiva
+    SM -> SM : viewRegistry.remove(totem)
+    SM -> GS : trySubmit(...)
+    activate GS
+    GS -> MD : removeObserver(view)
+    GS -> GC : disconnectPlayer(totem)
+    GC -> MD : raiseEvent(PLAYER_DISCONNECTED)
+    deactivate GS
+end
+deactivate SM
+
+== Countdown di abbandono (osservatore su evento connessione) ==
+MD -> SM : reevaluateCountdown (su evento DISCONNECT/RECONNECT)
+activate SM
+alt >= 2 connessi
+    SM -> SM : warm = true; cancelCountdown
+else == 1 connesso e warm
+    SM -> CS : sendCountdown(30s)
+    SM -> SCH : schedule(onCountdownExpired, 30s)
+end
+deactivate SM
+
+== Scadenza countdown ==
+SCH -> GS : trySubmit(onCountdownExpired)
+activate GS
+alt 1 superstite
+    GS -> GC : declareExceptionalWin(survivor)
+    GC -> MD : raiseEvent(EXCEPTIONAL_WIN)
+    MD -> SM : observer -> closeGame(gameId)
+else nessun connesso
+    GS -> SM : closeGame(gameId)
+end
+deactivate GS
+
+== Riconnessione (ramo REJOIN di enterLobby) ==
+CD -> SM : ENTER_LOBBY(gameId, nome) su partita attiva
+activate SM
+alt non e' un partecipante
+    SM --> CD : ErrorDTO(NOT_A_PARTICIPANT)
+else gia' connesso
+    SM --> CD : ErrorDTO(ALREADY_CONNECTED)
+else riconnessione valida
+    SM -> SM : viewRegistry[gameId][totem] = nuova view
+    SM -> GS : trySubmit(...)
+    activate GS
+    GS -> CD : sendLobbyUpdate(REJOIN) + snapshot
+    GS -> GC : reconnectPlayer(player, view)
+    alt reconnect fallito
+        GS --> CD : ErrorDTO(RECONNECTION_FAILED)\n+ rollback registry sul thread lobby
+    else ok
+        GC -> MD : raiseEvent(PLAYER_RECONNECTED)
+        MD -> SM : reevaluateCountdown -> cancelCountdown
+    end
+    deactivate GS
+end
+deactivate SM
+
+@enduml

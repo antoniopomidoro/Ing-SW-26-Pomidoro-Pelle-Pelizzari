@@ -1,0 +1,59 @@
+@startuml totem-selection-start
+title Selezione totem e avvio della partita
+
+skinparam responseMessageBelowArrow true
+
+actor Client as CL
+participant "VirtualView" as VV
+participant "NUDEAnalyzer" as NA
+participant "ServerManager\n(lobbyExecutor)" as SM
+participant "PendingGame" as PG
+participant "GameController" as GC
+participant "GameSession" as GS
+participant "Model\n(GameState)" as MD #DDEEDD
+
+CL -> VV : JSON {action:"SELECT_TOTEM", gameId, nome, totem}
+activate VV
+VV -> NA : parse(json)
+NA --> VV : SelectTotemCommand
+VV -> SM : submit -> submitToLobby(selectTotem)
+deactivate VV
+activate SM
+note over SM : eseguito sul thread lobby
+
+alt gameId non trovato
+    SM --> CL : ErrorDTO(LOBBY_NOT_FOUND)
+else lobby piena (non gia' dentro)
+    SM --> CL : ErrorDTO(LOBBY_FULL)
+else totem non disponibile
+    SM -> PG : addPlayer(nome, totem)
+    PG --> SM : IllegalArgumentException
+    SM --> CL : ErrorDTO(TOTEM_NOT_AVAILABLE)
+else selezione accettata
+    SM -> PG : addPlayer(nome, totem)
+    SM -> SM : sposta view da pendingViews\na viewRegistry[gameId][totem]
+    SM --> CL : TotemSelectionDTO (broadcast)
+
+    alt non tutti i totem scelti
+        SM --> CL : LobbyUpdate(WAITING) (broadcast)
+    else tutti i totem scelti
+        == Avvio partita ==
+        SM -> GC : new GameController(players, gameId)
+        loop per ogni VirtualView della lobby
+            SM -> MD : addObserver(view)
+            SM --> CL : LobbyUpdate(STARTING_GAME)
+        end
+        SM -> GC : start()
+        GC -> MD : inizializza stato\n(boundary: dettaglio omesso)
+        SM -> GS : GameSession.create(controller, gameId, warm=true)
+        SM -> SM : activeGames[gameId] = session\nregisterEndGameCleanup + registerCountdown\nrimuove pendingGames / pendingViews
+        alt avvio fallito (IllegalStateException)
+            SM --> CL : ErrorDTO(GAME_START_FAILED) (broadcast)\n+ closeGame / cleanup
+        end
+    end
+end
+deactivate SM
+
+note over GS : da qui i comandi di gioco seguono\n"network-message-flow.puml".
+
+@enduml

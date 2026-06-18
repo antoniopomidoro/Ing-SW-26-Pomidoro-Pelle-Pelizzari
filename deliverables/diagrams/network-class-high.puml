@@ -1,0 +1,77 @@
+@startuml network-class-high
+title Network - UML di alto livello
+
+skinparam classAttributeIconSize 0
+hide empty members
+
+interface GameStateObserver <<model>> {
+    +onGameEvent(event)
+}
+
+abstract class VirtualView {
+    -totem : Totem
+    -gameController : GameController
+    -gameId : String
+    +onGameEvent(event)
+    +sendError(error)
+    +sendLobbyUpdate(...)
+    +sendTotemSelection(dto)
+    #sendToClient(dto)
+    #ping()
+}
+
+class SocketClientHandler {
+    +run()
+    +NUDECommand(json)
+}
+class RMIClientHandler
+
+class ServerManager {
+    -pendingGames : Map
+    -activeGames : Map<String,GameSession>
+    -viewRegistry : Map
+    +createGame(...)
+    +enterLobby(...)
+    +selectTotem(...)
+    +submitToGame(cmd, view)
+    +submitToLobby(task)
+    +disconnectPlayer(view)
+    +closeGame(gameId)
+}
+
+class GameSession <<record>> {
+    +trySubmit(task) : boolean
+    +close()
+}
+
+interface ServerCommand {
+    +submit(serverManager, view)
+}
+abstract class Executor {
+    -idGame : String
+    -idPlayer : Totem
+    +execute(player, controller)
+}
+
+class NUDEPinger
+class SocketServer
+class RMIServer
+class GameController <<controller>>
+
+GameStateObserver <|.. VirtualView
+VirtualView <|-- SocketClientHandler
+VirtualView <|-- RMIClientHandler
+
+SocketServer ..> SocketClientHandler : crea (1 per client)
+RMIServer ..> RMIClientHandler : crea (1 per stub)
+
+ServerManager "1" o-- "*" GameSession : activeGames
+ServerManager ..> VirtualView : registra / notifica
+ServerManager *-- NUDEPinger
+NUDEPinger ..> VirtualView : ping periodico
+
+ServerCommand <|.. Executor
+ServerCommand ..> ServerManager : submit
+GameSession *-- GameController : controller
+
+@enduml

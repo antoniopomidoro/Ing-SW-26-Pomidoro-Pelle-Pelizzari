@@ -1,0 +1,64 @@
+@startuml lobby-create-join
+title Connessione e creazione / ingresso in lobby
+
+skinparam responseMessageBelowArrow true
+
+actor "Client A\n(host)" as A
+actor "Client B" as B
+participant "VirtualView A" as VA
+participant "VirtualView B" as VB
+participant "NUDEAnalyzer" as NA
+participant "ServerManager\n(lobbyExecutor)" as SM
+
+== Connessione transport ==
+A -> VA : connessione (Socket / RMI)
+activate VA
+VA -> SM : registerRawClient(view)
+VA -> A : ping (heartbeat iniziale)
+deactivate VA
+
+== Creazione lobby ==
+A -> VA : JSON {action:"CREATE", nome, nPlayer, totem}
+activate VA
+VA -> NA : parse(json)
+NA --> VA : CreateGameCommand
+VA -> SM : submit -> submitToLobby(createGame)
+deactivate VA
+activate SM
+note over SM : eseguito sul thread lobby
+alt input non valido
+    SM --> A : ErrorDTO(INVALID_INPUT)
+else ok
+    SM -> SM : genera gameId univoco\nPendingGame + addPlayer(host)\nviewRegistry[gameId][totem] = view
+    SM --> A : TotemSelectionDTO + LobbyUpdateDTO(WAITING)
+end
+deactivate SM
+
+== Ingresso secondo giocatore ==
+B -> VB : connessione + registerRawClient
+B -> VB : JSON {action:"ENTER_LOBBY", gameId, nome}
+activate VB
+VB -> NA : parse(json)
+NA --> VB : EnterLobbyCommand
+VB -> SM : submit -> submitToLobby(enterLobby)
+deactivate VB
+activate SM
+alt gameId non trovato
+    SM --> B : ErrorDTO(LOBBY_NOT_FOUND)
+else lobby piena
+    SM --> B : ErrorDTO(LOBBY_FULL)
+else nickname gia' preso
+    SM --> B : ErrorDTO(NICKNAME_TAKEN)
+else ok
+    SM -> SM : pending.registerPending(nome)\npendingViews[gameId][nome] = view
+    SM --> A : TotemSelectionDTO + LobbyUpdate(WAITING) (broadcast)
+    SM --> B : TotemSelectionDTO + LobbyUpdate(WAITING) (broadcast)
+end
+deactivate SM
+
+note over SM
+  La selezione del totem e l'avvio partita
+  proseguono in "totem-selection-start.puml".
+end note
+
+@enduml

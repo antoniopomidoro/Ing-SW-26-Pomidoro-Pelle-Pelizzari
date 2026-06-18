@@ -1,0 +1,142 @@
+@startuml model-class-high
+title Model - UML di alto livello
+
+skinparam classAttributeIconSize 0
+hide empty members
+
+class GameState <<context>> {
+    -age : Age
+    -turn : int
+    -currentPhase : GamePhaseBehavior
+    -players : List<Player>
+    -board : Board
+    -deck : Decks
+    +setPhase(phase) : boolean
+    +pickTopCard(...) / pickBottomCard(...)
+    +pickTopBuilding(...) / pickBottomBuilding(...)
+    +occupyOfferTrailTile(...)
+    +publishTrigger(key)
+    +raiseEvent(event)
+    +addObserver(o)
+}
+
+interface GamePhaseBehavior <<state>> {
+    +execute(context)
+    +nextPhase(context)
+    +handlePlayerDisconnect(context, player)
+    +resolveActivePlayer(context)
+}
+class SetupPhase
+class StartTurnPhase
+class TurnPhase
+class PlayerTurnPhase
+class EndTurnPhase
+class ChangeAgePhase
+class EndGamePhase
+
+class Player {
+    -id : Totem
+    -nickname : String
+    -food : int
+    -pp : int
+    -isConnected : boolean
+    -cards : List<Card>
+    -buildings : List<Building>
+    +addCard(c) / addBuilding(b)
+    +payFood(amount) / canBuy(b)
+    +getBuildingsByTrigger(key)
+}
+class PlayerStats {
+    -characterCounts : Map<CharacterEnum,Integer>
+    -stars : int
+    +calculateSet()
+}
+
+class Board {
+    -orderTile : OrderTile
+    -tiles : TileSet
+    +pickTopCard(i) / pickTopBuilding(i)
+    +discardBoard(state)
+}
+class TileSet
+class Tile {
+    -occupier : Player
+    -upperPicks : int
+    -bottomPicks : int
+    +occupy(p) / deOccupy()
+}
+class OrderTile
+
+class Decks {
+    -cards : Map<Age,List<Card>>
+    -buildings : Map<Age,List<Building>>
+    +popCard(age) / shuffle()
+}
+
+abstract class Card {
+    #age : Age
+    #instanceId : String
+    +getTriggerKey()
+    +onAddedToPlayer(p)
+    +onDiscard(state)
+}
+abstract class Character {
+    -id : CharacterEnum
+}
+class Building {
+    -foodCost : int
+    -pp : int
+    +triggerBuildingEffect(p, state)
+}
+class Event {
+    +onDiscard(state)
+}
+
+interface ContextualEffect {
+    +executeEffect(p, state)
+}
+interface EventEffect {
+    +applyEffect(state, age)
+}
+
+interface GameStateObserver {
+    +onGameEvent(event)
+}
+class GameEvent {
+    -type : Type
+    -culprit : Player
+}
+
+GameState *-- "currentPhase" GamePhaseBehavior
+GamePhaseBehavior <|.. SetupPhase
+GamePhaseBehavior <|.. StartTurnPhase
+GamePhaseBehavior <|.. TurnPhase
+GamePhaseBehavior <|.. PlayerTurnPhase
+GamePhaseBehavior <|.. EndTurnPhase
+GamePhaseBehavior <|.. ChangeAgePhase
+GamePhaseBehavior <|.. EndGamePhase
+
+GameState "1" *-- "*" Player
+GameState *-- Board
+GameState *-- Decks
+GameState ..> GameEvent : raiseEvent
+GameState ..> GameStateObserver : notifica
+
+Player *-- PlayerStats
+Player "1" o-- "*" Card
+Player "1" o-- "*" Building
+
+Board *-- TileSet
+Board *-- OrderTile
+TileSet "1" *-- "*" Tile
+OrderTile --|> Tile
+Tile o-- Player : occupier
+
+Decks o-- Card
+Card <|-- Character
+Card <|-- Building
+Card <|-- Event
+Building *-- ContextualEffect
+Event *-- EventEffect
+
+@enduml

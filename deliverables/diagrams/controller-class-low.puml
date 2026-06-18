@@ -1,0 +1,114 @@
+@startuml controller-class-low
+title Controller - UML di basso livello
+
+skinparam classAttributeIconSize 0
+
+class GameController {
+    -jsonGod : JsonFactory
+    -state : GameState
+    +GameController(players : List<Player>, gameId : String)
+    +GameController(state : GameState)
+    +start() : void
+    +pickTopCard(index : int, player : Player, cardId : String) : boolean
+    +pickBottomCard(index : int, player : Player, cardId : String) : boolean
+    +pickTopBuilding(index : int, player : Player, cardId : String) : boolean
+    +pickBottomBuilding(index : int, player : Player, cardId : String) : boolean
+    +occupyOfferTrailTile(index : int, player : Player) : boolean
+    +disconnectPlayer(totem : Totem) : boolean
+    +reconnectPlayer(player : Player, view : VirtualView) : boolean
+    +declareExceptionalWin(winner : Player) : void
+    +getGameState() : GameState
+    -setupDeck(cards, buildings, playerCount, config) : Decks
+    -setupBoard(orderTiles, tiles, playerCount) : Board
+}
+note right of GameController
+  Le azioni pubbliche catturano
+  IllegalMoveException dal model
+  e ritornano false. Il model ha
+  gia' emesso l'evento corrispondente.
+end note
+
+class JsonFactory {
+    -mapper : ObjectMapper
+    -cards : List<Card>
+    -buildings : List<Building>
+    -tiles : List<Tile>
+    -orderTiles : List<OrderTile>
+    -config : GameConfig
+    +loadAllData() : boolean
+    +loadCards() : List<Card>
+    +loadBuildings() : List<Building>
+    +loadTiles() : List<Tile>
+    +loadOrderTiles() : List<OrderTile>
+    +loadConfig() : GameConfig
+    +getCards() / getBuildings() / getTiles() / getOrderTiles() / getConfig()
+}
+
+class GameConfig {
+    -gameMaxPlayers : int
+    -gameMinPlayers : int
+    -buildingPerPlayer : int[][]
+    -startingFood : List<Integer>
+    -bottomExtraCards : int
+    -topExtraCards : int
+    -maxTurns : int
+    -artistGain : int
+    +getBuildingsCount(playerCount, age) : int
+    +getStartingFood() : List<Integer>
+    +getBottomCardsQuantity(players) : int
+    +getTopCardsQuantity(players) : int
+    +getMaxTurns() / getArtistGain() : int
+}
+
+class NUDEAnalyzer <<utility>> {
+    -{static} MAPPER : ObjectMapper
+    +{static} parse(json : String) : Optional<ServerCommand>
+    +{static} asJson(object : Object) : String
+}
+
+interface ServerCommand <<network>> {
+    +submit(serverManager : ServerManager, view : VirtualView) : void
+}
+abstract class Executor {
+    #index : int
+    #idGame : String
+    #idPlayer : Totem
+    #cardId : String
+    +{final} submit(serverManager, view) : void
+    +{abstract} execute(player : Player, controller : GameController) : boolean
+    +getIdGame() : String
+    +getIdPlayer() : Totem
+}
+class ExecTile {
+    +execute(player, controller) : boolean
+}
+class ExecTopCard {
+    +execute(player, controller) : boolean
+}
+class ExecBottomCard {
+    +execute(player, controller) : boolean
+}
+class ExecTopBuilding {
+    +execute(player, controller) : boolean
+}
+class ExecBottomBuilding {
+    +execute(player, controller) : boolean
+}
+
+class GameState <<model>>
+
+GameController *-- "state" GameState
+GameController *-- "jsonGod" JsonFactory
+JsonFactory ..> GameConfig : produce
+JsonFactory ..> GameState : alimenta setup
+NUDEAnalyzer ..> ServerCommand : deserializza
+ServerCommand <|.. Executor
+Executor <|-- ExecTile
+Executor <|-- ExecTopCard
+Executor <|-- ExecBottomCard
+Executor <|-- ExecTopBuilding
+Executor <|-- ExecBottomBuilding
+Executor ..> GameController : execute -> pick*/occupy*
+GameState o-- GameConfig
+
+@enduml

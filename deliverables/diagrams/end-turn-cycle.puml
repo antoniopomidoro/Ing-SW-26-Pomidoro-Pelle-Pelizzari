@@ -1,0 +1,73 @@
+@startuml end-turn-cycle
+title Fine turno - EndTurnPhase -> (EndGame | ChangeAge | StartTurn)
+
+skinparam responseMessageBelowArrow true
+
+participant "GameState\n(context)" as ST
+participant "EndTurnPhase" as ETP
+participant "Board" as B
+participant "Event\n+ EventEffect" as EV
+participant "ChangeAgePhase" as CAP
+participant "EndGamePhase" as EGP
+participant "StartTurnPhase" as STP
+participant "Player" as P
+participant "observers" as OBS
+
+note over ST : ingresso da TurnPhase\nsetPhase(new EndTurnPhase()) -> execute()
+ST -> ETP : execute(context)
+activate ETP
+
+alt turn >= maxTurns
+    ETP -> B : discardBoard(context)
+    ETP -> ST : raiseEvent(STARTING_END_GAME)
+    ETP -> ST : setPhase(new EndGamePhase())
+    activate ST
+    ST -> EGP : execute(context)
+    activate EGP
+    EGP -> ST : publishTrigger(END_GAME)
+    loop per ogni player (anche disconnessi)
+        EGP -> P : addPP(builderPp + inventorPP + artistPP + buildingsPP)
+    end
+    EGP -> ST : raiseEvent(END_GAME_COMPLETED)
+    ST -> OBS : onGameEvent(END_GAME_COMPLETED)
+    note right of OBS : ServerManager.closeGame(gameId)\n(stato terminale, nessuna transizione)
+    deactivate EGP
+    deactivate ST
+else turno normale
+    ETP -> B : discardBottomCards(context)
+    note right of B : per ogni carta scartata:\nEvent.onDiscard -> EventEffect.executeEffect
+    B -> EV : onDiscard(state)
+    EV -> EV : applyEffect(state, age)
+    EV -> ST : publishTrigger(triggerKey)
+    EV -> ST : raiseEvent(EVENT_CARD_TRIGGERED)
+    ETP -> B : topToBottomCards()
+    ETP -> ST : publishTrigger(END_TURN)
+    loop per ogni tile occupata
+        ETP -> B : tile.deOccupy()
+    end
+    ETP -> ST : setOrderTileOrder(nextOrder) + clearTurnOrder()
+    ETP -> ST : setTurn(turn + 1)
+    ETP -> ST : raiseEvent(END_TURN_COMPLETED)
+    ST -> OBS : onGameEvent(END_TURN_COMPLETED)
+    ETP -> ST : reset indici (tile/extra/player)
+    ETP -> ST : setPhase(new StartTurnPhase())
+    activate ST
+    ST -> STP : execute(context)
+    note right of STP : nuovo giro (vedi game-setup-start);\nse il deck si esaurisce -> ChangeAgePhase
+    deactivate ST
+end
+deactivate ETP
+
+== Cambio era (innescato da StartTurnPhase quando popCard e' vuoto) ==
+STP -> ST : setPhase(new ChangeAgePhase())
+activate ST
+ST -> CAP : execute(context)
+activate CAP
+CAP -> ST : setAge(age.getNext())
+CAP -> B : discardBottomBuildings + topToBottomBuildings + addTopBuildings(new age)
+CAP -> ST : raiseEvent(AGE_CHANGED)
+CAP -> ST : setPhase(new StartTurnPhase())
+deactivate CAP
+deactivate ST
+
+@enduml
