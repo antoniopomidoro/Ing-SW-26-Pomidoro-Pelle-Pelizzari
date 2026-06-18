@@ -80,8 +80,6 @@ public class GameViewController implements UserInterface {
     @FXML private AnchorPane ringPane;
     @FXML private VBox       boardArea;
     @FXML private ImageView  bgBase;
-    @FXML private ImageView  bgDrawings;
-    @FXML private ImageView  bgFire;
 
     @FXML private ImageView  deckView;
     @FXML private ImageView  orderTileView;
@@ -138,7 +136,7 @@ public class GameViewController implements UserInterface {
 
     @FXML
     public void initialize() {
-        new ResponsiveLayout(root, contentPane, boardArea, ringPane, bgBase, bgDrawings, bgFire).install();
+        new ResponsiveLayout(root, contentPane, boardArea, ringPane, bgBase).install();
 
         nodes     = new GuiNodeFactory();
         popups    = new PopupFactory(nodes);

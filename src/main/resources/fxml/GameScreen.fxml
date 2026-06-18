@@ -6,15 +6,9 @@
 
 <AnchorPane fx:id="root" prefHeight="720" prefWidth="1280" style="-fx-background-color: black;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="it.polimi.ingsw.view.gui.GameViewController">
 
-    <!-- ── Background layers (anchored to fill entire screen) ── -->
+    <!-- ── Single background (anchored to fill entire screen) ── -->
     <ImageView fx:id="bgBase" mouseTransparent="true" preserveRatio="false" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-        <image><Image backgroundLoading="false" url="@../images/box_art_background.png" /></image>
-    </ImageView>
-    <ImageView fx:id="bgDrawings" mouseTransparent="true" preserveRatio="false" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-        <image><Image backgroundLoading="false" url="@../images/box_art_drawings.png" /></image>
-    </ImageView>
-    <ImageView fx:id="bgFire" mouseTransparent="true" preserveRatio="false" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-        <image><Image backgroundLoading="false" url="@../images/box_art_fire.png" /></image>
+        <image><Image backgroundLoading="false" url="@../images/background_game.jpeg" /></image>
     </ImageView>
 
     <!-- ── Content pane: risoluzione di riferimento 1280x720, scalata uniformemente da GameViewController ── -->

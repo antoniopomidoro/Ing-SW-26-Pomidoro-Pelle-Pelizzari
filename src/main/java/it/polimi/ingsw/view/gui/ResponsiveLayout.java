@@ -3,7 +3,6 @@ package it.polimi.ingsw.view.gui;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
-import javafx.scene.effect.BlendMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -38,27 +37,21 @@ public class ResponsiveLayout {
     private final VBox boardArea;
     private final Pane ringPane;
     private final ImageView bgBase;
-    private final ImageView bgDrawings;
-    private final ImageView bgFire;
 
     /**
      * @param root        scene root
      * @param contentPane the 1280×720 reference content pane that gets scaled
      * @param boardArea   the board column, re-wrapped and centred
      * @param ringPane    overlay pane that must stay above the board for clicks
-     * @param bgBase      background base layer
-     * @param bgDrawings  background middle layer (multiplied)
-     * @param bgFire      background top layer
+     * @param bgBase      single cover background layer
      */
     public ResponsiveLayout(AnchorPane root, AnchorPane contentPane, VBox boardArea, Pane ringPane,
-                            ImageView bgBase, ImageView bgDrawings, ImageView bgFire) {
+                            ImageView bgBase) {
         this.root        = Objects.requireNonNull(root, "root");
         this.contentPane = Objects.requireNonNull(contentPane, "contentPane");
         this.boardArea   = Objects.requireNonNull(boardArea, "boardArea");
         this.ringPane    = Objects.requireNonNull(ringPane, "ringPane");
         this.bgBase      = Objects.requireNonNull(bgBase, "bgBase");
-        this.bgDrawings  = Objects.requireNonNull(bgDrawings, "bgDrawings");
-        this.bgFire      = Objects.requireNonNull(bgFire, "bgFire");
     }
 
     /** Reparents the board, installs the uniform scale and the cover background. */
@@ -110,7 +103,7 @@ public class ResponsiveLayout {
             clip.widthProperty().bind(root.widthProperty());
             clip.heightProperty().bind(root.heightProperty());
             root.setClip(clip);
-            for (ImageView bg : List.of(bgBase, bgDrawings, bgFire)) {
+            for (ImageView bg : List.of(bgBase)) {
                 Image img = bg.getImage();
                 AnchorPane.clearConstraints(bg);
                 bg.setPreserveRatio(false);
@@ -133,7 +126,6 @@ public class ResponsiveLayout {
                     (root.getHeight() - bg.getFitHeight()) / 2.0,
                     root.heightProperty(), bg.fitHeightProperty()));
             }
-            bgDrawings.setBlendMode(BlendMode.MULTIPLY);
         });
     }
 

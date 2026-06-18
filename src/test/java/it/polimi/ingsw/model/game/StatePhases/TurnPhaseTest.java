@@ -1,176 +1,128 @@
 package it.polimi.ingsw.model.game.StatePhases;
 
-import it.polimi.ingsw.controller.GameConfig;
-import it.polimi.ingsw.model.game.*;
-import it.polimi.ingsw.model.player.*;
-import it.polimi.ingsw.model.board.*;
-import it.polimi.ingsw.model.cards.*;
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
+import it.polimi.ingsw.model.board.Board;
+import it.polimi.ingsw.model.board.OrderTile;
+import it.polimi.ingsw.model.board.Tile;
+import it.polimi.ingsw.model.board.TileSet;
+import it.polimi.ingsw.model.cards.Decks;
+import it.polimi.ingsw.model.game.Age;
+import it.polimi.ingsw.model.game.GameState;
+import it.polimi.ingsw.model.player.Player;
+import it.polimi.ingsw.model.player.Totem;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import java.util.*;
-import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
+import static it.polimi.ingsw.model.game.StatePhases.PhaseTestSupport.fillCardDeck;
+import static it.polimi.ingsw.model.game.StatePhases.PhaseTestSupport.loadConfig;
+import static it.polimi.ingsw.model.game.StatePhases.PhaseTestSupport.mockCard;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/**
+ * Tests for {@link TurnPhase}: scanning the board tiles to hand control to each
+ * connected occupier, granting extra picks, and ending the turn.
+ */
+@DisplayName("TurnPhase")
 class TurnPhaseTest {
+
     private GameState context;
-    private Board board;
-    private List<Player> players;
-    private Decks decks;
-    private GameConfig config;
+    private OrderTile orderTile;
+    private Player p1;
+    private Player p2;
 
     @BeforeEach
-    void setUp() throws Exception {
-        players = new ArrayList<>(List.of(
-                new Player(Totem.RED, "P1"),
-                new Player(Totem.BLUE, "P2")
-        ));
-        board = new Board(new OrderTile(), new TileSet(new ArrayList<>()));
-        config = new GameConfig();
-        decks = new Decks(new ArrayList<>(), new ArrayList<>());
+    void setUp() {
+        p1 = new Player(Totem.RED, "P1");
+        p2 = new Player(Totem.BLUE, "P2");
+        List<Player> players = new ArrayList<>(List.of(p1, p2));
 
-        injectDecksData(decks);
+        // Neutral order tile (no bonus, no penalty) so downstream phases never starve.
+        orderTile = new OrderTile(new ArrayList<>(List.of(0, 0)), new ArrayList<>(List.of(0, 0)));
+        Board board = new Board(orderTile, new TileSet(new ArrayList<>()));
 
-        safeInjectField(config, "bottomExtraCards", 1);
-        safeInjectField(config, "topExtraCards", 1);
-        safeInjectField(config, "startingFood", new ArrayList<>(List.of(10, 10)));
+        Decks decks = new Decks(new ArrayList<>(), new ArrayList<>());
+        fillCardDeck(decks, 30);
 
-        context = new GameState(players, config, board, decks,"testId");
+        context = new GameState(players, loadConfig(), board, decks, "testId");
+    }
 
-        safeInjectField(context, "turnOrder", new ArrayList<>(players));
-        safeInjectField(context, "board", board);
+    /** Installs a board whose tiles are the given ones and a single buyable top card. */
+    private void useBoard(Tile... tiles) {
+        Board board = new Board(orderTile, new TileSet(new ArrayList<>(List.of(tiles))));
+        board.setTopCards(new ArrayList<>(List.of(mockCard(Age.AGE_1))));
+        context.setBoard(board);
     }
 
     @Test
-    @DisplayName("Verify TurnPhase phase change")
-    void testTurnPhaseExecution() throws Exception {
-        Player realPlayer = context.getTurnOrder().get(0);
-        safeInjectField(realPlayer, "isConnected", true); //
+    @DisplayName("hands control to the occupier of a connected tile and advances the scan index")
+    void transitionsToPlayerTurnOnConnectedOccupiedTile() {
+        Tile occupied = new Tile(p1, 1, 0); // occupied by connected p1, one upper pick
+        useBoard(new Tile(), occupied, new Tile());
+        context.setCurrentTileIndex(0);
 
-        Tile occupiedTile = new Tile();
-        safeInjectField(occupiedTile, "occupier", realPlayer);
-        safeInjectField(occupiedTile, "isOccupied", true);
+        assertTrue(new TurnPhase().execute(context));
 
-        Board internalBoard = context.getBoard();
-        safeInjectField(occupiedTile, "upperPicks", 1);
-
-        Card mockCard = createMockCard(Age.AGE_1);
-        List<Card> mockCards = new ArrayList<>(List.of(mockCard));
-
-        // !board.getTopCards().isEmpty() return true，canPickTop return true
-        safeInjectField(internalBoard, "topCards", mockCards);
-
-        //  occupiedTile:index=1
-        List<Tile> tileList = new ArrayList<>(List.of(new Tile(), occupiedTile, new Tile()));
-
-        //  TileSet instance->private List<Tile> tiles
-        //  Board->TileSet
-        TileSet tileSet = internalBoard.getTiles();
-        // prepared tileList injected to TileSet instance
-        safeInjectField(tileSet, "tiles", tileList);
-
-        // start point
-        safeInjectField(context, "currentTileIndex", 0);
-
-        StartTurnPhase phase = new StartTurnPhase();
-        safeInjectField(context,"currentPhase", phase);
-
-        assertTrue(context.getCurrentPhase() instanceof StartTurnPhase);//before execute:playerturnphase
-        TurnPhase turnPhase = new TurnPhase();
-
-        boolean result = turnPhase.execute(context);
-
-        assertTrue(result, "execute return true");
-        // hit index=1 Tile，next index: 1+1=2
-        assertEquals(2, context.getCurrentTileIndex(), "wrong index");
-        assertTrue(context.getCurrentPhase() instanceof PlayerTurnPhase, "wrong phase");
-    }
-    /**
-     * Boundary: Skip Disconnected but Proceed to Next.
-     * Logic: If occupier is disconnected, skip via index++ without returning false.
-     *
-     */
-    @Test
-    @DisplayName("Boundary: TurnPhase to PlayerTurnPhase transition with Mock Cards")
-    void testExecute_TransitionWithMockCards() throws Exception {
-        TurnPhase phase = new TurnPhase();
-        // Step 1: Physical Setup - Ensure P2 is connected and occupies the second tile
-        Player p1_dc = context.getPlayers().get(0);
-        Player p2_online = context.getPlayers().get(1);
-
-        // Mark P1 as disconnected to trigger index++ skip logic
-        safeInjectField(p1_dc, "isConnected", false);
-        safeInjectField(p2_online, "isConnected", true);
-
-        //  Step 2: Tile Configuration - Set picks to satisfy PlayerTurnPhase.nextPhase
-        Tile t0 = new Tile();
-        t0.occupy(p1_dc); // This tile will be physically skipped
-
-        Tile t1 = new Tile();
-        t1.occupy(p2_online);
-        // Inject picks so PlayerTurnPhase does not immediately return to TurnPhase
-        safeInjectField(t1, "upperPicks", 1);
-        safeInjectField(t1, "bottomPicks", 0);
-
-        // Step 3: Resource Injection - Populate Board using createMockCard
-        // nextPhase() checks canPickTop, which requires !board.getTopCards().isEmpty()
-        List<Card> mockCards = new ArrayList<>();
-        // Using your existing helper method to bypass Card constructor constraints
-        mockCards.add(createMockCard(Age.AGE_1));
-
-        Board board = context.getBoard();
-        safeInjectField(board, "topCards", mockCards);
-        safeInjectField(board, "tiles", new TileSet(List.of(t0, t1)));
-
-        // --- Step 4: Reset initial scan index to 0 ---
-        safeInjectField(context, "currentTileIndex", 0);
-
-        // Step 5: Physical Execution
-        boolean result = phase.execute(context);
-
-        //  Step 6: Physical Verification
-        // 1. Verify that a valid active player was found
-        assertTrue(result, "Execution should return true after finding an online player.");
-
-        // 2. Verify we stay in PlayerTurnPhase instead of falling back to TurnPhase
+        assertEquals(2, context.getCurrentTileIndex(), "scan resumes just after the processed tile");
         assertInstanceOf(PlayerTurnPhase.class, context.getCurrentPhase(),
-                "The system must stay in PlayerTurnPhase when resources and picks are available.");
-
-        // 3. Verify pointer increment: Processing index 1 should persist index 2
-        assertEquals(2, context.getCurrentTileIndex(), "The saved index should be (processed_index + 1).");
-    }
-    // inject tools
-    private void safeInjectField(Object target, String fieldName, Object value) throws Exception {
-        Field field = null;
-        Class<?> clazz = target.getClass();
-        while (clazz != null) {
-            try {
-                field = clazz.getDeclaredField(fieldName);
-                break;
-            } catch (NoSuchFieldException e) {
-                clazz = clazz.getSuperclass();
-            }
-        }
-        if (field == null) throw new NoSuchFieldException("Field " + fieldName + " not found in " + target.getClass().getSimpleName());
-        field.setAccessible(true);
-        field.set(target, value);
-    }
-    private void injectDecksData(Decks d) throws Exception {
-        Field cardsField = Decks.class.getDeclaredField("cards");
-        cardsField.setAccessible(true);
-        Map<Age, List<Card>> cardsMap = (Map<Age, List<Card>>) cardsField.get(d);
-        for (Age age : Age.values()) {
-            List<Card> list = cardsMap.computeIfAbsent(age, k -> new ArrayList<>());
-            for(int i=0; i<50; i++) list.add(createMockCard(age));
-        }
+                "control passes to the tile occupier");
     }
 
-    private Card createMockCard(Age age) {
-        return new Card() {
-            @Override public Age getAge() { return age; }
-            @Override public boolean addToDeck(Decks d) { return d.addCard(this); }
-            @Override public CardCategory getCategory() { return CardCategory.CHARACTER; }
-            @Override public boolean isBuyable() { return true; }
-            @Override public int getResolutionPriority() { return 0; }
-        };
+    @Test
+    @DisplayName("skips a disconnected occupier and stops on the next connected one")
+    void skipsDisconnectedOccupier() {
+        p1.setConnected(false);
+        Tile skipped = new Tile(p1, 1, 0);  // disconnected occupier, must be skipped
+        Tile active = new Tile(p2, 1, 0);   // connected occupier, takes the turn
+        useBoard(skipped, active);
+        context.setCurrentTileIndex(0);
+
+        new TurnPhase().execute(context);
+
+        assertEquals(2, context.getCurrentTileIndex(), "scan resumes after the connected tile");
+        assertInstanceOf(PlayerTurnPhase.class, context.getCurrentPhase());
+        assertEquals(p2, ((PlayerTurnPhase) context.getCurrentPhase()).getActivePlayer(),
+                "the connected occupier is the active player");
+    }
+
+    @Test
+    @DisplayName("grants an extra-pick turn when no tile is occupied but a player earned one")
+    void grantsExtraPickTurn() {
+        p1.getStats().setExtraUpperPick(1);
+        context.setTurnOrder(List.of(p1, p2));
+        useBoard(); // no tiles
+        context.setCurrentTileIndex(0);
+
+        new TurnPhase().execute(context);
+
+        assertInstanceOf(PlayerTurnPhase.class, context.getCurrentPhase(),
+                "the player with an extra pick gets a bonus turn");
+        assertEquals(1, context.getExtraIndex(), "the extra-pick cursor advanced past p1");
+    }
+
+    @Test
+    @DisplayName("ends the turn when there is nothing left to process")
+    void endsTurnWhenNothingToProcess() {
+        useBoard(); // no occupied tiles, no extra picks
+        context.setTurnOrder(new ArrayList<>());
+        context.setTurn(1);
+        context.setCurrentTileIndex(0);
+
+        new TurnPhase().execute(context);
+
+        // END_TURN runs and rolls the machine into the next turn's StartTurnPhase.
+        assertEquals(2, context.getTurn(), "the turn counter advanced");
+        assertInstanceOf(StartTurnPhase.class, context.getCurrentPhase());
+    }
+
+    @Test
+    @DisplayName("returns false for a null context")
+    void returnsFalseForNullContext() {
+        assertFalse(new TurnPhase().execute(null));
     }
 }

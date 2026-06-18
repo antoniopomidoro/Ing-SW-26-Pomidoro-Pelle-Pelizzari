@@ -18,7 +18,7 @@
     <!-- Background art -->
     <ImageView fx:id="background" fitWidth="1280" fitHeight="720"
                preserveRatio="false" mouseTransparent="true">
-        <image><Image url="@../images/box_art_background.png" backgroundLoading="true"/></image>
+        <image><Image url="@../images/background_game.jpeg" backgroundLoading="true"/></image>
     </ImageView>
 
     <!-- Logo — loaded in code; starts centred/large, animates to top/small -->

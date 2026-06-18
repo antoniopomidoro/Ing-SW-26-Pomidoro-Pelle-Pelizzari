@@ -65,7 +65,7 @@ public class JavaFXApp extends Application {
         lobbyController.setAudioManager(audioManager);
         lobbyController.setOnGameIdReceived(clientManager::setId);
         lobbyController.setOnTotemResolved(clientManager::setPlayerTotem);
-        lobbyController.setOnGameStartingCallback(() -> transitionToSplash());
+        lobbyController.setOnGameStartingCallback(() -> transitionToGame());
 
         Scene scene = new Scene(root, screenW, screenH);
         addCss(scene, "/css/lobby.css");
@@ -177,26 +177,7 @@ public class JavaFXApp extends Application {
         });
     }
 
-    /** Phase 2: show the splash screen. Called on the JavaFX thread. */
-    private void transitionToSplash() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    Objects.requireNonNull(getClass().getResource("/fxml/SplashScreen.fxml")));
-            AnchorPane splashRoot = loader.load();
-            SplashController splash = loader.getController();
-
-            Scene scene = primaryStage.getScene();
-            scene.setRoot(splashRoot);
-            addCss(scene, "/css/game.css");
-
-            audioManager.transitionToAge(Age.AGE_1);
-            splash.startSplash(() -> transitionToGame());
-        } catch (Exception ex) {
-            throw new RuntimeException("Failed to load SplashScreen.fxml", ex);
-        }
-    }
-
-    /** Phase 3: replace splash with game screen. Called on the JavaFX thread. */
+    /** Phase 2: load the game screen directly, with a 1-second fade-in. Called on the JavaFX thread. */
     private void transitionToGame() {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -212,6 +193,11 @@ public class JavaFXApp extends Application {
             clientManager.redirectGameEventsTo(gameController);
 
             Scene scene = primaryStage.getScene();
+            addCss(scene, "/css/game.css");
+            audioManager.transitionToAge(Age.AGE_1);
+
+            // The background fills the screen immediately (same art as the lobby), so the
+            // swap is seamless; GameViewController fades in only the foreground content.
             scene.setRoot(gameRoot);
         } catch (Exception ex) {
             throw new RuntimeException("Failed to load GameScreen.fxml", ex);
@@ -231,7 +217,7 @@ public class JavaFXApp extends Application {
             lobbyController.setActionSender(actionSender);
             lobbyController.setOnGameIdReceived(clientManager::setId);
             lobbyController.setOnTotemResolved(clientManager::setPlayerTotem);
-            lobbyController.setOnGameStartingCallback(() -> transitionToSplash());
+            lobbyController.setOnGameStartingCallback(() -> transitionToGame());
 
             Scene scene = primaryStage.getScene();
             scene.getStylesheets().clear();

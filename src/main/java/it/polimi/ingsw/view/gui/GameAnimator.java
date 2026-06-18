@@ -59,7 +59,6 @@ public class GameAnimator {
     private static final Duration DEAL_SLIDE     = Duration.millis(450);
     private static final Duration CARD_SLIDE     = Duration.millis(350);
     private static final Duration FADE_DURATION  = Duration.millis(280);
-    private static final Duration SPLASH_FADE    = Duration.millis(600);
 
     private static final Duration SCALE_UP_DURATION = Duration.millis(750);
     private static final Duration REVEAL_DURATION   = Duration.millis(1150);
@@ -157,29 +156,6 @@ public class GameAnimator {
             if (onDone != null) fade.setOnFinished(e -> onDone.run());
             new SequentialTransition(slide, fade).play();
         }
-    }
-
-    /**
-     * Sequential fade-in of the two upper splash layers (background is already visible).
-     * Used by SplashController.
-     *
-     * @param drawings the middle layer ImageView
-     * @param fire     the top layer ImageView
-     * @param onDone   called when the full sequence completes
-     */
-    public void animateSplashIn(ImageView drawings, ImageView fire, Runnable onDone) {
-        drawings.setOpacity(0);
-        fire.setOpacity(0);
-
-        FadeTransition fd1 = new FadeTransition(SPLASH_FADE, drawings);
-        fd1.setToValue(1);
-
-        FadeTransition fd2 = new FadeTransition(SPLASH_FADE, fire);
-        fd2.setToValue(1);
-
-        SequentialTransition seq = new SequentialTransition(fd1, fd2);
-        if (onDone != null) seq.setOnFinished(e -> onDone.run());
-        seq.play();
     }
 
     /**
