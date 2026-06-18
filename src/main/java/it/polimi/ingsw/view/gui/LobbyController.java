@@ -424,6 +424,9 @@ public class LobbyController implements UserInterface {
     public void onTotemUnavailable(ErrorDTO dto) {
         Platform.runLater(() -> {
             totemConfirmed = false;
+            if (selectedTotem != null) {
+                animator.clearTotemSelection(totemImages.get(selectedTotem));
+            }
             selectedTotem  = null;
             animator.stopWaitingAnimation(waitingLabel);
             waitingLabel.setVisible(false);
