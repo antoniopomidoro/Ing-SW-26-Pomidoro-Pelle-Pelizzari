@@ -109,3 +109,14 @@
     -fx-text-fill: #c8c0a8;
     -fx-font-size: 13px;
 }
+
+.countdown-card {
+    -fx-background-color: rgba(150,20,20,0.88);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(255,255,255,0.35);
+    -fx-border-radius: 14;
+    -fx-border-width: 1.5;
+    -fx-padding: 10 24 10 24;
+}
+.countdown-title { -fx-font-size: 13px; -fx-text-fill: #ffdada; }
+.countdown-count { -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white; }

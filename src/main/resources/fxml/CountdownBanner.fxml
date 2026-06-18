@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="it.polimi.ingsw.view.gui.CountdownBannerController"
+           alignment="TOP_CENTER" mouseTransparent="true" pickOnBounds="false"
+           AnchorPane.topAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+    <padding><Insets top="24"/></padding>
+    <VBox alignment="CENTER" spacing="3" styleClass="countdown-card">
+        <Label text="You are the last player connected" styleClass="countdown-title"/>
+        <Label fx:id="countLabel" styleClass="countdown-count"/>
+    </VBox>
+</StackPane>

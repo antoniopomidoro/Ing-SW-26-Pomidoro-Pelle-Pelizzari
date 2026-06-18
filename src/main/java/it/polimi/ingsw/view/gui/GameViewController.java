@@ -8,15 +8,13 @@ import it.polimi.ingsw.model.cards.characters.CharacterEnum;
 import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.game.TriggerKey;
 import it.polimi.ingsw.model.player.Totem;
-import it.polimi.ingsw.network.dto.ErrorDTO;
-import it.polimi.ingsw.network.dto.GameEventDTO;
-import it.polimi.ingsw.network.dto.GameStateDTO;
+import it.polimi.ingsw.network.dto.*;
 import it.polimi.ingsw.network.dto.GameStateDTO.PlayerDTO;
-import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
-import it.polimi.ingsw.network.dto.TotemSelectionDTO;
 import it.polimi.ingsw.view.UserInterface;
 import it.polimi.ingsw.view.gui.ActionSenders.GUIGameSender;
 import it.polimi.ingsw.view.gui.ActionSenders.GameCommandSender;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
@@ -37,6 +35,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -125,6 +124,11 @@ public class GameViewController implements UserInterface {
     private StackPane selectedCardView = null;
     private Button selectedPickBadge = null;
 
+    private Node                     countdownOverlay;
+    private CountdownBannerController countdownController;
+    private Timeline                 countdownTimeline;
+    private long                     countdownRemaining;
+
     // ── Collaborators (built in initialize) ──────────────────────────────────────
 
     private GuiNodeFactory nodes;
@@ -199,11 +203,11 @@ public class GameViewController implements UserInterface {
     @Override public void onPlayerDisconnected(GameEventDTO dto)  { handleGameEvent(dto); }
     @Override public void onGameEnded(GameEventDTO dto)           {
         handleGameEvent(dto);
-        Platform.runLater(() -> showEndGameScreen(dto.getSnapshot()));
+        Platform.runLater(() -> { hideCountdown(); showEndGameScreen(dto.getSnapshot()); });
     }
     @Override public void onExceptionalWin(GameEventDTO dto)      {
         handleGameEvent(dto);
-        Platform.runLater(() -> showEarlyWinScreen(dto.getSnapshot()));
+        Platform.runLater(() -> { hideCountdown(); showEarlyWinScreen(dto.getSnapshot()); });
     }
     @Override public void onGameError(GameEventDTO dto)           { /* TODO: toast */ }
     @Override public void onLobbyWaiting(LobbyUpdateDTO dto)      { }
@@ -211,6 +215,9 @@ public class GameViewController implements UserInterface {
     @Override public void onGameStarting(LobbyUpdateDTO dto)      { }
     @Override public void onTotemSelection(TotemSelectionDTO dto) { }
     @Override public void onLobbyError(ErrorDTO dto)              { }
+    @Override public void onCountdown(CountdownDTO dto) {
+        Platform.runLater(() -> showCountdown(dto.getSeconds()));
+    }
 
     /** Primary entry point — called from the network thread. */
     public boolean onGameEvent(GameEventDTO dto) { return handleGameEvent(dto); }
@@ -669,8 +676,57 @@ public class GameViewController implements UserInterface {
             lastEventType = eventType;
             lastTriggeredBy = triggeredBy;
             stateProperty.set(dto.getSnapshot());
+            maybeDismissCountdown(dto.getSnapshot());
         });
         return true;
+    }
+
+    private void showCountdown(long seconds) {
+        if (root == null) return;
+        countdownRemaining = Math.max(0, seconds);
+
+        if (countdownOverlay == null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(
+                        Objects.requireNonNull(getClass().getResource("/fxml/CountdownBanner.fxml")));
+                countdownOverlay   = loader.load();
+                countdownController = loader.getController();
+            } catch (Exception ex) {
+                throw new RuntimeException("Failed to load CountdownBanner.fxml", ex);
+            }
+        }
+
+        if (!root.getChildren().contains(countdownOverlay)) root.getChildren().add(countdownOverlay);
+        countdownOverlay.toFront();
+
+        updateCountdownLabel();
+        startCountdownTimeline();
+    }
+
+    private void updateCountdownLabel() {
+        if (countdownController != null) countdownController.setRemaining(countdownRemaining);
+    }
+
+    private void startCountdownTimeline() {
+        if (countdownTimeline != null) countdownTimeline.stop();
+        countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
+            countdownRemaining = Math.max(0, countdownRemaining - 1);
+            updateCountdownLabel();
+            if (countdownRemaining == 0 && countdownTimeline != null) countdownTimeline.stop();
+        }));
+        countdownTimeline.setCycleCount((int) Math.max(1, countdownRemaining));
+        countdownTimeline.playFromStart();
+    }
+
+    private void maybeDismissCountdown(GameStateDTO snapshot) {
+        if (countdownOverlay == null || snapshot == null || snapshot.getPlayers() == null) return;
+        long connected = snapshot.getPlayers().stream().filter(PlayerDTO::isConnected).count();
+        if (connected >= 2) hideCountdown();
+    }
+
+    private void hideCountdown() {
+        if (countdownTimeline != null) { countdownTimeline.stop(); countdownTimeline = null; }
+        if (countdownOverlay != null && root != null) root.getChildren().remove(countdownOverlay);
     }
 
     @Override
