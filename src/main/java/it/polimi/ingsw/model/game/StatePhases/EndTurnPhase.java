@@ -3,7 +3,9 @@ package it.polimi.ingsw.model.game.StatePhases;
 import it.polimi.ingsw.model.board.Board;
 import it.polimi.ingsw.model.board.Tile;
 import it.polimi.ingsw.model.game.*;
+import it.polimi.ingsw.model.player.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -48,7 +50,14 @@ public class EndTurnPhase implements GamePhaseBehavior {
         }
 
         // Re-place characters in order tile
-        context.setOrderTileOrder(context.getTurnOrder());
+        // context.setOrderTileOrder(context.getTurnOrder());
+        List<Player> nextOrder = new ArrayList<>(context.getTurnOrder());
+        for (Player p : context.getPlayers()) {
+            if (!nextOrder.contains(p)) {
+                nextOrder.add(p);
+            }
+        }
+        context.setOrderTileOrder(nextOrder);
 
         // Clear turn order
         context.clearTurnOrder();
