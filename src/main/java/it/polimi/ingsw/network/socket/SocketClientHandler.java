@@ -96,7 +96,9 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
             client.getOutputStream().write((payload + "\n").getBytes(StandardCharsets.UTF_8));
             client.getOutputStream().flush();
         }} catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("[SOCKET] sending failed: " + e.getMessage());
+            going = false;
+            serverManager.disconnectPlayer(this);
         }
 
     }
@@ -110,7 +112,9 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
             client.getOutputStream().write("ping\n".getBytes());
             client.getOutputStream().flush();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("[SOCKET] ping failed: " + e.getMessage());
+            going = false;
+            serverManager.disconnectPlayer(this);
         }
 
     }
