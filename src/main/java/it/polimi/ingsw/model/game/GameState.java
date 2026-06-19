@@ -132,6 +132,7 @@ public class GameState implements Serializable {
     }
     /** @return The current player in order-tile order, or null if unavailable. */
     public Player getCurrentOrderTileOrderPlayer() {
+        if (orderTileOrder.isEmpty() || currentPlayerOrderIndex >= orderTileOrder.size()) return null;
         return this.orderTileOrder.get(currentPlayerOrderIndex);
     }
 
