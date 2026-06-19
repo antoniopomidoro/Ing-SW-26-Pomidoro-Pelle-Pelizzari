@@ -4,6 +4,7 @@ import it.polimi.ingsw.model.game.GameEvent;
 import it.polimi.ingsw.model.player.Totem;
 import it.polimi.ingsw.network.dto.CountdownDTO;
 import it.polimi.ingsw.network.dto.DTO;
+import it.polimi.ingsw.network.dto.LobbyUpdateDTO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,15 @@ class ServerManagerDisconnectTest {
 
         long countdownsReceived() {
             return sent.stream().filter(d -> d instanceof CountdownDTO).count();
+        }
+
+        /** @return the player count from the most recent LobbyUpdateDTO, or -1 if none received. */
+        int lastLobbyPlayerCount() {
+            return sent.stream()
+                    .filter(d -> d instanceof LobbyUpdateDTO)
+                    .map(d -> ((LobbyUpdateDTO) d).getCurrentPlayers())
+                    .reduce((first, second) -> second)
+                    .orElse(-1);
         }
     }
 
@@ -110,6 +120,56 @@ class ServerManagerDisconnectTest {
         sm.disconnectPlayer(guest);
         await(() -> host.countdownsReceived() >= 1,
                 "the lone survivor must receive a countdown");
+    }
+
+    @Test
+    @DisplayName("a player disconnecting in lobby (no totem yet) rebroadcasts the decremented player count")
+    void lobbyDisconnectWithoutTotemUpdatesSurvivors() {
+        ServerManager sm = new ServerManager();
+        RecordingView host = new RecordingView();
+        RecordingView guest1 = new RecordingView();
+        RecordingView guest2 = new RecordingView();
+
+        // lobby a 3: host confermato, guest1 confermato, guest2 entra senza scegliere totem
+        sm.createGame("host", 3, Totem.RED, host);
+        gameId = host.getGameId();
+        assertNotNull(gameId, "createGame must assign the gameId to the host view");
+
+        sm.enterLobby(gameId, "guest1", guest1);
+        sm.selectTotem(gameId, "guest1", Totem.BLUE, guest1);
+        sm.enterLobby(gameId, "guest2", guest2);
+
+        await(() -> host.lastLobbyPlayerCount() == 3, "host must see 3 players once guest2 enters");
+
+        // guest2 cade mentre è in lobby senza totem (CASE A)
+        sm.disconnectPlayer(guest2);
+
+        await(() -> host.lastLobbyPlayerCount() == 2,
+                "host must receive a LobbyUpdate with the decremented count after a lobby disconnect");
+    }
+
+    @Test
+    @DisplayName("a player disconnecting in lobby (totem confirmed, game not started) rebroadcasts the decremented count")
+    void lobbyDisconnectWithTotemUpdatesSurvivors() {
+        ServerManager sm = new ServerManager();
+        RecordingView host = new RecordingView();
+        RecordingView guest1 = new RecordingView();
+
+        // lobby a 3 (resta in WAITING): host e guest1 confermano il totem
+        sm.createGame("host", 3, Totem.RED, host);
+        gameId = host.getGameId();
+        assertNotNull(gameId, "createGame must assign the gameId to the host view");
+
+        sm.enterLobby(gameId, "guest1", guest1);
+        sm.selectTotem(gameId, "guest1", Totem.BLUE, guest1);
+
+        await(() -> host.lastLobbyPlayerCount() == 2, "host must see 2 players once guest1 confirms");
+
+        // guest1 cade dopo aver confermato il totem, ma la partita non è partita (CASE B)
+        sm.disconnectPlayer(guest1);
+
+        await(() -> host.lastLobbyPlayerCount() == 1,
+                "host must receive a LobbyUpdate with the decremented count after a lobby disconnect");
     }
 
     private static void await(BooleanSupplier condition, String description) {
