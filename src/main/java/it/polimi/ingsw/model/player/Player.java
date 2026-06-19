@@ -16,6 +16,12 @@ import java.io.Serializable;
 import java.util.*;
 
 
+/**
+ * Represents a participant in the game: identified by a {@link Totem} colour and
+ * a nickname, owning food, prestige points, a hand of cards and a set of
+ * buildings, and tracking aggregate {@link PlayerStats}. Also carries the
+ * connection flag used by the networking layer to skip disconnected players.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Player implements Serializable {
     private Totem id;
@@ -35,6 +41,13 @@ public class Player implements Serializable {
         this.stats = new PlayerStats();
     }
 
+    /**
+     * Constructs a player with the given totem and nickname, starting with no
+     * food, no prestige points and empty collections.
+     *
+     * @param id       the totem identifying the player
+     * @param nickname the player's nickname
+     */
     public Player(Totem id, String nickname) {
 
         // Other initializations
@@ -49,34 +62,74 @@ public class Player implements Serializable {
         isChoosing = false;
     }
 
+    /**
+     * Indicates whether the player is currently in the middle of choosing.
+     *
+     * @return true if the player is choosing
+     */
     public boolean getIsChoosing() {
         return isChoosing;
     }
 
+    /**
+     * Gets the totem identifying this player.
+     *
+     * @return the player's totem
+     */
     public Totem getId() {
         return id;
     }
 
+    /**
+     * Gets the player's nickname.
+     *
+     * @return the nickname
+     */
     public String getNickname() {
         return nickname;
     }
 
+    /**
+     * Gets the player's current food supply.
+     *
+     * @return the amount of food
+     */
     public int getFood() {
         return food;
     }
 
+    /**
+     * Sets the player's food supply (used by save/load restoration).
+     *
+     * @param food the food amount to set
+     */
     public void setFood(int food) {
         this.food = food;
     }
 
+    /**
+     * Gets the player's current prestige points.
+     *
+     * @return the prestige points
+     */
     public int getPP() {
         return pp;
     }
 
+    /**
+     * Gets the player's hand of cards.
+     *
+     * @return the list of cards held by the player
+     */
     public List<Card> getCards() {
         return cards;
     }
 
+    /**
+     * Gets the player's totem (test/internal accessor).
+     *
+     * @return the player's totem
+     */
     protected Totem getID() {
         return id;
     }
@@ -85,16 +138,33 @@ public class Player implements Serializable {
 
 
 
+    /**
+     * Gets the aggregate statistics of this player.
+     *
+     * @return the player's stats
+     */
     public PlayerStats getStats() {
         return stats;
     }
 
+    /**
+     * Adds a card to the player's hand and runs its acquisition hook.
+     *
+     * @param c the card to add
+     * @return true
+     */
     public boolean addCard(Card c) {
         cards.add(c);
         c.onAddedToPlayer(this);
         return true;
     }
 
+    /**
+     * Adds food to the player's supply.
+     *
+     * @param amount the amount of food to add
+     * @return true
+     */
     public boolean addFood(int amount) {
         this.food += amount;
         return true;
@@ -119,16 +189,36 @@ public class Player implements Serializable {
         return true;
     }
 
+    /**
+     * Adds prestige points to the player.
+     *
+     * @param amount the amount of prestige points to add
+     * @return true
+     */
     public boolean addPP(int amount) {
         this.pp += amount;
         return true;
     }
 
+    /**
+     * Removes prestige points from the player (the total may become negative).
+     *
+     * @param amount the amount of prestige points to remove
+     * @return true
+     */
     public boolean payPP(int amount) {
         this.pp -= amount;
         return true;
     }
 
+    /**
+     * Pays food up to the player's available supply; any shortfall is converted
+     * into a prestige-point penalty (missing food times the penalty factor).
+     *
+     * @param requiredFood the food required
+     * @param penalty      the per-unit prestige penalty for missing food
+     * @return true
+     */
     public boolean payFoodWithPenalty(int requiredFood, int penalty) {
         int missingFood = Math.max(0, requiredFood - food);
         int foodToPay = Math.min(requiredFood, food);
@@ -139,9 +229,23 @@ public class Player implements Serializable {
         }
         return true;
     }
+
+    /**
+     * Checks whether the player can afford the given building after discounts.
+     *
+     * @param b the building to evaluate
+     * @return true if the player has enough food
+     */
     public boolean canBuy(Building b){
         return food >= calculateRealPrice(b);
     }
+
+    /**
+     * Pays for the given building at its discounted price, if affordable.
+     *
+     * @param b the building to pay for
+     * @return true if paid, false if the player cannot afford it
+     */
     public boolean payBuilding(Building b){
         if(!canBuy(b))return false;
         return payFood(calculateRealPrice(b));
@@ -152,12 +256,23 @@ public class Player implements Serializable {
     }
 
 
+    /**
+     * Adds a building to the player's collection and runs its acquisition hook.
+     *
+     * @param b the building to add
+     * @return true
+     */
     public boolean addBuilding(Building b){
         buildings.add(b);
         b.onAddedToPlayer(this);
         return true;
     }
 
+    /**
+     * Returns a defensive copy of the player's buildings.
+     *
+     * @return a copy of the buildings list
+     */
     public List<Building> getBuildings(){
         List<Building> sup = new ArrayList<>();
         sup.addAll(buildings);
@@ -178,20 +293,41 @@ public class Player implements Serializable {
         }
         return result;
     }
+    /**
+     * Sums the prestige points granted by all of the player's buildings.
+     *
+     * @return the total building prestige points
+     */
     public int getBuildingsPP(){
         return buildings.stream()
                 .mapToInt(Building::getPP)
                 .sum();
     }
 
+    /**
+     * Indicates whether the player is currently connected.
+     *
+     * @return true if connected
+     */
     public boolean isConnected() {
         return isConnected;
     }
 
+    /**
+     * Sets the player's connection state.
+     *
+     * @param b true to mark connected, false to mark disconnected
+     */
     public void setConnected(boolean b) {
         isConnected = b;
     }
 
+    /**
+     * Two players are considered equal when they share the same totem.
+     *
+     * @param obj the object to compare with
+     * @return true if {@code obj} is a player with the same totem
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -203,6 +339,12 @@ public class Player implements Serializable {
         Player otherPlayer = (Player) obj;
         return this.id == otherPlayer.id;
     }
+    /**
+     * Computes the hash code consistently with {@link #equals(Object)}, based on
+     * the player's totem.
+     *
+     * @return the hash code
+     */
     @Override
     public int hashCode() {
         return Objects.hash(id);

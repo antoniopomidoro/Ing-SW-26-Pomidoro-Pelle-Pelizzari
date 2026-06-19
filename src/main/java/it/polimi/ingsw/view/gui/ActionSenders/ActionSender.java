@@ -11,10 +11,20 @@ import it.polimi.ingsw.view.NUDEGenerator;
 
 import java.util.Objects;
 
+/**
+ * Concrete sender that builds lobby and game commands and pushes them to the
+ * server through the client's connection. Implements both
+ * {@link LobbyCommandSender} and {@link GameCommandSender}.
+ */
 public class ActionSender implements LobbyCommandSender, GameCommandSender {
 
     private final ClientManager client;
 
+    /**
+     * Creates a sender bound to the given client manager.
+     *
+     * @param client the client manager owning the connection and player state
+     */
     public ActionSender(ClientManager client) {
         this.client = Objects.requireNonNull(client, "client");
     }
@@ -63,26 +73,31 @@ public class ActionSender implements LobbyCommandSender, GameCommandSender {
 
     // ── Game-phase commands ───────────────────────────────────────────────────
 
+    /** {@inheritDoc} */
     @Override
     public void sendPickTopCard(int index, String cardInstanceId) {
         send(NUDEGenerator.toJson(new ExecTopCard(client.getId(), client.getPlayerTotem(), index, cardInstanceId)));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendPickBottomCard(int index, String cardInstanceId) {
         send(NUDEGenerator.toJson(new ExecBottomCard(client.getId(), client.getPlayerTotem(), index, cardInstanceId)));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendPickTopBuilding(int index, String cardInstanceId) {
         send(NUDEGenerator.toJson(new ExecTopBuilding(client.getId(), client.getPlayerTotem(), index, cardInstanceId)));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendPickBottomBuilding(int index, String cardInstanceId) {
         send(NUDEGenerator.toJson(new ExecBottomBuilding(client.getId(), client.getPlayerTotem(), index, cardInstanceId)));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void sendPickTile(int index) {
         send(NUDEGenerator.toJson(new ExecTile(client.getId(), client.getPlayerTotem(), index)));

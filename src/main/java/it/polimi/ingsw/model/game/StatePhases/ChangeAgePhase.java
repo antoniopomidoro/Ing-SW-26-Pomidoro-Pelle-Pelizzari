@@ -16,6 +16,14 @@ import it.polimi.ingsw.model.game.GameState;
  */
 public class ChangeAgePhase implements GamePhaseBehavior {
 
+    /**
+     * Advances to the next age, refreshes the board's buildings for the new era,
+     * emits {@code AGE_CHANGED} and transitions back to {@link StartTurnPhase}.
+     *
+     * @param context the game state
+     * @return true on success, false if the context, board or age is missing or
+     *         there is no next age
+     */
     @Override
     public boolean execute(GameState context) {
         if (context == null || context.getBoard() == null || context.getAge() == null) {

@@ -36,6 +36,13 @@ public class Tile implements Serializable {
 
     }
 
+    /**
+     * Constructs an occupied tile assigned to a player.
+     *
+     * @param p           the player occupying the tile
+     * @param upperPicks  the number of picks granted from the top row
+     * @param bottomPicks the number of picks granted from the bottom row
+     */
     public Tile(Player p, int upperPicks, int bottomPicks){
         this.occupier = p;
         this.upperPicks = upperPicks;
@@ -44,7 +51,15 @@ public class Tile implements Serializable {
 
     }
 
-    /* Constructor for testing purposes */
+    /**
+     * Test-only constructor that fully specifies a tile.
+     *
+     * @param id          the tile id
+     * @param upperPicks  the number of picks granted from the top row
+     * @param bottomPicks the number of picks granted from the bottom row
+     * @param foodBonus   the food bonus granted by the tile
+     * @param minPlayers  the minimum number of players for the tile to be in play
+     */
     public Tile(TileId id, int upperPicks, int bottomPicks, int foodBonus, int minPlayers){
         this.tileId = id;
         this.upperPicks = upperPicks;
@@ -138,22 +153,62 @@ public class Tile implements Serializable {
         return true;
     }
 
+    /**
+     * Gets the number of picks this tile grants from the top row.
+     *
+     * @return the upper picks
+     */
     public int getUpperPicks() {
         return upperPicks;
     }
 
+    /**
+     * Gets the number of picks this tile grants from the bottom row.
+     *
+     * @return the bottom picks
+     */
     public int getBottomPicks() {
         return bottomPicks;
     }
 
+    /**
+     * Gets the food bonus granted by this tile.
+     *
+     * @return the food bonus
+     */
     public int getFoodBonus() {
         return foodBonus;
     }
 
     // --- Setters for save/load restoration ---
+
+    /**
+     * Sets the food bonus (save/load restore).
+     *
+     * @param foodBonus the food bonus to set
+     */
     public void setFoodBonus(int foodBonus) { this.foodBonus = foodBonus; }
+
+    /**
+     * Sets the upper picks (save/load restore).
+     *
+     * @param upperPicks the upper picks to set
+     */
     public void setUpperPicks(int upperPicks) { this.upperPicks = upperPicks; }
+
+    /**
+     * Sets the bottom picks (save/load restore).
+     *
+     * @param bottomPicks the bottom picks to set
+     */
     public void setBottomPicks(int bottomPicks) { this.bottomPicks = bottomPicks; }
+
+    /**
+     * Sets the occupier (save/load restore), marking the tile occupied when the
+     * given player is non-null.
+     *
+     * @param p the occupying player, or null to free the tile
+     */
     public void setOccupier(Player p) {
         this.occupier = p;
         this.isOccupied = (p != null);

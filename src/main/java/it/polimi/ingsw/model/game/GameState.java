@@ -140,6 +140,7 @@ public class GameState implements Serializable {
         return this.currentTileIndex;
     }
 
+    /** @return The unique identifier of this game. */
     public String getGameId() {
         return gameId;
     }
@@ -309,15 +310,23 @@ public class GameState implements Serializable {
     /** @return The current player index in orderTileOrder. */
     public int getCurrentPlayerOrderIndex() { return currentPlayerOrderIndex; }
 
+    /** Restores the configuration (save/load). @param config the configuration to set. */
     public void setConfig(GameConfig config) { this.config = config; }
+    /** Restores the player list (save/load). @param players the players to set. */
     public void setPlayers(List<Player> players) { this.players = new ArrayList<>(players); }
+    /** Restores the board (save/load). @param board the board to set. */
     public void setBoard(Board board) { this.board = board; }
+    /** Restores the decks (save/load). @param deck the decks to set. */
     public void setDeck(Decks deck) { this.deck = deck; }
+    /** Restores the turn order (save/load). @param turnOrder the turn order to set. */
     public void setTurnOrder(List<Player> turnOrder) { this.turnOrder = new ArrayList<>(turnOrder); }
-    /** Restores orderTileOrder directly, without connected-first sorting. */
+    /** Restores orderTileOrder directly, without connected-first sorting. @param order the order to set. */
     public void restoreOrderTileOrder(List<Player> order) { this.orderTileOrder = new ArrayList<>(order); }
+    /** Restores the game id (save/load). @param gameId the game id to set. */
     public void setGameId(String gameId) { this.gameId = gameId; }
+    /** Restores the current turn-order player index (save/load). @param idx the index to set. */
     public void setCurrentPlayerIndex(int idx) { this.currentPlayerIndex = idx; }
+    /** Restores the current order-tile player index (save/load). @param idx the index to set. */
     public void setCurrentPlayerOrderIndex(int idx) { this.currentPlayerOrderIndex = idx; }
 
     /**
@@ -487,12 +496,25 @@ public class GameState implements Serializable {
         player.setConnected(false);
         return true;
     }
+    /**
+     * Unregisters an observer from {@link GameEvent} notifications.
+     *
+     * @param observer the observer to remove
+     * @return true if removed, false if the observer is null
+     */
     public boolean removeObserver(GameStateObserver observer) {
         if (observer == null) return false;
         observers.remove(observer);
         return true;
     }
 
+    /**
+     * Marks a previously disconnected player as connected again.
+     *
+     * @param player the player to reintegrate
+     * @return true if the player belongs to this game and was reconnected,
+     *         false if the player is null or unknown
+     */
     public boolean reintegratePlayer(Player player) {
         if (player == null) return false;
         if (!players.contains(player)) {

@@ -28,6 +28,9 @@ public class CountdownDTO implements DTO {
         return seconds;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void accept(DTOVisitor visitor) {
         visitor.visit(this);

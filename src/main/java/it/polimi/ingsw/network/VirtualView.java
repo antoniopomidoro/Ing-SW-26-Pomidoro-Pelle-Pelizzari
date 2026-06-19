@@ -90,6 +90,7 @@ public abstract class VirtualView implements GameStateObserver {
     /**
      * Sends a lobby progress update to the client.
      *
+     * @param lobbyState the current lobby state to report
      * @param currentPlayers current number of connected players
      * @param requiredPlayers total players required to start the match
      */
@@ -103,6 +104,11 @@ public abstract class VirtualView implements GameStateObserver {
 
         sendToClient(lobbyDto);
     }
+    /**
+     * Sends a lobby update carrying a full game-state snapshot (used for rejoin).
+     *
+     * @param lobbyState the current lobby state to report
+     */
     public void sendLobbyUpdate(LobbyState lobbyState) {
         GameStateDTO snapshot = GameStateDTO.from(gameController.getGameState());
         LobbyUpdateDTO lobbyDto = new LobbyUpdateDTO(
@@ -139,12 +145,26 @@ public abstract class VirtualView implements GameStateObserver {
      */
     protected abstract void sendToClient(DTO dto);
 
+    /**
+     * Sends a heartbeat to the client to detect disconnections. Implemented by
+     * the concrete transport (socket/RMI).
+     */
     protected abstract void ping();
 
+    /**
+     * Returns the id of the game this view belongs to.
+     *
+     * @return the game id, or null if not yet assigned
+     */
     public String getGameId() {
         return gameId;
     }
 
+    /**
+     * Sets the id of the game this view belongs to.
+     *
+     * @param gameId the game id
+     */
     public void setGameId(String gameId) {
         this.gameId = gameId;
     }

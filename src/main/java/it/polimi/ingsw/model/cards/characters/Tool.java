@@ -10,6 +10,10 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
 
+/**
+ * The set of tools an {@link Inventor} card can be associated with. Collecting
+ * distinct tools contributes to a player's scoring.
+ */
 public enum Tool {
     BREAD,
     STONE,

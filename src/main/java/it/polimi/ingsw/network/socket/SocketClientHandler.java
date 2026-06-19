@@ -14,18 +14,33 @@ import it.polimi.ingsw.network.dto.GameEventDTO;
 import java.util.Optional;
 import java.time.Clock;
 import java.time.Instant;
+/**
+ * Virtual view implementation that serves a single socket client: reads
+ * incoming JSON commands in its own thread and writes serialized DTOs back to
+ * the client, also handling the ping/pong heartbeat.
+ */
 public class SocketClientHandler extends VirtualView implements Runnable  {
     private final ServerManager serverManager;
     private final Socket client;
     private Instant lastPing;
     private boolean going = true;
 
+    /**
+     * Creates a handler for the given client socket.
+     *
+     * @param serverManager the server manager coordinating lobbies and games
+     * @param client        the accepted client socket
+     */
     public SocketClientHandler(ServerManager serverManager, Socket client){
         this.client = client;
         this.serverManager = serverManager;
         going = true;
     }
 
+    /**
+     * Reads and dispatches client messages in a loop until the connection closes
+     * or fails, updating the heartbeat timestamp on each pong.
+     */
     @Override
     public void run() {
 
@@ -68,6 +83,12 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
 
     }
 
+    /**
+     * Serializes the DTO to JSON and writes it to the client socket, newline
+     * terminated.
+     *
+     * @param dto the payload to send
+     */
     @Override
     protected synchronized void sendToClient(DTO dto) {
         try{String payload = JacksonConfig.mapper().writeValueAsString(dto);
@@ -80,6 +101,9 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
 
     }
 
+    /**
+     * Sends a {@code ping} line to the client to drive the heartbeat.
+     */
     @Override
     protected synchronized void ping() {
         try{
@@ -90,6 +114,10 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
         }
 
     }
+
+    /**
+     * Signals the read loop to stop after the current iteration.
+     */
     public void stop(){
         going = false;
     }
@@ -109,6 +137,11 @@ public class SocketClientHandler extends VirtualView implements Runnable  {
         command.get().submit(serverManager, this);
         return true;
     }
+    /**
+     * Returns the timestamp of the last received pong, used for timeout detection.
+     *
+     * @return the last ping/pong instant
+     */
     public Instant GetLastPing(){
         return lastPing;
     }

@@ -4,6 +4,9 @@ import it.polimi.ingsw.controller.GameController;
 import it.polimi.ingsw.model.player.Player;
 import it.polimi.ingsw.model.player.Totem;
 
+/**
+ * Game command that picks a building from the top row.
+ */
 public class ExecTopBuilding extends Executor {
 
     protected ExecTopBuilding() {
@@ -22,6 +25,13 @@ public class ExecTopBuilding extends Executor {
         super(idGame, idPlayer, index, cardId);
     }
 
+    /**
+     * Delegates to the controller to pick the top building at this command's index.
+     *
+     * @param player     the acting player
+     * @param controller the game controller
+     * @return true if the pick was legal and applied
+     */
     @Override
     public boolean execute(Player player, GameController controller){
         return controller.pickTopBuilding(super.index, player, super.cardId);

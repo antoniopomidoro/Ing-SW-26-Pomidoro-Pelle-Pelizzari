@@ -21,18 +21,36 @@ public class Hunter extends Character {
         setId(CharacterEnum.HUNTER);
     }
 
+    /**
+     * Constructs a Hunter for the given age.
+     *
+     * @param age     the age the card belongs to
+     * @param hasFood whether this hunter grants food when acquired
+     */
     public Hunter(Age age, boolean hasFood){
         this.age = age;
         this.hasFood = hasFood;
         setId(CharacterEnum.HUNTER);
     }
 
-    /* protected constructor for test purposes */
+    /**
+     * Test-only constructor that sets the food flag without an age.
+     *
+     * @param hasFood whether this hunter grants food when acquired
+     */
     protected Hunter(boolean hasFood) {
         this.hasFood = hasFood;
         setId(CharacterEnum.HUNTER);
     }
 
+    /**
+     * Updates the player's stats when this Hunter is added to their hand,
+     * incrementing the character count and granting food proportional to the
+     * number of hunters owned (when this hunter provides food).
+     *
+     * @param p the player receiving the card
+     * @return true on success, false if the player is null or the update fails
+     */
     @Override
     public boolean onAddedToPlayer(Player p) {
         if (p == null) {
@@ -45,6 +63,11 @@ public class Hunter extends Character {
         return p.addFood(food);
     }
 
+    /**
+     * Returns a human-readable representation of this Hunter card.
+     *
+     * @return a string describing age and whether it grants food
+     */
     @Override
     public String toString(){
         if(hasFood){

@@ -33,6 +33,12 @@ public class RMIClientHandler extends VirtualView {
         this.onDisconnect = onDisconnect;
     }
 
+    /**
+     * Serializes the DTO and pushes it to the RMI client callback; a remote
+     * failure triggers disconnect cleanup.
+     *
+     * @param dto the payload to send
+     */
     @Override
     protected void sendToClient(DTO dto) {
         if (dto == null) {
@@ -49,6 +55,9 @@ public class RMIClientHandler extends VirtualView {
         }
     }
 
+    /**
+     * Pings the RMI client callback; a remote failure triggers disconnect cleanup.
+     */
     @Override
     protected void ping() {
         try {

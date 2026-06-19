@@ -41,6 +41,10 @@ public class JsonFactory {
     private List<OrderTile> orderTiles;
     private GameConfig config;
 
+    /**
+     * Creates the factory and configures its {@link ObjectMapper} to use direct
+     * field access, avoiding setter return-type and property-name mismatches.
+     */
     public JsonFactory() {
         this.mapper = new ObjectMapper();
         // Use direct field access so Jackson reads/writes private fields by name,
@@ -67,22 +71,27 @@ public class JsonFactory {
 
     // ─── Getters for cached data ───────────────────────────────────────
 
+    /** @return the cached list of cards loaded from JSON. */
     public List<Card> getCards() {
         return cards;
     }
 
+    /** @return the cached list of buildings loaded from JSON. */
     public List<Building> getBuildings() {
         return buildings;
     }
 
+    /** @return the cached list of tiles loaded from JSON. */
     public List<Tile> getTiles() {
         return tiles;
     }
 
+    /** @return the cached list of order tiles loaded from JSON. */
     public List<OrderTile> getOrderTiles() {
         return orderTiles;
     }
 
+    /** @return the cached game configuration loaded from JSON. */
     public GameConfig getConfig() {
         return config;
     }

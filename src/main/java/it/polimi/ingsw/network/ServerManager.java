@@ -63,6 +63,10 @@ public class ServerManager {
     private final NUDEPinger pinger = new NUDEPinger(this);
     private final Thread pingerThread = new Thread(pinger, "Pinger");
 
+    /**
+     * Starts the heartbeat pinger and loads any games persisted on disk so they
+     * can be rejoined.
+     */
     public ServerManager() {
         pingerThread.start();
         loadSavedGames();
@@ -667,6 +671,13 @@ public class ServerManager {
         }
     }
 
+    /**
+     * Scans the {@code saves/} directory and restores each persisted game into
+     * the active games map, re-registering its end-game and countdown observers.
+     * Creates the directory if it is missing.
+     *
+     * @return true unless the saves directory cannot be created or is not a directory
+     */
     public boolean loadSavedGames(){
         Path savesDir = Paths.get("saves");
 
@@ -743,22 +754,39 @@ public class ServerManager {
         return Optional.ofNullable(activeGames.get(gameId)).map(GameSession::controller);
     }
 
+    /**
+     * Returns the live map of pending (not yet started) lobbies.
+     *
+     * @return the pending games map keyed by game id
+     */
     public Map<String, PendingGame> getPendingGames() {
         return pendingGames;
     }
 
+    /**
+     * Returns the live registry of confirmed views per game and totem.
+     *
+     * @return the view registry keyed by game id then totem
+     */
     public Map<String, Map<Totem, VirtualView>> getViewRegistry() {
         return viewRegistry;
     }
 
     /**
-     * Pings all registered virtual views — both confirmed (viewRegistry) and pending (pendingViews).
-     * Invoked by {@link NUDEPinger} to detect silent disconnections in every lobby phase.
+     * Registers a not-yet-associated client view so it is pinged before it joins
+     * any lobby.
+     *
+     * @param view the raw client view to track
      */
     public void registerRawClient(VirtualView view) {
         rawClients.add(view);
     }
 
+    /**
+     * Pings all registered virtual views — confirmed (viewRegistry), pending
+     * (pendingViews) and raw clients. Invoked by {@link NUDEPinger} to detect
+     * silent disconnections in every lobby phase.
+     */
     public void pingAllViews() {
         viewRegistry.values().forEach(gameViews -> gameViews.values().forEach(VirtualView::ping));
         pendingViews.values().forEach(gameViews -> gameViews.values().forEach(VirtualView::ping));

@@ -24,13 +24,23 @@ public class Inventor extends Character {
         super();
         setId(CharacterEnum.INVENTOR);
     }
+    /**
+     * Constructs an Inventor for the given age associated with a tool.
+     *
+     * @param age  the age the card belongs to
+     * @param tool the tool associated with the inventor
+     */
     public Inventor(Age age, Tool tool){
         this.age = age;
         this.tool = tool;
         setId(CharacterEnum.INVENTOR);
     }
 
-    /* protected constructor for test purposes */
+    /**
+     * Test-only constructor that sets the tool without an age.
+     *
+     * @param tool the tool associated with the inventor
+     */
     protected Inventor(Tool tool) {
         this.tool = tool;
         setId(CharacterEnum.INVENTOR);
@@ -44,6 +54,13 @@ public class Inventor extends Character {
         return tool;
     }
 
+    /**
+     * Updates the player's stats when this Inventor is added to their hand,
+     * incrementing the character count and the associated tool count.
+     *
+     * @param p the player receiving the card
+     * @return true on success, false if the player is null
+     */
     @Override
     public boolean onAddedToPlayer(Player p) {
         if (p == null) {
@@ -52,6 +69,12 @@ public class Inventor extends Character {
         return p.getStats().incrementCharacter(getId())
                 && p.getStats().incrementTool(tool);
     }
+
+    /**
+     * Returns a human-readable representation of this Inventor card.
+     *
+     * @return a string describing age and tool
+     */
     @Override
     public String toString(){
         return "INVENTOR, " + super.age + ", TOOL: " + tool + "\n";

@@ -29,6 +29,12 @@ public class PendingGame {
     private final List<Player> joinedPlayers = new ArrayList<>();
     private final Set<String> pendingNicknames = new HashSet<>();
 
+    /**
+     * Creates an empty lobby for a game expecting the given number of players.
+     *
+     * @param gameId          the game identifier
+     * @param requiredPlayers the number of players required to start
+     */
     public PendingGame(String gameId, int requiredPlayers) {
         this.gameId = gameId;
         this.requiredPlayers = requiredPlayers;
@@ -119,6 +125,11 @@ public class PendingGame {
         }
     }
 
+    /**
+     * Indicates whether the lobby has reached its required player count.
+     *
+     * @return true if the lobby is full
+     */
     public synchronized boolean isFull() {
         return getCurrentPlayerCount() >= requiredPlayers;
     }
@@ -146,14 +157,30 @@ public class PendingGame {
         return new ArrayList<>(joinedPlayers);
     }
 
+    /**
+     * Returns the game identifier of this lobby.
+     *
+     * @return the game id
+     */
     public String getGameId() {
         return gameId;
     }
 
+    /**
+     * Returns the number of players required to start the match.
+     *
+     * @return the required player count
+     */
     public int getRequiredPlayers() {
         return requiredPlayers;
     }
 
+    /**
+     * Returns the current number of participants, counting both confirmed
+     * players and nicknames still pending totem selection.
+     *
+     * @return the current participant count
+     */
     public synchronized int getCurrentPlayerCount() {
         return joinedPlayers.size() + pendingNicknames.size();
     }
@@ -184,6 +211,11 @@ public class PendingGame {
         return Collections.unmodifiableMap(takenTotems);
     }
 
+    /**
+     * Indicates whether every required player has confirmed a totem.
+     *
+     * @return true if all participants have selected their totem
+     */
     public boolean allTotemsSelected(){
         return joinedPlayers.size() == requiredPlayers;
     }

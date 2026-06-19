@@ -34,6 +34,16 @@ public class Building extends Card {
         super();
     }
 
+    /**
+     * Constructs a fully specified Building.
+     *
+     * @param age        the age the building belongs to
+     * @param cardId     the JSON card id used for client-side image association
+     * @param foodCost   the food cost required to build it
+     * @param pp         the prestige points it provides
+     * @param effect     the contextual effect triggered by the building
+     * @param triggerKey the key determining when the effect fires
+     */
     public Building(Age age, String cardId, int foodCost, int pp, ContextualEffect effect, TriggerKey triggerKey){
         this.age = age;
         this.cardId = cardId;
@@ -106,6 +116,13 @@ public class Building extends Card {
         return effect.onAddedToPlayer(p);
     }
 
+    /**
+     * Registers this building into the deck manager's building collection
+     * (Visitor pattern dispatch).
+     *
+     * @param manager the deck manager to add this building to
+     * @return true if added, false if the age is not set
+     */
     @Override
     public boolean addToDeck(Decks manager) {
         if (this.age == null) return false;
@@ -113,11 +130,21 @@ public class Building extends Card {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@link CardCategory#BUILDING}
+     */
     @Override
     public CardCategory getCategory() {
         return CardCategory.BUILDING;
     }
 
+    /**
+     * Returns a human-readable representation of this building.
+     *
+     * @return a string describing age, food cost, prestige points and effect
+     */
     @Override
     public String toString(){
         return "BUILDING, " + super.age + ", FOOD COST: " + foodCost + ", PP: " + pp + ", EFFECT: " + effect.toString() + "\n";

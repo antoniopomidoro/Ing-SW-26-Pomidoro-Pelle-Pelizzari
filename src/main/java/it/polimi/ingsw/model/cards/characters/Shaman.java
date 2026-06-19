@@ -27,13 +27,23 @@ public class Shaman extends Character {
         setId(CharacterEnum.SHAMAN);
     }
 
+    /**
+     * Constructs a Shaman for the given age with a number of stars.
+     *
+     * @param age   the age the card belongs to
+     * @param stars the number of stars granted by the card
+     */
     public Shaman(Age age, int stars){
         this.age = age;
         this.stars= stars;
         setId(CharacterEnum.SHAMAN);
     }
 
-    /* protected constructor for test purposes */
+    /**
+     * Test-only constructor that sets the stars without an age.
+     *
+     * @param stars the number of stars granted by the card
+     */
     protected Shaman(int stars) {
         this.stars = stars;
         setId(CharacterEnum.SHAMAN);
@@ -47,6 +57,13 @@ public class Shaman extends Character {
         return stars;
     }
 
+    /**
+     * Updates the player's stats when this Shaman is added to their hand,
+     * incrementing the character count and adding its stars.
+     *
+     * @param p the player receiving the card
+     * @return true on success, false if the player is null
+     */
     @Override
     public boolean onAddedToPlayer(Player p) {
         if (p == null) {
@@ -56,6 +73,11 @@ public class Shaman extends Character {
                 && p.getStats().addStars(stars);
     }
 
+    /**
+     * Returns a human-readable representation of this Shaman card.
+     *
+     * @return a string describing age and stars
+     */
     @Override
     public String toString(){
         return "SHAMAN, " + super.age + ", STARS: " + stars + "\n";

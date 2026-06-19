@@ -16,5 +16,12 @@ public interface ClientRMIInterface extends Remote {
      * @throws RemoteException if the remote call fails
      */
     void receiveEvent(String event) throws RemoteException;
+
+    /**
+     * Liveness check invoked by the server; a successful return proves the client
+     * is reachable.
+     *
+     * @throws RemoteException if the remote call fails
+     */
     void ping() throws RemoteException;
 }

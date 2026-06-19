@@ -12,6 +12,7 @@ import javafx.scene.layout.Pane;
 
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -28,6 +29,27 @@ public class TotemLayerManager {
     private static final double TOTEM_H = 38; // width/height swapped on purpose (sprite is rotated)
     private static final double TILE_CENTER_X = 33.0;
     private static final double TILE_CENTER_Y = 12.0;
+
+    /**
+     * Vertical placement of a totem inside an order-tile slot, expressed as a
+     * linear function of the slot index: {@code y = startY + slotIndex * stepY}.
+     * The horizontal offset is fixed per layout.
+     */
+    private record OrderTileLayout(double offsetX, double startY, double stepY) {
+        Point2D pointFor(int slotIndex) {
+            return new Point2D(offsetX, startY + slotIndex * stepY);
+        }
+    }
+
+    /** Slot layout keyed by player count; falls back to {@link #FALLBACK_LAYOUT}. */
+    private static final Map<Integer, OrderTileLayout> ORDER_TILE_LAYOUTS = Map.of(
+            2, new OrderTileLayout(35, 20, 20),
+            3, new OrderTileLayout(35, 20, 20),
+            4, new OrderTileLayout(35,  5, 22),
+            5, new OrderTileLayout(35,  0, 22)
+    );
+    private static final OrderTileLayout FALLBACK_LAYOUT = new OrderTileLayout(24, 0, 15);
+    private static final int MIN_PLAYERS = 2;
 
     private final Pane totemLayer;
     private final HBox tilesetBox;
@@ -158,25 +180,7 @@ public class TotemLayerManager {
     }
 
     private Point2D orderTileOffset(int numPlayers, int slotIndex) {
-        if (numPlayers <= 2) {
-            if (slotIndex == 0) return new Point2D(35, 20);
-            if (slotIndex == 1) return new Point2D(35, 40);
-        } else if (numPlayers == 3) {
-            if (slotIndex == 0) return new Point2D(35, 20);
-            if (slotIndex == 1) return new Point2D(35, 40);
-            if (slotIndex == 2) return new Point2D(35, 60);
-        } else if (numPlayers == 4) {
-            if (slotIndex == 0) return new Point2D(35,  5);
-            if (slotIndex == 1) return new Point2D(35, 27);
-            if (slotIndex == 2) return new Point2D(35, 49);
-            if (slotIndex == 3) return new Point2D(35, 71);
-        } else if (numPlayers == 5) {
-            if (slotIndex == 0) return new Point2D(35,  0);
-            if (slotIndex == 1) return new Point2D(35, 22);
-            if (slotIndex == 2) return new Point2D(35, 44);
-            if (slotIndex == 3) return new Point2D(35, 66);
-            if (slotIndex == 4) return new Point2D(35, 88);
-        }
-        return new Point2D(24, slotIndex * 15);
+        int key = Math.max(numPlayers, MIN_PLAYERS);
+        return ORDER_TILE_LAYOUTS.getOrDefault(key, FALLBACK_LAYOUT).pointFor(slotIndex);
     }
 }

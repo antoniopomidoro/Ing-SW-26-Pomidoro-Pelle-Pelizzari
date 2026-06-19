@@ -27,18 +27,35 @@ public class Gatherer extends Character {
         setId(CharacterEnum.GATHERER);
     }
 
+    /**
+     * Constructs a Gatherer for the given age with a sustainment discount.
+     *
+     * @param age      the age the card belongs to
+     * @param sustDisc the sustainment discount granted by the card
+     */
     public Gatherer(Age age, int sustDisc){
         this.sustDisc = sustDisc;
         this.age = age;
         setId(CharacterEnum.GATHERER);
     }
 
-    /* protected setter for testing purposes */
+    /**
+     * Test-only setter for the sustainment discount.
+     *
+     * @param sustDisc the sustainment discount granted by the card
+     */
     protected void setSustDisc(int sustDisc) {
         this.sustDisc = sustDisc;
         setId(CharacterEnum.GATHERER);
     }
 
+    /**
+     * Updates the player's stats when this Gatherer is added to their hand,
+     * incrementing the character count and applying its sustainment discount.
+     *
+     * @param p the player receiving the card
+     * @return true on success, false if the player is null
+     */
     @Override
     public boolean onAddedToPlayer(Player p) {
         if (p == null) {
@@ -48,10 +65,20 @@ public class Gatherer extends Character {
                 && p.getStats().addSustainmentDiscount(sustDisc);
     }
 
+    /**
+     * Gets the sustainment discount granted by this card.
+     *
+     * @return the sustainment discount
+     */
     public int getSustDisc() {
         return sustDisc;
     }
 
+    /**
+     * Returns a human-readable representation of this Gatherer card.
+     *
+     * @return a string describing age and sustainment discount
+     */
     @Override
     public  String toString(){
         return "GATHERER, AGE " + super.age + " SUSTAINMENT DISCOUNT: " + sustDisc + "\n";

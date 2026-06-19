@@ -6,6 +6,11 @@ import it.polimi.ingsw.model.cards.Building;
 import it.polimi.ingsw.model.game.Age;
 
 
+/**
+ * Holds the game's draw decks, keeping cards and buildings separated and
+ * partitioned by {@link Age}. Cards and buildings are routed into the correct
+ * collection through the Visitor pattern ({@link Card#addToDeck(Decks)}).
+ */
 public class Decks implements Serializable {
     private  Map<Age,List<Building>> buildings;
     private  Map<Age,List<Card>> cards;
@@ -19,9 +24,14 @@ public class Decks implements Serializable {
         }
     }
 
-    //the constructor initialize 2 enum map that contains lists divided by era of cards and buildings
-    //then for each card and buildin in the lists passed in input creates the ages decks using the function addToDeck of card
-    //using visitors pattern
+    /**
+     * Builds the decks from flat lists of cards and buildings, partitioning each
+     * element by age. Every element is dispatched through {@link Card#addToDeck(Decks)}
+     * (Visitor pattern) so it is routed to the correct per-age collection.
+     *
+     * @param cards     the cards to distribute across the age decks
+     * @param buildings the buildings to distribute across the age decks
+     */
     public Decks(List<Card> cards, List<Building> buildings){
         this.cards = new EnumMap<>(Age.class);
         this.buildings= new EnumMap<>(Age.class);
@@ -40,6 +50,11 @@ public class Decks implements Serializable {
 
     /* Protected methods for testing purposes */
 
+    /**
+     * Returns the full cards map for all ages.
+     *
+     * @return the cards map keyed by age
+     */
     public Map<Age, List<Card>> getCards() {
         return cards;
     }
@@ -52,15 +67,29 @@ public class Decks implements Serializable {
         return buildings;
     }
 
+    /**
+     * Replaces the per-age cards map. Used by Jackson deserialization and tests.
+     *
+     * @param cards the cards map to set
+     */
     public void setCards(Map<Age, List<Card>> cards) {
         this.cards = cards;
     }
 
+    /**
+     * Replaces the per-age buildings map. Used by Jackson deserialization and tests.
+     *
+     * @param buildings the buildings map to set
+     */
     public void setBuildings(Map<Age, List<Building>> buildings) {
         this.buildings = buildings;
     }
 
-    //the shuffle method remove the final methods then shuffle all non-empty decks then add final events
+    /**
+     * Shuffles every non-empty per-age card deck in place.
+     *
+     * @return true if the decks were shuffled, false if the cards map is null
+     */
     public boolean shuffle() {
         if (cards == null) {
             return false;
@@ -93,6 +122,14 @@ public class Decks implements Serializable {
         return Optional.empty();
     }
 
+    /**
+     * Removes and returns the top card of the deck for the given age. If the
+     * age's deck is empty, falls back to the overflow deck of the next age when
+     * it shares the same numeric value.
+     *
+     * @param a the age whose deck to draw from
+     * @return the drawn card, or empty if no card is available
+     */
     public Optional<Card> popCard(Age a) {
         List<Card> deck = cards.get(a);
         if (deck == null) return Optional.empty();
@@ -109,6 +146,12 @@ public class Decks implements Serializable {
         return Optional.empty();
     }
 
+    /**
+     * Returns the buildings available for the given age.
+     *
+     * @param age the age to query
+     * @return the list of buildings for that age, or an empty list if none
+     */
     public List<Building> getBuildings(Age age) {
         if (buildings == null || buildings.get(age) == null) {
             return Collections.emptyList();
@@ -116,6 +159,13 @@ public class Decks implements Serializable {
         return buildings.get(age);
 
     }
+
+    /**
+     * Adds a card to the deck of its own age.
+     *
+     * @param c the card to add
+     * @return true if added, false if the card or its age is null or unknown
+     */
     public boolean addCard(Card c) {
         if (c == null || c.getAge() == null || this.cards.get(c.getAge()) == null) {
             return false;
@@ -142,6 +192,12 @@ public class Decks implements Serializable {
         return count;
     }
 
+    /**
+     * Adds a building to the deck of its own age.
+     *
+     * @param b the building to add
+     * @return true if added, false if the building or its age is null or unknown
+     */
     public boolean addBuilding(Building b) {
         if (b == null || b.getAge() == null || this.buildings.get(b.getAge()) == null) {
             return false;

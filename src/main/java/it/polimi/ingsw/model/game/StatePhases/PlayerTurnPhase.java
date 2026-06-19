@@ -42,6 +42,11 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
     /**
      * Restore constructor: creates a PlayerTurnPhase with explicit pick counts.
      * Does NOT call execute() — used during save/load restoration.
+     *
+     * @param activePlayer the player this phase is bound to
+     * @param activeTile   the tile occupied by the active player
+     * @param upperPicks   the remaining top-row picks
+     * @param bottomPicks  the remaining bottom-row picks
      */
     public PlayerTurnPhase(Player activePlayer, Tile activeTile, int upperPicks, int bottomPicks) {
         this.activePlayer = activePlayer;
@@ -50,17 +55,26 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
         this.bottomPicks = bottomPicks;
     }
 
+    /** @return the player this phase is bound to. */
     public Player getActivePlayer() { return activePlayer; }
+    /** @return the tile occupied by the active player. */
     public Tile getActiveTile() { return activeTile; }
+    /** @return the remaining top-row picks. */
     public int getUpperPicks() { return upperPicks; }
+    /** @return the remaining bottom-row picks. */
     public int getBottomPicks() { return bottomPicks; }
 
+    /** {@inheritDoc} */
     @Override public int getRemainingUpperPicks() { return upperPicks; }
+    /** {@inheritDoc} */
     @Override public int getRemainingBottomPicks() { return bottomPicks; }
 
     /**
      * Applies the food bonus of the active tile and immediately checks
      * for a possible phase transition.
+     *
+     * @param context the game state
+     * @return true on success, false if the context, player or tile is missing
      */
     @Override
     public boolean execute(GameState context) {
@@ -80,6 +94,13 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
      * Pick of an upper card.
      * In case of invalid move: event broadcast ({@link GameState#raiseEvent(GameEvent)})
      * followed by {@link IllegalMoveException}.
+     *
+     * @param context        the game state
+     * @param index          the position of the card in the top row
+     * @param player         the player performing the pick
+     * @param cardInstanceId the expected instance id of the card
+     * @return true if the pick succeeded
+     * @throws IllegalMoveException if the move is not allowed
      */
     @Override
     public boolean pickTopCard(GameState context, int index, Player player, String cardInstanceId){
@@ -100,6 +121,13 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
     /**
      * Pick of a lower card.
      * In case of invalid move: event broadcast followed by {@link IllegalMoveException}.
+     *
+     * @param context        the game state
+     * @param index          the position of the card in the bottom row
+     * @param player         the player performing the pick
+     * @param cardInstanceId the expected instance id of the card
+     * @return true if the pick succeeded
+     * @throws IllegalMoveException if the move is not allowed
      */
     @Override
     public boolean pickBottomCard(GameState context, int index, Player player, String cardInstanceId) {
@@ -135,6 +163,13 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
     /**
      * Pick of an upper building.
      * In case of invalid move: event broadcast followed by {@link IllegalMoveException}.
+     *
+     * @param context        the game state
+     * @param index          the position of the building in the top row
+     * @param player         the player performing the pick
+     * @param cardInstanceId the expected instance id of the building
+     * @return true if the pick succeeded
+     * @throws IllegalMoveException if the move is not allowed
      */
     @Override
     public boolean pickTopBuilding(GameState context, int index, Player player, String cardInstanceId) {
@@ -165,6 +200,13 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
     /**
      * Pick of a lower building.
      * In case of invalid move: event broadcast followed by {@link IllegalMoveException}.
+     *
+     * @param context        the game state
+     * @param index          the position of the building in the bottom row
+     * @param player         the player performing the pick
+     * @param cardInstanceId the expected instance id of the building
+     * @return true if the pick succeeded
+     * @throws IllegalMoveException if the move is not allowed
      */
     @Override
     public boolean pickBottomBuilding(GameState context, int index, Player player, String cardInstanceId) {
@@ -255,6 +297,9 @@ public class PlayerTurnPhase implements GamePhaseBehavior {
 
     /**
      * If no picks are possible, return to the TURN phase.
+     *
+     * @param context the game state
+     * @return false (the active player keeps drafting until no picks remain)
      */
     @Override
      public boolean nextPhase(GameState context){

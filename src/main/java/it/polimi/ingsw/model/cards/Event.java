@@ -25,6 +25,15 @@ public class Event extends Card {
         super();
     }
 
+    /**
+     * Constructs a fully specified Event.
+     *
+     * @param age                the age the event belongs to
+     * @param cardId             the JSON card id used for client-side image association
+     * @param effect             the effect executed when the event is discarded
+     * @param triggerKey         the key identifying when the event resolves
+     * @param resolutionPriority the discard resolution priority (lower resolves first)
+     */
     public Event(Age age, String cardId, EventEffect effect, TriggerKey triggerKey, int resolutionPriority){
         this.age = age;
         this.cardId = cardId;
@@ -45,6 +54,11 @@ public class Event extends Card {
         return resolutionPriority;
     }
 
+    /**
+     * Trigger key associated with this event, if any.
+     *
+     * @return an Optional containing the TriggerKey, or empty if none is set
+     */
     @Override
     public java.util.Optional<it.polimi.ingsw.model.game.TriggerKey> getTriggerKey() {
         return java.util.Optional.ofNullable(triggerKey);
@@ -66,14 +80,31 @@ public class Event extends Card {
         }
         return result;
     }
+    /**
+     * Events are never buyable by players.
+     *
+     * @return false
+     */
     @Override
     public boolean isBuyable(){
         return false;
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@link CardCategory#EVENT}
+     */
     @Override
     public CardCategory getCategory() {
         return CardCategory.EVENT;
     }
+
+    /**
+     * Returns a human-readable representation of this event.
+     *
+     * @return a string describing age and effect
+     */
     @Override
     public String toString(){
         return "EVENT, " + super.age + ", EFFECT: " + effect.toString() + "\n";

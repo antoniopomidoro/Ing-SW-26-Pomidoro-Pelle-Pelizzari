@@ -18,6 +18,15 @@ import java.util.List;
  */
 public class TurnPhase implements GamePhaseBehavior {
 
+    /**
+     * Scans the board tiles from the current index: on the first occupied tile
+     * held by a connected player it transitions to {@link PlayerTurnPhase}; it
+     * then grants any pending extra upper picks; once everything is processed it
+     * emits {@code TURN_COMPLETED} and transitions to {@link EndTurnPhase}.
+     *
+     * @param context the game state
+     * @return true on success, false if the context, board or tiles are missing
+     */
     @Override
     public boolean execute(GameState context) {
         if (context == null || context.getBoard() == null || context.getBoard().getTiles() == null) {

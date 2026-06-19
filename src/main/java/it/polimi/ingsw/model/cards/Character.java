@@ -77,6 +77,11 @@ public abstract class Character extends Card {
         return p != null;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return {@link CardCategory#CHARACTER}
+     */
     @Override
     public CardCategory getCategory() {
         return CardCategory.CHARACTER;

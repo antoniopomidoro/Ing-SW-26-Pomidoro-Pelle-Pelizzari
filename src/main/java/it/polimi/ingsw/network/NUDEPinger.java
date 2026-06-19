@@ -1,5 +1,9 @@
 package it.polimi.ingsw.network;
 
+/**
+ * Background task that periodically pings all registered virtual views to detect
+ * client disconnections, driving heartbeat-based timeout handling.
+ */
 public class NUDEPinger implements Runnable{
     private final ServerManager serverManager;
     private boolean running = true;
@@ -33,6 +37,9 @@ public class NUDEPinger implements Runnable{
         serverManager.pingAllViews();
     }
 
+    /**
+     * Signals the pinger loop to stop after the current iteration.
+     */
     public void stop() {
         this.running = false;
     }

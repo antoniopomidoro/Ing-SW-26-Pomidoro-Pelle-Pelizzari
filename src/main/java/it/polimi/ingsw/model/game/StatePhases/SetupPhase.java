@@ -9,7 +9,21 @@ import it.polimi.ingsw.model.player.Player;
 
 import java.util.Collections;
 
+/**
+ * SETUP phase behavior, the entry state of the game. It shuffles the turn order,
+ * assigns starting food, populates the board's card rows and buildings for the
+ * first age, then transitions to {@link StartTurnPhase}.
+ */
 public class SetupPhase implements GamePhaseBehavior {
+    /**
+     * Runs the one-time setup: shuffles the order, distributes starting food,
+     * fills the board's top and bottom card rows and buildings, then advances to
+     * the start-turn phase.
+     *
+     * @param context the game state
+     * @return true on success, false if the context, players, config or a draw
+     *         is missing
+     */
     @Override
     public boolean execute(GameState context) {
         if (context == null || context.getPlayers() == null || context.getConfig() == null) {
@@ -43,6 +57,12 @@ public class SetupPhase implements GamePhaseBehavior {
         return nextPhase(context);
     }
 
+    /**
+     * Emits {@code SETUP_COMPLETED} and transitions to {@link StartTurnPhase}.
+     *
+     * @param context the game state
+     * @return true
+     */
     @Override
     public boolean nextPhase(GameState context) {
         context.raiseEvent(new GameEvent(

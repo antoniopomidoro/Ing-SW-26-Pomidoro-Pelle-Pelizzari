@@ -10,6 +10,10 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
 
+/**
+ * Identifies the six character types available in the game. Used as a stable
+ * key for character-related stats and JSON polymorphic dispatch.
+ */
 public enum CharacterEnum {
     GATHERER,
     HUNTER,

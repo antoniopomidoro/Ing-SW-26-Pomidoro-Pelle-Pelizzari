@@ -46,6 +46,12 @@ public class GameDTOHandler implements DTOVisitor {
     private final EnumMap<GameEvent.Type, Consumer<GameEventDTO>> gameDispatch =
             new EnumMap<>(GameEvent.Type.class);
 
+    /**
+     * Builds the game-phase handler and wires the event-type dispatch table to
+     * the appropriate {@link UserInterface} methods.
+     *
+     * @param ui the user interface to drive
+     */
     public GameDTOHandler(UserInterface ui) {
         this.ui = ui;
 
@@ -94,6 +100,11 @@ public class GameDTOHandler implements DTOVisitor {
     @Override
     public GameEventDTO getLastEvent() { return lastEvent; }
 
+    /**
+     * Records and dispatches a game event to the UI method mapped to its type.
+     *
+     * @param dto the game event DTO
+     */
     @Override
     public void visit(GameEventDTO dto) {
         if (dto.getEventType() == null) return;

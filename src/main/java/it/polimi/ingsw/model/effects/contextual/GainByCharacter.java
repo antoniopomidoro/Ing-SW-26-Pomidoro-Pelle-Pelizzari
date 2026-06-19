@@ -12,6 +12,10 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
 
+/**
+ * Contextual effect that grants prestige points and/or food proportional to the
+ * number of cards of a given character type owned by the player.
+ */
 public class GainByCharacter implements ContextualEffect {
     @JsonProperty("type")
     private CharacterEnum type;
@@ -20,6 +24,14 @@ public class GainByCharacter implements ContextualEffect {
     @JsonProperty("foodGain")
     private int foodGain;
 
+    /**
+     * Grants prestige points and food scaled by how many cards of the target
+     * character type the player owns.
+     *
+     * @param p     the player the effect applies to
+     * @param state the current game state
+     * @return true if the player owns at least one card of that type
+     */
     @Override
     public boolean executeEffect(Player p, GameState state) {
         int charCount = p.getStats().getCharacterCount(type);
@@ -28,6 +40,9 @@ public class GainByCharacter implements ContextualEffect {
         return charCount > 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString(){
         if(foodGain == 0){

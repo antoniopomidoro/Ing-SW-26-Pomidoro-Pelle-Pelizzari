@@ -57,6 +57,12 @@ public class GameController {
         this.state.addObserver(new SaveObserver(this.state));
     }
 
+    /**
+     * Builds a controller around an already-existing game state (e.g. restored
+     * from a save) and registers the save observer on it.
+     *
+     * @param state the restored game state to drive
+     */
     public GameController(GameState state) {
         this.state = state;
         this.state.addObserver(new SaveObserver(this.state));

@@ -26,6 +26,13 @@ public class Builder extends Character {
     public Builder() {
         setId(CharacterEnum.BUILDER);
     }
+    /**
+     * Constructs a Builder for the given age with its prestige points and discount.
+     *
+     * @param age      the age the card belongs to
+     * @param pp       the prestige points granted by the card
+     * @param discount the building discount granted by the card
+     */
     public Builder(Age age, int pp , int discount){
         this.age = age;
         this.discount =discount;
@@ -33,7 +40,12 @@ public class Builder extends Character {
         setId(CharacterEnum.BUILDER);
     }
 
-    /* Protected constructor for test purposes */
+    /**
+     * Test-only constructor that sets discount and prestige points without an age.
+     *
+     * @param discount the building discount granted by the card
+     * @param pp       the prestige points granted by the card
+     */
     protected Builder(int discount, int pp) {
         this.discount = discount;
         this.pp = pp;
@@ -56,6 +68,13 @@ public class Builder extends Character {
         return this.pp;
     }
 
+    /**
+     * Updates the player's stats when this Builder is added to their hand,
+     * incrementing the character count and applying its prestige points and discount.
+     *
+     * @param p the player receiving the card
+     * @return true on success, false if the player is null
+     */
     @Override
     public boolean onAddedToPlayer(Player p) {
         if (p == null) {
@@ -67,6 +86,11 @@ public class Builder extends Character {
     }
 
 
+    /**
+     * Returns a human-readable representation of this Builder card.
+     *
+     * @return a string describing age, discount and prestige points
+     */
     @Override
     public String toString(){
         return "BUILDER, AGE: " + super.age +", DISCOUNT: " + discount + ", PP: " + pp + "\n" ;

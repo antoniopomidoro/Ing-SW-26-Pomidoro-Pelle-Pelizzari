@@ -19,6 +19,15 @@ import java.util.List;
  * </ol>
  */
 public class EndTurnPhase implements GamePhaseBehavior {
+    /**
+     * Closes the turn: discards bottom cards, triggers END_TURN buildings, frees
+     * occupied tiles, rebuilds the order-tile sequence, increments the turn
+     * counter and transitions to {@link EndGamePhase} (when the turn limit is
+     * reached) or {@link StartTurnPhase}.
+     *
+     * @param context the game state
+     * @return true on success, false if the context, board or config is missing
+     */
     @Override
     public boolean execute(GameState context) {
         if (context == null || context.getBoard() == null || context.getConfig() == null) {

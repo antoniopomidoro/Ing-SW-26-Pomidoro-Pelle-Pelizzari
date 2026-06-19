@@ -37,9 +37,10 @@ public class TileSet implements Serializable {
     }
 
     /**
-     * Retrieves a tile by its ID.
-     * @param id The ID of the tile to retrieve.
-     * @return The tile with the specified ID, or null if not found.
+     * Retrieves the tile at the given position in the set.
+     * @param index The position of the tile to retrieve.
+     * @return The tile at the specified index.
+     * @throws IndexOutOfBoundsException if the index is out of range.
      */
     public Tile getTile(int index) {
         if (index < 0 || index >= tiles.size()) {

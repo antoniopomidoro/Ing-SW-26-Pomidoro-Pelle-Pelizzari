@@ -18,6 +18,14 @@ import java.util.List;
  * This is a terminal state — no further transitions occur.
  */
 public class EndGamePhase implements GamePhaseBehavior {
+    /**
+     * Triggers END_GAME buildings and computes the final score for every player
+     * (including disconnected ones), then emits {@code END_GAME_COMPLETED}. This
+     * is a terminal state with no further transition.
+     *
+     * @param context the game state
+     * @return true on success, false if the context, players or order are missing
+     */
     @Override
     public boolean execute(GameState context) {
         if (context == null || context.getPlayers() == null || context.getOrderTileOrder() == null) {

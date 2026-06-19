@@ -47,6 +47,12 @@ public class LobbyDTOHandler implements DTOVisitor {
     private final EnumMap<ErrorDTO.ErrorCode, Consumer<ErrorDTO>> errorDispatch =
             new EnumMap<>(ErrorDTO.ErrorCode.class);
 
+    /**
+     * Builds the lobby-phase handler and wires the lobby-state and error-code
+     * dispatch tables to the appropriate {@link UserInterface} methods.
+     *
+     * @param ui the user interface to drive
+     */
     public LobbyDTOHandler(UserInterface ui) {
         this.ui = ui;
 
@@ -73,35 +79,67 @@ public class LobbyDTOHandler implements DTOVisitor {
         this.onGameStart = onGameStart;
     }
 
+    /**
+     * GameEventDTOs are not expected during the lobby phase and are ignored.
+     *
+     * @param dto the game event DTO
+     */
     @Override
     public void visit(GameEventDTO dto) {
         // GameEventDTOs are not expected during the lobby phase — ignore silently.
     }
 
+    /**
+     * Dispatches a lobby update to the UI method mapped to its lobby state.
+     *
+     * @param dto the lobby update DTO
+     */
     @Override
     public void visit(LobbyUpdateDTO dto) {
         Consumer<LobbyUpdateDTO> handler = lobbyDispatch.get(dto.getLobbyState());
         if (handler != null) handler.accept(dto);
     }
 
+    /**
+     * Forwards a totem-selection update to the UI.
+     *
+     * @param dto the totem-selection DTO
+     */
     @Override
     public void visit(TotemSelectionDTO dto) {
         ui.onTotemSelection(dto);
     }
 
+    /**
+     * Dispatches an error to the UI method mapped to its error code.
+     *
+     * @param dto the error DTO
+     */
     @Override
     public void visit(ErrorDTO dto) {
         Consumer<ErrorDTO> handler = errorDispatch.get(dto.getErrorCode());
         if (handler != null) handler.accept(dto);
     }
 
-    /** CountdownDTOs are not expected during the lobby phase — ignore silently. */
+    /**
+     * CountdownDTOs are not expected during the lobby phase and are ignored.
+     *
+     * @param dto the countdown DTO
+     */
     @Override
     public void visit(CountdownDTO dto) {}
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return always null during the lobby phase
+     */
     @Override
     public GameEventDTO getLastEvent() { return null; }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public GameStateDTO getLastSnapshot() { return lastSnapshot; }
 }

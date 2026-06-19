@@ -10,6 +10,10 @@ import it.polimi.ingsw.model.game.*;
 import it.polimi.ingsw.model.player.*;
 
 
+/**
+ * Identifies the board tiles, including the special turn-order tile and the
+ * lettered player tiles A through G.
+ */
 public enum TileId {
     ORDER_TILE,
     A,

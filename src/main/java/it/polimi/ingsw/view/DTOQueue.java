@@ -38,6 +38,11 @@ public class DTOQueue implements Runnable {
 
     private volatile boolean going = true;
 
+    /**
+     * Creates the queue with the visitor active for the lobby phase.
+     *
+     * @param initialVisitor the initial DTO visitor
+     */
     public DTOQueue(DTOVisitor initialVisitor) {
         this.visitor = initialVisitor;
     }
@@ -59,6 +64,9 @@ public class DTOQueue implements Runnable {
     /** Returns the currently active visitor. */
     public DTOVisitor getVisitor() { return visitor; }
 
+    /**
+     * Signals the consumer loop to stop after the current take.
+     */
     public void stop() {
         going = false;
     }

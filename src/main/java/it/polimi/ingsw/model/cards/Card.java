@@ -46,6 +46,10 @@ public abstract class Card implements Serializable {
     /** Card ID from JSON (e.g. "C1"), used by the client to map card → PNG image. */
     protected String cardId;
 
+    /**
+     * Semantic categories a card can belong to, used for DTO serialization
+     * and client-side rendering.
+     */
     public enum CardCategory {
         CHARACTER,
         EVENT,
@@ -66,10 +70,23 @@ public abstract class Card implements Serializable {
     }
 
     /* Protected methods for testing purposes */
+
+    /**
+     * Sets the minimum number of players required for this card.
+     * Intended for testing; production instances are populated via JSON deserialization.
+     *
+     * @param minPlayers the minimum required players
+     */
     protected void setMinPlayers(int minPlayers) {
         this.minPlayers = minPlayers;
     }
 
+    /**
+     * Sets the age (era) of this card.
+     * Intended for testing; production instances are populated via JSON deserialization.
+     *
+     * @param age the age to assign to the card
+     */
     protected void setAge(Age age) {
         this.age = age;
     }
@@ -93,6 +110,12 @@ public abstract class Card implements Serializable {
         return minPlayers;
     }
 
+    /**
+     * Gets the unique runtime instance identifier of this card.
+     * Distinct from {@link #getCardId()}, which is the JSON-defined type id.
+     *
+     * @return the unique instance id
+     */
     public String getInstanceId() {
         return instanceId;
     }
@@ -158,13 +181,26 @@ public abstract class Card implements Serializable {
     public boolean onAddedToPlayer(Player p) {
         return true;
     }
-    //method that says if the selected card is a building
-    //method that add the card to a list
+    /**
+     * Adds this card to the given deck manager using the Visitor pattern, so
+     * each subclass routes itself to the correct collection (cards or buildings)
+     * without type checks. The base implementation registers a generic card.
+     *
+     * @param manager the deck manager to add this card to
+     * @return true if the card was added, false if its age is not set
+     */
     public boolean addToDeck(Decks manager) {
         if (this.age == null) return false;
         manager.addCard(this);
         return true;
     }
+
+    /**
+     * Indicates whether this card can be bought/picked by a player.
+     * Default is true; non-buyable cards (e.g. events) override this.
+     *
+     * @return true if the card is buyable
+     */
     public boolean isBuyable() {
         return true;
     }
@@ -179,6 +215,12 @@ public abstract class Card implements Serializable {
         return null;
     }
 
+    /**
+     * Returns a human-readable representation of this card.
+     * The base implementation returns an empty string; subclasses override it.
+     *
+     * @return a string representation of the card
+     */
     public String toString() {return "";}
 
 

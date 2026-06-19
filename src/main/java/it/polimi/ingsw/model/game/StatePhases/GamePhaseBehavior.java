@@ -135,13 +135,6 @@ public interface GamePhaseBehavior extends Serializable {
     }
 
     /**
-     * Transitions the game to the next age.
-     *
-     * @param context The {@link GameState} which serves as the context for the state pattern.
-     * @return {@code true} if the transition was successful, {@code false} otherwise.
-     * @throws IllegalMoveException if this action is not applicable to the current phase.
-     */
-    /**
      * Remaining upper-row picks for the active player in the current phase.
      * Phases that do not allow picks return 0 (default).
      *
@@ -161,6 +154,13 @@ public interface GamePhaseBehavior extends Serializable {
         return 0;
     }
 
+    /**
+     * Transitions the game to the next age.
+     *
+     * @param context The {@link GameState} which serves as the context for the state pattern.
+     * @return {@code true} if the transition was successful, {@code false} otherwise.
+     * @throws IllegalMoveException if this action is not applicable to the current phase.
+     */
     default boolean nextAge(GameState context) {
         if (context != null) {
             context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_PHASE, null));

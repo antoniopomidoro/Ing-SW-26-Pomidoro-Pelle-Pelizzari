@@ -46,6 +46,24 @@ public class GameStateDTO {
     private final int remainingUpperPicks;
     private final int remainingBottomPicks;
 
+    /**
+     * Full constructor used by Jackson deserialization.
+     *
+     * @param gameId               the game identifier
+     * @param age                  the current age
+     * @param turn                 the current turn number
+     * @param currentTileIndex     the tile scan index
+     * @param extraIndex           the extra-pick scan index
+     * @param currentPhaseName     the simple name of the current phase
+     * @param players              the player snapshots
+     * @param board                the board snapshot
+     * @param turnOrder            the totems in turn order
+     * @param orderTileOrder       the totems in order-tile order
+     * @param activePlayer         the totem of the player currently expected to act
+     * @param deckSize             the remaining cards in the current age deck
+     * @param remainingUpperPicks  the active player's remaining top-row picks
+     * @param remainingBottomPicks the active player's remaining bottom-row picks
+     */
     @JsonCreator
     public GameStateDTO(
             @JsonProperty("gameId") String gameId,
@@ -143,38 +161,47 @@ public class GameStateDTO {
         );
     }
 
+    /** @return the game identifier. */
     public String getGameId() {
         return gameId;
     }
 
+    /** @return the current age. */
     public Age getAge() {
         return age;
     }
 
+    /** @return the current turn number. */
     public int getTurn() {
         return turn;
     }
 
+    /** @return the tile scan index. */
     public int getCurrentTileIndex() {
         return currentTileIndex;
     }
 
+    /** @return the extra-pick scan index. */
     public int getExtraIndex() {
         return extraIndex;
     }
 
+    /** @return the simple class name of the current phase, or null. */
     public String getCurrentPhaseName() {
         return currentPhaseName;
     }
 
+    /** @return the player snapshots. */
     public List<PlayerDTO> getPlayers() {
         return players;
     }
 
+    /** @return the board snapshot, or null. */
     public BoardDTO getBoard() {
         return board;
     }
 
+    /** @return the totems in turn order. */
     public List<Totem> getTurnOrder() {
         return turnOrder;
     }
@@ -189,6 +216,7 @@ public class GameStateDTO {
         return orderTileOrder;
     }
 
+    /** @return the totem of the player currently expected to act, or null. */
     public Totem getActivePlayer() {
         return activePlayer;
     }
@@ -243,6 +271,22 @@ public class GameStateDTO {
         private int sustainmentDiscount;
         private Set<String> ownedTools;
 
+        /**
+         * Full constructor used by Jackson deserialization.
+         *
+         * @param totem               the player's totem
+         * @param nickname            the player's nickname
+         * @param food                the player's food
+         * @param pp                  the player's prestige points
+         * @param connected           whether the player is connected
+         * @param cards               the player's cards
+         * @param buildings           the player's buildings
+         * @param characterCounts     per-character owned counts, keyed by name
+         * @param stars               the player's stars
+         * @param buildingDiscount    the player's building discount
+         * @param sustainmentDiscount the player's sustainment discount
+         * @param ownedTools          the names of the tools the player owns
+         */
         @JsonCreator
         public PlayerDTO(
                 @JsonProperty("totem") Totem totem,
@@ -327,17 +371,29 @@ public class GameStateDTO {
                     : Set.of();
         }
 
+        /** @return the player's totem. */
         public Totem getTotem() { return totem; }
+        /** @return the player's nickname. */
         public String getNickname() { return nickname; }
+        /** @return the player's food. */
         public int getFood() { return food; }
+        /** @return the player's prestige points. */
         public int getPp() { return pp; }
+        /** @return whether the player is connected. */
         public boolean isConnected() { return connected; }
+        /** @return the player's cards. */
         public List<Card> getCards() { return cards; }
+        /** @return the player's buildings. */
         public List<Building> getBuildings() { return buildings; }
+        /** @return per-character owned counts, keyed by character name. */
         public Map<String, Integer> getCharacterCounts() { return characterCounts; }
+        /** @return the player's stars. */
         public int getStars() { return stars; }
+        /** @return the player's building discount. */
         public int getBuildingDiscount() { return buildingDiscount; }
+        /** @return the player's sustainment discount. */
         public int getSustainmentDiscount() { return sustainmentDiscount; }
+        /** @return the names of the tools the player owns. */
         public Set<String> getOwnedTools() { return ownedTools == null ? Set.of() : ownedTools; }
     }
 
@@ -354,6 +410,15 @@ public class GameStateDTO {
         private final List<Building> bottomBuildings;
         private final List<Tile> tiles;
 
+        /**
+         * Full constructor used by Jackson deserialization.
+         *
+         * @param topCards        the top-row cards
+         * @param bottomCards     the bottom-row cards
+         * @param topBuildings    the top-row buildings
+         * @param bottomBuildings the bottom-row buildings
+         * @param tiles           the board tiles
+         */
         @JsonCreator
         public BoardDTO(
                 @JsonProperty("topCards") List<Card> topCards,
@@ -382,22 +447,27 @@ public class GameStateDTO {
             this.tiles = board.getTiles().getTiles();
          }
 
+        /** @return an unmodifiable view of the top-row cards. */
         public List<Card> getTopCards() {
             return Collections.unmodifiableList(topCards);
         }
 
+        /** @return an unmodifiable view of the bottom-row cards. */
         public List<Card> getBottomCards() {
             return Collections.unmodifiableList(bottomCards);
         }
 
+        /** @return an unmodifiable view of the top-row buildings. */
         public List<Building> getTopBuildings() {
             return Collections.unmodifiableList(topBuildings);
         }
 
+        /** @return an unmodifiable view of the bottom-row buildings. */
         public List<Building> getBottomBuildings() {
             return Collections.unmodifiableList(bottomBuildings);
         }
 
+        /** @return an unmodifiable view of the board tiles. */
         public List<Tile> getTiles() {
             return Collections.unmodifiableList(tiles);
         }

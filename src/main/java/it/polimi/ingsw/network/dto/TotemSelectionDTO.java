@@ -74,6 +74,9 @@ public class TotemSelectionDTO implements DTO {
         return takenBy;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void accept(DTOVisitor visitor) {
         visitor.visit(this);

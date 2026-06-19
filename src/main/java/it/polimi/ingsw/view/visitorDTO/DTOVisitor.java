@@ -21,12 +21,46 @@ import it.polimi.ingsw.network.dto.TotemSelectionDTO;
  *   - GameDTOHandler   : swapped in when the game starts
  */
 public interface DTOVisitor {
+    /**
+     * Handles a game event payload.
+     *
+     * @param dto the game event DTO
+     */
     void visit(GameEventDTO dto);
+
+    /**
+     * Handles a lobby update payload.
+     *
+     * @param dto the lobby update DTO
+     */
     void visit(LobbyUpdateDTO dto);
+
+    /**
+     * Handles a totem-selection payload.
+     *
+     * @param dto the totem-selection DTO
+     */
     void visit(TotemSelectionDTO dto);
+
+    /**
+     * Handles an error payload.
+     *
+     * @param dto the error DTO
+     */
     void visit(ErrorDTO dto);
+
+    /**
+     * Handles an abandonment-countdown payload.
+     *
+     * @param dto the countdown DTO
+     */
     void visit(CountdownDTO dto);
 
+    /**
+     * Returns the last game event handled by this visitor, if any.
+     *
+     * @return the last game event DTO, or null
+     */
     GameEventDTO getLastEvent();
 
     /** Returns the last game-state snapshot received outside of a GameEventDTO (e.g. from a REJOIN lobby DTO). */

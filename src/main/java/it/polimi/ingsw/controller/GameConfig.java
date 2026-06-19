@@ -90,31 +90,75 @@ public class GameConfig implements Serializable {
         return startingFood;
     }
 
+    /**
+     * Returns the maximum number of players allowed in a game.
+     *
+     * @return the maximum player count
+     */
     public int getGameMaxPlayers() {
         return gameMaxPlayers;
     }
 
+    /**
+     * Returns the minimum number of players required to start a game.
+     *
+     * @return the minimum player count
+     */
     public int getGameMinPlayers() {
         return gameMinPlayers;
     }
 
+    /**
+     * Returns how many bottom-row cards to deal: the configured extra cards plus
+     * one per player.
+     *
+     * @param p the players in the match
+     * @return the bottom-row card quantity
+     */
     public int getBottomCardsQuantity(List<Player> p) {
         return bottomExtraCards + p.size();
     }
 
+    /**
+     * Returns how many top-row cards to deal: the configured extra cards plus
+     * one per player.
+     *
+     * @param p the players in the match
+     * @return the top-row card quantity
+     */
     public int getTopCardsQuantity(List<Player> p) {
         return topExtraCards + p.size();
     }
 
+    /**
+     * Returns the maximum number of turns in a game.
+     *
+     * @return the turn limit
+     */
     public int getMaxTurns() {
         return maxTurns;
     }
 
+    /**
+     * Returns the prestige points awarded per artist pair at end game.
+     *
+     * @return the artist gain
+     */
     public int getArtistGain() {
         return artistGain;
     }
 
+    /**
+     * Returns the configured number of extra bottom-row cards.
+     *
+     * @return the bottom extra cards
+     */
     public int getBottomExtraCards() { return bottomExtraCards; }
 
+    /**
+     * Returns the configured number of extra top-row cards.
+     *
+     * @return the top extra cards
+     */
     public int getTopExtraCards() { return topExtraCards; }
 }

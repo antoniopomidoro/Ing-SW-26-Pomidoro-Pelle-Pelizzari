@@ -1,0 +1,23 @@
+-classpath
+'C:/Users/Thony/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.17.2/jackson-databind-2.17.2.jar;C:/Users/Thony/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.17.2/jackson-annotations-2.17.2.jar;C:/Users/Thony/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.17.2/jackson-core-2.17.2.jar;C:/Users/Thony/.m2/repository/org/openjfx/javafx-base/25.0.3/javafx-base-25.0.3-win.jar;C:/Users/Thony/.m2/repository/org/openjfx/javafx-base/25.0.3/javafx-base-25.0.3-linux.jar;C:/Users/Thony/.m2/repository/org/openjfx/javafx-graphics/25.0.3/javafx-graphics-25.0.3-win.jar;C:/Users/Thony/.m2/repository/org/openjfx/javafx-base/25.0.3/javafx-base-25.0.3.jar;C:/Users/Thony/.m2/repository/org/openjfx/javafx-graphics/25.0.3/javafx-graphics-25.0.3-linux.jar;C:/Users/Thony/.m2/repository/org/openjfx/javafx-controls/25.0.3/javafx-controls-25.0.3-win.jar;C:/Users/Thony/.m2/repository/org/openjfx/javafx-graphics/25.0.3/javafx-graphics-25.0.3.jar;C:/Users/Thony/.m2/repository/org/openjfx/javafx-controls/25.0.3/javafx-controls-25.0.3-linux.jar;C:/Users/Thony/.m2/repository/org/openjfx/javafx-fxml/25.0.3/javafx-fxml-25.0.3-win.jar;C:/Users/Thony/.m2/repository/org/openjfx/javafx-controls/25.0.3/javafx-controls-25.0.3.jar;C:/Users/Thony/.m2/repository/org/openjfx/javafx-fxml/25.0.3/javafx-fxml-25.0.3-linux.jar;C:/Users/Thony/.m2/repository/org/openjfx/javafx-media/25.0.3/javafx-media-25.0.3-win.jar;C:/Users/Thony/.m2/repository/org/openjfx/javafx-media/25.0.3/javafx-media-25.0.3-linux.jar'
+-encoding
+'UTF-8'
+-private
+-sourcepath
+'C:/Users/Thony/IdeaProjects/Ing-SW-26-Pomidoro-Pelle-Pelizzari/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2026. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'C:/Users/Thony/IdeaProjects/Ing-SW-26-Pomidoro-Pelle-Pelizzari/target/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'GC42 1.0-SNAPSHOT API'
+-nohelp
+-use
+-version
+-windowtitle
+'GC42 1.0-SNAPSHOT API'
