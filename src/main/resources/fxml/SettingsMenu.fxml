@@ -17,7 +17,7 @@
     </VBox>
 
     <VBox spacing="4">
-        <Label text="Effetti sonori" style="-fx-text-fill: white;" />
+        <Label text="Sound effects" style="-fx-text-fill: white;" />
         <Slider fx:id="sfxSlider" min="0" max="1" majorTickUnit="0.25" blockIncrement="0.05" />
     </VBox>
 

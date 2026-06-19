@@ -31,6 +31,7 @@ public class CLIinterface implements UserInterface, Runnable {
 
     private final ClientManager user;
     private boolean going;
+    private volatile boolean gameOver = false;
     private GameEventDTO state;
     private LobbyUpdateDTO currentLobby;
     private TotemSelectionDTO currentTotems;
@@ -114,7 +115,7 @@ public class CLIinterface implements UserInterface, Runnable {
     // ============================================================
     public boolean print() {
         if (state == null || state.getSnapshot() == null) return false;
-
+        if (gameOver) return false;
         GameStateDTO snap = state.getSnapshot();
         System.out.flush();
         clearScreen();
@@ -382,6 +383,7 @@ public class CLIinterface implements UserInterface, Runnable {
 
     @Override
     public synchronized void onGameEnded(GameEventDTO dto) {
+        gameOver = true;
         update(dto);
             new Thread(new CLIEnder(user, dto), "CLI-ender").start();
 
@@ -389,6 +391,7 @@ public class CLIinterface implements UserInterface, Runnable {
 
     @Override
     public synchronized void onExceptionalWin(GameEventDTO dto) {
+        gameOver = true;
         update(dto);
         System.out.println();
         System.out.println(BOLD + GREEN + "  ★ VICTORY! All other players abandoned the game. ★" + RESET);
