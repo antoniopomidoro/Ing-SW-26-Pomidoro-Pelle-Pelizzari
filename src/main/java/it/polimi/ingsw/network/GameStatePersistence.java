@@ -1,6 +1,7 @@
 package it.polimi.ingsw.network;
 
 import it.polimi.ingsw.model.game.GameState;
+import it.polimi.ingsw.model.player.Player;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -51,7 +52,11 @@ public final class GameStatePersistence {
         }
         File file = new File("saves/" + gameId + ".ser");
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
-            return (GameState) ois.readObject();
+            GameState state =  (GameState) ois.readObject();
+            for(Player p : state.getPlayers()) {
+                state.disconnectPlayer((p));
+            }
+            return state;
         } catch (IOException | ClassNotFoundException e) {
             throw new IllegalStateException("Error during load for game " + gameId, e);
         }
