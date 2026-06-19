@@ -514,11 +514,14 @@ public class GameState implements Serializable {
      *
      * @param player the player to reintegrate
      * @return true if the player belongs to this game and was reconnected,
-     *         false if the player is null or unknown
+     *         false if the player is null, unknown, or already connected
      */
     public boolean reintegratePlayer(Player player) {
         if (player == null) return false;
         if (!players.contains(player)) {
+            return false;
+        }
+        if (player.isConnected()) {
             return false;
         }
         player.setConnected(true);
