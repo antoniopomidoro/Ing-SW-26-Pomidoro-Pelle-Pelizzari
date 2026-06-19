@@ -1,0 +1,122 @@
+/* ── Root ──────────────────────────────────────────────── */
+.root {
+    -fx-font-family: "Georgia", serif;
+}
+
+/* ── Card container shadow ───────────────────────────── */
+.card-container {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.75), 12, 0.4, 0, 2);
+    -fx-padding: 4;
+}
+
+/* ── Buyable card overlay pulse (applied to Rectangle) ── */
+.card-buyable {
+    -fx-stroke: #f0c040;
+    -fx-stroke-width: 3;
+    -fx-fill: transparent;
+    -fx-arc-width: 4;
+    -fx-arc-height: 4;
+}
+
+/* ── HUD stat labels ─────────────────────────────────── */
+.stat-label {
+    -fx-text-fill: #f0e6c8;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.8), 4, 0.5, 0, 1);
+}
+
+/* ── Opponent player box ─────────────────────────────── */
+.player-box {
+    -fx-background-color: rgba(20, 14, 6, 0.72);
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(200, 168, 75, 0.45);
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+}
+.player-box:hover {
+    -fx-background-color: rgba(20, 14, 6, 0.88);
+    -fx-border-color: #c8a84b;
+}
+
+/* ── Pick badge button ───────────────────────────────── */
+.pick-badge {
+    -fx-background-color: #c8a84b;
+    -fx-background-radius: 4;
+    -fx-text-fill: #1a1108;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 18 5 18;
+    -fx-cursor: hand;
+}
+.pick-badge:hover {
+    -fx-background-color: #f0c040;
+}
+
+/* ── Detail popup background ────────────────────────── */
+.detail-popup {
+    -fx-background-color: rgba(20, 14, 6, 0.90);
+    -fx-background-radius: 8;
+    -fx-border-color: #c8a84b;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-padding: 16;
+}
+
+/* ── Online / offline dot ────────────────────────────── */
+.online-dot {
+    -fx-fill: #44dd77;
+}
+.offline-dot {
+    -fx-fill: #dd4444;
+}
+
+/* ── Opponent nickname ───────────────────────────────── */
+.opponent-nickname {
+    -fx-text-fill: #e8d9b0;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+/* ── HUD background panel ────────────────────────────── */
+.hud-panel {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6;
+    -fx-padding: 8 16 8 16;
+}
+
+/* ── Opponent menu dropdown ──────────────────────────── */
+.opponent-menu {
+    -fx-background-color: rgba(20, 14, 6, 0.90);
+    -fx-background-radius: 6;
+    -fx-border-color: rgba(200,168,75,0.5);
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-padding: 8 12 8 12;
+    -fx-min-width: 220;
+}
+.opponent-menu-row {
+    -fx-padding: 6 10 6 10;
+    -fx-cursor: hand;
+}
+.opponent-menu-row:hover {
+    -fx-background-color: rgba(200,168,75,0.12);
+    -fx-background-radius: 4;
+}
+.opponent-menu-stat {
+    -fx-text-fill: #c8c0a8;
+    -fx-font-size: 13px;
+}
+
+.countdown-card {
+    -fx-background-color: rgba(150,20,20,0.88);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(255,255,255,0.35);
+    -fx-border-radius: 14;
+    -fx-border-width: 1.5;
+    -fx-padding: 10 24 10 24;
+}
+.countdown-title { -fx-font-size: 13px; -fx-text-fill: #ffdada; }
+.countdown-count { -fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white; }

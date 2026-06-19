@@ -1,0 +1,8 @@
+JavaFXApp sets up the GUi and start the application by showing login page
+
+LobbyController and GameCOntrollers are 2 implementations of UserInterface and implements lobby and game methods respectively.
+these 2 classes handles Event and decides the animations/pages to show
+
+the rest are javaFX boxes that contains animations and pages to show
+
+

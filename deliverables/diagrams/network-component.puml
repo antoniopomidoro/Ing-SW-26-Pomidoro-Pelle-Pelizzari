@@ -1,0 +1,91 @@
+@startuml network-component
+title Architettura statica del layer network
+
+' Cosa accade DENTRO Model e Client e' omesso: qui sono boundary opachi.
+
+skinparam classAttributeIconSize 0
+hide empty members
+
+class "Client\n(Socket o RMI)" as CL <<actor>>
+
+package "Entry point" {
+    class App <<entry>>
+    class SocketServer <<entry>>
+    class SocketDestroyer <<thread>>
+    class RMIServer <<entry>>
+}
+
+package "Viste di rete" {
+    abstract class VirtualView
+    note right of VirtualView
+      implements GameStateObserver
+      serializza i DTO via JacksonConfig
+    end note
+    class SocketClientHandler
+    class RMIClientHandler
+    VirtualView <|-- SocketClientHandler
+    VirtualView <|-- RMIClientHandler
+}
+
+package "Dispatch messaggi" {
+    class NUDEAnalyzer <<utility>> {
+        +parse() : Optional<ServerCommand>
+    }
+    interface ServerCommand
+    note bottom of ServerCommand
+      @JsonSubTypes (discriminatore "action")
+      lobby: CREATE, ENTER_LOBBY, SELECT_TOTEM
+      game:  TILE, TOP_CARD, BOTTOM_CARD,
+             TOP_BUILDING, BOTTOM_BUILDING
+    end note
+}
+
+package "Coordinamento" {
+    class ServerManager
+    class NUDEPinger <<thread>>
+    class countdownScheduler <<timer>>
+    class GameSession {
+        GameController + coda single-thread
+        + GameLiveness
+    }
+}
+
+class "Model\n(GameState)" as MD <<model>>
+class "GameStatePersistence\n+ SaveObserver" as PERS
+
+' --- relazioni ---
+App --> SocketServer : avvia
+App --> RMIServer : avvia
+App --> ServerManager : possiede
+
+SocketServer --> SocketDestroyer : thread di pulizia
+CL --> SocketServer : connessione TCP (porta 1969)
+CL --> RMIServer : receive(json, callback)
+
+SocketServer ..> SocketClientHandler : 1 per client (thread)
+RMIServer ..> RMIClientHandler : 1 per stub (sessions)
+
+SocketClientHandler --> NUDEAnalyzer : NUDECommand(json)
+RMIClientHandler --> NUDEAnalyzer : receive(json)
+NUDEAnalyzer --> ServerCommand : crea
+ServerCommand --> ServerManager : submit
+
+ServerManager --> NUDEPinger : possiede
+ServerManager --> countdownScheduler : possiede
+ServerManager "1" o-- "*" GameSession : activeGames
+ServerManager ..> VirtualView : viewRegistry / pendingViews / rawClients
+NUDEPinger ..> VirtualView : ping periodico
+
+GameSession --> MD : GameController applica le mosse
+MD ..> VirtualView : onGameEvent (Observer)
+MD --> PERS : SaveObserver salva su evento
+
+note as N1
+  Confine di threading:
+  - stato lobby   -> solo lobbyExecutor (submitToLobby)
+  - stato partita -> solo coda GameSession (trySubmit)
+  - transport     -> solo parsing/IO, nessuna mutazione
+end note
+ServerManager .. N1
+
+@enduml

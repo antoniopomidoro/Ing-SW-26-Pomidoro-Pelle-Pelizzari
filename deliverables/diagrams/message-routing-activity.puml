@@ -1,0 +1,65 @@
+@startuml message-routing-activity
+title Percorso di un messaggio in arrivo (routing e rami di errore)
+
+start
+:il transport riceve una riga JSON;
+note right: Socket: readLine()\nRMI: receive(json, callback)
+
+if (contenuto?) then (null)
+    :disconnectPlayer(view);
+    stop
+elseif ("" vuoto) then (si)
+    :ignora;
+    stop
+elseif ("pong") then (si)
+    :aggiorna lastPing;
+    stop
+else (comando)
+endif
+
+:NUDEAnalyzer.parse(json);
+if (ServerCommand riconosciuto?) then (no)
+    :drop + log\n"unrecognized message";
+    stop
+else (si)
+endif
+
+:command.submit(serverManager, view);
+
+if (tipo di comando) then (comando lobby)
+    :submitToLobby(task);
+    note right: coda lobby single-thread
+    :ServerManager esegue\n(createGame / enterLobby / selectTotem);
+    if (validazione ok?) then (no)
+        :sendError(ErrorDTO)\nINVALID_INPUT / LOBBY_NOT_FOUND /\nLOBBY_FULL / NICKNAME_TAKEN /\nTOTEM_NOT_AVAILABLE;
+        stop
+    else (si)
+        :broadcast TotemSelectionDTO / LobbyUpdateDTO;
+        stop
+    endif
+else (azione di gioco Exec*)
+    :submitToGame(command, view);
+    if (gameId valido e partita in activeGames?) then (no)
+        :sendError(INVALID_INPUT / LOBBY_NOT_FOUND);
+        stop
+    else (si)
+        if (GameSession.trySubmit accettato?) then (no - coda chiusa)
+            :sendError(LOBBY_NOT_FOUND);
+            stop
+        else (si)
+            :runGameCommand sul thread partita;
+            if (player risolto da idPlayer?) then (no)
+                :log + no-op;
+                stop
+            else (si)
+                :command.execute(player, controller);
+                :il Model applica la mossa\ne raiseEvent (boundary opaco);
+                :VirtualView.onGameEvent ->\nGameEventDTO (+ snapshot se requiresSave);
+                :serializza via JacksonConfig\ne invia al client;
+                stop
+            endif
+        endif
+    endif
+endif
+
+@enduml

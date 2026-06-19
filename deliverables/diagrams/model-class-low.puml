@@ -1,0 +1,300 @@
+@startuml model-class-low
+title Model - UML di basso livello
+
+skinparam classAttributeIconSize 0
+
+' ======================= GAME / STATE =======================
+class GameState <<context>> {
+    -config : GameConfig
+    -age : Age
+    -turn : int
+    -currentPhase : GamePhaseBehavior
+    -players : List<Player>
+    -board : Board
+    -deck : Decks
+    -turnOrder : List<Player>
+    -orderTileOrder : List<Player>
+    -observers : List<GameStateObserver>
+    -currentPlayerIndex : int
+    -currentPlayerOrderIndex : int
+    -currentTileIndex : int
+    +setPhase(newPhase) : boolean
+    +restorePhase(phase) : void
+    +pickTopCard(index, player, cardInstanceId) : boolean
+    +pickBottomCard(index, player, cardInstanceId) : boolean
+    +pickTopBuilding(index, player, cardInstanceId) : boolean
+    +pickBottomBuilding(index, player, cardInstanceId) : boolean
+    +occupyOfferTrailTile(index, player) : boolean
+    +nextPlayerInTurnOrder() : boolean
+    +nextPlayerInTurnOrderTile() : boolean
+    +updateTurnOrder() : boolean
+    +publishTrigger(key : TriggerKey) : boolean
+    +disconnectPlayer(player) : boolean
+    +reintegratePlayer(player) : boolean
+    +addObserver(o) / removeObserver(o)
+    +raiseEvent(event : GameEvent) : void
+}
+
+interface GamePhaseBehavior <<state>> {
+    +execute(context) : boolean
+    +nextPhase(context) : boolean
+    +nextAge(context) : boolean
+    +pickTopCard(context, index, player, id) : boolean
+    +pickBottomCard(context, index, player, id) : boolean
+    +pickTopBuilding(context, index, player, id) : boolean
+    +pickBottomBuilding(context, index, player, id) : boolean
+    +occupyOfferTrailTile(context, index, player) : boolean
+    +getRemainingUpperPicks() : int
+    +getRemainingBottomPicks() : int
+    +handlePlayerDisconnect(context, player) : boolean
+    +resolveActivePlayer(context) : Optional<Player>
+}
+note right of GamePhaseBehavior
+  Default: raiseEvent(INVALID_PHASE)
+  + throw IllegalMoveException.
+  Le fasi concrete sovrascrivono
+  solo le azioni permesse.
+end note
+class SetupPhase
+class StartTurnPhase
+class TurnPhase
+class PlayerTurnPhase
+class EndTurnPhase
+class ChangeAgePhase
+class EndGamePhase
+
+class GameEvent {
+    -type : Type
+    -culprit : Player
+    -triggerKey : TriggerKey
+    +getType() : Type
+    +getCulprit() : Player
+}
+enum "GameEvent.Type" as EventType {
+    WRONG_TURN
+    INVALID_PHASE
+    SUCCESSFUL_ACTION
+    TILE_OCCUPIED
+    PLAYER_DISCONNECTED
+    PLAYER_RECONNECTED
+    END_GAME_COMPLETED
+    EXCEPTIONAL_WIN
+}
+note right of EventType : ogni costante espone requiresSave() : boolean
+interface GameStateObserver {
+    +onGameEvent(event : GameEvent) : void
+}
+
+enum Age {
+    AGE_1
+    AGE_2
+    AGE_3
+    AGE_3_FINAL
+}
+note right of Age : getValue() : int\nisAge() : boolean\nhasNext() / getNext()
+enum TriggerKey
+class IllegalMoveException
+
+' ======================= PLAYER =======================
+class Player {
+    -id : Totem
+    -nickname : String
+    -cards : List<Card>
+    -buildings : List<Building>
+    -stats : PlayerStats
+    -food : int
+    -pp : int
+    -isChoosing : boolean
+    -isConnected : boolean
+    +addCard(c) : boolean
+    +addBuilding(b) : boolean
+    +addFood(amount) / payFood(amount) : boolean
+    +payFoodWithPenalty(requiredFood, penalty) : boolean
+    +canBuy(b) / payBuilding(b) : boolean
+    +getBuildingsByTrigger(key) : List<Building>
+    +getBuildingsPP() : int
+    +isConnected() / setConnected(b)
+}
+class PlayerStats {
+    -characterCounts : Map<CharacterEnum,Integer>
+    -buildingDiscount : int
+    -ritualLossMultiplier : int
+    -baseSustainmentDiscount : int
+    -sustainmentBoosts : Map<CharacterEnum,Integer>
+    -stars : int
+    -builderPp : int
+    -ritualWinBoost : int
+    -uniqueTools : Set<Tool>
+    +incrementCharacter(type) : boolean
+    +getSustainmentDiscount() : int
+    +calculateSet() : int
+    +incrementTool(tool) : boolean
+}
+enum Totem {
+    RED
+    WHITE
+    BLACK
+    YELLOW
+    BLUE
+}
+
+' ======================= BOARD =======================
+class Board {
+    -orderTile : OrderTile
+    -tiles : TileSet
+    -topCards : List<Card>
+    -bottomCards : List<Card>
+    -topBuildings : List<Building>
+    -bottomBuildings : List<Building>
+    +pickTopCard(i) / pickBottomCard(i) : Card
+    +pickTopBuilding(i) / pickBottomBuilding(i) : Building
+    +addTopCard(c) / addBottomCard(c) : boolean
+    +topToBottomCards() / topToBottomBuildings() : boolean
+    +discardBottomCards(state) / discardBoard(state) : boolean
+    +seeTopCard(i) / seeBottomCard(i) : Card
+}
+class TileSet {
+    -tiles : List<Tile>
+    +getTile(index) : Tile
+    +getTiles() : List<Tile>
+    +indexOf(tile) : int
+}
+class Tile {
+    -tileId : TileId
+    -isOccupied : boolean
+    -occupier : Player
+    -upperPicks : int
+    -bottomPicks : int
+    -foodBonus : int
+    -minPlayers : int
+    +occupy(p) : boolean
+    +deOccupy() : boolean
+    +isOccupied() / getOccupier()
+}
+class OrderTile {
+    -orderBonus : List<Integer>
+    -ppPenalty : List<Integer>
+    +getOrderBonus(i) : int
+    +getPenalty(i) : int
+}
+enum TileId
+
+' ======================= CARDS / DECKS =======================
+class Decks {
+    -cards : Map<Age,List<Card>>
+    -buildings : Map<Age,List<Building>>
+    +shuffle() : boolean
+    +peekCard(age) / popCard(age) : Optional<Card>
+    +getBuildings(age) : List<Building>
+    +addCard(c) / addBuilding(b) : boolean
+    +remainingCards(age) : int
+}
+abstract class Card {
+    #age : Age
+    #minPlayers : int
+    #instanceId : String
+    #cardId : String
+    +{abstract} getCategory() : CardCategory
+    +getTriggerKey() : Optional<TriggerKey>
+    +getResolutionPriority() : int
+    +onAddedToPlayer(p) : boolean
+    +onDiscard(state) : boolean
+    +addToDeck(manager) : boolean
+    +isBuyable() : boolean
+    +getId() : CharacterEnum
+}
+abstract class Character {
+    -id : CharacterEnum
+    +getId() : CharacterEnum
+}
+class Building {
+    -foodCost : int
+    -pp : int
+    -effect : ContextualEffect
+    -triggerKey : TriggerKey
+    +triggerBuildingEffect(p, state) : boolean
+    +onAddedToPlayer(p) : boolean
+}
+class Event {
+    -effect : EventEffect
+    -triggerKey : TriggerKey
+    -resolutionPriority : int
+    +onDiscard(state) : boolean
+}
+class Artist
+class Gatherer
+class Shaman
+class Builder
+class Inventor
+class Hunter
+enum CharacterEnum
+enum Tool
+
+' ======================= EFFECTS =======================
+interface ContextualEffect {
+    +executeEffect(p : Player, state : GameState) : boolean
+    +onAddedToPlayer(p : Player) : boolean
+}
+interface EventEffect {
+    +applyEffect(state : GameState, age : Age) : boolean
+    +executeEffect(state, triggerKey, age) : boolean
+}
+note bottom of ContextualEffect
+  Impl: GainByCharacter, AddStars, CardSet,
+  EndCardSet, EndBuilderPpMultiplier,
+  EndOfTurnExtraPick, InventorPair,
+  ShamanicLossProtection, ShamanicWinBoost,
+  SustainmentBoost, TotemPlacementBonus
+end note
+note bottom of EventEffect
+  Impl: Sustenance, Hunting,
+  ShamanicRitual, CavePaintings
+end note
+
+' ======================= RELAZIONI =======================
+GameState *-- "currentPhase" GamePhaseBehavior
+GamePhaseBehavior <|.. SetupPhase
+GamePhaseBehavior <|.. StartTurnPhase
+GamePhaseBehavior <|.. TurnPhase
+GamePhaseBehavior <|.. PlayerTurnPhase
+GamePhaseBehavior <|.. EndTurnPhase
+GamePhaseBehavior <|.. ChangeAgePhase
+GamePhaseBehavior <|.. EndGamePhase
+GamePhaseBehavior ..> IllegalMoveException : throws
+GameState ..> GameEvent : raiseEvent
+GameEvent +-- EventType
+GameState o-- GameStateObserver
+
+GameState "1" *-- "2..5" Player
+GameState *-- Board
+GameState *-- Decks
+GameState o-- GameConfig
+Player *-- PlayerStats
+Player o-- "*" Card
+Player o-- "*" Building
+PlayerStats o-- Tool
+
+Board *-- TileSet
+Board *-- OrderTile
+TileSet "1" *-- "*" Tile
+OrderTile --|> Tile
+Tile o-- "occupier" Player
+Tile *-- TileId
+
+Decks o-- Card
+Card <|-- Character
+Card <|-- Building
+Card <|-- Event
+Character <|-- Artist
+Character <|-- Gatherer
+Character <|-- Shaman
+Character <|-- Builder
+Character <|-- Inventor
+Character <|-- Hunter
+Character o-- CharacterEnum
+Building *-- ContextualEffect
+Event *-- EventEffect
+
+class GameConfig <<controller>>
+
+@enduml

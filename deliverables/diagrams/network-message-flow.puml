@@ -1,0 +1,80 @@
+@startuml network-message-flow
+title Flusso di rete - dal messaggio del client alla modifica del model e ritorno
+
+' Scope: solo il layer network. Cosa accade DENTRO Model e Client
+' e' volutamente omesso (saranno oggetto di diagrammi separati):
+' qui sono trattati come boundary opachi.
+
+skinparam responseMessageBelowArrow true
+skinparam sequenceMessageAlign center
+
+actor Client as CL
+box "Server - layer network" #F7F7F7
+    participant "VirtualView\n(SocketClientHandler /\nRMIClientHandler)" as VV
+    participant "NUDEAnalyzer" as NA
+    participant "ServerManager" as SM
+    participant "GameSession\n(coda single-thread)" as GS
+    participant "GameController" as GC
+end box
+participant "Model\n(GameState)" as MD #DDEEDD
+
+== Ingresso e parsing del messaggio ==
+CL -> VV : invia messaggio JSON\n{action, idGame, idPlayer, ...}
+activate VV
+VV -> NA : parse(json)
+activate NA
+NA --> VV : Optional<ServerCommand>
+deactivate NA
+
+alt messaggio non riconosciuto
+    VV -> VV : drop + log\n("unrecognized message")
+else comando valido
+    VV -> SM : command.submit(serverManager, view)
+    deactivate VV
+    activate SM
+
+    == Routing sulla coda corretta ==
+    SM -> SM : risolve GameSession\nda activeGames[idGame]
+    alt idGame assente / partita non trovata
+        SM --> CL : ErrorDTO(INVALID_INPUT |\nLOBBY_NOT_FOUND)
+    else partita attiva
+        SM -> GS : trySubmit(runGameCommand)
+        alt coda gia' chiusa (trySubmit == false)
+            SM --> CL : ErrorDTO(LOBBY_NOT_FOUND)
+        else accodato
+            deactivate SM
+            note over GS : esecuzione serializzata\nsul thread della partita
+
+            == Esecuzione sul thread di gioco ==
+            activate GS
+            GS -> SM : runGameCommand(session, command)
+            activate SM
+            SM -> SM : risolve Player da idPlayer
+            alt player non presente
+                SM -> SM : log + return (no-op)
+            else player risolto
+                SM -> GC : command.execute(player, controller)
+                deactivate SM
+                activate GC
+
+                ' --- BOUNDARY: dettaglio interno al model omesso ---
+                GC -> MD : applica la mossa
+                activate MD
+                MD -> MD : raiseEvent(GameEvent)
+                deactivate GC
+
+                == Notifica observer e ritorno verso i client ==
+                MD --> VV : onGameEvent(event)
+                deactivate MD
+                deactivate GS
+                activate VV
+                VV -> VV : costruisce GameEventDTO\n(+ GameStateDTO snapshot\nse event.requiresSave())
+                VV --> CL : GameEventDTO (JSON serializzato\nvia JacksonConfig)
+                deactivate VV
+                ' --- BOUNDARY: aggiornamento interno del client omesso ---
+            end
+        end
+    end
+end
+
+@enduml

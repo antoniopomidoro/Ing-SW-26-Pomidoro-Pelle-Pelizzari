@@ -1,0 +1,63 @@
+@startuml player-pick-resolution
+title Pick di una carta/edificio - PlayerTurnPhase (con effetti/trigger)
+
+skinparam responseMessageBelowArrow true
+
+participant "ExecTopCard\n(controller)" as EX
+participant "GameController" as GC
+participant "GameState" as ST
+participant "PlayerTurnPhase" as PTP
+participant "Board" as B
+participant "Player" as P
+participant "Building\n+ ContextualEffect" as BLD
+participant "observers" as OBS
+
+EX -> GC : execute(player, controller)
+GC -> ST : pickTopCard(index, player, cardId)
+activate ST
+ST -> ST : requireEnoughConnectedPlayers(player)
+ST -> PTP : pickTopCard(context, index, player, cardId)
+activate PTP
+
+PTP -> PTP : topCheck(context, player)
+note right of PTP : non e' l'active player -> WRONG_TURN + throw\nupperPicks<=0 -> INSUFFICIENT_PICKS + throw
+PTP -> B : seeTopCard(index)
+PTP -> PTP : cardCheck(...)
+note right of PTP : carta nulla -> INVALID_INDEX\nid diverso -> INVALID_ID\nnon comprabile -> INVALID_CARD\n(tutti + throw IllegalMoveException)
+
+alt mossa valida
+    PTP -> B : pickTopCard(index)
+    PTP -> P : addCard(card)
+    PTP -> PTP : upperPicks--
+    PTP -> ST : raiseEvent(UPPER_CARD, activePlayer)
+    ST -> OBS : onGameEvent(UPPER_CARD)
+
+    == Trigger ON_CARD_PICK (Strategy) ==
+    PTP -> P : getBuildingsByTrigger(ON_CARD_PICK)
+    loop per ogni building attivato
+        PTP -> BLD : triggerBuildingEffect(player, context)
+        BLD -> BLD : effect.executeEffect(player, state)
+    end
+    opt almeno un effetto attivato
+        PTP -> ST : raiseEvent(BUILDING_ACTIVATED)
+        ST -> OBS : onGameEvent(BUILDING_ACTIVATED)
+    end
+
+    PTP -> PTP : nextPhase(context)
+    opt niente piu' pick possibili
+        PTP -> ST : setPhase(new TurnPhase())
+        note right of PTP : riprende lo scan tile\n(vedi turn-tile-occupation)
+    end
+end
+deactivate PTP
+GC <-- ST : true / false (IllegalMoveException catturata)
+deactivate ST
+EX <-- GC : boolean
+
+note over P, BLD
+  Per i building (ExecTopBuilding/ExecBottomBuilding):
+  buildingCheck aggiunge il controllo canBuy
+  (INSUFFICIENT_FOOD) e payBuilding prima di addBuilding.
+end note
+
+@enduml

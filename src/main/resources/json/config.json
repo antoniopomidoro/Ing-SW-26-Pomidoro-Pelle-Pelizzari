@@ -1,0 +1,16 @@
+{
+  "gameMaxPlayers": 5,
+  "gameMinPlayers": 2,
+  "buildingPerPlayer": [
+    [1, 2, 3, 0],
+    [2, 2, 4, 0],
+    [2, 3, 4, 0],
+    [2, 3, 5, 0]
+  ],
+  "startingFood": [2, 3, 3, 4, 4],
+  "bottomExtraCards": 1,
+  "topExtraCards": 4,
+  "maxTurns": 10,
+  "artistGain": 10
+}
+

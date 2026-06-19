@@ -1,0 +1,216 @@
+package it.polimi.ingsw.model.board;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import it.polimi.ingsw.model.board.*;
+import it.polimi.ingsw.model.cards.*;
+import it.polimi.ingsw.model.cards.characters.*;
+import it.polimi.ingsw.model.effects.*;
+import it.polimi.ingsw.model.effects.contextual.*;
+import it.polimi.ingsw.model.effects.events.*;
+import it.polimi.ingsw.model.game.*;
+import it.polimi.ingsw.model.player.*;
+
+import java.io.Serializable;
+
+
+/**
+ * Represents a tile on the game board.
+ * Instances of this class are intended to be created from JSON data.
+ */
+public class Tile implements Serializable {
+
+    private TileId tileId;
+    @JsonProperty("occupied")
+    private boolean isOccupied;
+    private Player occupier;
+    private int upperPicks;
+    private int bottomPicks;
+    private int foodBonus;
+    private int minPlayers;
+
+    /**
+     * Default constructor for Tile.
+     * The constructor is empty as instances of this class will be populated using JSON deserialization.
+     */
+    public Tile() {
+
+    }
+
+    /**
+     * Constructs an occupied tile assigned to a player.
+     *
+     * @param p           the player occupying the tile
+     * @param upperPicks  the number of picks granted from the top row
+     * @param bottomPicks the number of picks granted from the bottom row
+     */
+    public Tile(Player p, int upperPicks, int bottomPicks){
+        this.occupier = p;
+        this.upperPicks = upperPicks;
+        this.bottomPicks = bottomPicks;
+        this.isOccupied = true;
+
+    }
+
+    /**
+     * Test-only constructor that fully specifies a tile.
+     *
+     * @param id          the tile id
+     * @param upperPicks  the number of picks granted from the top row
+     * @param bottomPicks the number of picks granted from the bottom row
+     * @param foodBonus   the food bonus granted by the tile
+     * @param minPlayers  the minimum number of players for the tile to be in play
+     */
+    public Tile(TileId id, int upperPicks, int bottomPicks, int foodBonus, int minPlayers){
+        this.tileId = id;
+        this.upperPicks = upperPicks;
+        this.bottomPicks = bottomPicks;
+        this.foodBonus = foodBonus;
+        this.minPlayers = minPlayers;
+    }
+
+    /**
+     * Gets the ID of the tile.
+     * @return The tile ID.
+     */
+    public TileId getId() {
+        return tileId ;
+    }
+
+    /**
+     * Sets the ID of the tile. This method is intended to be used by the JSON deserializer.
+     * @param id The tile ID to set.
+     * @return True if the ID was set successfully, false otherwise.
+     */
+    public boolean setId(TileId id) {
+        if(id == null){
+            return false;
+        }
+        this.tileId = id;
+        return true;
+    }
+
+    /**
+     * Checks if the tile is occupied.
+     * @return True if the tile is occupied, false otherwise.
+     */
+    public boolean isOccupied() {
+        return isOccupied;
+    }
+
+    /**
+     * Gets the player who occupies the tile.
+     * @return The occupying player, or null if the tile is not occupied.
+     */
+    public Player getOccupier() {
+        return this.occupier;
+    }
+
+    /**
+     * Gets the minimum number of players required for this tile to be in play.
+     * @return The minimum number of players.
+     */
+    public int getMinPlayers() {
+        return this.minPlayers;
+    }
+
+    /**
+     * Sets the minimum number of players for this tile. This method is intended to be used by the JSON deserializer.
+     * @param minPlayers The minimum number of players to set.
+     * @return True if the value was set successfully, false otherwise.
+     */
+    public boolean setMinPlayers(int minPlayers) {
+        if(minPlayers <= 1 || minPlayers > 5) {
+            return false;
+        }
+        this.minPlayers = minPlayers;
+        return true;
+    }
+
+    /**
+     * Occupies the tile with a player.
+     * @param p The player to occupy the tile.
+     * @return True if the tile was occupied successfully, false otherwise.
+     */
+    public boolean occupy(Player p) {
+        if(this.isOccupied || p == null){
+            return false;
+        }
+        this.occupier = p;
+        this.isOccupied = true;
+        return true;
+    }
+
+    /**
+     * Frees the tile from occupation.
+     * @return True if the tile was de-occupied successfully, false otherwise.
+     */
+    public boolean deOccupy() {
+        if(!this.isOccupied){
+            return false;
+        }
+        this.occupier = null;
+        this.isOccupied = false;
+        return true;
+    }
+
+    /**
+     * Gets the number of picks this tile grants from the top row.
+     *
+     * @return the upper picks
+     */
+    public int getUpperPicks() {
+        return upperPicks;
+    }
+
+    /**
+     * Gets the number of picks this tile grants from the bottom row.
+     *
+     * @return the bottom picks
+     */
+    public int getBottomPicks() {
+        return bottomPicks;
+    }
+
+    /**
+     * Gets the food bonus granted by this tile.
+     *
+     * @return the food bonus
+     */
+    public int getFoodBonus() {
+        return foodBonus;
+    }
+
+    // --- Setters for save/load restoration ---
+
+    /**
+     * Sets the food bonus (save/load restore).
+     *
+     * @param foodBonus the food bonus to set
+     */
+    public void setFoodBonus(int foodBonus) { this.foodBonus = foodBonus; }
+
+    /**
+     * Sets the upper picks (save/load restore).
+     *
+     * @param upperPicks the upper picks to set
+     */
+    public void setUpperPicks(int upperPicks) { this.upperPicks = upperPicks; }
+
+    /**
+     * Sets the bottom picks (save/load restore).
+     *
+     * @param bottomPicks the bottom picks to set
+     */
+    public void setBottomPicks(int bottomPicks) { this.bottomPicks = bottomPicks; }
+
+    /**
+     * Sets the occupier (save/load restore), marking the tile occupied when the
+     * given player is non-null.
+     *
+     * @param p the occupying player, or null to free the tile
+     */
+    public void setOccupier(Player p) {
+        this.occupier = p;
+        this.isOccupied = (p != null);
+    }
+}

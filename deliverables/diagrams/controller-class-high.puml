@@ -1,0 +1,67 @@
+@startuml controller-class-high
+title Controller - UML di alto livello
+
+skinparam classAttributeIconSize 0
+hide empty members
+
+class GameController {
+    -state : GameState
+    -jsonGod : JsonFactory
+    +start()
+    +pickTopCard(index, player, cardId) : boolean
+    +pickBottomCard(index, player, cardId) : boolean
+    +pickTopBuilding(index, player, cardId) : boolean
+    +pickBottomBuilding(index, player, cardId) : boolean
+    +occupyOfferTrailTile(index, player) : boolean
+    +disconnectPlayer(totem) : boolean
+    +reconnectPlayer(player, view) : boolean
+    +declareExceptionalWin(winner)
+    +getGameState() : GameState
+}
+
+class JsonFactory {
+    +loadAllData()
+    +getCards() / getBuildings() / getTiles()
+    +getOrderTiles() / getConfig()
+}
+class GameConfig {
+    -buildingPerPlayer : int[][]
+    -startingFood : List<Integer>
+    +getBuildingsCount(playerCount, age)
+    +getStartingFood()
+}
+class NUDEAnalyzer <<utility>> {
+    +{static} parse(json) : Optional<ServerCommand>
+    +{static} asJson(object) : String
+}
+
+interface ServerCommand <<network>> {
+    +submit(serverManager, view)
+}
+abstract class Executor {
+    -idGame : String
+    -idPlayer : Totem
+    -index : int
+    +execute(player, controller) : boolean
+}
+class ExecTile
+class ExecTopCard
+class ExecBottomCard
+class ExecTopBuilding
+class ExecBottomBuilding
+
+class GameState <<model>>
+
+GameController *-- GameState : delega le mosse
+GameController *-- JsonFactory
+JsonFactory ..> GameConfig : carica
+NUDEAnalyzer ..> ServerCommand : crea
+ServerCommand <|.. Executor
+Executor <|-- ExecTile
+Executor <|-- ExecTopCard
+Executor <|-- ExecBottomCard
+Executor <|-- ExecTopBuilding
+Executor <|-- ExecBottomBuilding
+Executor ..> GameController : execute
+
+@enduml

@@ -1,0 +1,59 @@
+@startuml game-setup-start
+title Avvio partita - SetupPhase -> StartTurnPhase (state machine)
+
+skinparam responseMessageBelowArrow true
+
+participant "GameController" as GC
+participant "GameState\n(context)" as ST
+participant "SetupPhase" as SP
+participant "StartTurnPhase" as STP
+participant "Board" as B
+participant "Decks" as D
+participant "Player" as P
+participant "observers\n(VirtualView/Save)" as OBS
+
+GC -> ST : setPhase(new SetupPhase())
+activate ST
+note over ST : setPhase memorizza la fase\nE chiama subito execute()
+ST -> SP : execute(context)
+activate SP
+
+SP -> ST : shuffle(orderTileOrder)
+loop per ogni player in orderTileOrder
+    SP -> P : addFood(startingFood[i])
+end
+loop fino a riempire bottom/top cards
+    SP -> D : popCard(age)
+    D --> SP : Optional<Card>
+    SP -> B : addBottomCard / addTopCard
+end
+SP -> B : addTopBuildings(deck.getBuildings(age))
+
+SP -> SP : nextPhase(context)
+SP -> ST : raiseEvent(SETUP_COMPLETED)
+ST -> OBS : onGameEvent(SETUP_COMPLETED)
+SP -> ST : setPhase(new StartTurnPhase())
+activate ST
+ST -> STP : execute(context)
+activate STP
+
+loop riempi top cards
+    STP -> D : popCard(age)
+    alt deck esaurito e age.hasNext()
+        STP -> ST : setPhase(new ChangeAgePhase())
+        note right of STP : cambio era (vedi end-turn-cycle)
+    else carta disponibile
+        STP -> B : addTopCard(card)
+    end
+end
+note over STP : turn==1 -> nessun bonus cibo
+STP -> ST : publishTrigger(START_TURN)
+STP -> ST : raiseEvent(START_TURN_STARTED)
+ST -> OBS : onGameEvent(START_TURN_STARTED)
+STP --> ST : true
+deactivate STP
+deactivate ST
+deactivate SP
+deactivate ST
+
+@enduml

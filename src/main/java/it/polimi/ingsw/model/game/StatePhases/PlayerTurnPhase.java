@@ -1,0 +1,347 @@
+package it.polimi.ingsw.model.game.StatePhases;
+
+import it.polimi.ingsw.model.board.Board;
+import it.polimi.ingsw.model.board.Tile;
+import it.polimi.ingsw.model.cards.Building;
+import it.polimi.ingsw.model.cards.Card;
+import it.polimi.ingsw.model.game.*;
+import it.polimi.ingsw.model.player.Player;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * PLAYER_TURN phase behavior.
+ * Handles the full turn logic for the player occupying the current tile:
+ * <ol>
+ *   <li>Identifies the player on the current tile</li>
+ *   <li>Triggers all buildings with triggerKey == PLAYER_TURN</li>
+ *   <li>The player performs picks (upper/bottom) as defined by the tile</li>
+ *   <li>Advances the tile index and transitions back to TURN</li>
+ * </ol>
+ */
+public class PlayerTurnPhase implements GamePhaseBehavior {
+    private Player activePlayer;
+    private Tile activeTile;
+    private int upperPicks = 0;
+    private int bottomPicks = 0;
+
+    /**
+     * Creates the player turn phase binding it to the active player and tile.
+     *
+     * @param player active player
+     * @param tile tile occupied by the active player
+     */
+    public PlayerTurnPhase(Player player, Tile tile) {
+        this.activePlayer = player;
+        this.activeTile = tile;
+        this.upperPicks = activeTile.getUpperPicks();
+        this.bottomPicks = activeTile.getBottomPicks();
+    }
+
+    /**
+     * Restore constructor: creates a PlayerTurnPhase with explicit pick counts.
+     * Does NOT call execute() — used during save/load restoration.
+     *
+     * @param activePlayer the player this phase is bound to
+     * @param activeTile   the tile occupied by the active player
+     * @param upperPicks   the remaining top-row picks
+     * @param bottomPicks  the remaining bottom-row picks
+     */
+    public PlayerTurnPhase(Player activePlayer, Tile activeTile, int upperPicks, int bottomPicks) {
+        this.activePlayer = activePlayer;
+        this.activeTile = activeTile;
+        this.upperPicks = upperPicks;
+        this.bottomPicks = bottomPicks;
+    }
+
+    /** @return the player this phase is bound to. */
+    public Player getActivePlayer() { return activePlayer; }
+    /** @return the tile occupied by the active player. */
+    public Tile getActiveTile() { return activeTile; }
+    /** @return the remaining top-row picks. */
+    public int getUpperPicks() { return upperPicks; }
+    /** @return the remaining bottom-row picks. */
+    public int getBottomPicks() { return bottomPicks; }
+
+    /** {@inheritDoc} */
+    @Override public int getRemainingUpperPicks() { return upperPicks; }
+    /** {@inheritDoc} */
+    @Override public int getRemainingBottomPicks() { return bottomPicks; }
+
+    /**
+     * Applies the food bonus of the active tile and immediately checks
+     * for a possible phase transition.
+     *
+     * @param context the game state
+     * @return true on success, false if the context, player or tile is missing
+     */
+    @Override
+    public boolean execute(GameState context) {
+        if (context == null || activePlayer == null || activeTile == null) {
+            return false;
+        }
+        int food = activeTile.getFoodBonus();
+        if (food > 0){
+            activePlayer.addFood(food);
+        }
+        context.raiseEvent(new GameEvent(GameEvent.Type.PLAYER_TURN_STARTED, activePlayer));
+        nextPhase(context);
+        return true;
+    }
+
+    /**
+     * Pick of an upper card.
+     * In case of invalid move: event broadcast ({@link GameState#raiseEvent(GameEvent)})
+     * followed by {@link IllegalMoveException}.
+     *
+     * @param context        the game state
+     * @param index          the position of the card in the top row
+     * @param player         the player performing the pick
+     * @param cardInstanceId the expected instance id of the card
+     * @return true if the pick succeeded
+     * @throws IllegalMoveException if the move is not allowed
+     */
+    @Override
+    public boolean pickTopCard(GameState context, int index, Player player, String cardInstanceId){
+        topCheck(context, player);
+        Card c = context.getBoard().seeTopCard(index);
+        cardCheck(context, player, cardInstanceId, c);
+        c = context.getBoard().pickTopCard(index);
+        activePlayer.addCard(c);
+        upperPicks--;
+        // Notify successful pick
+        context.raiseEvent(new GameEvent(GameEvent.Type.UPPER_CARD, activePlayer));
+        // Trigger ON_CARD_PICK buildings (e.g. CardSet, InventorPair)
+        triggerOnCardPick(activePlayer, context);
+        nextPhase(context);
+        return true;
+    }
+
+    /**
+     * Pick of a lower card.
+     * In case of invalid move: event broadcast followed by {@link IllegalMoveException}.
+     *
+     * @param context        the game state
+     * @param index          the position of the card in the bottom row
+     * @param player         the player performing the pick
+     * @param cardInstanceId the expected instance id of the card
+     * @return true if the pick succeeded
+     * @throws IllegalMoveException if the move is not allowed
+     */
+    @Override
+    public boolean pickBottomCard(GameState context, int index, Player player, String cardInstanceId) {
+        bottomCheck(context, player);
+        Card c = context.getBoard().seeBottomCard(index);
+        cardCheck(context, player, cardInstanceId, c);
+        c = context.getBoard().pickBottomCard(index);
+        activePlayer.addCard(c);
+        bottomPicks--;
+        // Notify successful pick
+        context.raiseEvent(new GameEvent(GameEvent.Type.BOTTOM_CARD, activePlayer));
+        // Trigger ON_CARD_PICK buildings (e.g. CardSet, InventorPair)
+        triggerOnCardPick(activePlayer, context);
+        nextPhase(context);
+        return true;
+    }
+
+    private void cardCheck(GameState context, Player player, String cardInstanceId, Card c) {
+        if (c == null) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_INDEX, player));
+            throw new IllegalMoveException("Invalid card index");
+        }
+        if (cardInstanceId == null || !cardInstanceId.equals(c.getInstanceId())) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_ID, player));
+            throw new IllegalMoveException("Invalid card instance id");
+        }
+        if (!c.isBuyable()) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INVALID_CARD, player));
+            throw new IllegalMoveException("Card is not buyable");
+        }
+    }
+
+    /**
+     * Pick of an upper building.
+     * In case of invalid move: event broadcast followed by {@link IllegalMoveException}.
+     *
+     * @param context        the game state
+     * @param index          the position of the building in the top row
+     * @param player         the player performing the pick
+     * @param cardInstanceId the expected instance id of the building
+     * @return true if the pick succeeded
+     * @throws IllegalMoveException if the move is not allowed
+     */
+    @Override
+    public boolean pickTopBuilding(GameState context, int index, Player player, String cardInstanceId) {
+        topCheck(context, player);
+        Building b = context.getBoard().seeTopBuilding(index);
+        buildingCheck(context, player, cardInstanceId, b);
+        b = context.getBoard().pickTopBuilding(index);
+        activePlayer.payBuilding(b);
+        activePlayer.addBuilding(b);
+        upperPicks--;
+        // Notify successful pick
+        context.raiseEvent(new GameEvent(GameEvent.Type.UPPER_BUILDING, activePlayer));
+        nextPhase(context);
+        return true;
+    }
+
+    private void topCheck(GameState context, Player player) {
+        if (!player.equals(activePlayer)) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player));
+            throw new IllegalMoveException("Only the active player can perform picks");
+        }
+        if (upperPicks <= 0) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INSUFFICIENT_PICKS, player));
+            throw new IllegalMoveException("No upper picks remaining");
+        }
+    }
+
+    /**
+     * Pick of a lower building.
+     * In case of invalid move: event broadcast followed by {@link IllegalMoveException}.
+     *
+     * @param context        the game state
+     * @param index          the position of the building in the bottom row
+     * @param player         the player performing the pick
+     * @param cardInstanceId the expected instance id of the building
+     * @return true if the pick succeeded
+     * @throws IllegalMoveException if the move is not allowed
+     */
+    @Override
+    public boolean pickBottomBuilding(GameState context, int index, Player player, String cardInstanceId) {
+        bottomCheck(context, player);
+        Building b = context.getBoard().seeBottomBuilding(index);
+        buildingCheck(context, player, cardInstanceId, b);
+        b = context.getBoard().pickBottomBuilding(index);
+        activePlayer.payBuilding(b);
+        activePlayer.addBuilding(b);
+        bottomPicks--;
+        // Notify successful pick
+        context.raiseEvent(new GameEvent(GameEvent.Type.BOTTOM_BUILDING, activePlayer));
+        nextPhase(context);
+        return true;
+    }
+
+    private void bottomCheck(GameState context, Player player) {
+        if (!player.equals(activePlayer)) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.WRONG_TURN, player));
+            throw new IllegalMoveException("Only the active player can perform picks");
+        }
+        if (bottomPicks <= 0) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INSUFFICIENT_PICKS, player));
+            throw new IllegalMoveException("No bottom picks remaining");
+        }
+    }
+
+    private void buildingCheck(GameState context, Player player, String cardInstanceId, Building b) {
+        cardCheck(context, player, cardInstanceId, b);
+        if (!activePlayer.canBuy(b)) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.INSUFFICIENT_FOOD, player));
+            throw new IllegalMoveException("Player cannot afford this building");
+        }
+    }
+
+    /**
+     * Triggers ON_CARD_PICK buildings for the active player only.
+     * This fires per-pick, not globally, so we avoid publishTrigger
+     * which would iterate all active players.
+     */
+    private void triggerOnCardPick(Player player, GameState context) {
+        if (player == null || context == null) return;
+        List<Building> triggered = player.getBuildingsByTrigger(TriggerKey.ON_CARD_PICK);
+        boolean anyActivated = false;
+        for (Building b : triggered) {
+            if (b.triggerBuildingEffect(player, context)) {
+                anyActivated = true;
+            }
+        }
+        if (anyActivated) {
+            context.raiseEvent(new GameEvent(GameEvent.Type.BUILDING_ACTIVATED, null));
+        }
+    }
+
+    /**
+     * Skips the active player's turn when they disconnect.
+     * <p>
+     * Only acts when the leaver is the player this phase is bound to; a different
+     * player disconnecting does not affect the current drafter. Returning to
+     * {@link TurnPhase} resumes the tile scan from {@code currentTileIndex}, which
+     * {@link TurnPhase} already advanced past this player's tile before entering
+     * the {@code PlayerTurnPhase}, so their turn is cleanly skipped.
+     *
+     * @param context the game state
+     * @param player  the player who just disconnected
+     * @return {@code true} if the turn was skipped, {@code false} otherwise
+     */
+    @Override
+    public boolean handlePlayerDisconnect(GameState context, Player player) {
+        if (context == null || player == null || !player.equals(activePlayer)) {
+            return false;
+        }
+        context.setPhase(new TurnPhase());
+        return true;
+    }
+
+    /**
+     * The active player is the one bound to this phase — the authoritative answer
+     * for the public snapshot, independent of any turn-order index.
+     *
+     * @param context the game state (unused; the active player is held by this phase)
+     * @return the active player, or empty if unset
+     */
+    @Override
+    public Optional<Player> resolveActivePlayer(GameState context) {
+        return Optional.ofNullable(activePlayer);
+    }
+
+    /**
+     * If no picks are possible, return to the TURN phase.
+     *
+     * @param context the game state
+     * @return false (the active player keeps drafting until no picks remain)
+     */
+    @Override
+     public boolean nextPhase(GameState context){
+        if (!canPickTop(context) && !canPickBottom(context)) context.setPhase(new TurnPhase());
+        return false;
+    }
+    private boolean canPickTop (GameState context){
+        if (upperPicks <= 0) return false;
+        Board board = context.getBoard();
+        boolean canBuy = false;
+        for(Building b : board.getTopBuildings()){
+            if(activePlayer.canBuy(b)){
+                canBuy = true;
+                break;
+            }
+        }
+        for (Card c : board.getTopCards()){
+            if(c.isBuyable()){
+                canBuy = true;
+                break;
+            }
+        }
+        return canBuy;
+    }
+    private boolean canPickBottom (GameState context){
+        if (this.bottomPicks <= 0) return false;
+        Board board = context.getBoard();
+        boolean canBuy = false;
+        for(Building b : board.getBottomBuildings()){
+            if(activePlayer.canBuy(b)){
+                canBuy = true;
+                break;
+            }
+        }
+        for (Card c : board.getBottomCards()){
+            if(c.isBuyable()){
+                canBuy = true;
+                break;
+            }
+        }
+        return canBuy;
+    }
+
+    }
+

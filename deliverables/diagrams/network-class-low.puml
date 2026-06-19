@@ -1,0 +1,147 @@
+@startuml network-class-low
+title Network - UML di basso livello
+
+skinparam classAttributeIconSize 0
+
+interface GameStateObserver <<model>> {
+    +onGameEvent(event : GameEvent) : void
+}
+
+abstract class VirtualView {
+    #totem : Totem
+    #gameController : GameController
+    #gameId : String
+    #nickname : String
+    +onGameEvent(event : GameEvent) : void
+    +sendCountdown(seconds : long) : void
+    +sendLobbyUpdate(state : LobbyState, current : int, required : int) : void
+    +sendLobbyUpdate(state : LobbyState) : void
+    +sendError(error : ErrorDTO) : void
+    +sendTotemSelection(dto : TotemSelectionDTO) : void
+    +setTotem(t) / setGameController(c) / setGameId(id) / setNickname(n)
+    #{abstract} sendToClient(dto : DTO) : void
+    #{abstract} ping() : void
+}
+
+class SocketClientHandler {
+    -serverManager : ServerManager
+    -client : Socket
+    -lastPing : Instant
+    -going : boolean
+    +run() : void
+    +NUDECommand(json : String) : boolean
+    #sendToClient(dto : DTO) : void
+    #ping() : void
+}
+
+class RMIClientHandler {
+    -clientStub : ClientRMIInterface
+    -serverManager : ServerManager
+    -onDisconnect : Runnable
+    #sendToClient(dto : DTO) : void
+    #ping() : void
+}
+
+class ServerManager {
+    -pendingGames : Map<String,PendingGame>
+    -activeGames : Map<String,GameSession>
+    -viewRegistry : Map<String,Map<Totem,VirtualView>>
+    -pendingViews : Map<String,Map<String,VirtualView>>
+    -rawClients : Set<VirtualView>
+    -lobbyExecutor : ExecutorService
+    -countdownScheduler : ScheduledExecutorService
+    -pinger : NUDEPinger
+    +createGame(name, requiredPlayers, totem, view) : LobbyState
+    +enterLobby(gameId, name, view) : void
+    +selectTotem(gameId, name, totem, view) : void
+    +submitToLobby(task : Runnable) : void
+    +submitToGame(cmd : Executor, view : VirtualView) : void
+    +disconnectPlayer(view : VirtualView) : void
+    +closeGame(gameId : String) : void
+    +pingAllViews() : void
+    +registerRawClient(view) : void
+    -doDisconnect(view) / reevaluateCountdown / startCountdown / onCountdownExpired
+}
+
+class GameSession <<record>> {
+    +controller : GameController
+    +commandQueue : ExecutorService
+    +liveness : GameLiveness
+    +{static} create(controller, gameId, warm) : GameSession
+    +trySubmit(task : Runnable) : boolean
+    +close() : void
+}
+class GameLiveness {
+    ~warm : boolean
+    ~countdown : ScheduledFuture
+}
+
+interface ServerCommand {
+    +submit(serverManager : ServerManager, view : VirtualView) : void
+}
+abstract class Executor {
+    #index : int
+    #idGame : String
+    #idPlayer : Totem
+    #cardId : String
+    +{final} submit(serverManager, view) : void
+    +{abstract} execute(player : Player, controller : GameController) : boolean
+    +getIdGame() : String
+    +getIdPlayer() : Totem
+}
+class ExecTile
+class ExecTopCard
+class ExecBottomCard
+class ExecTopBuilding
+class ExecBottomBuilding
+class CreateGameCommand
+class EnterLobbyCommand
+class SelectTotemCommand
+
+class NUDEPinger {
+    -serverManager : ServerManager
+    -running : boolean
+    +run() : void
+    -checkConnections() : void
+}
+
+class SocketServer {
+    -serverSocket : ServerSocket
+    -port : int = 1969
+    +start() : void
+    +stop() : boolean
+}
+class RMIServer {
+    -serverManager : ServerManager
+    -sessions : Map<ClientRMIInterface,RMIClientHandler>
+    +receive(json, callback) : boolean
+    +ping() : void
+    +{static} start(port, bindName, serverManager) : void
+}
+
+GameStateObserver <|.. VirtualView
+VirtualView <|-- SocketClientHandler
+VirtualView <|-- RMIClientHandler
+
+ServerCommand <|.. Executor
+Executor <|-- ExecTile
+Executor <|-- ExecTopCard
+Executor <|-- ExecBottomCard
+Executor <|-- ExecTopBuilding
+Executor <|-- ExecBottomBuilding
+ServerCommand <|.. CreateGameCommand
+ServerCommand <|.. EnterLobbyCommand
+ServerCommand <|.. SelectTotemCommand
+
+ServerManager "1" o-- "*" GameSession : activeGames
+ServerManager *-- NUDEPinger
+GameSession +-- GameLiveness
+GameSession *-- "controller" GameController
+SocketServer ..> SocketClientHandler : crea
+RMIServer ..> RMIClientHandler : crea
+ServerManager ..> VirtualView
+Executor ..> ServerManager : submitToGame
+
+class GameController <<controller>>
+
+@enduml

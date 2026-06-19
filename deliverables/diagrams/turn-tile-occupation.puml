@@ -1,0 +1,69 @@
+@startuml turn-tile-occupation
+title Occupazione tile - StartTurnPhase -> TurnPhase -> PlayerTurnPhase
+
+skinparam responseMessageBelowArrow true
+
+participant "ExecTile\n(controller)" as EX
+participant "GameController" as GC
+participant "GameState\n(context)" as ST
+participant "StartTurnPhase" as STP
+participant "TurnPhase" as TP
+participant "PlayerTurnPhase" as PTP
+participant "Board / Tile" as B
+participant "observers" as OBS
+
+EX -> GC : execute(player, controller)
+GC -> ST : occupyOfferTrailTile(index, player)
+activate ST
+ST -> ST : requireEnoughConnectedPlayers(player)
+note right of ST : <2 connessi -> raiseEvent(INSUFFICIENT_PLAYERS)\n+ throw IllegalMoveException
+ST -> STP : occupyOfferTrailTile(context, index, player)
+activate STP
+
+alt index fuori range
+    STP -> ST : raiseEvent(INVALID_INDEX) + throw
+else non e' il suo turno
+    STP -> ST : raiseEvent(WRONG_TURN) + throw
+else tile gia' occupata
+    STP -> ST : raiseEvent(INVALID_ACTION) + throw
+else mossa valida
+    STP -> B : targetTile.occupy(player)
+    STP -> ST : nextPlayerInTurnOrderTile()
+    note right of STP : avanza l'indice PRIMA dell'evento\ncosi' lo snapshot punta al prossimo
+    STP -> ST : raiseEvent(TILE_OCCUPIED, player)
+    ST -> OBS : onGameEvent(TILE_OCCUPIED)
+    alt era l'ultimo giocatore
+        STP -> ST : updateTurnOrder()
+        STP -> STP : nextPhase(context)
+        STP -> ST : raiseEvent(START_TURN_COMPLETED)
+        STP -> ST : setPhase(new TurnPhase())
+        activate ST
+        ST -> TP : execute(context)
+        activate TP
+        TP -> TP : scan tiles da currentTileIndex
+        alt trova tile occupata da player connesso
+            TP -> ST : setCurrentPlayerIndex / setCurrentTileIndex(index+1)
+            TP -> ST : setPhase(new PlayerTurnPhase(occupier, tile))
+            activate ST
+            ST -> PTP : execute(context)
+            activate PTP
+            PTP -> ST : raiseEvent(PLAYER_TURN_STARTED, activePlayer)
+            ST -> OBS : onGameEvent(PLAYER_TURN_STARTED)
+            PTP -> PTP : nextPhase (resta in attesa dei pick)
+            deactivate PTP
+            deactivate ST
+        else nessuna tile da servire
+            TP -> ST : raiseEvent(TURN_COMPLETED)
+            TP -> ST : setPhase(new EndTurnPhase())
+            note right of TP : vedi end-turn-cycle
+        end
+        deactivate TP
+        deactivate ST
+    end
+end
+deactivate STP
+GC <-- ST : true / (false su IllegalMoveException)
+deactivate ST
+EX <-- GC : boolean
+
+@enduml
