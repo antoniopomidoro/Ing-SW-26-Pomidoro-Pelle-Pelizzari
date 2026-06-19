@@ -1,0 +1,62 @@
+@startuml client-event-flow
+title Client - ricezione di un evento dal server (in ingresso)
+
+skinparam responseMessageBelowArrow true
+
+participant "Server" as SRV
+participant "SocketClient / RMIclient\n(thread di rete)" as NET
+participant "NUDEanalyzerClient" as NA
+participant "DTOQueue\n(thread dto-consumer)" as Q
+participant "DTOVisitor\n(Lobby/GameDTOHandler)" as V
+participant "UserInterface\n(CLI / GUI)" as UI
+
+== Messaggio applicativo ==
+SRV -> NET : JSON (DTO serializzato)
+activate NET
+alt linea == "ping"
+    NET -> NET : lastPing = now (solo Socket)
+else messaggio applicativo
+    NET -> NA : action(json)
+    NA --> NET : Optional<DTO>
+    NET -> Q : push(dto)
+end
+deactivate NET
+
+note over Q : disaccoppia I/O di rete da rendering UI
+
+Q -> Q : dto = queue.take() (bloccante)
+activate Q
+Q -> V : dto.accept(visitor)
+activate V
+note over V : double dispatch -> visit() corretto
+
+alt LobbyUpdateDTO (fase lobby)
+    V -> V : lobbyDispatch.get(state)
+    V -> UI : onLobbyWaiting / onGameStarting / onLobbyRejoin
+else GameEventDTO (fase gioco)
+    V -> V : lastEvent = dto\ngameDispatch.get(eventType)
+    alt evento di errore
+        V -> UI : onGameError(dto)
+    else SETUP_COMPLETED
+        V -> UI : setUp(dto)
+    else evento di stato
+        V -> UI : update(dto)  (re-render dallo snapshot)
+    else PLAYER_TURN_STARTED / END_GAME_COMPLETED
+        V -> UI : onPlayerTurnStarted / onGameEnded
+    end
+else ErrorDTO / TotemSelectionDTO / CountdownDTO
+    V -> UI : onLobbyError / onTotemSelection / onCountdown
+end
+deactivate V
+
+UI -> UI : render (CLI: notifyAll; GUI: Platform.runLater)
+deactivate Q
+
+note over V
+  Swap del visitor: quando arriva
+  LobbyState.STARTING_GAME (o REJOIN),
+  LobbyDTOHandler invoca onGameStart ->
+  DTOQueue.setVisitor(GameDTOHandler).
+end note
+
+@enduml

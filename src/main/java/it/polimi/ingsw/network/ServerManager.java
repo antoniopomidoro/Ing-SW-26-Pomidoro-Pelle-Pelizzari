@@ -602,6 +602,9 @@ public class ServerManager {
             }
 
             cleanupLobbyIfEmpty(gameId);
+            if (pendingGames.containsKey(gameId)) {
+                broadcastWaiting(gameId, pending);
+            }
             return;
         }
 
@@ -636,6 +639,7 @@ public class ServerManager {
 
             cleanupLobbyIfEmpty(gameId);
             if (pendingGames.containsKey(gameId)) {
+                broadcastWaiting(gameId, pending);
                 broadcastTotemSelection(gameId, pending);
             }
             return;

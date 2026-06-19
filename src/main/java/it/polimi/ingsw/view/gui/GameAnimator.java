@@ -57,8 +57,6 @@ public class GameAnimator {
 
     private static final Duration FLIP_HALF      = Duration.millis(300);
     private static final Duration DEAL_SLIDE     = Duration.millis(450);
-    private static final Duration CARD_SLIDE     = Duration.millis(350);
-    private static final Duration FADE_DURATION  = Duration.millis(280);
 
     private static final Duration SCALE_UP_DURATION = Duration.millis(750);
     private static final Duration REVEAL_DURATION   = Duration.millis(1150);
@@ -67,19 +65,6 @@ public class GameAnimator {
     private static final double   OVERLAY_CARD_W    = 180;
     private static final double   OVERLAY_CARD_H    = 270;
     private static final double   DIM_OPACITY       = 0.65;
-
-    /**
-     * Enqueues a single deck-to-board deal: flip the source once and fly the target
-     * out from it. Plays in turn with all other queued animations.
-     *
-     * @param deck   the deck ImageView to animate from
-     * @param target the board node to populate (shown mid-flip)
-     */
-    public void animateDeckDeal(ImageView deck, Node target) {
-        // Hide until dealt so the card does not show in its slot before its turn.
-        target.setOpacity(0);
-        enqueueAnimation(() -> startSingleDeal(deck, target));
-    }
 
     /**
      * Enqueues one deal per freshly-added card from a single source, so the cards are
@@ -96,65 +81,6 @@ public class GameAnimator {
         }
         for (Node target : targets) {
             enqueueAnimation(() -> startSingleDeal(source, target));
-        }
-    }
-
-    /**
-     * Fade-out a card, then calls {@code onDone} so the caller can remove the node.
-     *
-     * @param card   the card ImageView to fade out
-     * @param onDone called on JavaFX thread after the fade completes
-     */
-    public void animateCardDiscard(ImageView card, Runnable onDone) {
-        FadeTransition ft = new FadeTransition(FADE_DURATION, card);
-        ft.setToValue(0);
-        if (onDone != null) ft.setOnFinished(e -> onDone.run());
-        ft.play();
-    }
-
-    /**
-     * Translates a card vertically from {@code fromY} to {@code toY} (top-row → bottom-row).
-     *
-     * @param card   the card ImageView to move
-     * @param fromY  starting Y in scene coordinates
-     * @param toY    ending Y in scene coordinates
-     * @param onDone called after the animation completes
-     */
-    public void animateTopToBottom(ImageView card, double fromY, double toY, Runnable onDone) {
-        TranslateTransition tt = new TranslateTransition(CARD_SLIDE, card);
-        tt.setFromY(fromY);
-        tt.setToY(toY);
-        if (onDone != null) tt.setOnFinished(e -> onDone.run());
-        tt.play();
-    }
-
-    /**
-     * Translates a card from its current scene position toward the target coordinates.
-     * If {@code isLocal} is false the card fades out on arrival (opponent hand — not directly visible).
-     *
-     * @param card    the card ImageView to move
-     * @param targetX destination X in scene coordinates
-     * @param targetY destination Y in scene coordinates
-     * @param isLocal true if the destination is the local player hand
-     * @param onDone  called after the animation (including fade) completes
-     */
-    public void animateCardToHand(ImageView card, double targetX, double targetY,
-                                  boolean isLocal, Runnable onDone) {
-        double dx = targetX - card.localToScene(card.getBoundsInLocal()).getCenterX();
-        double dy = targetY - card.localToScene(card.getBoundsInLocal()).getCenterY();
-
-        TranslateTransition slide = new TranslateTransition(CARD_SLIDE, card);
-        slide.setByX(dx);
-        slide.setByY(dy);
-
-        if (isLocal) {
-            if (onDone != null) slide.setOnFinished(e -> onDone.run());
-            slide.play();
-        } else {
-            FadeTransition fade = new FadeTransition(FADE_DURATION, card);
-            fade.setToValue(0);
-            if (onDone != null) fade.setOnFinished(e -> onDone.run());
-            new SequentialTransition(slide, fade).play();
         }
     }
 

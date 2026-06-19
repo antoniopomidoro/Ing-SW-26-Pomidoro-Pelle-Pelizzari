@@ -233,12 +233,12 @@ public class GameControllerTest {
         assertTrue(p1.isConnected());
     }
 
-    @DisplayName("Reconnecting an already connected player is idempotent and returns true")
+    @DisplayName("Reconnecting an already connected player is rejected and returns false")
     @Test
     public void reconnectPlayerAlreadyConnected() {
         VirtualView view = new DummyVirtualView();
         boolean res = controller.reconnectPlayer(p1, view);
-        assertTrue(res);
+        assertFalse(res);
         assertTrue(p1.isConnected());
     }
 

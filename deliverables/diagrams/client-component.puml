@@ -1,0 +1,98 @@
+@startuml client-component
+title Architettura statica del client
+
+' Cosa accade DENTRO il Server e' omesso: qui e' un boundary opaco.
+
+skinparam classAttributeIconSize 0
+hide empty members
+
+class "Server\n(Socket o RMI)" as SRV <<actor>>
+
+package "Entry point" {
+    class ClientLauncher <<entry>>
+    class JavaFXApp <<JavaFX Application>>
+}
+
+package "Coordinamento" {
+    class ClientManager
+    note right of ClientManager
+      puro coordinatore: nessuna
+      I/O di console o rendering
+    end note
+}
+
+package "Transport (client)" {
+    interface ConnectionProtocol
+    class SocketClient <<thread>>
+    class RMIclient
+    ConnectionProtocol <|.. SocketClient
+    ConnectionProtocol <|.. RMIclient
+    note bottom of SocketClient
+      keep-alive "pong" ogni 5s
+      reader su thread dedicato
+    end note
+}
+
+package "Routing messaggi in ingresso" {
+    class DTOQueue <<thread: dto-consumer>>
+    interface DTOVisitor
+    class LobbyDTOHandler
+    class GameDTOHandler
+    class NUDEanalyzerClient <<utility>>
+    DTOVisitor <|.. LobbyDTOHandler
+    DTOVisitor <|.. GameDTOHandler
+    note bottom of DTOVisitor
+      EnumMap per sotto-dispatch
+      (LobbyState / GameEvent.Type)
+      swap a STARTING_GAME
+    end note
+}
+
+package "Comandi in uscita" {
+    class ActionSender
+    class NUDEGenerator <<utility>>
+}
+
+package "View" {
+    interface UserInterface
+    class CLIinterface <<CLI>>
+    class LobbyController <<JavaFX>>
+    class GameViewController <<JavaFX>>
+    UserInterface <|.. CLIinterface
+    UserInterface <|.. LobbyController
+    UserInterface <|.. GameViewController
+}
+
+' --- avvio ---
+ClientLauncher --> JavaFXApp : launchGui (modo GUI)
+ClientLauncher --> ClientManager : crea (modo CLI)
+JavaFXApp --> ClientManager : crea
+JavaFXApp --> ActionSender : crea
+ClientManager --> ConnectionProtocol : possiede
+ClientManager --> DTOQueue : possiede
+ClientManager --> UserInterface : possiede
+
+' --- flusso in ingresso: Server -> UI ---
+SRV --> SocketClient : JSON / "ping" (TCP 1969)
+SRV --> RMIclient : receiveEvent(json)
+SocketClient --> NUDEanalyzerClient : action(line)
+RMIclient --> NUDEanalyzerClient : action(event)
+NUDEanalyzerClient --> DTOQueue : push(DTO)
+DTOQueue --> DTOVisitor : accept (double dispatch)
+DTOVisitor --> UserInterface : callback (setUp/update/onLobby...)
+
+' --- flusso in uscita: UI -> Server ---
+UserInterface --> ActionSender : azione utente
+ActionSender --> NUDEGenerator : toJson(ServerCommand)
+ActionSender --> ConnectionProtocol : send(json)
+ConnectionProtocol --> SRV : invio comando
+
+note as N1
+  Confine di threading lato client:
+  - thread di rete (SocketClient/RMI) -> solo push() sulla coda
+  - thread dto-consumer -> dispatch ai visitor / callback UI
+  - JavaFX Application Thread -> rendering (Platform.runLater)
+end note
+DTOQueue .. N1
+
+@enduml

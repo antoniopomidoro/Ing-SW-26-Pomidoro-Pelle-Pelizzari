@@ -1,0 +1,210 @@
+@startuml client-class-low
+title Client - UML di basso livello
+
+skinparam classAttributeIconSize 0
+
+class ClientManager {
+    -connection : ConnectionProtocol
+    -userInterface : UserInterface
+    -dtoQueue : DTOQueue
+    -id : String
+    -playerTotem : Totem
+    -nickname : String
+    +ClientManager(ui, socket, serverIp)
+    +ClientManager(socket, serverIp)
+    -{static} buildQueue(ui : UserInterface) : DTOQueue
+    -{static} buildConnection(queue, socket, serverIp) : ConnectionProtocol
+    +getConnection() : ConnectionProtocol
+    +getUser() : UserInterface
+    +getId() : String / getPlayerTotem() : Totem / getNickname() : String
+    +setId(id) / setPlayerTotem(t) / setNickname(n)
+    +redirectGameEventsTo(gameUi : UserInterface) : void
+    +stop() : void
+}
+
+interface ConnectionProtocol {
+    +send(message : String) : boolean
+    +isConnected() : Boolean
+    +stop() : void
+}
+
+class SocketClient {
+    -{static} PORT : int = 1969
+    -reader : BufferedReader
+    -writer : PrintWriter
+    -lastPing : Instant
+    -going : boolean
+    -dtoQueue : DTOQueue
+    +SocketClient(dtoQueue, host)
+    -startKeepAlive() : void
+    +send(message) : boolean
+    +run() : void
+    +isConnected() : Boolean
+    +stop() : void
+}
+
+class RMIclient {
+    -{static} RMI_PORT : int = 1099
+    -{static} RMI_BIND_NAME : String = "palle"
+    -dtoQueue : DTOQueue
+    -serverStub : ServerRMIInterface
+    -going : boolean
+    +RMIclient(dtoQueue, serverIP)
+    +connect() : void
+    -startKeepAlive() : void
+    +send(message) : boolean
+    +receiveEvent(event : String) : void
+    +ping() : void
+    +isConnected() : Boolean
+    +stop() : void
+}
+
+class DTOQueue {
+    -queue : LinkedBlockingQueue<DTO>
+    -visitor : DTOVisitor «volatile»
+    -going : boolean «volatile»
+    +DTOQueue(initialVisitor : DTOVisitor)
+    +push(dto : DTO) : void
+    +setVisitor(visitor : DTOVisitor) : void
+    +getVisitor() : DTOVisitor
+    +run() : void
+    +stop() : void
+}
+
+interface DTOVisitor {
+    +visit(dto : GameEventDTO) : void
+    +visit(dto : LobbyUpdateDTO) : void
+    +visit(dto : TotemSelectionDTO) : void
+    +visit(dto : ErrorDTO) : void
+    +visit(dto : CountdownDTO) : void
+    +getLastEvent() : GameEventDTO
+    +getLastSnapshot() : GameStateDTO
+}
+
+class LobbyDTOHandler {
+    -ui : UserInterface
+    -onGameStart : Runnable
+    -lastSnapshot : GameStateDTO
+    -lobbyDispatch : EnumMap<LobbyState,Consumer<LobbyUpdateDTO>>
+    -errorDispatch : EnumMap<ErrorCode,Consumer<ErrorDTO>>
+    +setOnGameStart(r : Runnable) : void
+}
+
+class GameDTOHandler {
+    -ui : UserInterface
+    -lastEvent : GameEventDTO
+    -gameDispatch : EnumMap<GameEvent.Type,Consumer<GameEventDTO>>
+}
+
+interface UserInterface {
+    +update(state : GameEventDTO) : boolean
+    +setUp(state : GameEventDTO) : boolean
+    +onGameError(dto) / onPlayerTurnStarted(dto)
+    +onPlayerDisconnected(dto) / onGameEnded(dto)
+    +onExceptionalWin(dto)
+    +onCountdown(dto : CountdownDTO) «default»
+    +onLobbyWaiting(dto) / onLobbyRejoin(dto) / onGameStarting(dto)
+    +onTotemSelection(dto) / onLobbyError(dto)
+    +onTotemUnavailable(dto) «default»
+    +stop() : void
+}
+
+class CLIinterface {
+    -user : ClientManager
+    -state : GameEventDTO
+    -currentLobby : LobbyUpdateDTO
+    -inputSender : Thread
+    +print() : boolean
+    +run() : void
+}
+class LobbyController <<JavaFX>> {
+    -inputSender : GUIInputSender
+    -currentStep : LobbyStep
+    +setActionSender(s) / setOnGameStartingCallback(r)
+}
+class GameViewController <<JavaFX>> {
+    -localPlayer : Totem
+    +setGameSender(s : GameCommandSender)
+    +setLocalPlayer(totem)
+}
+
+' --- command senders ---
+interface LobbyCommandSender {
+    +sendCreateGame(nickname, numPlayers, totem)
+    +sendJoinGame(gameId, nickname)
+    +sendSelectTotem(totem)
+}
+interface GameCommandSender {
+    +sendPickTopCard(index, cardInstanceId)
+    +sendPickBottomCard(index, cardInstanceId)
+    +sendPickTopBuilding(index, cardInstanceId)
+    +sendPickBottomBuilding(index, cardInstanceId)
+    +sendPickTile(index)
+}
+class ActionSender {
+    -client : ClientManager
+    +ActionSender(client)
+    -send(json : String) : void
+}
+class GUIInputSender {
+    -sender : LobbyCommandSender
+    +onCreateConfirmed(...) / onJoinConfirmed(...) / onTotemSelected(totem)
+}
+class GUIGameSender {
+    -sender : GameCommandSender
+    +onPickTopCard(...) / onPickTile(index)
+}
+
+class NUDEGenerator <<utility>> {
+    +{static} toJson(command : ServerCommand) : String
+    +{static} buildLobbyCreate(...) : String
+    +{static} buildLobbyEnter(...) : String
+    +{static} buildLobbySelectTotem(...) : String
+}
+class NUDEanalyzerClient <<utility>> {
+    +{static} action(json : String) : Optional<DTO>
+}
+
+interface ServerRMIInterface <<rmi>> {
+    +receive(json, callback) : boolean
+    +ping() : void
+}
+interface ClientRMIInterface <<rmi>> {
+    +receiveEvent(event : String) : void
+    +ping() : void
+}
+
+' --- gerarchie ---
+ConnectionProtocol <|.. SocketClient
+ConnectionProtocol <|.. RMIclient
+ClientRMIInterface <|.. RMIclient
+DTOVisitor <|.. LobbyDTOHandler
+DTOVisitor <|.. GameDTOHandler
+UserInterface <|.. CLIinterface
+UserInterface <|.. LobbyController
+UserInterface <|.. GameViewController
+LobbyCommandSender <|.. ActionSender
+GameCommandSender <|.. ActionSender
+
+' --- composizione / dipendenze ---
+ClientManager *-- ConnectionProtocol
+ClientManager *-- DTOQueue
+ClientManager o-- UserInterface
+DTOQueue o-- DTOVisitor
+LobbyDTOHandler o-- UserInterface
+GameDTOHandler o-- UserInterface
+LobbyDTOHandler ..> "onGameStart" DTOQueue : setVisitor(GameDTOHandler)
+
+SocketClient ..> NUDEanalyzerClient : action(line)
+RMIclient ..> NUDEanalyzerClient : action(event)
+NUDEanalyzerClient ..> DTOQueue : push
+RMIclient ..> ServerRMIInterface : receive(json, this)
+
+ActionSender ..> NUDEGenerator : build/toJson
+ActionSender ..> ClientManager : connection + stato player
+GUIInputSender o-- LobbyCommandSender
+GUIGameSender o-- GameCommandSender
+LobbyController o-- GUIInputSender
+GameViewController ..> GameCommandSender
+
+@enduml

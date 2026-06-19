@@ -1,0 +1,87 @@
+@startuml client-class-high
+title Client - UML di alto livello
+
+skinparam classAttributeIconSize 0
+hide empty members
+
+class ClientManager {
+    -id : String
+    -playerTotem : Totem
+    -nickname : String
+    +getConnection() : ConnectionProtocol
+    +getUser() : UserInterface
+    +redirectGameEventsTo(gameUi)
+    +stop()
+}
+
+interface ConnectionProtocol {
+    +send(message) : boolean
+    +isConnected() : Boolean
+    +stop()
+}
+class SocketClient
+class RMIclient
+
+class DTOQueue {
+    -queue : LinkedBlockingQueue<DTO>
+    -visitor : DTOVisitor
+    +push(dto)
+    +setVisitor(visitor)
+    +run()
+}
+
+interface DTOVisitor {
+    +visit(dto)
+    +getLastEvent() : GameEventDTO
+}
+class LobbyDTOHandler
+class GameDTOHandler
+
+interface UserInterface {
+    +setUp(state) : boolean
+    +update(state) : boolean
+    +onGameError(dto)
+    +onLobbyWaiting(dto)
+    +onGameStarting(dto)
+    +stop()
+}
+class CLIinterface
+class LobbyController <<JavaFX>>
+class GameViewController <<JavaFX>>
+
+class ActionSender {
+    +sendCreateGame(...)
+    +sendSelectTotem(totem)
+    +sendPickTile(index)
+}
+interface DTO <<network>>
+
+' --- transport ---
+ConnectionProtocol <|.. SocketClient
+ConnectionProtocol <|.. RMIclient
+
+' --- visitor ---
+DTOVisitor <|.. LobbyDTOHandler
+DTOVisitor <|.. GameDTOHandler
+
+' --- views ---
+UserInterface <|.. CLIinterface
+UserInterface <|.. LobbyController
+UserInterface <|.. GameViewController
+
+' --- wiring ---
+ClientManager *-- ConnectionProtocol : connection
+ClientManager *-- DTOQueue : dtoQueue
+ClientManager o-- UserInterface : userInterface
+
+SocketClient ..> DTOQueue : push (thread di rete)
+RMIclient ..> DTOQueue : push (callback RMI)
+DTOQueue o-- DTOVisitor : visitor (volatile, swap a STARTING_GAME)
+DTOVisitor ..> UserInterface : invoca i callback
+DTO ..> DTOVisitor : accept (double dispatch)
+
+ActionSender ..> ClientManager : usa connection + stato player
+LobbyController ..> ActionSender : comandi lobby
+GameViewController ..> ActionSender : comandi di gioco
+
+@enduml

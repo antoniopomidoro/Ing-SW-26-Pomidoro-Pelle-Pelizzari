@@ -276,9 +276,12 @@ public class GameController {
      * @return {@code true} if the player was reintegrated
      */
     public boolean reconnectPlayer(Player player, VirtualView view){
-        Boolean reconnect = state.reintegratePlayer(player);
+        boolean reconnect = state.reintegratePlayer(player);
+        if (!reconnect) {
+            return false;
+        }
         state.addObserver(view);
         state.raiseEvent(new GameEvent(GameEvent.Type.PLAYER_RECONNECTED, player));
-        return reconnect;
+        return true;
     }
 }

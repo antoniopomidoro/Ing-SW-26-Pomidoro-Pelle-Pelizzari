@@ -1,0 +1,56 @@
+@startuml client-state
+title Client - macchina a stati (vista utente + swap del visitor)
+
+[*] --> Avvio
+
+state Avvio {
+    [*] --> SceltaConnessione
+    SceltaConnessione : ClientLauncher / JavaFXApp
+    SceltaConnessione : sceglie IP, GUI/CLI, Socket/RMI
+    SceltaConnessione --> Connesso : connect() ok
+    SceltaConnessione --> Disconnesso : errore connessione
+}
+
+state "Fase Lobby\n(visitor = LobbyDTOHandler)" as Lobby {
+    [*] --> Welcome
+    Welcome --> Creazione : CREATE
+    Welcome --> Ingresso  : ENTER_LOBBY
+    Creazione --> SelezioneTotem : TotemSelectionDTO
+    Ingresso  --> SelezioneTotem : TotemSelectionDTO
+    SelezioneTotem --> Attesa : SELECT_TOTEM ok\n(LobbyUpdate WAITING)
+    SelezioneTotem --> SelezioneTotem : TOTEM_NOT_AVAILABLE
+    Attesa --> Attesa : altri giocatori entrano
+}
+
+Connesso --> Lobby
+
+' --- swap del visitor: da LobbyDTOHandler a GameDTOHandler ---
+Lobby --> Gioco : LobbyState.STARTING_GAME\n/ REJOIN  -> setVisitor(GameDTOHandler)
+
+state "Fase Gioco\n(visitor = GameDTOHandler)" as Gioco {
+    [*] --> Setup
+    Setup --> InGioco : SETUP_COMPLETED -> setUp()
+    InGioco --> InGioco : eventi di stato -> update()\n(re-render dallo snapshot)
+    InGioco --> InGioco : WRONG_TURN / OCCUPIED_TILE ... -> onGameError()
+    InGioco --> AttesaRiconnessione : PLAYER_DISCONNECTED
+    AttesaRiconnessione --> InGioco : PLAYER_RECONNECTED
+    InGioco --> CountdownAbbandono : CountdownDTO\n(unico superstite)
+    CountdownAbbandono --> FinePartita : EXCEPTIONAL_WIN
+    InGioco --> FinePartita : END_GAME_COMPLETED -> onGameEnded()
+}
+
+FinePartita --> Lobby : "Back to menu" (solo GUI)\nnuovo ClientManager
+FinePartita --> [*] : chiusura
+
+Connesso --> Disconnesso : keep-alive scaduto / IOException
+Lobby --> Disconnesso : connessione persa
+Gioco --> Disconnesso : connessione persa
+Disconnesso --> [*]
+
+note right of Gioco
+  Lo swap del visitor avviene una sola
+  volta: da qui in poi DTOQueue instrada
+  ogni DTO a GameDTOHandler.
+end note
+
+@enduml

@@ -1,0 +1,55 @@
+@startuml client-action-flow
+title Client - invio di un'azione utente al server (in uscita)
+
+skinparam responseMessageBelowArrow true
+
+actor "Utente" as U
+participant "View\n(GameViewController / CLI)" as UI
+participant "GUIGameSender\n(adapter GUI)" as GS
+participant "ActionSender" as AS
+participant "ClientManager" as CM
+participant "NUDEGenerator" as NG
+participant "ConnectionProtocol\n(SocketClient/RMIclient)" as CONN
+participant "Server" as SRV
+
+== Esempio: occupazione di una tile ==
+U -> UI : click su tile [index]
+activate UI
+note over UI : la GUI passa da un adapter;\nla CLI chiama direttamente ActionSender
+UI -> GS : onPickTile(index)
+activate GS
+GS -> AS : sendPickTile(index)
+deactivate GS
+activate AS
+
+AS -> CM : getId(), getPlayerTotem()
+AS -> NG : toJson(new ExecTile(id, totem, index))
+NG --> AS : JSON
+AS -> CM : getConnection()
+AS -> CONN : send(json)
+deactivate AS
+activate CONN
+
+alt Socket
+    CONN -> SRV : writer.println(json) (TCP 1969)
+else RMI
+    CONN -> SRV : serverStub.receive(json, this)
+end
+deactivate CONN
+
+note over SRV
+  Il server instrada il comando sulla coda
+  della partita (vedi turn-tile-occupation.puml);
+  la risposta torna come GameEventDTO
+  (vedi client-event-flow.puml).
+end note
+
+deactivate UI
+
+== Comandi lobby (stessa struttura) ==
+note over UI, SRV
+  CREATE / ENTER_LOBBY / SELECT_TOTEM passano da
+  GUIInputSender -> ActionSender -> NUDEGenerator.buildLobby* -> send.
+end note
+
+@enduml
