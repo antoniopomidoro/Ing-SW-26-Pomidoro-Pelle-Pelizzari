@@ -98,3 +98,10 @@ mvn exec:java@client   # start the client
 mvn test
 mvn test -Dtest=ClassName#methodName   # run a single test
 ```
+
+## 📜 License
+> **Il gioco da tavolo Mesos e tutto il relativo materiale grafico è di esclusiva proprietà di Cranio Creations.**
+
+This project is a non-commercial reimplementation for educational purposes only. All game rights belong to *Cranio Creations*. Unauthorized use, reproduction, or distribution of this project is prohibited.
+
+See the [LICENSE](LICENSE) file for details.
